@@ -1,5 +1,7 @@
 # TestRdkit
 
+I am using Clion as IDE
+
 # Install
 
 Install Anaconda
