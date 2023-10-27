@@ -1,10 +1,13 @@
-# This is a skeleton project that uses RDKit
+# TestRdkit
+
+I am using Clion as IDE
 
 # Install
 Install RDKit:
 
 ```commandline
-sudo apt-get install python3-rdkit librdkit1 rdkit-data
+conda create -c conda-forge -n my-rdkit-env rdkit
+conda activate my-rdkit-env
 ```
 
 Install Eigen3
@@ -14,18 +17,29 @@ sudo apt install libeigen3-dev
 
 # Error
 
-I got this Error `error: ‘uint64_t’ in namespace ‘std’ does not name a type; did you mean ‘wint_t’?`
+error: ‘uint64_t’ in namespace ‘std’ does not name a type; did you mean ‘wint_t’?
 
-The solution was:
+Solution:
 ```c++
 #include <cstdint> // before any RDKit includes
 ```
 
 # CLion settings
 
-Generator: Set to: `Let CMake decide
+First run:
+```commandline
+conda activate my-rdkit-env
+cd PathToProject/RDKitSkeletonCPP
+cmake .
+```
+
+## After that you can set the CLion settings:
+
+Generator: Let CMake decide
 
 CMake options:
 ```commandline
 -DCMAKE_BUILD_TYPE=Debug
 ```
+
+Now reload your CMakeLists.txt and the libraries should be found.
