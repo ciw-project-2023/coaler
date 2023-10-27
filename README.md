@@ -1,6 +1,4 @@
-# TestRdkit
-
-I am using Clion as IDE
+# This is a skeleton project that uses RDKit
 
 # Install
 Install RDKit:
@@ -16,16 +14,16 @@ sudo apt install libeigen3-dev
 
 # Error
 
-error: ‘uint64_t’ in namespace ‘std’ does not name a type; did you mean ‘wint_t’?
+I got this Error `error: ‘uint64_t’ in namespace ‘std’ does not name a type; did you mean ‘wint_t’?`
 
-Solution:
+The solution was:
 ```c++
 #include <cstdint> // before any RDKit includes
 ```
 
 # CLion settings
 
-Generator: Let CMake decide
+Generator: Set to: `Let CMake decide
 
 CMake options:
 ```commandline
