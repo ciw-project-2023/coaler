@@ -26,6 +26,7 @@ https://github.com/ciw-project-2023/RDKitSkeletonCPP
 ### Add what you need from rdkit in your CMakeLists.txt
 ```sh
 $ cd RDKitSkeletonCPP
+$ conan install . -s build_type=Debug
 $ $EDITOR CMakeLists.txt
 ```
 
