@@ -1,6 +1,17 @@
 # Prerequisites
 *.d
 
+cmake-build-debug/*
+CMakeFiles/*
+.cmake/*
+
+.idea/*
+TestRDkit
+
+cmake_install.cmake
+CMakeCache.txt
+Testing/*
+
 # Compiled Object files
 *.slo
 *.lo
