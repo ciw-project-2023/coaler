@@ -23,6 +23,8 @@ class alignerRecipe(ConanFile):
     def requirements(self):
         self.requires("rdkit/0.0.1")
 
+        self.requires("catch2/2.13.10")
+
     def layout(self):
         cmake_layout(self)
 

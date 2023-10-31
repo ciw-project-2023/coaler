@@ -3,14 +3,7 @@ project(aligner CXX)
 
 find_package(rdkit REQUIRED)
 
-add_executable(aligner src/main.cpp src/SingleAligner.cpp src/SingleAligner.hpp)
+add_subdirectory (src)
 
-target_link_libraries(aligner PUBLIC rdkit::RDKitSmilesParse)
-target_link_libraries(aligner PUBLIC rdkit::RDKitGraphMol)
-target_link_libraries(aligner PUBLIC rdkit::RDKitRDGeneral)
-
-install(TARGETS aligner DESTINATION "."
-        RUNTIME DESTINATION bin
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        )
+enable_testing()
+add_subdirectory (test)
