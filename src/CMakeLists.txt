@@ -28,4 +28,3 @@ install(TARGETS aligner DESTINATION "."
         RUNTIME DESTINATION bin
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
-)
