@@ -1,13 +1,12 @@
-#include <cstdint>
+#include <cstdint> // todo: is necessary when using RDKit libraries
 
-#include <GraphMol/FileParsers/MolSupplier.h>
-#include <GraphMol/MolHash/MolHash.h>
-#include <GraphMol/RDKitBase.h>
-#include <RDGeneral/RDLog.h>
-#include <boost/timer/timer.hpp>
 #include <iostream>
-#include <vector>
+
+#include "SingleAligner.hpp"
 
 int main(int argc, char *argv[]) {
+
+    ciw::SingleAligner single_aligner;
+
     std::cout << "RDKit is linked :)" << std::endl;
 }

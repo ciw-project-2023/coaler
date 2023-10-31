@@ -8,7 +8,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(RDKit REQUIRED)
 find_package(Boost COMPONENTS timer system REQUIRED)
 
-add_executable(TestRDkit src/main.cpp)
+add_executable(TestRDkit
+        src/main.cpp
+        src/SingleAligner.cpp)
 
 target_link_libraries(TestRDkit
         RDKit::SmilesParse
