@@ -41,3 +41,5 @@ Testing/*
 *.exe
 *.out
 *.app
+
+build/

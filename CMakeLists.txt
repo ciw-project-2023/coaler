@@ -3,7 +3,7 @@ project(aligner CXX)
 
 find_package(rdkit REQUIRED)
 
-add_subdirectory (src)
+add_subdirectory(src)
 
 enable_testing()
 add_subdirectory (test)
