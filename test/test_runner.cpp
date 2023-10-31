@@ -10,5 +10,5 @@
 
 TEST_CASE("Aligner", "[align]") {
     RDKit::RWMol* mol_a = RDKit::SmilesToMol("CCCO");
-    CHECK(1==1);
+    CHECK(mol_a->getNumAtoms()==4);
 }
