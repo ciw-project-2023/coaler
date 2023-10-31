@@ -2,15 +2,13 @@
 
 #include "catch2/catch.hpp"
 
+#include "../src/SingleAligner.hpp"
+
+
 #include <cstdint>
+#include <GraphMol/SmilesParse/SmilesParse.h>
 
-uint32_t factorial(uint32_t number) {
-    return number <= 1 ? number : factorial(number - 1) * number;
-}
-
-TEST_CASE("Factorials are computed", "[factorial]") {
-    REQUIRE(factorial(1) == 1);
-    REQUIRE(factorial(2) == 2);
-    REQUIRE(factorial(3) == 6);
-    REQUIRE(factorial(10) == 3'628'800);
+TEST_CASE("Aligner", "[align]") {
+    RDKit::RWMol* mol_a = RDKit::SmilesToMol("CCCO");
+    CHECK(1==1);
 }
