@@ -21,8 +21,7 @@ class alignerRecipe(ConanFile):
     exports_sources = "CMakeLists.txt", "src/*"
 
     def requirements(self):
-        self.requires("rdkit/0.0.1@nikplx/local")
-        self.requires("mytestlib/0.0.1")
+        self.requires("rdkit/0.0.1")
 
     def layout(self):
         cmake_layout(self)
