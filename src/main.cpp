@@ -6,14 +6,17 @@
 #include "SingleAligner.hpp"
 
 int main(int argc, char *argv[]) {
-    RDKit::RWMol* mol_a = RDKit::SmilesToMol("CCCO");
-    RDKit::RWMol* mol_b = RDKit::SmilesToMol("CCCN");
+    //Using two cox2 inhibitor molecules as example
+    //Celebrex
+    RDKit::RWMol* mol_a = RDKit::SmilesToMol("CC1=CC=C(C=C1)C1=CC(=NN1C1=CC=C(C=C1)S(N)(=O)=O)C(F)(F)F");
+    //Bextra
+    RDKit::RWMol* mol_b = RDKit::SmilesToMol("CC1=C(C(=NO1)C1=CC=CC=C1)C1=CC=C(C=C1)S(N)(=O)=O");
 
-    std::cout << mol_a->getNumAtoms() << std::endl;
-
+    // print number of atoms
+    std::cout << "Number of atoms in Celebrex: " << mol_a->getNumAtoms() << std::endl;
+    std::cout << "Number of atoms in Bextra: " << mol_b->getNumAtoms() << std::endl;
     ciw::SingleAligner single_aligner;
 
-    //single_aligner.algin_molecules(mol_a->, mol_b);
-
-    std::cout << "RDKit is linked :)" << std::endl;
+    // align molecules
+    single_aligner.algin_molecules(*mol_a, *mol_b);
 }
