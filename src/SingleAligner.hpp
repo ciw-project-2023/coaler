@@ -2,7 +2,6 @@
 
 #include <cstdint> // todo: is necessary when using RDKit libraries
 
-#include <GraphMol/MolAlign/AlignMolecules.h>
 #include <GraphMol/ROMol.h>
 
 namespace ciw {
