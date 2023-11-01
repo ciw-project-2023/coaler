@@ -17,7 +17,9 @@ namespace ciw {
 
         void set_outputfile(std::string);
 
-        void algin_molecules(RDKit::ROMol mol_a, RDKit::ROMol mol_b);
+        void align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional<RDKit::ROMol> core);
+
+        //void align_molecules_*
 
     private:
         std::string outputfile;
