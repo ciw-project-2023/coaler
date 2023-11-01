@@ -1,27 +1,6 @@
 cmake_minimum_required(VERSION 3.15..3.27)
 
-option(USE_CONAN "enables the dependency management via conan for this package" ON)
-
 project(aligner CXX)
-
-if (USE_CONAN)
-    if (EXISTS ${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
-        set(CONAN_SYSTEM_INCLUDES ON)
-        include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
-        conan_basic_setup()
-
-        # Enable sanitizer and coverage if conan profile propagates them.
-        if (${CONAN_SETTINGS_COMPILER_SANITIZER} MATCHES "AddressUndefinedBehavior")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer -fsanitize=undefined -fno-sanitize=alignment")
-        endif ()
-
-        if (${CONAN_SETTINGS_COMPILER_COVERAGE})
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
-        endif ()
-    else ()
-        message(WARNING "Dependencies not found. Run \"conan install\" first.")
-    endif ()
-endif ()
 
 find_package(rdkit REQUIRED)
 
