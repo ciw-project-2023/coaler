@@ -13,7 +13,6 @@ class alignerRecipe(ConanFile):
     url = "<Package recipe repository url here, for issues about the package>"
     description = "<Description of aligner package here>"
     topics = ("<Put some tag here>", "<here>", "<and here>")
-
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
 
@@ -22,8 +21,8 @@ class alignerRecipe(ConanFile):
 
     def requirements(self):
         self.requires("rdkit/0.0.1")
-
         self.requires("catch2/2.13.10")
+        self.requires("boost/1.83.0")
 
     def layout(self):
         cmake_layout(self)
