@@ -49,10 +49,10 @@ jobs:
         run: poetry run conan remote login doc $CONAN_SERVER_USER --password $CONAN_SERVER_PASSWORD
 
       - name: Run conan install
-        run: poetry run conan install . -s build_type=$TARGET --build missing
+        run: poetry run conan install . -pr=conan_profile -s build_type=$TARGET --build missing
 
       - name: Build
-        run: poetry run conan build . -s build_type=$TARGET
+        run: poetry run conan build . -pr=conan_profile -s build_type=$TARGET
 
       - name: Run Tests
         run: ./build/${TARGET}/test/Test
