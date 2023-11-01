@@ -5,12 +5,26 @@ I am using Clion as IDE
 ## Install with Conan
 Install conan: https://conan.io/downloads
 
-### Clone rdkit 
-https://github.com/ciw-project-2023/rdkit
+### Fetch the rdkit package from Artifactory:
+
+Credentials are:
+```
+username: ciw
+password: VZKhzh2v5nCnijAS3A8R
+```
+
+```bash
+$ conan remote add doc https://monkfish-app-qfnky.ondigitalocean.app
+$ conan remote login doc
+```
+
+You can then proceed to the conan install step and it should pull rdkit from the server
+
+### Alternatively: Run conan install + create
+
+Clone https://github.com/ciw-project-2023/rdkit
 
 Checkout `conan` Branch (`git checkout conan`)
-
-### Run conan install + create
 
 ```bash
 $ cd rdkit
