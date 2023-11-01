@@ -1,20 +1,16 @@
 find_package (Catch2 REQUIRED)
 find_package(rdkit REQUIRED)
 
-include_directories (${TEST_SOURCE_DIR}/src)
-add_executable (Test test_runner.cpp)
 
-target_link_libraries(Test PRIVATE Catch2::Catch2)
+add_executable(unittests
+        test_runner.cpp
+        )
 
-target_link_libraries(Test PUBLIC rdkit::RDKitSmilesParse)
-target_link_libraries(Test PUBLIC rdkit::RDKitGraphMol)
-target_link_libraries(Test PUBLIC rdkit::RDKitRDGeneral)
-target_link_libraries(Test PUBLIC rdkit::RDKitRDGeometryLib)
-target_link_libraries(Test PUBLIC rdkit::RDKitDataStructs)
-target_link_libraries(Test PUBLIC rdkit::RDKitRingDecomposerLib)
+include_directories(.)
 
-include(CTest)
-include(Catch)
-#catch_discover_tests(Test)
+target_link_libraries(unittests PRIVATE
+        ${PROJECT_NAME}
+        ${CONAN_LIBS}
+        )
 
-add_test (NAME MyTest COMMAND Test)
+add_test(NAME Test COMMAND unittests)
