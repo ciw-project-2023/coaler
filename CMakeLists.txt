@@ -5,9 +5,9 @@ option(USE_CONAN "enables the dependency management via conan for this package" 
 project(aligner CXX)
 
 if (USE_CONAN)
-    if (EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    if (EXISTS ${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
         set(CONAN_SYSTEM_INCLUDES ON)
-        include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+        include(${CMAKE_BINARY_DIR}/conan_toolchain.cmake)
         conan_basic_setup()
 
         # Enable sanitizer and coverage if conan profile propagates them.
