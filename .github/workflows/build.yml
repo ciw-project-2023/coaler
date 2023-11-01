@@ -39,6 +39,9 @@ jobs:
       - name: Install project
         run: poetry install --no-interaction
 
+      - name: Create conan profile
+        run: poetry run conan profile detect
+
       - name: Add conan remote
         run: poetry run conan remote add doc $CONAN_SERVER_URL
 
