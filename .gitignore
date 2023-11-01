@@ -4,6 +4,7 @@
 cmake-build-debug/*
 CMakeFiles/*
 .cmake/*
+CMakeUserPresets.json
 
 .idea/*
 TestRDkit
