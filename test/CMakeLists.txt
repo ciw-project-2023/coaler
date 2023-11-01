@@ -12,6 +12,7 @@ target_link_libraries(Test PUBLIC rdkit::RDKitRDGeneral)
 target_link_libraries(Test PUBLIC rdkit::RDKitRDGeometryLib)
 target_link_libraries(Test PUBLIC rdkit::RDKitDataStructs)
 target_link_libraries(Test PUBLIC rdkit::RDKitRingDecomposerLib)
+target_link_libraries(Test PUBLIC Boost::boost)
 
 include(CTest)
 include(Catch)
