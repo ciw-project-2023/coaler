@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up python
-        id: setup-pytohn
+        id: setup-python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
@@ -43,7 +43,7 @@ jobs:
         run: poetry run conan remote add doc $CONAN_SERVER_URL
 
       - name: Login into conan server
-        run: poetry run conan remote login $CONAN_SERVER_USER --password $CONAN_SERVER_PASSWORD
+        run: poetry run conan remote login doc $CONAN_SERVER_USER --password $CONAN_SERVER_PASSWORD
 
       - name: Run conan install
         run: poetry run conan install . -s build_type=$TARGET
