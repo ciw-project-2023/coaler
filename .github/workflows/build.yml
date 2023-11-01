@@ -1,0 +1,57 @@
+name: Test
+on: [workflow_dispatch]
+env:
+  CONAN_SERVER_URL: https://monkfish-app-qfnky.ondigitalocean.app
+  CONAN_SERVER_USER: ciw
+  CONAN_SERVER_PASSWORD: VZKhzh2v5nCnijAS3A8R
+  TARGET: Debug
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up python
+        id: setup-pytohn
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Install project
+        run: poetry install --no-interaction
+
+      - name: Add conan remote
+        run: poetry run conan remote add doc $CONAN_SERVER_URL
+
+      - name: Login into conan server
+        run: poetry run conan remote login $CONAN_SERVER_USER --password $CONAN_SERVER_PASSWORD
+
+      - name: Run conan install
+        run: poetry run conan install . -s build_type=$TARGET
+
+      - name: Build
+        run: poetry run conan build . -s build_type=$TARGET
+
+      - name: Run Tests
+        run: ./build/${TARGET}/test/Test
+
+
