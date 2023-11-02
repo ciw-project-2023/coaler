@@ -1,0 +1,18 @@
+{
+    "version": "0.5",
+    "requires": [
+        "zlib/1.3#06023034579559bb64357db3a53f88a4%1692672716.907",
+        "rdkit/0.0.1#192ca38aa50334ab46a46eff0dccce10%1698924935.7197087",
+        "libpng/1.6.40#0337b7b87ac125307ed70fd064c31eea%1694676185.364",
+        "libbacktrace/cci.20210118#ec1aa63bbc10145c6a299e68e711670c%1676205469.545",
+        "freetype/2.10.4#3146f1f6628958fb91ce61711bd8a414%1693958951.415",
+        "catch2/2.13.10#d8541ec3a7e1236ecc46a5952896969e%1678978757.681",
+        "bzip2/1.0.8#411fc05e80d47a89045edc1ee6f23c1d%1678293522.814",
+        "brotli/1.1.0#d56d7bb9ca722942aba17369cb5c0519%1696161049.808",
+        "boost/1.83.0#e948ecbe69e6e240658ba2eda46ba8e8%1694685982.949"
+    ],
+    "build_requires": [
+        "b2/4.10.1#8dc3df1cc73ad65d86cbdfd31fdb011f%1690006205.975"
+    ],
+    "python_requires": []
+}
