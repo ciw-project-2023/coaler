@@ -18,5 +18,5 @@ int main(int argc, char *argv[]) {
     ciw::SingleAligner single_aligner;
 
     // align molecules
-    single_aligner.algin_molecules(*mol_a, *mol_b);
+    single_aligner.align_molecules_kabsch(*mol_a, *mol_b, std::nullopt);
 }
