@@ -20,9 +20,10 @@ class alignerRecipe(ConanFile):
     exports_sources = "CMakeLists.txt", "src/*"
 
     def requirements(self):
+        self.requires("boost/1.83.0")
         self.requires("rdkit/0.0.1")
         self.requires("catch2/2.13.10")
-        self.requires("boost/1.83.0")
+
 
     def layout(self):
         cmake_layout(self)

@@ -4,6 +4,9 @@ add_executable (aligner
         SingleAligner.hpp
 )
 
+
+target_include_directories(aligner PUBLIC ${Boost_INCLUDE_DIRS})
+
 target_link_libraries(aligner PUBLIC rdkit::RDKitSmilesParse)
 target_link_libraries(aligner PUBLIC rdkit::RDKitGraphMol)
 target_link_libraries(aligner PUBLIC rdkit::RDKitRDGeneral)
