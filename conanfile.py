@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+from conan.tools.env import VirtualRunEnv
 
 
 class alignerRecipe(ConanFile):
@@ -20,8 +21,8 @@ class alignerRecipe(ConanFile):
     exports_sources = "CMakeLists.txt", "src/*"
 
     def requirements(self):
-        self.requires("boost/1.83.0")
         self.requires("rdkit/0.0.1")
+        self.requires("boost/1.83.0")
         self.requires("catch2/2.13.10")
 
 
@@ -29,6 +30,8 @@ class alignerRecipe(ConanFile):
         cmake_layout(self)
 
     def generate(self):
+        ev = VirtualRunEnv(self)
+        ev.generate()
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)

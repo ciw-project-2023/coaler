@@ -65,10 +65,13 @@ jobs:
 
       - name: Run conan install
         if: steps.cached-conan-files.outputs.cache-hit != 'true'
-        run: poetry run conan install . -pr=conan_profile -s build_type=$TARGET --build missing
+        run: poetry run conan install . -s build_type=$TARGET --build missing
 
       - name: Build
-        run: poetry run conan build . -pr=conan_profile -s build_type=$TARGET
+        run: poetry run conan build . -s build_type=$TARGET
+
+      - name: Source Run Env
+        run: source ./build/${TARGET}/generators/conanrun.sh
 
       - name: Run Tests
         run: ./build/${TARGET}/test/Test
