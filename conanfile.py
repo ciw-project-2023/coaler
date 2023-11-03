@@ -21,7 +21,7 @@ class alignerRecipe(ConanFile):
     exports_sources = "CMakeLists.txt", "src/*"
 
     def requirements(self):
-        self.requires("rdkit/0.0.1")
+        self.requires("rdkit/0.0.1#330e75c8154ffdf0c01add908da9ff1e")
         self.requires("boost/1.83.0")
         self.requires("catch2/2.13.10")
 
