@@ -1,5 +1,8 @@
 name: Test
-on: [workflow_dispatch]
+on:
+  pull_request:
+    branches:
+      - main
 env:
   CONAN_SERVER_URL: https://monkfish-app-qfnky.ondigitalocean.app
   CONAN_SERVER_USER: ciw
