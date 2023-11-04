@@ -3,8 +3,9 @@ find_package(Boost REQUIRED)
 
 include_directories (${TEST_SOURCE_DIR}/src)
 add_executable (Test test_runner.cpp)
-
 target_include_directories(Test PUBLIC ${Boost_INCLUDE_DIRS})
+
+target_link_libraries(Test PUBLIC "-Wl,--disable-new-dtags")
 
 target_link_libraries(Test PRIVATE Catch2::Catch2)
 target_link_libraries(Test PUBLIC rdkit::RDKitSmilesParse)

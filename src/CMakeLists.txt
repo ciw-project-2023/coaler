@@ -4,6 +4,7 @@ add_executable (aligner
         SingleAligner.hpp
 )
 
+target_link_libraries(aligner PUBLIC "-Wl,--disable-new-dtags")
 
 target_include_directories(aligner PUBLIC ${Boost_INCLUDE_DIRS})
 
