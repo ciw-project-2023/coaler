@@ -17,7 +17,7 @@ namespace ciw {
     void SingleAligner::set_outputfile(std::string) {
     }
 
-    void
+    std::tuple<double, std::nullptr_t>
     SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional<RDKit::ROMol> core) {
         /*TODO: Add more conformeres to the molecules with RDKit::DGeomHelpers::EmbedMultipleConfs or Multi-Align
          * has to do these steps in advance, has to be discussed with the group
@@ -44,8 +44,7 @@ namespace ciw {
 
             // print the MCS
             std::cout << "MCS: " << res.SmartsString << std::endl;
-        }
-        else {
+        } else {
             //TODO: Check if this really works ... (uff)
             res.SmartsString = core->getProp<std::string>("smarts");
         }
@@ -67,8 +66,7 @@ namespace ciw {
         // align molecules
         double rmsd = RDKit::MolAlign::alignMol(mol_a, mol_b, -1, -1, &match_vect);
 
-        // print rmsd
-        std::cout << "RMSD: " << rmsd << std::endl;
+        return std::make_tuple(rmsd, nullptr);
     }
 
 } // ciw
