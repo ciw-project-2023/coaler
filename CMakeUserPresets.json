@@ -4,6 +4,6 @@
         "conan": {}
     },
     "include": [
-        "/home/niklas/projects/uni/RDKitSkeletonCPP/build/Debug/generators/CMakePresets.json"
+        "/home/chris/CiW_Project/RDKitSkeletonCPP/build/Debug/generators/CMakePresets.json"
     ]
 }
