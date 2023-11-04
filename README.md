@@ -1,9 +1,66 @@
-# TestRdkit
+# RDKitSkeletonCPP
 
-I am using Clion as IDE
+### UPDATE YOUR SYSTEM
+We have prebuild rdkit for the following setups:
+```
+[settings]
+arch=x86_64
+build_type=Debug
+compiler=gcc
+compiler.cppstd=gnu17
+compiler.libcxx=libstdc++11
+compiler.version=13
+os=Linux
 
-## Install with Conan
-Install conan: https://conan.io/downloads
+-- GlibC 2.36/2.38
+```
+
+And 
+```
+[settings]
+arch=x86_64
+build_type=Debug
+compiler=gcc
+compiler.cppstd=gnu17
+compiler.libcxx=libstdc++11
+compiler.version=11
+os=Linux
+
+-- GlibC 2.34/2.36 (should work for both)
+```
+
+
+Please check your version you have installed locally and update them if you need to:
+```bash
+# Check g++ (compile.version)
+g++ -v
+
+# Check libc version
+ldd --version
+
+# Check cmake version 
+cmake --version
+```
+
+### Install conan
+https://conan.io/downloads
+
+### Add your conan profile
+Make conan detect the default profile:
+```
+conan profile detect
+```
+
+This will create `~/.conan2/profiles/default`.
+
+Then for local development, you want a debug profile. So add change this in your 
+conan default profile.
+
+~/.conan2/profiles/default
+```
+- build_type=Release
++ build_type=Debug
+```
 
 ### Fetch the rdkit package from Artifactory:
 
@@ -14,42 +71,46 @@ password: VZKhzh2v5nCnijAS3A8R
 ```
 
 ```bash
-$ conan remote add doc https://monkfish-app-qfnky.ondigitalocean.app
-$ conan remote login doc
+conan remote add doc https://monkfish-app-qfnky.ondigitalocean.app
+```
+```
+conan remote login doc
 ```
 
 You can then proceed to the conan install step and it should pull rdkit from the server
 
-### Alternatively: Run conan install + create
-
-Clone https://github.com/ciw-project-2023/rdkit
-
-Checkout `conan` Branch (`git checkout conan`)
-
-```bash
-$ cd rdkit
-$ conan create . -s build_type=Debug --build missing
-```
-
-This can take a loooong while (for very fast PCs under 10 minutes)
-
-### Get your client repo
-For example purpose:
+### Clone the client Repo
 https://github.com/ciw-project-2023/RDKitSkeletonCPP
 
-### Add what you need from rdkit in your CMakeLists.txt
 ```sh
-$ cd RDKitSkeletonCPP
-$ conan install . -s build_type=Debug --build missing
+git clone https://github.com/ciw-project-2023/RDKitSkeletonCPP && cd RDKitSkeletonCPP
 ```
 
-### Run build
-run
+### Install dependencies
+```
+conan install . --build missing
+```
+
+This can take a bit, but you should see rdkit packages bein downloaded from the artifactory.
+
+### Build Project
+
 ```bash
-$ conan build . -s build_type=Debug
+conan build . 
 ```
 
-Here you should get an output containing lines like this:
+To run the programm from the CMD:
+```
+./build/Debug/src/aligner
+```
+
+To run the tests from the CMD:
+```
+./build/Debug/test/Test
+```
+
+### Setup Clion
+In the output of `conan build` you should get an output containing lines like this:
 ```
 ======== Calling build() ========
 conanfile.py (aligner/0.0.1): Calling build()
@@ -62,7 +123,6 @@ Copy this part (it will be different for on your PC):
 -DCMAKE_TOOLCHAIN_FILE="/home/niklas/projects/uni/RDKitSkeletonCPP/build/Debug/generators/conan_toolchain.cmake" -DCMAKE_INSTALL_PREFIX="/home/niklas/projects/uni/RDKitSkeletonCPP" `
 ```
 
-### Setup Clion
 1. Open your Project in Clion and tell it that it is a CMake project
 2. In Clion Goto Settings->Build,Execution...->CMAKE and add the thing you just copied to `CMake Options`.
 3. Change "Build directory" from `cmake-build-debug` to `build` (Conan uses this one)
