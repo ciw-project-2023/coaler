@@ -55,6 +55,9 @@ jobs:
         if: steps.cached-conan-files.outputs.cache-hit != 'true'
         run: poetry run conan profile detect
 
+      - name: Enable Debug Mode
+        run: sed -i 's/Release/Debug/g' $(poetry run conan profile path default)
+
       - name: Add conan remote
         if: steps.cached-conan-files.outputs.cache-hit != 'true'
         run: poetry run conan remote add doc $CONAN_SERVER_URL
