@@ -70,9 +70,6 @@ jobs:
       - name: Build
         run: poetry run conan build . -s build_type=$TARGET
 
-      - name: Source Run Env
-        run: source ./build/${TARGET}/generators/conanrun.sh
-
       - name: Run Tests
         run: ./build/${TARGET}/test/Test
 
