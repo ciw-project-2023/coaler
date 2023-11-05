@@ -28,5 +28,4 @@ install(TARGETS ${rdkit_LIBS} RUNTIME DESTINATION bin)
 install(TARGETS aligner DESTINATION "."
         RUNTIME DESTINATION bin
         ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-)
+        LIBRARY DESTINATION lib)
