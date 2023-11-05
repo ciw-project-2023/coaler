@@ -13,17 +13,10 @@ namespace ciw {
     public:
         SingleAligner();
 
-        ~SingleAligner();
-
-        void set_outputfile(std::string);
-
-        std::tuple<double, std::nullptr_t> align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional<RDKit::ROMol> core);
+        std::tuple<double, std::nullptr_t>
+        align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional <RDKit::ROMol> core);
 
         //void align_molecules_*
-
-    private:
-        std::string outputfile;
     };
 
 } // ciw
-

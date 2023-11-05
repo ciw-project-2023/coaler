@@ -7,18 +7,13 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 
 namespace ciw {
+SingleAligner::SingleAligner() {
 
-    SingleAligner::SingleAligner() {
-    }
+}
 
-    SingleAligner::~SingleAligner() {
-    }
-
-    void SingleAligner::set_outputfile(std::string) {
-    }
 
     std::tuple<double, std::nullptr_t>
-    SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional<RDKit::ROMol> core) {
+    SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional <RDKit::ROMol> core) {
         /*TODO: Add more conformeres to the molecules with RDKit::DGeomHelpers::EmbedMultipleConfs or Multi-Align
          * has to do these steps in advance, has to be discussed with the group
          * */
@@ -35,7 +30,7 @@ namespace ciw {
         // use mcs if no core structure
         if (!core.has_value()) {
             // zip mol_a and mol_b into a vector
-            std::vector<RDKit::ROMOL_SPTR> mols;
+            std::vector <RDKit::ROMOL_SPTR> mols;
             mols.push_back(RDKit::ROMOL_SPTR(new RDKit::ROMol(mol_a)));
             mols.push_back(RDKit::ROMOL_SPTR(new RDKit::ROMol(mol_b)));
 
