@@ -1,5 +1,8 @@
 name: Test
-on: [workflow_dispatch]
+on:
+  pull_request:
+    branches:
+      - main
 env:
   CONAN_SERVER_URL: https://monkfish-app-qfnky.ondigitalocean.app
   CONAN_SERVER_USER: ciw
@@ -55,6 +58,9 @@ jobs:
         if: steps.cached-conan-files.outputs.cache-hit != 'true'
         run: poetry run conan profile detect
 
+      - name: Enable Debug Mode
+        run: sed -i 's/Release/Debug/g' $(poetry run conan profile path default)
+
       - name: Add conan remote
         if: steps.cached-conan-files.outputs.cache-hit != 'true'
         run: poetry run conan remote add doc $CONAN_SERVER_URL
@@ -69,9 +75,6 @@ jobs:
 
       - name: Build
         run: poetry run conan build . -s build_type=$TARGET
-
-      - name: Source Run Env
-        run: source ./build/${TARGET}/generators/conanrun.sh
 
       - name: Run Tests
         run: ./build/${TARGET}/test/Test
