@@ -22,9 +22,6 @@ foreach(lib IN LISTS rdkitlibs)
     target_link_libraries(aligner PUBLIC rdkit::${lib})
 endforeach()
 
-
-install(TARGETS ${rdkit_LIBS} RUNTIME DESTINATION bin)
-
 install(TARGETS aligner DESTINATION "."
         RUNTIME DESTINATION bin
         ARCHIVE DESTINATION lib
