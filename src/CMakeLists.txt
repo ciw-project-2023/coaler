@@ -1,8 +1,24 @@
 add_executable (coaler
         main.cpp
         singlealign/SingleAligner.cpp
-        parser/FileParser.cpp
-)
+        singlealign/SingleAligner.hpp
+        multialign/PoseRegister.cpp
+        multialign/PoseRegister.hpp
+        multialign/Forward.hpp
+        multialign/PoseRegisterBuilder.hpp
+        multialign/BasicClasses/LigandPair.cpp
+        multialign/BasicClasses/LigandPair.hpp
+        multialign/BasicClasses/Forward.hpp
+        multialign/BasicClasses/Ligand.cpp
+        multialign/BasicClasses/Ligand.hpp
+        multialign/BasicClasses/PosePair.cpp
+        multialign/BasicClasses/PosePair.hpp
+        multialign/MultiAligner.cpp
+        multialign/MultiAligner.hpp
+        multialign/LigandAlignmentAssembly.cpp
+        multialign/LigandAlignmentAssembly.hpp
+        multialign/PoseRegisterBuilder.cpp
+        multialign/BasicClasses/UniquePoseIdentifier.hpp multialign/MultiAlignerResult.hpp)
 
 find_package(spdlog REQUIRED)
 find_package(rdkit REQUIRED)

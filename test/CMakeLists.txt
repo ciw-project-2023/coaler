@@ -8,7 +8,22 @@ add_executable (Test
         test_file_parser.cpp
         ${CMAKE_SOURCE_DIR}/src/singlealign/SingleAligner.cpp # TODO: restructure this
         ${CMAKE_SOURCE_DIR}/src/parser/FileParser.cpp
-)
+        pose_register_tester.cpp
+        ${CMAKE_SOURCE_DIR}/src/multialign/BasicClasses/PosePair.cpp
+        ${CMAKE_SOURCE_DIR}/src/multialign/PoseRegister.cpp
+        ${CMAKE_SOURCE_DIR}/src/multialign/BasicClasses/Ligand.cpp
+        ${CMAKE_SOURCE_DIR}/src/multialign/BasicClasses/LigandPair.cpp
+        ${CMAKE_SOURCE_DIR}/src/multialign/PoseRegisterBuilder.cpp
+        ligand_tester.cpp multi_aligner_tester.cpp
+        ligand_pair_tester.cpp
+        pose_pair_tester.cpp
+        ligand_alignment_assembly_tester.cpp
+        pose_register_builder_tester.cpp)
+
+include_directories (${TEST_SOURCE_DIR}/src)
+
+
+target_include_directories(Test PUBLIC ${Boost_INCLUDE_DIRS})
 
 # Include additional headers here
 target_include_directories(Test PUBLIC
