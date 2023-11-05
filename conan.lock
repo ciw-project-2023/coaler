@@ -2,6 +2,7 @@
     "version": "0.5",
     "requires": [
         "zlib/1.3#06023034579559bb64357db3a53f88a4%1692672716.907",
+        "rdkit/0.0.1@ciw/e6b129b1cac9ce46bf03fcc2ac0f7a5a#18f2036d920faada93fa8074892aae0a",
         "rdkit/0.0.1@ciw/b7d195abf06cf8f368523c17fba70f4c#bd56a5ad8415a2571972e8c6aa72946e",
         "rdkit/0.0.1@ciw/6f79f83fa419df562f72843400ef77d1#bd56a5ad8415a2571972e8c6aa72946e%1699126216.0",
         "libpng/1.6.40#0337b7b87ac125307ed70fd064c31eea%1694676185.364",
