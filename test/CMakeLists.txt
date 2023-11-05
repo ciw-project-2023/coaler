@@ -2,7 +2,10 @@ find_package(Catch2 REQUIRED)
 find_package(Boost REQUIRED)
 
 include_directories (${TEST_SOURCE_DIR}/src)
-add_executable (Test test_runner.cpp)
+
+add_executable (Test test_runner.cpp
+                multialign/PoseRegisterTester.cpp)
+
 target_include_directories(Test PUBLIC ${Boost_INCLUDE_DIRS})
 
 target_link_libraries(Test PUBLIC "-Wl,--disable-new-dtags")
