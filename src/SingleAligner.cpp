@@ -7,11 +7,6 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 
 namespace ciw {
-SingleAligner::SingleAligner() {
-
-}
-
-
     std::tuple<double, std::nullptr_t>
     SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional <RDKit::ROMol> core) {
         /*TODO: Add more conformeres to the molecules with RDKit::DGeomHelpers::EmbedMultipleConfs or Multi-Align
