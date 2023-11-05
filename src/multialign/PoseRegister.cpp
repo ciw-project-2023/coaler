@@ -7,11 +7,18 @@
 
 namespace MultiAlign {
 
-    PoseRegister::PoseRegister(unsigned int maxSize)
-    : m_maxSize(maxSize)
-    , m_lowestScoringPosePair(std::numeric_limits<unsigned>::max(),
-                              std::numeric_limits<unsigned>::max()){
 
+    PoseRegister::PoseRegister(LigandID firstLigand,
+                               LigandID secondLigand,
+                               unsigned maxSize)
+    : m_maxSize(maxSize)
+    , m_first(firstLigand)
+    , m_second(secondLigand)
+    , m_lowestScoringPosePair(
+            std::numeric_limits<unsigned>::max(),
+            std::numeric_limits<unsigned>::max() - 1)
+    {
+        assert(m_first != m_second);
     }
 
     unsigned PoseRegister::getSize() const noexcept {
@@ -67,6 +74,8 @@ namespace MultiAlign {
         m_lowestScoringPosePair = min->first;
     }
 
-
+    PosePair PoseRegister::getMinimumPosePairInRegister() {
+        return m_lowestScoringPosePair;
+    }
 
 }

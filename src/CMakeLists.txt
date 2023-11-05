@@ -5,7 +5,12 @@ add_executable (aligner
         multialign/PairwiseAlignment.cpp
         multialign/PairwiseAlignment.hpp
         multialign/PoseRegister.cpp
-        multialign/PoseRegister.hpp multialign/Forward.hpp multialign/Ligand.cpp multialign/Ligand.hpp multialign/PosePair.cpp multialign/PosePair.hpp)
+        multialign/PoseRegister.hpp
+        multialign/Forward.hpp
+        multialign/Ligand.cpp
+        multialign/Ligand.hpp
+        multialign/PosePair.cpp
+        multialign/PosePair.hpp)
 
 target_link_libraries(aligner PUBLIC "-Wl,--disable-new-dtags")
 

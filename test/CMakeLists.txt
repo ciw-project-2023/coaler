@@ -3,8 +3,14 @@ find_package(Boost REQUIRED)
 
 include_directories (${TEST_SOURCE_DIR}/src)
 
+file(GLOB TEST_SOURCES "*.hpp" "*.cpp")
+
 add_executable (Test test_runner.cpp
-                multialign/PoseRegisterTester.cpp)
+                PoseRegisterTester.cpp
+                ${CMAKE_SOURCE_DIR}/src/multialign/PosePair.cpp
+                ${CMAKE_SOURCE_DIR}/src/multialign/PoseRegister.cpp
+        )
+
 
 target_include_directories(Test PUBLIC ${Boost_INCLUDE_DIRS})
 
