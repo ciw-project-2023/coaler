@@ -11,7 +11,7 @@ namespace MultiAlign {
     }
 
     std::set<PoseID> Ligand::getPoses() const noexcept {
-        return std::set<PoseID>();
+        return m_poses;
     }
 
     LigandID Ligand::getID() const noexcept {

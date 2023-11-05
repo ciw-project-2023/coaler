@@ -21,6 +21,8 @@ namespace MultiAlign {
         assert(m_first != m_second);
     }
 
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     unsigned PoseRegister::getSize() const noexcept {
         return m_register.size();
     }

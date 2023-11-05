@@ -12,7 +12,7 @@ namespace MultiAlign
     : m_singleAlignmentScores(singleAlignmentScores)
     {}
 
-    /*---------------------------------------------------------------------------------*/
+    /*----------------------------------------------------------------------------------------------------------------*/
 
     double PairwiseAlignment::getValue(const unsigned int x, const unsigned int y) const {
         assert(x < m_singleAlignmentScores.size1()
