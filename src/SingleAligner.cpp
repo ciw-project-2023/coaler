@@ -21,31 +21,30 @@ namespace ciw {
         RDKit::DGeomHelpers::EmbedMolecule(mol_a);
         RDKit::DGeomHelpers::EmbedMolecule(mol_b);
 
-        RDKit::MCSResult res;
+        RDKit::ROMOL_SPTR core_structure;
         // use mcs if no core structure
         if (!core.has_value()) {
             // zip mol_a and mol_b into a vector
             std::vector <RDKit::ROMOL_SPTR> mols;
-            mols.push_back(RDKit::ROMOL_SPTR(new RDKit::ROMol(mol_a)));
-            mols.push_back(RDKit::ROMOL_SPTR(new RDKit::ROMol(mol_b)));
+            mols.emplace_back(boost::make_shared<RDKit::ROMol>(mol_a));
+            mols.emplace_back(boost::make_shared<RDKit::ROMol>(mol_b));
 
             // find the MCS
-            res = RDKit::findMCS(mols);
+            RDKit::MCSResult res = RDKit::findMCS(mols);
 
             // print the MCS
             std::cout << "MCS: " << res.SmartsString << std::endl;
+            core_structure = res.QueryMol;
         } else {
-            //TODO: Check if this really works ... (uff)
-            res.SmartsString = core->getProp<std::string>("smarts");
+            core_structure = boost::make_shared<RDKit::ROMol>(core.value());
         }
-        // Turn core into MCSResult
 
         // get substructutre match for mol_a and mol_b
         RDKit::MatchVectType match_vect_a;
-        RDKit::SubstructMatch(mol_a, *res.QueryMol, match_vect_a);
+        RDKit::SubstructMatch(mol_a, *core_structure, match_vect_a);
 
         RDKit::MatchVectType match_vect_b;
-        RDKit::SubstructMatch(mol_b, *res.QueryMol, match_vect_b);
+        RDKit::SubstructMatch(mol_b, *core_structure, match_vect_b);
 
         // zip second value of match_vect_a and match_vect_b into MatchVectType
         RDKit::MatchVectType match_vect;
