@@ -4,9 +4,14 @@ add_executable (aligner
         SingleAligner.hpp
 )
 
+find_package(spdlog REQUIRED)
+find_package(rdkit REQUIRED)
+find_package(Boost REQUIRED COMPONENTS program_options)
+
 target_link_libraries(aligner PUBLIC "-Wl,--disable-new-dtags")
 
 target_include_directories(aligner PUBLIC ${Boost_INCLUDE_DIRS})
+target_include_directories(aligner PUBLIC ${spdlog_INCLUDE_DIRS})
 
 set(rdkitlibs "RDKitAbbreviations" "RDKitAlignment" "RDKitCatalogs" "RDKitChemicalFeatures" "RDKitChemReactions" "RDKitChemTransforms"
   "RDKitCIPLabeler" "RDKitcoordgen" "RDKitDataStructs" "RDKitDepictor" "RDKitDeprotect" "RDKitDescriptors" "RDKitDistGeometry" "RDKitDistGeomHelpers"
@@ -21,6 +26,8 @@ set(rdkitlibs "RDKitAbbreviations" "RDKitAlignment" "RDKitCatalogs" "RDKitChemic
 foreach(lib IN LISTS rdkitlibs)
     target_link_libraries(aligner PUBLIC rdkit::${lib})
 endforeach()
+
+target_link_libraries(aligner PUBLIC spdlog::spdlog)
 
 install(TARGETS aligner DESTINATION "."
         RUNTIME DESTINATION bin
