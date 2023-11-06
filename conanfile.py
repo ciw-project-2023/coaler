@@ -22,6 +22,7 @@ class alignerRecipe(ConanFile):
             self.requires("rdkit/0.0.1@ciw/{}".format(hash))
         self.requires("boost/1.83.0")
         self.requires("catch2/2.13.10")
+        self.requires("spdlog/1.12.0")
 
 
     def layout(self):
