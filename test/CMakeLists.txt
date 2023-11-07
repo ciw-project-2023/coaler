@@ -5,8 +5,8 @@ find_package(Boost REQUIRED)
 add_executable (Test
         test_runner.cpp
         test_single_aligner.cpp
+        test_file_parser.cpp
         ${CMAKE_SOURCE_DIR}/src/SingleAligner.cpp # TODO: restructure this
-        ${CMAKE_SOURCE_DIR}/src/parsers/FileParserSmiles.h
         ${CMAKE_SOURCE_DIR}/src/parsers/FileParserSmiles.cpp
 )
 

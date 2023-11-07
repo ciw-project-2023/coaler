@@ -1,9 +1,4 @@
-//
-// Created by niklas on 11/7/23.
-//
-
-#ifndef ALIGNER_FILENOTFOUNDEXCEPTION_H
-#define ALIGNER_FILENOTFOUNDEXCEPTION_H
+#pragma once
 
 
 #include <exception>
@@ -20,6 +15,3 @@ public:
         return file_path;
     }
 };
-
-
-#endif //ALIGNER_FILENOTFOUNDEXCEPTION_H

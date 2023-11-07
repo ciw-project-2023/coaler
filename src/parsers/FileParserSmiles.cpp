@@ -1,10 +1,10 @@
-#include "FileParserSmiles.h"
+#include "FileParserSmiles.hpp"
+#include "FileNotFoundException.hpp"
 #include <vector>
-#include <GraphMol/RWMol.h>
 #include <spdlog/spdlog.h>
 #include <filesystem>
+#include <GraphMol/RWMol.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
-#include "FileNotFoundException.h"
 
 std::vector<RDKit::RWMol *> FileParserSmiles::parse(const std::string &file_path) {
     std::vector<RDKit::RWMol *> result;

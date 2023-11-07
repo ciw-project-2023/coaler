@@ -1,7 +1,8 @@
 add_executable (aligner
         main.cpp
-        SingleAligner.cpp SingleAligner.hpp parsers/FileParserSmiles.h
-        parsers/FileNotFoundException.h parsers/FileParserSmiles.cpp)
+        SingleAligner.cpp
+        parsers/FileParserSmiles.cpp
+)
 
 find_package(spdlog REQUIRED)
 find_package(rdkit REQUIRED)
