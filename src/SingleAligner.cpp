@@ -42,7 +42,7 @@ namespace ciw {
             spdlog::info("MCS: " + res.SmartsString);
         } else {
             core_structure = boost::make_shared<RDKit::ROMol>(core.value());
-            spdlog::info("Use core: " + RDKit::MolToSmarts(core.value()));
+            spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
         }
 
         // get substructutre match for mol_a and mol_b
@@ -61,7 +61,7 @@ namespace ciw {
         // align molecules
         double rmsd = RDKit::MolAlign::alignMol(mol_a, mol_b, -1, -1, &match_vect);
 
-        spdlog::info("Molecules are align with a score of " + std::to_string(rmsd));
+        spdlog::info("Molecules are align with a score of {}", rmsd);
 
         return std::make_tuple(rmsd, nullptr);
     }
