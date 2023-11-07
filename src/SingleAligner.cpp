@@ -1,10 +1,14 @@
 #include "SingleAligner.hpp"
 
+#include <vector>
+
+#include <spdlog/spdlog.h>
+
 #include <GraphMol/MolAlign/AlignMolecules.h>
 #include <GraphMol/FMCS/FMCS.h>
-#include <vector>
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <GraphMol/DistGeomHelpers/Embedder.h>
+#include <GraphMol/SmilesParse/SmartsWrite.h>
 
 namespace ciw {
     std::tuple<double, std::nullptr_t>
@@ -12,6 +16,7 @@ namespace ciw {
         /*TODO: Add more conformeres to the molecules with RDKit::DGeomHelpers::EmbedMultipleConfs or Multi-Align
          * has to do these steps in advance, has to be discussed with the group
          * */
+        spdlog::info("Start single alignment with Kabsch' algorithm");
 
         // Add hydrogens to molecules
         RDKit::MolOps::addHs(mol_a);
@@ -24,6 +29,8 @@ namespace ciw {
         RDKit::ROMOL_SPTR core_structure;
         // use mcs if no core structure
         if (!core.has_value()) {
+            spdlog::info("No core structure, start calculating MCS");
+
             // zip mol_a and mol_b into a vector
             std::vector <RDKit::ROMOL_SPTR> mols;
             mols.emplace_back(boost::make_shared<RDKit::ROMol>(mol_a));
@@ -31,12 +38,11 @@ namespace ciw {
 
             // find the MCS
             RDKit::MCSResult res = RDKit::findMCS(mols);
-
-            // print the MCS
-            std::cout << "MCS: " << res.SmartsString << std::endl;
             core_structure = res.QueryMol;
+            spdlog::info("MCS: " + res.SmartsString);
         } else {
             core_structure = boost::make_shared<RDKit::ROMol>(core.value());
+            spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
         }
 
         // get substructutre match for mol_a and mol_b
@@ -54,6 +60,8 @@ namespace ciw {
 
         // align molecules
         double rmsd = RDKit::MolAlign::alignMol(mol_a, mol_b, -1, -1, &match_vect);
+
+        spdlog::info("Molecules are align with a score of {}", rmsd);
 
         return std::make_tuple(rmsd, nullptr);
     }
