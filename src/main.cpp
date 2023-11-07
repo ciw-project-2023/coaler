@@ -1,7 +1,5 @@
 #include <cstdint> // todo: is necessary when using RDKit libraries
-
 #include <spdlog/spdlog.h>
-
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/FileParsers/MolSupplier.h>
 

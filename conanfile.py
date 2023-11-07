@@ -14,7 +14,7 @@ class coalerRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     # Sources are located in the same place as this recipe, copy them to the recipe
-    exports_sources = "CMakeLists.txt", "src/*"
+    exports_sources = "CMakeLists.txt", "src/*", "test/*"
 
     def requirements(self):
         with open(os.path.expanduser("~/.conan2/profiles/default"), "rb") as profile:
