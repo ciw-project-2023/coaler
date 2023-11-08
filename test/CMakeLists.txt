@@ -1,4 +1,5 @@
 find_package(Catch2 REQUIRED)
+find_package(spdlog REQUIRED)
 find_package(Boost REQUIRED)
 
 add_executable (Test
@@ -30,6 +31,8 @@ set(rdkitlibs "RDKitAbbreviations" "RDKitAlignment" "RDKitCatalogs" "RDKitChemic
 foreach(lib IN LISTS rdkitlibs)
     target_link_libraries(Test PUBLIC rdkit::${lib})
 endforeach()
+
+target_link_libraries(Test PUBLIC spdlog::spdlog)
 
 include(CTest)
 include(Catch)
