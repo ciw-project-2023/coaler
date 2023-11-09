@@ -9,11 +9,11 @@
 std::vector<RDKit::RWMol *> FileParserSmiles::parse(const std::string &file_path) {
     std::vector<RDKit::RWMol *> result;
 
-    spdlog::info("Searching at: {}", std::filesystem::current_path().string());
+    spdlog::debug("searching at: {}", std::filesystem::current_path().string());
 
     std::ifstream infile(file_path);
     if (!infile) {
-        spdlog::error("File not found: {}", file_path);
+        spdlog::error("file not found: {}", file_path);
 
         throw FileNotFoundException(file_path);
     }

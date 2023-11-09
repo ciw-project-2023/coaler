@@ -35,17 +35,5 @@ foreach(lib IN LISTS rdkitlibs)
     target_link_libraries(Test PUBLIC rdkit::${lib})
 endforeach()
 
-add_custom_command(
-        TARGET Test POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_SOURCE_DIR}/test/data/AID_1806504.smi
-                # Add your new testdata files here so they get copied to
-                # the build directory
-                ${CMAKE_CURRENT_BINARY_DIR}/data
-)
-
-include(CTest)
-include(Catch)
-
-# Add tests here
+set(TEST_DATA_FILES AID_1806504.smi)
 add_test(NAME MyTest COMMAND Test)
