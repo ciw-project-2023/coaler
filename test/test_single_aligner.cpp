@@ -1,9 +1,10 @@
 #include "catch2/catch.hpp"
 
 #include "../src/SingleAligner.hpp"
+#include "../src/parsers/FileParser.hpp"
 
 #include <cstdint>
-#include <GraphMol/SmilesParse/SmilesParse.h>
+#include <filesystem>
 
 TEST_CASE("Single Aligner", "[aligner]")
 {
@@ -26,3 +27,4 @@ TEST_CASE("Single Aligner", "[aligner]")
                           "Size of core is too large!");
     };
 }
+

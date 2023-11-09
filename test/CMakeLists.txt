@@ -5,18 +5,21 @@ find_package(Boost REQUIRED)
 add_executable (Test
         test_runner.cpp
         test_single_aligner.cpp
-
+        test_file_parser.cpp
         ${CMAKE_SOURCE_DIR}/src/SingleAligner.cpp # TODO: restructure this
+        ${CMAKE_SOURCE_DIR}/src/parsers/FileParser.cpp
 )
 
+# Include additional headers here
 target_include_directories(Test PUBLIC
         ${Boost_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}/src/
 )
 
+# All the dependencies get linked here
 target_link_libraries(Test PUBLIC "-Wl,--disable-new-dtags")
-
 target_link_libraries(Test PRIVATE Catch2::Catch2)
+target_link_libraries(Test PUBLIC spdlog::spdlog)
 
 set(rdkitlibs "RDKitAbbreviations" "RDKitAlignment" "RDKitCatalogs" "RDKitChemicalFeatures" "RDKitChemReactions" "RDKitChemTransforms"
         "RDKitCIPLabeler" "RDKitcoordgen" "RDKitDataStructs" "RDKitDepictor" "RDKitDeprotect" "RDKitDescriptors" "RDKitDistGeometry" "RDKitDistGeomHelpers"
@@ -32,10 +35,5 @@ foreach(lib IN LISTS rdkitlibs)
     target_link_libraries(Test PUBLIC rdkit::${lib})
 endforeach()
 
-target_link_libraries(Test PUBLIC spdlog::spdlog)
-
-include(CTest)
-include(Catch)
-#catch_discover_tests(Test)
-
+set(TEST_DATA_FILES AID_1806504.smi)
 add_test(NAME MyTest COMMAND Test)
