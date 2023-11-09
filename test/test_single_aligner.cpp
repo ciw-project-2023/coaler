@@ -15,7 +15,7 @@ RDKit::RWMol *mol_b = RDKit::SmilesToMol("CC1=C(C(=NO1)C1=CC=CC=C1)C1=CC=C(C=C1)
 // print number of atoms
 std::cout << "Number of atoms in Celebrex: " << mol_a->getNumAtoms() << std::endl;
 std::cout << "Number of atoms in Bextra: " << mol_b->getNumAtoms() << std::endl;
-ciw::SingleAligner single_aligner;
+ciw::SingleAligner single_aligner(5, 50);
 
 // align molecules
 single_aligner.align_molecules_kabsch(*mol_a, *mol_b, std::nullopt);
