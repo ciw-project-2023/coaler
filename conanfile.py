@@ -5,8 +5,8 @@ import hashlib
 import os
 
 
-class alignerRecipe(ConanFile):
-    name = "aligner"
+class coalerRecipe(ConanFile):
+    name = "coaler"
     version = "0.0.1"
     package_type = "application"
 
@@ -17,13 +17,12 @@ class alignerRecipe(ConanFile):
     exports_sources = "CMakeLists.txt", "src/*"
 
     def requirements(self):
-        with open(os.path.expanduser("~/.conan2/profiles/default"), 'rb') as profile:
+        with open(os.path.expanduser("~/.conan2/profiles/default"), "rb") as profile:
             hash = hashlib.md5(profile.read()).hexdigest()
             self.requires("rdkit/0.0.1@ciw/{}".format(hash))
         self.requires("boost/1.83.0")
         self.requires("catch2/2.13.10")
         self.requires("spdlog/1.12.0")
-
 
     def layout(self):
         cmake_layout(self)
@@ -44,7 +43,3 @@ class alignerRecipe(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-
-    
-
-    
