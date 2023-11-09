@@ -49,9 +49,11 @@ namespace ciw {
         }
 
         if(core_structure->getNumAtoms() < core_min_size_){
+            spdlog::error("Size of core is too small!");
             throw std::runtime_error("Size of core is too small!");
         }
         if(core_structure->getNumAtoms() > core_max_size_){
+            spdlog::error("Size of core is too large!");
             throw std::runtime_error("Size of core is too large!");
         }
 
