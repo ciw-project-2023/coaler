@@ -1,6 +1,6 @@
 # coaler
 
-<img src="logo/coaler.png" width="150">
+<img src="logo/coaler-removebg.png" width="150">
 
 Core Aligner
 
