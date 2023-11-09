@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 
     spdlog::info("No. of Atoms: {}", mol_a->getNumAtoms());
 
-    ciw::SingleAligner single_aligner;
+    ciw::SingleAligner single_aligner(5, 50);
 
     spdlog::info("Program linked and executed correctly");
 
