@@ -49,10 +49,10 @@ namespace ciw {
         }
 
         if(core_structure->getNumAtoms() < core_min_size_){
-            throw std::runtime_error("Size of core is too small!")
+            throw std::runtime_error("Size of core is too small!");
         }
         if(core_structure->getNumAtoms() > core_max_size_){
-            throw std::runtime_error("Size of core is too large!")
+            throw std::runtime_error("Size of core is too large!");
         }
 
         // get substructutre match for mol_a and mol_b
