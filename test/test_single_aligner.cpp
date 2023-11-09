@@ -5,18 +5,21 @@
 #include <cstdint>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 
-TEST_CASE("Single Aligner","[aligner]") {
-//Using two cox2 inhibitor molecules as example
-//Celebrex
-RDKit::RWMol *mol_a = RDKit::SmilesToMol("CC1=CC=C(C=C1)C1=CC(=NN1C1=CC=C(C=C1)S(N)(=O)=O)C(F)(F)F");
-//Bextra
-RDKit::RWMol *mol_b = RDKit::SmilesToMol("CC1=C(C(=NO1)C1=CC=CC=C1)C1=CC=C(C=C1)S(N)(=O)=O");
+TEST_CASE("Single Aligner", "[aligner]") {
+    SECTION("Core structure is too small!") {
+        RDKit::RWMol *mol_a = RDKit::SmilesToMol("CCCN");
+        RDKit::RWMol *mol_b = RDKit::SmilesToMol("CCCO");
 
-// print number of atoms
-std::cout << "Number of atoms in Celebrex: " << mol_a->getNumAtoms() << std::endl;
-std::cout << "Number of atoms in Bextra: " << mol_b->getNumAtoms() << std::endl;
-ciw::SingleAligner single_aligner;
+        ciw::SingleAligner single_aligner(5, 50);
+        CHECK_THROWS_WITH(single_aligner.align_molecules_kabsch(*mol_a, *mol_b, std::nullopt),
+                          "Size of core is too small!");
+    };
+    SECTION("Core structure is too large!") {
+        RDKit::RWMol *mol_a = RDKit::SmilesToMol("CCCN");
+        RDKit::RWMol *mol_b = RDKit::SmilesToMol("CCCO");
 
-// align molecules
-single_aligner.align_molecules_kabsch(*mol_a, *mol_b, std::nullopt);
+        ciw::SingleAligner single_aligner(1, 1);
+        CHECK_THROWS_WITH(single_aligner.align_molecules_kabsch(*mol_a, *mol_b, std::nullopt),
+                          "Size of core is too large!");
+    };
 }
