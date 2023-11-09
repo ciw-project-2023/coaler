@@ -3,10 +3,22 @@
 //
 
 #pragma once
+#include "Forward.hpp"
+#include "PoseRegister.hpp"
+#include "Ligand.hpp"
+#include "PairwiseAlignment.hpp"
+#include "PoseRegisterBuilder.hpp"
 
 namespace MultiAlign {
-    class MultiAligner {
 
+    class MultiAligner {
+    public:
+
+    private:
+
+        std::vector<Ligand> m_ligands;
+        PairwisePoseRegisters m_poseRegisters;
+        PairwiseAlignment m_pairwiseAlignments;
     };
 
 }

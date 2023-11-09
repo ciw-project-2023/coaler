@@ -6,8 +6,12 @@
 
 namespace MultiAlign {
 
-    Ligand::Ligand(const std::set<PoseID> &poses, LigandID id)
-            : m_poses(poses), m_id(id) {
+    Ligand::Ligand(const RDKit::RWMol& mol,
+                   const std::set<PoseID> &poses, LigandID id)
+            : m_molecule(mol)
+            , m_poses(poses)
+            , m_id(id)
+    {
     }
 
     std::set<PoseID> Ligand::getPoses() const noexcept {
@@ -16,6 +20,10 @@ namespace MultiAlign {
 
     LigandID Ligand::getID() const noexcept {
         return m_id;
+    }
+
+    unsigned Ligand::getHeavyAtomSize() const noexcept{
+        return m_molecule.getNumHeavyAtoms();
     }
 
 }

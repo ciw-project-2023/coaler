@@ -8,7 +8,6 @@
 
 namespace MultiAlign {
 
-
     class LigandAlignmentAssembly {
 
     public:

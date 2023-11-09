@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Forward.hpp"
+#include <GraphMol/GraphMol.h>
 
 #include <set>
 
@@ -11,18 +12,20 @@ namespace MultiAlign {
 
     class Ligand {
     public:
-        Ligand(const std::set<PoseID> &poses,
+        Ligand(const RDKit::RWMol& mol,
+               const std::set<PoseID> &poses,
                LigandID id);
 
         [[nodiscard]] std::set<PoseID> getPoses() const noexcept;
 
         [[nodiscard]] LigandID getID() const noexcept;
 
+        unsigned getHeavyAtomSize() const noexcept;
+
     private:
         LigandID m_id;
-
+        RDKit::RWMol m_molecule;
         std::set<PoseID> m_poses;
-
     };
 
 }
