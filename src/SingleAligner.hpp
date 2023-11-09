@@ -11,7 +11,7 @@ namespace ciw {
      */
     class SingleAligner {
     public:
-        SingleAligner(int core_min_size, int core_max_size);
+        explicit SingleAligner(int core_min_size=0, int core_max_size=100);
 
         std::tuple<double, RDKit::ROMOL_SPTR>
         align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional <RDKit::ROMol> core);
