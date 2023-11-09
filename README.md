@@ -1,4 +1,4 @@
-# Coaler
+# coaler
 
 <img src="logo/coaler.png" width="150">
 
@@ -94,10 +94,10 @@ You can then proceed to the conan install step and it should pull rdkit from the
 
 ### Clone the client Repo
 
-<https://github.com/ciw-project-2023/RDKitSkeletonCPP>
+<https://github.com/ciw-project-2023/coaler>
 
 ```sh
-git clone https://github.com/ciw-project-2023/RDKitSkeletonCPP && cd RDKitSkeletonCPP
+git clone https://github.com/ciw-project-2023/coaler && cd coaler
 ```
 
 ### Install dependencies
@@ -134,13 +134,13 @@ In the output of `conan build` you should get an output containing lines like th
 ======== Calling build() ========
 conanfile.py (aligner/0.0.1): Calling build()
 conanfile.py (aligner/0.0.1): Running CMake.configure()
-conanfile.py (aligner/0.0.1): RUN: cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE="/home/niklas/projects/uni/RDKitSkeletonCPP/build/Debug/generators/conan_toolchain.cmake" -DCMAKE_INSTALL_PREFIX="/home/niklas/projects/uni/RDKitSkeletonCPP" -DCMAKE_POLICY_DEFAULT_CMP0091="NEW" -DCMAKE_BUILD_TYPE="Debug" "/home/niklas/projects/uni/RDKitSkeletonCPP"
+conanfile.py (aligner/0.0.1): RUN: cmake -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE="/home/niklas/projects/uni/coaler/build/Debug/generators/conan_toolchain.cmake" -DCMAKE_INSTALL_PREFIX="/home/niklas/projects/uni/coaler" -DCMAKE_POLICY_DEFAULT_CMP0091="NEW" -DCMAKE_BUILD_TYPE="Debug" "/home/niklas/projects/uni/coaler"
 ```
 
 Copy this part (it will be different for on your PC):
 
 ```
--DCMAKE_TOOLCHAIN_FILE="/home/niklas/projects/uni/RDKitSkeletonCPP/build/Debug/generators/conan_toolchain.cmake" -DCMAKE_INSTALL_PREFIX="/home/niklas/projects/uni/RDKitSkeletonCPP" `
+-DCMAKE_TOOLCHAIN_FILE="/home/niklas/projects/uni/coaler/build/Debug/generators/conan_toolchain.cmake" -DCMAKE_INSTALL_PREFIX="/home/niklas/projects/uni/coaler" `
 ```
 
 1. Open your Project in Clion and tell it that it is a CMake project
