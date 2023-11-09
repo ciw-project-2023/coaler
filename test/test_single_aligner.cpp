@@ -1,7 +1,7 @@
 #include "catch2/catch.hpp"
 
 #include "../src/SingleAligner.hpp"
-#include "../src/parsers/FileParserSmiles.hpp"
+#include "../src/parsers/FileParser.hpp"
 
 #include <cstdint>
 #include <filesystem>

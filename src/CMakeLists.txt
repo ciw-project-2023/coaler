@@ -1,7 +1,7 @@
 add_executable (coaler
         main.cpp
         SingleAligner.cpp
-        parsers/FileParserSmiles.cpp
+        parsers/FileParser.cpp
 )
 
 find_package(spdlog REQUIRED)

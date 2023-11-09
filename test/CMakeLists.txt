@@ -7,7 +7,7 @@ add_executable (Test
         test_single_aligner.cpp
         test_file_parser.cpp
         ${CMAKE_SOURCE_DIR}/src/SingleAligner.cpp # TODO: restructure this
-        ${CMAKE_SOURCE_DIR}/src/parsers/FileParserSmiles.cpp
+        ${CMAKE_SOURCE_DIR}/src/parsers/FileParser.cpp
 )
 
 # Include additional headers here
