@@ -6,4 +6,6 @@
 #include "../src/multialign/Forward.hpp"
 #include "../src/multialign/MultiAligner.hpp"
 
+TEST_CASE("test_multialigner", "[multialigner_tester]") {
 
+}

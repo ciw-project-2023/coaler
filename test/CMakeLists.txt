@@ -10,7 +10,11 @@ add_executable (Test test_runner.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/PosePair.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/PoseRegister.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/Ligand.cpp
-        LigandTester.cpp MutliAlignerTester.cpp)
+        LigandTester.cpp MutliAlignerTester.cpp
+        LigandPairTester.cpp
+        PosePairTester.cpp
+        LigandAlignmentAssemblyTester.cpp
+        PoseRegisterBuilderTester.cpp)
 
 
 target_include_directories(Test PUBLIC ${Boost_INCLUDE_DIRS})
