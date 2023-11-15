@@ -10,6 +10,7 @@ add_executable (Test test_runner.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/PosePair.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/PoseRegister.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/Ligand.cpp
+        ${CMAKE_SOURCE_DIR}/src/multialign/LigandPair.cpp
         LigandTester.cpp MutliAlignerTester.cpp
         LigandPairTester.cpp
         PosePairTester.cpp
