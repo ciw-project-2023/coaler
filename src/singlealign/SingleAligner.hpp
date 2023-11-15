@@ -34,6 +34,14 @@ namespace coaler {
          */
         void validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a, RDKit::ROMol mol_b) const;
 
+        /**
+         * Returns the mapping from the subgraph of the core inside molecule a to the subgraph of the core inside
+         * molecule b.
+         * @param core_structure
+         * @param mol_a
+         * @param mol_b
+         * @return
+         */
         RDKit::MatchVectType get_core_mapping(RDKit::ROMOL_SPTR core_structure, RDKit::ROMol mol_a, RDKit::ROMol mol_b);
 
         int core_min_size_{0};
