@@ -1,9 +1,8 @@
 #include <cstdint> // todo: is necessary when using RDKit libraries
 #include <spdlog/spdlog.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
-#include <GraphMol/FileParsers/MolSupplier.h>
 
-#include "SingleAligner.hpp"
+#include "singlealign/SingleAligner.hpp"
 
 int main(int argc, char *argv[])
 {

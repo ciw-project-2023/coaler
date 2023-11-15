@@ -1,6 +1,6 @@
 #include "catch2/catch.hpp"
 
-#include "../src/parsers/FileParser.hpp"
+#include "../src/parser/FileParser.hpp"
 
 #include <cstdint>
 #include <filesystem>
