@@ -14,8 +14,6 @@ namespace coaler {
         spdlog::debug("searching at: {}", std::filesystem::current_path().string());
 
         std::ifstream infile(file_path);
-
-        auto strin33 = std::filesystem::current_path().string() + file_path;
         if (!infile) {
             spdlog::error("file not found: {}", file_path);
 
