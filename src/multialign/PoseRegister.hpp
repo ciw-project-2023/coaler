@@ -8,8 +8,6 @@
 #include "PosePair.hpp"
 #include <unordered_map>
 
-class PoseRegisterTester;
-
 namespace MultiAlign
 {
     using RegisterMap = std::unordered_map<PosePair, double, PosePairHash>;
@@ -21,8 +19,6 @@ namespace MultiAlign
         PoseRegister(LigandID firstLigand,
                               LigandID secondLigand,
                               unsigned maxSize);
-
-        //PoseRegister();
 
         [[nodiscard]] unsigned getSize() const noexcept;
 
@@ -45,8 +41,6 @@ namespace MultiAlign
         unsigned m_maxSize;
         RegisterMap m_register;
         PosePair m_lowestScoringPosePair;
-
-        friend class ::PoseRegisterTester;
     };
 
 }
