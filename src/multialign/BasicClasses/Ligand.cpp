@@ -7,14 +7,14 @@
 namespace MultiAlign {
 
     Ligand::Ligand(const RDKit::RWMol& mol,
-                   const std::set<PoseID> &poses, LigandID id)
+                   const UniquePoseSet &poses, LigandID id)
             : m_molecule(mol)
             , m_poses(poses)
             , m_id(id)
     {
     }
 
-    std::set<PoseID> Ligand::getPoses() const noexcept {
+    UniquePoseSet Ligand::getPoses() const noexcept {
         return m_poses;
     }
 

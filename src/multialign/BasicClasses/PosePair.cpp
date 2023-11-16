@@ -4,11 +4,12 @@
 
 #include "PosePair.hpp"
 
+
 namespace MultiAlign
 {
-    PosePair::PosePair(const PoseID first, const PoseID second) {
+    PosePair::PosePair(const UniquePoseIdentifier first, const UniquePoseIdentifier second) {
         //swap values to rule out duplicates
-        assert(first != second);
+        assert(static_cast<const UniquePoseIdentifier>(first) != second);
         if(first > second){
             m_firstPose = second;
             m_secondPose = first;
@@ -23,11 +24,11 @@ namespace MultiAlign
         && this->m_secondPose == other.m_secondPose;
     }
 
-    const PoseID PosePair::getFirst() const noexcept {
+    const UniquePoseIdentifier PosePair::getFirst() const noexcept {
         return m_firstPose;
     }
 
-    const PoseID PosePair::getSecond() const noexcept {
+    const UniquePoseIdentifier PosePair::getSecond() const noexcept {
         return m_secondPose;
     }
 }

@@ -4,6 +4,7 @@
 
 #pragma once
 #include <boost/functional/hash.hpp>
+#include <unordered_set>
 
 namespace MultiAlign {
 
@@ -19,8 +20,10 @@ namespace MultiAlign {
     struct PosePairHash;
     struct LigandPairHash;
 
-
-    using PoseID = unsigned;
     using LigandID = unsigned;
+    using PoseID = unsigned;
+
+    using UniquePoseSet = std::unordered_set<UniquePoseIdentifier, UniquePoseIdentifierHash>;
+
 
 }

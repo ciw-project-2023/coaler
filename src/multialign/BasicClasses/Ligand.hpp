@@ -4,19 +4,20 @@
 #pragma once
 
 #include "Forward.hpp"
+#include "UniquePoseIdentifier.hpp"
 #include <GraphMol/GraphMol.h>
 
-#include <set>
+#include <unordered_set>
 
 namespace MultiAlign {
 
     class Ligand {
     public:
         Ligand(const RDKit::RWMol& mol,
-               const std::set<PoseID> &poses,
+               const UniquePoseSet &poses,
                LigandID id);
 
-        [[nodiscard]] std::set<PoseID> getPoses() const noexcept;
+        [[nodiscard]] UniquePoseSet getPoses() const noexcept;
 
         [[nodiscard]] LigandID getID() const noexcept;
 
@@ -25,7 +26,7 @@ namespace MultiAlign {
     private:
         LigandID m_id;
         RDKit::RWMol m_molecule;
-        std::set<PoseID> m_poses;
+        UniquePoseSet m_poses;
     };
 
 }

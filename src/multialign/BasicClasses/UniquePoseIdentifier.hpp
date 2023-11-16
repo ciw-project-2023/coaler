@@ -5,9 +5,14 @@
 #pragma once
 #include "Forward.hpp"
 
+namespace MultiAlign
+{
+
 struct UniquePoseIdentifier
 {
-public:
+    UniquePoseIdentifier()
+    {};
+
     UniquePoseIdentifier(LigandID ligandId,
                          PoseID ligandInternalPoseId)
                          : m_ligandId(ligandId)
@@ -15,7 +20,28 @@ public:
     {
     }
 
-private:
+    //TODO wtf
+    bool operator!=(const UniquePoseIdentifier &other) const{
+        return this->m_ligandId != other.m_ligandId
+        || this->m_ligandInternalPoseId != other.m_ligandInternalPoseId;
+    }
+
+    bool operator==(const UniquePoseIdentifier &other) const{
+        return !(*this != other);
+    }
+
+    bool operator>(const UniquePoseIdentifier &other) const
+    {
+        if(this->m_ligandId > other.m_ligandId)
+        {
+            return true;
+        }
+        else {
+            return this->m_ligandInternalPoseId >
+            other.m_ligandInternalPoseId;
+        }
+    }
+
     LigandID m_ligandId;
     PoseID m_ligandInternalPoseId;
 };
@@ -26,6 +52,7 @@ struct UniquePoseIdentifierHash
     {
         std::size_t seed = 0;
         std::string key = std::to_string(id.m_ligandId) + "-" +  std::to_string(id.m_ligandInternalPoseId);
-        return std::hash<std::string>(key);
-    }};
+        return std::hash<std::string>{}(key);
+    }
 };
+}

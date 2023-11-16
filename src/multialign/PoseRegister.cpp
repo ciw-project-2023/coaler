@@ -15,8 +15,13 @@ namespace MultiAlign {
     , m_first(firstLigand)
     , m_second(secondLigand)
     , m_lowestScoringPosePair(
-            std::numeric_limits<unsigned>::max(),
-            std::numeric_limits<unsigned>::max() - 1)
+            UniquePoseIdentifier(
+                    std::numeric_limits<unsigned>::max(),
+                    std::numeric_limits<unsigned>::max() - 1),
+            UniquePoseIdentifier(
+                    std::numeric_limits<unsigned>::max() -1,
+                    std::numeric_limits<unsigned>::max() )
+            )
     {
         assert(m_first != m_second);
     }

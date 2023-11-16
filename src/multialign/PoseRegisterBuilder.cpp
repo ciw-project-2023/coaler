@@ -36,9 +36,9 @@ namespace MultiAlign {
                 poseRegisters.emplace(
                         currentLigandPair,std::make_shared<PoseRegister>(PoseRegister(firstLigand, secondLigand, size)));
 
-                for(const PoseID firstLigandPose : ligands.at(firstLigand).getPoses())
+                for(const UniquePoseIdentifier firstLigandPose : ligands.at(firstLigand).getPoses())
                 {
-                    for(const PoseID secondLigandPose : ligands.at(secondLigand).getPoses())
+                    for(const UniquePoseIdentifier secondLigandPose : ligands.at(secondLigand).getPoses())
                     {
                         PosePair pair(firstLigandPose, secondLigandPose);
                         poseRegisters.at(currentLigandPair)->addPoses(

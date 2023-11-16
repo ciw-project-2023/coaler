@@ -4,23 +4,24 @@
 
 #pragma once
 #include "Forward.hpp"
+#include "UniquePoseIdentifier.hpp"
 
 namespace MultiAlign
 {
 
     class PosePair{
     public:
-        PosePair(PoseID first,
-                 PoseID second);
+        PosePair(UniquePoseIdentifier first,
+                 UniquePoseIdentifier second);
 
-        [[nodiscard]] const PoseID getFirst() const noexcept;
-        [[nodiscard]] const PoseID getSecond() const noexcept;
+        [[nodiscard]] const UniquePoseIdentifier getFirst() const noexcept;
+        [[nodiscard]] const UniquePoseIdentifier getSecond() const noexcept;
 
         bool operator==(const PosePair& other) const;
 
     private:
-        PoseID m_firstPose;
-        PoseID m_secondPose;
+        UniquePoseIdentifier m_firstPose;
+        UniquePoseIdentifier m_secondPose;
     };
 
     struct PosePairHash
@@ -28,10 +29,8 @@ namespace MultiAlign
         std::size_t operator()(const PosePair& pair) const
         {
             std::size_t seed = 0;
-
-            boost::hash_combine(seed,boost::hash_value(pair.getFirst()));
-            boost::hash_combine(seed,boost::hash_value(pair.getSecond()));
-
+            boost::hash_combine(seed, UniquePoseIdentifierHash()(pair.getFirst()));
+            boost::hash_combine(seed, UniquePoseIdentifierHash()(pair.getSecond()));
             return seed;
         }};
 

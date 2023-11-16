@@ -7,8 +7,12 @@
 #include "../src/multialign/BasicClasses/Forward.hpp"
 #include <GraphMol/SmilesParse/SmilesParse.h>
 
+using namespace MultiAlign;
 TEST_CASE("test_ligand", "[ligand_tester]") {
-    std::set<MultiAlign::PoseID> poses = {2,35,23};
+    std::unordered_set<MultiAlign::UniquePoseIdentifier> poses = {
+    UniquePoseIdentifier(0,0),
+    UniquePoseIdentifier(0,1),
+    UniquePoseIdentifier(0,2)};
     RDKit::RWMol mol = *RDKit::SmilesToMol("CN");
     MultiAlign::Ligand ligand(mol, poses, 1);
 
