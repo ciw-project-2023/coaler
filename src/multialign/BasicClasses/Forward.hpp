@@ -13,6 +13,9 @@ namespace MultiAlign {
 
     class PosePair;
 
+    struct UniquePoseIdentifier;
+    struct UniquePoseIdentifierHash;
+
     struct PosePairHash;
     struct LigandPairHash;
 
