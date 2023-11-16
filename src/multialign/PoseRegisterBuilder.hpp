@@ -3,12 +3,10 @@
 //
 #pragma once
 #include "Forward.hpp"
-#include "LigandPair.hpp"
-#include "Ligand.hpp"
+#include "BasicClasses/LigandPair.hpp"
+#include "BasicClasses/Ligand.hpp"
 
 namespace MultiAlign {
-
-    using PairwisePoseRegisters = std::unordered_map<LigandPair, PoseRegisterPtr, LigandPairHash>;
 
     class PoseRegisterBuilder {
 

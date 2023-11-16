@@ -4,7 +4,7 @@
 
 #include "catch2/catch.hpp"
 //#include "../src/multialign/Forward.hpp"
-#include "../src/multialign/LigandPair.hpp"
+#include "../src/multialign/BasicClasses/LigandPair.hpp"
 
 TEST_CASE("test_ligand_pair", "[ligand_pair_tester]") {
     MultiAlign::LigandPair pair1(0 ,1);

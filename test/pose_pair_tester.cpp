@@ -4,7 +4,7 @@
 
 #include "catch2/catch.hpp"
 #include "../src/multialign/Forward.hpp"
-#include "../src/multialign/PosePair.hpp"
+#include "../src/multialign/BasicClasses/PosePair.hpp"
 
 TEST_CASE("test_pose_pair", "[pose_pair_tester]") {
     MultiAlign::PosePair pair1(0 ,1);

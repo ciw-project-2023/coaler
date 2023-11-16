@@ -5,7 +5,7 @@
 #pragma once
 
 #include "Forward.hpp"
-#include "PosePair.hpp"
+#include "BasicClasses/PosePair.hpp"
 #include <unordered_map>
 
 namespace MultiAlign

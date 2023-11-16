@@ -7,10 +7,10 @@ file(GLOB TEST_SOURCES "*.hpp" "*.cpp")
 
 add_executable (Test test_runner.cpp
         pose_register_tester.cpp
-        ${CMAKE_SOURCE_DIR}/src/multialign/PosePair.cpp
+        ${CMAKE_SOURCE_DIR}/src/multialign/BasicClasses/PosePair.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/PoseRegister.cpp
-        ${CMAKE_SOURCE_DIR}/src/multialign/Ligand.cpp
-        ${CMAKE_SOURCE_DIR}/src/multialign/LigandPair.cpp
+        ${CMAKE_SOURCE_DIR}/src/multialign/BasicClasses/Ligand.cpp
+        ${CMAKE_SOURCE_DIR}/src/multialign/BasicClasses/LigandPair.cpp
         ligand_tester.cpp multi_aligner_tester.cpp
         ligand_pair_tester.cpp
         pose_pair_tester.cpp

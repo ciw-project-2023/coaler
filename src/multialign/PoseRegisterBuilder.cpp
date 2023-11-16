@@ -3,7 +3,7 @@
 //
 
 #include "PoseRegisterBuilder.hpp"
-#include "Ligand.hpp"
+#include "BasicClasses/Ligand.hpp"
 #include "PoseRegister.hpp"
 
 
@@ -21,7 +21,7 @@ namespace MultiAlign {
             const PairwiseAlignment &alignmentScores,
             const std::vector<Ligand>& ligands) noexcept {
 
-        PairwisePoseRegisters registerMatrix;
+        PairwisePoseRegisters poseRegisters;
 
         for(LigandID firstLigand = 0; firstLigand < ligands.size(); firstLigand++)
         {
@@ -33,7 +33,7 @@ namespace MultiAlign {
                 }
                 unsigned size = calculateRegisterSizeForLigand(ligands.at(firstLigand), ligands.at(secondLigand));
                 LigandPair currentLigandPair(firstLigand, secondLigand);
-                registerMatrix.emplace(
+                poseRegisters.emplace(
                         currentLigandPair,std::make_shared<PoseRegister>(PoseRegister(firstLigand, secondLigand, size)));
 
                 for(const PoseID firstLigandPose : ligands.at(firstLigand).getPoses())
@@ -41,12 +41,13 @@ namespace MultiAlign {
                     for(const PoseID secondLigandPose : ligands.at(secondLigand).getPoses())
                     {
                         PosePair pair(firstLigandPose, secondLigandPose);
-                        registerMatrix.at(currentLigandPair)->addPoses(
+                        poseRegisters.at(currentLigandPair)->addPoses(
                                 pair,
                                 alignmentScores.at(pair));
                     }
                 }
             }
         }
+        return poseRegisters;
     }
 }

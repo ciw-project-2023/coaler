@@ -5,7 +5,6 @@
 #pragma once
 #include "Forward.hpp"
 #include "PoseRegister.hpp"
-#include "Ligand.hpp"
 #include "PoseRegisterBuilder.hpp"
 
 namespace MultiAlign {

@@ -4,7 +4,7 @@
 
 #include "catch2/catch.hpp"
 #include "../src/multialign/Forward.hpp"
-#include "../src/multialign/Ligand.hpp"
+#include "../src/multialign/BasicClasses/Forward.hpp"
 #include <GraphMol/SmilesParse/SmilesParse.h>
 
 TEST_CASE("test_ligand", "[ligand_tester]") {

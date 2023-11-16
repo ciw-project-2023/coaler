@@ -3,7 +3,7 @@
 //
 
 #include "PoseRegister.hpp"
-#include "PosePair.hpp"
+#include "BasicClasses/Forward.hpp"
 
 namespace MultiAlign {
 

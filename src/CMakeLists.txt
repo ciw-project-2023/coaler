@@ -5,11 +5,20 @@ add_executable (aligner
         multialign/PoseRegister.cpp
         multialign/PoseRegister.hpp
         multialign/Forward.hpp
-        multialign/Ligand.cpp
-        multialign/Ligand.hpp
-        multialign/PosePair.cpp
-        multialign/PosePair.hpp multialign/MultiAligner.cpp multialign/MultiAligner.hpp multialign/LigandAlignmentAssembly.cpp multialign/LigandAlignmentAssembly.hpp multialign/PoseRegisterBuilder.cpp multialign/PoseRegisterBuilder.hpp multialign/LigandPair.cpp multialign/LigandPair.hpp
-)
+        multialign/PoseRegisterBuilder.hpp
+        multialign/BasicClasses/LigandPair.cpp
+        multialign/BasicClasses/LigandPair.hpp
+        multialign/BasicClasses/Forward.hpp
+        multialign/BasicClasses/Ligand.cpp
+        multialign/BasicClasses/Ligand.hpp
+        multialign/BasicClasses/PosePair.cpp
+        multialign/BasicClasses/PosePair.hpp
+        multialign/MultiAligner.cpp
+        multialign/MultiAligner.hpp
+        multialign/LigandAlignmentAssembly.cpp
+        multialign/LigandAlignmentAssembly.hpp
+        multialign/PoseRegisterBuilder.cpp
+        )
 
 target_link_libraries(aligner PUBLIC "-Wl,--disable-new-dtags")
 
