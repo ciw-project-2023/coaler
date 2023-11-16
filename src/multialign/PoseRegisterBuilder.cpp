@@ -40,9 +40,10 @@ namespace MultiAlign {
                 {
                     for(const PoseID secondLigandPose : ligands.at(secondLigand).getPoses())
                     {
+                        PosePair pair(firstLigandPose, secondLigandPose);
                         registerMatrix.at(currentLigandPair)->addPoses(
-                                PosePair(firstLigandPose, secondLigandPose),
-                                alignmentScores.getValue(firstLigandPose, secondLigandPose));
+                                pair,
+                                alignmentScores.at(pair));
                     }
                 }
             }

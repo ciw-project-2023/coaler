@@ -5,9 +5,7 @@
 #pragma once
 #include <cassert>
 #include <boost/functional/hash.hpp>
-#include "boost/numeric/ublas/triangular.hpp"
-//#include "LigandAlignmentAssembly.hpp"
-#include "PairwiseAlignment.hpp"
+#include <unordered_map>
 
 namespace MultiAlign
 {
@@ -19,11 +17,13 @@ namespace MultiAlign
     class LigandAlignmentAssembly;
     class MultiAligner;
     class PairwiseAlignment;
-    class PosePair;
     class PoseRegisterBuilder; */
+    class PosePair;
+    struct PosePairHash;
 
     class PoseRegister;
     using PoseRegisterPtr = std::shared_ptr<PoseRegister>;
+    using PairwiseAlignment = std::unordered_map<PosePair, double, PosePairHash>;
 
 
 

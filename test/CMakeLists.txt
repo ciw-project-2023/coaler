@@ -6,16 +6,16 @@ include_directories (${TEST_SOURCE_DIR}/src)
 file(GLOB TEST_SOURCES "*.hpp" "*.cpp")
 
 add_executable (Test test_runner.cpp
-        PoseRegisterTester.cpp
+        pose_register_tester.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/PosePair.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/PoseRegister.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/Ligand.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/LigandPair.cpp
-        LigandTester.cpp MutliAlignerTester.cpp
-        LigandPairTester.cpp
-        PosePairTester.cpp
-        LigandAlignmentAssemblyTester.cpp
-        PoseRegisterBuilderTester.cpp)
+        ligand_tester.cpp multi_aligner_tester.cpp
+        ligand_pair_tester.cpp
+        pose_pair_tester.cpp
+        ligand_alignment_assembly_tester.cpp
+        pose_register_builder_tester.cpp)
 
 
 target_include_directories(Test PUBLIC ${Boost_INCLUDE_DIRS})

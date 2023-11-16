@@ -6,7 +6,6 @@
 #include "Forward.hpp"
 #include "PoseRegister.hpp"
 #include "Ligand.hpp"
-#include "PairwiseAlignment.hpp"
 #include "PoseRegisterBuilder.hpp"
 
 namespace MultiAlign {
