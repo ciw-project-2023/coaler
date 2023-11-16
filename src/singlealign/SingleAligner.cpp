@@ -11,8 +11,8 @@
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 
 namespace coaler {
-    SingleAligner::SingleAligner(int core_min_size, int core_max_size) : core_min_size_{core_min_size},
-                                                                         core_max_size_{core_max_size} {}
+    SingleAligner::SingleAligner(int core_min_size, float core_max_percentage) :
+            core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage} {}
 
     std::tuple<double, RDKit::ROMOL_SPTR>
     SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional<RDKit::ROMol> core) {
@@ -45,8 +45,31 @@ namespace coaler {
             spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
         }
 
-        validate_core_structure(core_structure);
+        validate_core_structure_size(core_structure, mol_a, mol_b);
 
+        RDKit::MatchVectType mapping = get_core_mapping(core_structure, mol_a, mol_b);
+        double rmsd = RDKit::MolAlign::alignMol(mol_a, mol_b, -1, -1, &mapping);
+
+        spdlog::info("Molecules are align with a score of {}", rmsd);
+        return std::make_tuple(rmsd, core_structure);
+    }
+
+    void
+    SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a, RDKit::ROMol mol_b) const {
+        if (core->getNumAtoms() < core_min_size_) {
+            spdlog::error("Size of core is too small!");
+            throw std::runtime_error("Size of core is too small!");
+        }
+
+        float core_percentage_to_mol_a = (core->getNumAtoms() * 100) / mol_a.getNumAtoms();
+        float core_percentage_to_mol_b = (core->getNumAtoms() * 100) / mol_b.getNumAtoms();
+        if (core_percentage_to_mol_a > core_max_percentage_ || core_percentage_to_mol_b > core_max_percentage_) {
+            spdlog::warn("Size of core is near the size of the input molecules!");
+        }
+    }
+
+    RDKit::MatchVectType
+    SingleAligner::get_core_mapping(RDKit::ROMOL_SPTR core_structure, RDKit::ROMol mol_a, RDKit::ROMol mol_b) {
         // find core inside molecules
         RDKit::MatchVectType match_vect_a;
         RDKit::SubstructMatch(mol_a, *core_structure, match_vect_a);
@@ -54,27 +77,16 @@ namespace coaler {
         RDKit::MatchVectType match_vect_b;
         RDKit::SubstructMatch(mol_b, *core_structure, match_vect_b);
 
-        // zip second value of match_vect_a and match_vect_b into MatchVectType
-        RDKit::MatchVectType match_vect;
+        if (match_vect_a.size() != match_vect_b.size()) {
+            spdlog::error("Core is not a common core structure of molecule a and molecule b!");
+            throw std::runtime_error("Core is not a common core structure of molecule a and molecule b!");
+        }
+
+        RDKit::MatchVectType mapping;
         for (int i = 0; i < match_vect_a.size(); i++) {
-            match_vect.push_back(std::make_pair(match_vect_a[i].second, match_vect_b[i].second));
+            mapping.push_back(std::make_pair(match_vect_a[i].second, match_vect_b[i].second));
         }
-
-        double rmsd = RDKit::MolAlign::alignMol(mol_a, mol_b, -1, -1, &match_vect);
-
-        spdlog::info("Molecules are align with a score of {}", rmsd);
-        return std::make_tuple(rmsd, core_structure);
-    }
-
-    void SingleAligner::validate_core_structure(RDKit::ROMOL_SPTR core) const {
-        if (core->getNumAtoms() < core_min_size_) {
-            spdlog::error("Size of core is too small!");
-            throw std::runtime_error("Size of core is too small!");
-        }
-        if (core->getNumAtoms() > core_max_size_) {
-            spdlog::error("Size of core is too large!");
-            throw std::runtime_error("Size of core is too large!");
-        }
+        return mapping;
     }
 
 } // coaler

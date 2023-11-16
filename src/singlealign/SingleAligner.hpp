@@ -3,6 +3,7 @@
 #include <cstdint> // todo: is necessary when using RDKit libraries
 
 #include <GraphMol/ROMol.h>
+#include <GraphMol/Substruct/SubstructMatch.h>
 
 namespace coaler {
 
@@ -11,7 +12,7 @@ namespace coaler {
      */
     class SingleAligner {
     public:
-        explicit SingleAligner(int core_min_size = 0, int core_max_size = 100);
+        explicit SingleAligner(int core_min_size = 0, float core_max_percentage = 80);
 
         /**
          * Computes the alignment of two molecules with a common core structure using the Kabsch' algorithm.
@@ -31,10 +32,20 @@ namespace coaler {
          * Validates the core structure.
          * @param core
          */
-        void validate_core_structure(RDKit::ROMOL_SPTR core) const;
+        void validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a, RDKit::ROMol mol_b) const;
+
+        /**
+         * Returns the mapping from the subgraph of the core inside molecule a to the subgraph of the core inside
+         * molecule b.
+         * @param core_structure
+         * @param mol_a
+         * @param mol_b
+         * @return
+         */
+        RDKit::MatchVectType get_core_mapping(RDKit::ROMOL_SPTR core_structure, RDKit::ROMol mol_a, RDKit::ROMol mol_b);
 
         int core_min_size_{0};
-        int core_max_size_{0};
+        float core_max_percentage_{0};
     };
 
 } // coaler
