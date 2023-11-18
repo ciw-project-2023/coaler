@@ -19,11 +19,14 @@ namespace coaler {
          * If the core structure is not set, then the MCS of the two molecules is calculated.
          * @param mol_a
          * @param mol_b
+         * @param pos_id_
+         * @param pos_id_
          * @param core: optional set core structure.
          * @return RMDS score and the core structure of the molecules.
          */
-        std::tuple<double, RDKit::ROMOL_SPTR>
-        align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional<RDKit::ROMol> core);
+        double
+        align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a, unsigned int pos_id_b,
+                               std::optional<RDKit::ROMol> core);
 
 
         // TODO: multiple void align_molecules_* functions

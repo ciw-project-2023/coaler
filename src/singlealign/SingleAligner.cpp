@@ -6,26 +6,60 @@
 
 #include <GraphMol/MolAlign/AlignMolecules.h>
 #include <GraphMol/FMCS/FMCS.h>
-#include <GraphMol/Substruct/SubstructMatch.h>
 #include <GraphMol/DistGeomHelpers/Embedder.h>
+#include <GraphMol/Substruct/SubstructMatch.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
+#include <GraphMol/SmilesParse/SmilesParse.h>
 
 namespace coaler {
+
+    namespace {
+        std::tuple<RDKit::ROMol, RDKit::ROMol>
+        get_molecule_conformers(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
+                                unsigned int pos_id_b) {
+            auto smarts_a = MolToSmarts(mol_a);
+            auto smarts_b = MolToSmarts(mol_b);
+
+            RDKit::RWMol *mol_conf_a = RDKit::SmilesToMol(smarts_a);
+            RDKit::RWMol *mol_conf_b = RDKit::SmilesToMol(smarts_b);
+            RDKit::ROMol mol_one_conf_a = *mol_conf_a;
+            RDKit::ROMol mol_one_conf_b = *mol_conf_b;
+
+            RDKit::MolOps::addHs(mol_one_conf_a);
+            RDKit::MolOps::addHs(mol_one_conf_b);
+
+            auto conf_a = mol_a.getConformer(pos_id_a);
+            auto conf_b = mol_a.getConformer(pos_id_b);
+            mol_one_conf_a.addConformer(&conf_a);
+            mol_one_conf_b.addConformer(&conf_b);
+
+//            std::vector<unsigned int> conf_mol_a;
+//            std::vector<unsigned int> conf_mol_b;
+//
+//            conf_mol_a.emplace_back(pos_id_a);
+//            conf_mol_b.emplace_back(pos_id_b);
+//
+//            RDKit::MolAlign::alignMolConformers(mol_one_conf_a, nullptr, &conf_mol_a);
+//            RDKit::MolAlign::alignMolConformers(mol_one_conf_b, nullptr, &conf_mol_b);
+//
+//
+  //          throw std::runtime_error("CONFS" + std::to_string(mol_one_conf_a.getNumConformers()));
+
+            std::cout << "TEST" << std::endl;
+
+            auto tuple = std::make_tuple(mol_one_conf_a, mol_one_conf_b);
+
+            return tuple;
+        }
+    }
+
     SingleAligner::SingleAligner(int core_min_size, float core_max_percentage) :
             core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage} {}
 
-    std::tuple<double, RDKit::ROMOL_SPTR>
-    SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional<RDKit::ROMol> core) {
-        /*TODO: Add more conformeres to the molecules with RDKit::DGeomHelpers::EmbedMultipleConfs or Multi-Align
-         * has to do these steps in advance, has to be discussed with the group
-         * */
+    double
+    SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
+                                          unsigned int pos_id_b, std::optional<RDKit::ROMol> core) {
         spdlog::info("Start single alignment with Kabsch' algorithm");
-
-        RDKit::MolOps::addHs(mol_a);
-        RDKit::MolOps::addHs(mol_b);
-
-        RDKit::DGeomHelpers::EmbedMolecule(mol_a);
-        RDKit::DGeomHelpers::EmbedMolecule(mol_b);
 
         RDKit::ROMOL_SPTR core_structure;
         // calculate mcs if no core structure
@@ -47,11 +81,35 @@ namespace coaler {
 
         validate_core_structure_size(core_structure, mol_a, mol_b);
 
-        RDKit::MatchVectType mapping = get_core_mapping(core_structure, mol_a, mol_b);
-        double rmsd = RDKit::MolAlign::alignMol(mol_a, mol_b, -1, -1, &mapping);
+
+
+        // TODO: change
+        auto smarts_a = MolToSmarts(mol_a);
+        auto smarts_b = MolToSmarts(mol_b);
+        RDKit::RWMol *mol_conf_a = RDKit::SmilesToMol(smarts_a);
+        RDKit::RWMol *mol_conf_b = RDKit::SmilesToMol(smarts_b);
+        RDKit::ROMol mol_one_conf_a = *mol_conf_a;
+        RDKit::ROMol mol_one_conf_b = *mol_conf_b;
+        RDKit::MolOps::addHs(mol_one_conf_a);
+        RDKit::MolOps::addHs(mol_one_conf_b);
+        auto conf_a = mol_a.getConformer(pos_id_a);
+        auto conf_b = mol_a.getConformer(pos_id_b);
+        mol_one_conf_a.addConformer(&conf_a);
+        mol_one_conf_b.addConformer(&conf_b);
+        // TODO: end change
+
+        //auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
+
+
+        RDKit::MatchVectType mapping = get_core_mapping(core_structure, mol_one_conf_a, mol_one_conf_b);
+
+        double rmsd = RDKit::MolAlign::alignMol(mol_one_conf_a, mol_one_conf_b,-1, -1, &mapping);
+
+        //double rmsd = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules),
+        //                                        -1, -1, &mapping);
 
         spdlog::info("Molecules are align with a score of {}", rmsd);
-        return std::make_tuple(rmsd, core_structure);
+        return rmsd;
     }
 
     void
