@@ -28,6 +28,7 @@ foreach(lib IN LISTS rdkitlibs)
 endforeach()
 
 target_link_libraries(coaler PUBLIC spdlog::spdlog)
+target_link_libraries(coaler PUBLIC ${Boost_LIBRARIES})
 
 install(TARGETS coaler DESTINATION "."
         RUNTIME DESTINATION bin
