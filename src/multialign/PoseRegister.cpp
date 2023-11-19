@@ -5,8 +5,19 @@
 #include "PoseRegister.hpp"
 #include "BasicClasses/Forward.hpp"
 
-namespace MultiAlign {
+namespace{
+    struct PosePairScoreGreater{
+        bool operator()(
+                const PosePairAndScore lhs,
+                const PosePairAndScore rhs
+                ){
+            return lhs.second > rhs.second;
+        }
+    };
 
+}
+
+namespace MultiAlign {
 
     PoseRegister::PoseRegister(LigandID firstLigand,
                                LigandID secondLigand,
@@ -14,14 +25,6 @@ namespace MultiAlign {
     : m_maxSize(maxSize)
     , m_first(firstLigand)
     , m_second(secondLigand)
-    , m_lowestScoringPosePair(
-            UniquePoseIdentifier(
-                    std::numeric_limits<unsigned>::max(),
-                    std::numeric_limits<unsigned>::max() - 1),
-            UniquePoseIdentifier(
-                    std::numeric_limits<unsigned>::max() -1,
-                    std::numeric_limits<unsigned>::max() )
-            )
     {
         assert(m_first != m_second);
     }
@@ -47,42 +50,25 @@ namespace MultiAlign {
     bool PoseRegister::addPoses(const PosePair pair, const double score) {
         if(m_register.size() < m_maxSize)
         {
-            m_register.insert({pair, score});
-            updateLowestScoringPosePair(); //NOTE can also check directly
+            m_register.emplace_back(pair, score);
+            std::sort(m_register.begin(),
+                      m_register.end(),
+                      PosePairScoreGreater());
             return true;
         }
-        else if(score > m_register.at(m_lowestScoringPosePair))
+        else if(score > m_register.back().second)
         {
-            m_register.erase(m_lowestScoringPosePair);
-            m_register.insert({pair, score});
-            updateLowestScoringPosePair();
-            return true;
+            m_register.pop_back();
+            m_register.emplace_back(pair, score);
+            std::sort(m_register.begin(),
+                      m_register.end(),
+                      PosePairScoreGreater());
         }
         return false;
     }
 
-    void PoseRegister::updateLowestScoringPosePair() {
-        // if only one pose pair in register its automatically the lowest
-        if(m_register.size() == 1)
-        {
-            m_lowestScoringPosePair = m_register.begin()->first;
-            return;
-        }
-
-        //else find min pair
-        auto min = m_register.begin();
-        for(auto iter = m_register.begin(); iter != m_register.end(); iter++)
-        {
-            if(iter->second < min->second)
-            {
-                min = iter;
-            }
-        }
-        m_lowestScoringPosePair = min->first;
-    }
-
-    PosePair PoseRegister::getMinimumPosePairInRegister() {
-        return m_lowestScoringPosePair;
+    PosePair PoseRegister::getHighestScoringPair() {
+        return m_register.at(0).first;
     }
 
 }

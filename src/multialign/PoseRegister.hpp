@@ -8,6 +8,9 @@
 #include "BasicClasses/PosePair.hpp"
 #include <unordered_map>
 
+using PosePairAndScore = std::pair<MultiAlign::PosePair, double>;
+
+
 namespace MultiAlign
 {
     using RegisterMap = std::unordered_map<PosePair, double, PosePairHash>;
@@ -30,17 +33,14 @@ namespace MultiAlign
 
         bool addPoses(PosePair pair, double score);
 
-        PosePair getMinimumPosePairInRegister();
+        PosePair getHighestScoringPair();
 
     private:
-
-        void updateLowestScoringPosePair();
 
         LigandID m_first;
         LigandID m_second;
         unsigned m_maxSize;
-        RegisterMap m_register;
-        PosePair m_lowestScoringPosePair;
+        std::vector<PosePairAndScore> m_register;
     };
 
 }
