@@ -9,7 +9,7 @@
 
 using namespace MultiAlign;
 TEST_CASE("test_ligand", "[ligand_tester]") {
-    std::unordered_set<MultiAlign::UniquePoseIdentifier> poses = {
+    UniquePoseSet poses = {
     UniquePoseIdentifier(0,0),
     UniquePoseIdentifier(0,1),
     UniquePoseIdentifier(0,2)};
