@@ -1,23 +1,22 @@
 #include "SingleAligner.hpp"
 
-#include <vector>
-
+#include <GraphMol/DistGeomHelpers/Embedder.h>
+#include <GraphMol/FMCS/FMCS.h>
+#include <GraphMol/MolAlign/AlignMolecules.h>
+#include <GraphMol/SmilesParse/SmartsWrite.h>
+#include <GraphMol/Substruct/SubstructMatch.h>
 #include <spdlog/spdlog.h>
 
-#include <GraphMol/MolAlign/AlignMolecules.h>
-#include <GraphMol/FMCS/FMCS.h>
-#include <GraphMol/Substruct/SubstructMatch.h>
-#include <GraphMol/DistGeomHelpers/Embedder.h>
-#include <GraphMol/SmilesParse/SmartsWrite.h>
+#include <vector>
 
 namespace coaler {
-    SingleAligner::SingleAligner(int core_min_size, float core_max_percentage) :
-            core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage} {}
+    SingleAligner::SingleAligner(int core_min_size, float core_max_percentage)
+        : core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage} {}
 
-    std::tuple<double, RDKit::ROMOL_SPTR>
-    SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional<RDKit::ROMol> core) {
-        /*TODO: Add more conformeres to the molecules with RDKit::DGeomHelpers::EmbedMultipleConfs or Multi-Align
-         * has to do these steps in advance, has to be discussed with the group
+    std::tuple<double, RDKit::ROMOL_SPTR> SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b,
+                                                                                std::optional<RDKit::ROMol> core) {
+        /*TODO: Add more conformeres to the molecules with RDKit::DGeomHelpers::EmbedMultipleConfs or
+         * Multi-Align has to do these steps in advance, has to be discussed with the group
          * */
         spdlog::info("Start single alignment with Kabsch' algorithm");
 
@@ -54,8 +53,7 @@ namespace coaler {
         return std::make_tuple(rmsd, core_structure);
     }
 
-    void
-    SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a, RDKit::ROMol mol_b) const {
+    void SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a, RDKit::ROMol mol_b) const {
         if (core->getNumAtoms() < core_min_size_) {
             spdlog::error("Size of core is too small!");
             throw std::runtime_error("Size of core is too small!");
@@ -68,8 +66,7 @@ namespace coaler {
         }
     }
 
-    RDKit::MatchVectType
-    SingleAligner::get_core_mapping(RDKit::ROMOL_SPTR core_structure, RDKit::ROMol mol_a, RDKit::ROMol mol_b) {
+    RDKit::MatchVectType SingleAligner::get_core_mapping(RDKit::ROMOL_SPTR core_structure, RDKit::ROMol mol_a, RDKit::ROMol mol_b) {
         // find core inside molecules
         RDKit::MatchVectType match_vect_a;
         RDKit::SubstructMatch(mol_a, *core_structure, match_vect_a);
@@ -89,4 +86,4 @@ namespace coaler {
         return mapping;
     }
 
-} // coaler
+}  // namespace coaler
