@@ -8,13 +8,23 @@ namespace MultiAlign
 {
     MultiAligner::MultiAligner(
             const std::vector<RDKit::RWMol>& molecules,
-            const RDKit::MCSResult& core) {
-
-    }
+            const RDKit::MCSResult& core)
+            : m_molecules(molecules)
+            , m_core(core)
+            {
+            }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    MultiAlignerResult MultiAligner::alignMolecules() {
+    MultiAlignerResult MultiAligner::alignMolecules(){
+        //PairwiseAlignment allPosesAlignmentScores = SingleAligner(...);
+
+        //generate registers
+
+        // build starting ensembles from registers
+
+        //optimize ensembles
+
         return MultiAlignerResult();
     }
 }

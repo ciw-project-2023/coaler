@@ -22,7 +22,10 @@ namespace MultiAlign {
 
     private:
 
-        std::vector<Ligand> m_ligands;
+        //singleAligner --> im constructior übergeben
+
+        RDKit::MCSResult m_core;
+        std::vector<RDKit::RWMol> m_molecules;
         PairwisePoseRegisters m_poseRegisters;
         PairwiseAlignment m_pairwiseAlignments;
     };

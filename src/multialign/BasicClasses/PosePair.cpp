@@ -9,7 +9,7 @@ namespace MultiAlign
 {
     PosePair::PosePair(const UniquePoseIdentifier first, const UniquePoseIdentifier second) {
         //swap values to rule out duplicates
-        assert(static_cast<const UniquePoseIdentifier>(first) != second);
+        assert(first != second);
         if(first > second){
             m_firstPose = second;
             m_secondPose = first;
