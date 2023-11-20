@@ -6,11 +6,19 @@
 #include "Forward.hpp"
 #include "PoseRegister.hpp"
 #include "PoseRegisterBuilder.hpp"
+#include "GraphMol/FMCS/FMCS.h"
+#include "MultiAlignerResult.hpp"
 
 namespace MultiAlign {
 
     class MultiAligner {
     public:
+
+        MultiAligner(
+                const std::vector<RDKit::RWMol>& molecules,
+                const RDKit::MCSResult& core);
+
+        MultiAlignerResult alignMolecules();
 
     private:
 

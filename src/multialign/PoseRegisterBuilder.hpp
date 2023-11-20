@@ -10,8 +10,9 @@ namespace MultiAlign {
 
     class PoseRegisterBuilder {
 
-        static PairwisePoseRegisters buildPoseRegisters(const PairwiseAlignment& alignmentScores,
-                                                       const std::vector<Ligand>& ligands) noexcept;
+        static PairwisePoseRegisters buildPoseRegisters(
+                const PairwiseAlignment& alignmentScores,
+                const std::vector<Ligand>& ligands) noexcept;
 
     };
 

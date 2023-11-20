@@ -18,7 +18,7 @@ add_executable (aligner
         multialign/LigandAlignmentAssembly.cpp
         multialign/LigandAlignmentAssembly.hpp
         multialign/PoseRegisterBuilder.cpp
-        multialign/BasicClasses/UniquePoseIdentifier.hpp)
+        multialign/BasicClasses/UniquePoseIdentifier.hpp multialign/MultiAlignerResult.hpp)
 
 target_link_libraries(aligner PUBLIC "-Wl,--disable-new-dtags")
 
