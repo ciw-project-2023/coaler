@@ -1,9 +1,9 @@
 #pragma once
 
-#include <cstdint> // todo: is necessary when using RDKit libraries
-
 #include <GraphMol/ROMol.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
+
+#include <cstdint>  // todo: is necessary when using RDKit libraries
 
 namespace coaler {
 
@@ -11,7 +11,7 @@ namespace coaler {
      * @brief This class is responsible for alignments of two molecules.
      */
     class SingleAligner {
-    public:
+      public:
         explicit SingleAligner(int core_min_size = 0, float core_max_percentage = 80);
 
         /**
@@ -22,12 +22,10 @@ namespace coaler {
          * @param core: optional set core structure.
          * @return RMDS score and the core structure of the molecules.
          */
-        std::tuple<double, RDKit::ROMOL_SPTR>
-        align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional<RDKit::ROMol> core);
-
+        std::tuple<double, RDKit::ROMOL_SPTR> align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional<RDKit::ROMol> core);
 
         // TODO: multiple void align_molecules_* functions
-    private:
+      private:
         /**
          * Validates the core structure.
          * @param core
@@ -48,4 +46,4 @@ namespace coaler {
         float core_max_percentage_{0};
     };
 
-} // coaler
+}  // namespace coaler

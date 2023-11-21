@@ -1,10 +1,13 @@
 #include "FileParser.hpp"
-#include "FileNotFoundException.hpp"
-#include <vector>
-#include <spdlog/spdlog.h>
-#include <filesystem>
+
 #include <GraphMol/RWMol.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
+#include <spdlog/spdlog.h>
+
+#include <filesystem>
+#include <vector>
+
+#include "FileNotFoundException.hpp"
 
 namespace coaler {
 
@@ -30,4 +33,4 @@ namespace coaler {
 
         return result;
     }
-}
+}  // namespace coaler

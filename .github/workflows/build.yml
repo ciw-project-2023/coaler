@@ -9,6 +9,18 @@ env:
   CONAN_SERVER_PASSWORD: VZKhzh2v5nCnijAS3A8R
   TARGET: Debug
 jobs:
+  format:
+    name: check formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run clang-format
+        uses: jidicula/clang-format-action@v4.11.0
+        with:
+          clang-format-version: '16'
+          check-path: 'src'
+          fallback-style: 'Google' #
+
   test:
     runs-on: ubuntu-latest
     steps:
