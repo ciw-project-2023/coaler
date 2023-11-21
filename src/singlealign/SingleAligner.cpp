@@ -12,30 +12,8 @@
 #include <GraphMol/SmilesParse/SmilesParse.h>
 
 namespace coaler {
-
-    namespace {
-        std::tuple<RDKit::ROMol, RDKit::ROMol>
-        get_molecule_conformers(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
-                                unsigned int pos_id_b) {
-            auto smarts_a = MolToSmarts(mol_a);
-            auto smarts_b = MolToSmarts(mol_b);
-
-            RDKit::RWMol *mol_conf_a = RDKit::SmilesToMol(smarts_a);
-            RDKit::RWMol *mol_conf_b = RDKit::SmilesToMol(smarts_b);
-
-            auto conf_a = RDKit::Conformer{mol_a.getConformer(pos_id_a)};
-            auto conf_b = RDKit::Conformer{mol_b.getConformer(pos_id_b)};
-
-            mol_conf_a->addConformer(&conf_a, true);
-            mol_conf_b->addConformer(&conf_b, true);
-
-            auto tuple = std::make_tuple(*mol_conf_a, *mol_conf_b);
-            return tuple;
-        }
-    }
-
-    SingleAligner::SingleAligner(int core_min_size, float core_max_percentage) :
-            core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage} {}
+    SingleAligner::SingleAligner(int core_min_size, float core_max_percentage, bool with_hs) :
+            core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage}, with_hs_{with_hs} {}
 
     double
     SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
@@ -50,7 +28,7 @@ namespace coaler {
 
         auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
         RDKit::MatchVectType mapping = get_core_mapping(core_structure, std::get<0>(molecules), std::get<1>(molecules));
-        double rmsd = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules),-1, -1, &mapping);
+        double rmsd = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
 
         spdlog::info("Molecules are align with a score of {}", rmsd);
         return rmsd;
@@ -89,6 +67,30 @@ namespace coaler {
             mapping.push_back(std::make_pair(match_vect_a[i].second, match_vect_b[i].second));
         }
         return mapping;
+    }
+
+    std::tuple<RDKit::ROMol, RDKit::ROMol>
+    SingleAligner::get_molecule_conformers(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
+                                           unsigned int pos_id_b) {
+        auto smarts_a = MolToSmarts(mol_a);
+        auto smarts_b = MolToSmarts(mol_b);
+
+        RDKit::RWMol *mol_conf_a = RDKit::SmilesToMol(smarts_a);
+        RDKit::RWMol *mol_conf_b = RDKit::SmilesToMol(smarts_b);
+
+        if (with_hs_) {
+            RDKit::MolOps::addHs(*mol_conf_a);
+            RDKit::MolOps::addHs(*mol_conf_b);
+        }
+
+        auto conf_a = RDKit::Conformer{mol_a.getConformer(pos_id_a)};
+        auto conf_b = RDKit::Conformer{mol_b.getConformer(pos_id_b)};
+
+        mol_conf_a->addConformer(&conf_a, true);
+        mol_conf_b->addConformer(&conf_b, true);
+
+        auto tuple = std::make_tuple(*mol_conf_a, *mol_conf_b);
+        return tuple;
     }
 
 } // coaler
