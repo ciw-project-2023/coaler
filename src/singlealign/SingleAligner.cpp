@@ -53,7 +53,8 @@ namespace coaler {
         return std::make_tuple(rmsd, core_structure);
     }
 
-    void SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a, RDKit::ROMol mol_b) const {
+    void SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a,
+                                                     RDKit::ROMol mol_b) const {
         if (core->getNumAtoms() < core_min_size_) {
             spdlog::error("Size of core is too small!");
             throw std::runtime_error("Size of core is too small!");
@@ -66,7 +67,8 @@ namespace coaler {
         }
     }
 
-    RDKit::MatchVectType SingleAligner::get_core_mapping(RDKit::ROMOL_SPTR core_structure, RDKit::ROMol mol_a, RDKit::ROMol mol_b) {
+    RDKit::MatchVectType SingleAligner::get_core_mapping(RDKit::ROMOL_SPTR core_structure, RDKit::ROMol mol_a,
+                                                         RDKit::ROMol mol_b) {
         // find core inside molecules
         RDKit::MatchVectType match_vect_a;
         RDKit::SubstructMatch(mol_a, *core_structure, match_vect_a);

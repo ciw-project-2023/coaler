@@ -13,7 +13,8 @@ TEST_CASE("Single Aligner", "[aligner]") {
         RDKit::RWMol *mol_b = RDKit::SmilesToMol("CCCO");
 
         coaler::SingleAligner single_aligner(5, 80);
-        CHECK_THROWS_WITH(single_aligner.align_molecules_kabsch(*mol_a, *mol_b, std::nullopt), "Size of core is too small!");
+        CHECK_THROWS_WITH(single_aligner.align_molecules_kabsch(*mol_a, *mol_b, std::nullopt),
+                          "Size of core is too small!");
     };
     SECTION("Warning when core structure is too large!") {
         RDKit::RWMol *mol_a = RDKit::SmilesToMol("CCCN");
