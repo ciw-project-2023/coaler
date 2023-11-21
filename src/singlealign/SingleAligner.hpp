@@ -22,7 +22,8 @@ namespace coaler {
          * @param core: optional set core structure.
          * @return RMDS score and the core structure of the molecules.
          */
-        std::tuple<double, RDKit::ROMOL_SPTR> align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, std::optional<RDKit::ROMol> core);
+        std::tuple<double, RDKit::ROMOL_SPTR> align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b,
+                                                                     std::optional<RDKit::ROMol> core);
 
         // TODO: multiple void align_molecules_* functions
       private:
