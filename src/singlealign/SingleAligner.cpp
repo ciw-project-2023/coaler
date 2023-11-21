@@ -19,20 +19,17 @@ namespace coaler {
                                 unsigned int pos_id_b) {
             auto smarts_a = MolToSmarts(mol_a);
             auto smarts_b = MolToSmarts(mol_b);
+
             RDKit::RWMol *mol_conf_a = RDKit::SmilesToMol(smarts_a);
             RDKit::RWMol *mol_conf_b = RDKit::SmilesToMol(smarts_b);
-            RDKit::ROMol mol_one_conf_a = *mol_conf_a;
-            RDKit::ROMol mol_one_conf_b = *mol_conf_b;
-            auto mol_one_conf_a_h = RDKit::MolOps::addHs(mol_one_conf_a);
-            auto mol_one_conf_b_h = RDKit::MolOps::addHs(mol_one_conf_b);
+
             auto conf_a = RDKit::Conformer{mol_a.getConformer(pos_id_a)};
-            auto conf_b = RDKit::Conformer{mol_a.getConformer(pos_id_b)};
+            auto conf_b = RDKit::Conformer{mol_b.getConformer(pos_id_b)};
 
-            mol_one_conf_a_h->addConformer(&conf_a, true);
-            mol_one_conf_b_h->addConformer(&conf_b, true);
+            mol_conf_a->addConformer(&conf_a, true);
+            mol_conf_b->addConformer(&conf_b, true);
 
-            auto tuple = std::make_tuple(*mol_one_conf_a_h, *mol_one_conf_b_h);
-
+            auto tuple = std::make_tuple(*mol_conf_a, *mol_conf_b);
             return tuple;
         }
     }
@@ -46,22 +43,8 @@ namespace coaler {
         spdlog::info("Start single alignment with Kabsch' algorithm");
 
         RDKit::ROMOL_SPTR core_structure;
-        // calculate mcs if no core structure
-        if (!core.has_value()) {
-            spdlog::info("No core structure, start calculating MCS");
-
-            // zip mol_a and mol_b into a vector
-            std::vector<RDKit::ROMOL_SPTR> mols;
-            mols.emplace_back(boost::make_shared<RDKit::ROMol>(mol_a));
-            mols.emplace_back(boost::make_shared<RDKit::ROMol>(mol_b));
-
-            RDKit::MCSResult res = RDKit::findMCS(mols);
-            core_structure = res.QueryMol;
-            spdlog::info("MCS: " + res.SmartsString);
-        } else {
-            core_structure = boost::make_shared<RDKit::ROMol>(core.value());
-            spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
-        }
+        core_structure = boost::make_shared<RDKit::ROMol>(core.value());
+        spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
 
         validate_core_structure_size(core_structure, mol_a, mol_b);
 

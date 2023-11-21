@@ -17,37 +17,46 @@ TEST_CASE("Single Aligner", "[aligner]") {
 
     RDKit::ROMol molO_a = *mol_a;
     RDKit::ROMol molO_b = *mol_b;
-    RDKit::MolOps::addHs(molO_a);
-    RDKit::MolOps::addHs(molO_b);
 
     RDKit::DGeomHelpers::EmbedMolecule(molO_a);
     RDKit::DGeomHelpers::EmbedMolecule(molO_b);
 
-    SECTION("Error when core structure is too small!") {
-        coaler::SingleAligner single_aligner(5, 80);
-        CHECK_THROWS_WITH(single_aligner.align_molecules_kabsch(molO_a, molO_b, 0, 0, std::nullopt),
-                          "Size of core is too small!");
-    };
-    SECTION("Warning when core structure is too large!") {
-        coaler::SingleAligner single_aligner(1, 1);
-        single_aligner.align_molecules_kabsch(molO_a, molO_b, 0, 0, std::nullopt);
+    SECTION("Use MCS") {
+        spdlog::info("No core structure, start calculating MCS");
+        std::vector<RDKit::ROMOL_SPTR> mols;
+        mols.emplace_back(boost::make_shared<RDKit::ROMol>(molO_a));
+        mols.emplace_back(boost::make_shared<RDKit::ROMol>(molO_b));
 
-        CHECK(0==0);
+        RDKit::MCSResult res = RDKit::findMCS(mols);
+        RDKit::ROMOL_SPTR core_structure = res.QueryMol;
+        spdlog::info("MCS: " + res.SmartsString);
+
+        SECTION("Error when core structure is too small!") {
+            coaler::SingleAligner single_aligner(5, 80);
+            CHECK_THROWS_WITH(single_aligner.align_molecules_kabsch(molO_a, molO_b, 0, 0, *core_structure),
+                              "Size of core is too small!");
+        };
+        SECTION("Warning when core structure is too large!") {
+            coaler::SingleAligner single_aligner(1, 1);
+            single_aligner.align_molecules_kabsch(molO_a, molO_b, 0, 0,
+                                                  *core_structure);
+        };
+        SECTION("Compare two molecules") {
+            coaler::SingleAligner single_aligner(1, 80);
+            auto result = single_aligner.align_molecules_kabsch(molO_a, molO_b, 0, 0,
+                                                                *core_structure);
+
+            double score = static_cast<unsigned int>(result * 10000) / 10000.0;
+            CHECK(score == 0.0057);
+        };
     };
+
     SECTION("Core is only part of one molecule") {
         RDKit::RWMol *core = RDKit::SmilesToMol("CO");
 
         coaler::SingleAligner single_aligner(1, 80);
         CHECK_THROWS_WITH(single_aligner.align_molecules_kabsch(molO_a, molO_b, 0, 0, *core),
                           "Core is not a common core structure of molecule a and molecule b!");
-    };
-    SECTION("Compare two molecules") {
-        coaler::SingleAligner single_aligner(1, 80);
-        auto result = single_aligner.align_molecules_kabsch(molO_a, molO_b, 0, 0,
-                                                            std::nullopt);
-
-        double score = static_cast<unsigned int>(result * 100000) / 100000.0;
-        CHECK(score == 0.0127);
     };
 }
 
