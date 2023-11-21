@@ -19,35 +19,19 @@ namespace coaler {
                                 unsigned int pos_id_b) {
             auto smarts_a = MolToSmarts(mol_a);
             auto smarts_b = MolToSmarts(mol_b);
-
             RDKit::RWMol *mol_conf_a = RDKit::SmilesToMol(smarts_a);
             RDKit::RWMol *mol_conf_b = RDKit::SmilesToMol(smarts_b);
             RDKit::ROMol mol_one_conf_a = *mol_conf_a;
             RDKit::ROMol mol_one_conf_b = *mol_conf_b;
+            auto mol_one_conf_a_h = RDKit::MolOps::addHs(mol_one_conf_a);
+            auto mol_one_conf_b_h = RDKit::MolOps::addHs(mol_one_conf_b);
+            auto conf_a = RDKit::Conformer{mol_a.getConformer(pos_id_a)};
+            auto conf_b = RDKit::Conformer{mol_a.getConformer(pos_id_b)};
 
-            RDKit::MolOps::addHs(mol_one_conf_a);
-            RDKit::MolOps::addHs(mol_one_conf_b);
+            mol_one_conf_a_h->addConformer(&conf_a, true);
+            mol_one_conf_b_h->addConformer(&conf_b, true);
 
-            auto conf_a = mol_a.getConformer(pos_id_a);
-            auto conf_b = mol_a.getConformer(pos_id_b);
-            mol_one_conf_a.addConformer(&conf_a);
-            mol_one_conf_b.addConformer(&conf_b);
-
-//            std::vector<unsigned int> conf_mol_a;
-//            std::vector<unsigned int> conf_mol_b;
-//
-//            conf_mol_a.emplace_back(pos_id_a);
-//            conf_mol_b.emplace_back(pos_id_b);
-//
-//            RDKit::MolAlign::alignMolConformers(mol_one_conf_a, nullptr, &conf_mol_a);
-//            RDKit::MolAlign::alignMolConformers(mol_one_conf_b, nullptr, &conf_mol_b);
-//
-//
-  //          throw std::runtime_error("CONFS" + std::to_string(mol_one_conf_a.getNumConformers()));
-
-            std::cout << "TEST" << std::endl;
-
-            auto tuple = std::make_tuple(mol_one_conf_a, mol_one_conf_b);
+            auto tuple = std::make_tuple(*mol_one_conf_a_h, *mol_one_conf_b_h);
 
             return tuple;
         }
@@ -81,32 +65,9 @@ namespace coaler {
 
         validate_core_structure_size(core_structure, mol_a, mol_b);
 
-
-
-        // TODO: change
-        auto smarts_a = MolToSmarts(mol_a);
-        auto smarts_b = MolToSmarts(mol_b);
-        RDKit::RWMol *mol_conf_a = RDKit::SmilesToMol(smarts_a);
-        RDKit::RWMol *mol_conf_b = RDKit::SmilesToMol(smarts_b);
-        RDKit::ROMol mol_one_conf_a = *mol_conf_a;
-        RDKit::ROMol mol_one_conf_b = *mol_conf_b;
-        RDKit::MolOps::addHs(mol_one_conf_a);
-        RDKit::MolOps::addHs(mol_one_conf_b);
-        auto conf_a = mol_a.getConformer(pos_id_a);
-        auto conf_b = mol_a.getConformer(pos_id_b);
-        mol_one_conf_a.addConformer(&conf_a);
-        mol_one_conf_b.addConformer(&conf_b);
-        // TODO: end change
-
-        //auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
-
-
-        RDKit::MatchVectType mapping = get_core_mapping(core_structure, mol_one_conf_a, mol_one_conf_b);
-
-        double rmsd = RDKit::MolAlign::alignMol(mol_one_conf_a, mol_one_conf_b,-1, -1, &mapping);
-
-        //double rmsd = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules),
-        //                                        -1, -1, &mapping);
+        auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
+        RDKit::MatchVectType mapping = get_core_mapping(core_structure, std::get<0>(molecules), std::get<1>(molecules));
+        double rmsd = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules),-1, -1, &mapping);
 
         spdlog::info("Molecules are align with a score of {}", rmsd);
         return rmsd;
