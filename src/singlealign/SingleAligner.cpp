@@ -1,23 +1,20 @@
 #include "SingleAligner.hpp"
 
-#include <GraphMol/MolAlign/AlignMolecules.h>
 #include <GraphMol/FMCS/FMCS.h>
-#include <GraphMol/Substruct/SubstructMatch.h>
+#include <GraphMol/MolAlign/AlignMolecules.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
-
+#include <GraphMol/Substruct/SubstructMatch.h>
 #include <spdlog/spdlog.h>
-
 
 #include <vector>
 
 namespace coaler {
-    SingleAligner::SingleAligner(int core_min_size, float core_max_percentage, bool with_hs) :
-            core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage}, with_hs_{with_hs} {}
+    SingleAligner::SingleAligner(int core_min_size, float core_max_percentage, bool with_hs)
+        : core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage}, with_hs_{with_hs} {}
 
-    double
-    SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
-                                          unsigned int pos_id_b, std::optional<RDKit::ROMol> core) {
+    double SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
+                                                 unsigned int pos_id_b, std::optional<RDKit::ROMol> core) {
         spdlog::info("Start single alignment with Kabsch' algorithm");
 
         RDKit::ROMOL_SPTR core_structure;
@@ -68,10 +65,11 @@ namespace coaler {
         }
         return mapping;
     }
-  
-    std::tuple<RDKit::ROMol, RDKit::ROMol>
-    SingleAligner::get_molecule_conformers(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
-                                           unsigned int pos_id_b) {
+
+    std::tuple<RDKit::ROMol, RDKit::ROMol> SingleAligner::get_molecule_conformers(RDKit::ROMol mol_a,
+                                                                                  RDKit::ROMol mol_b,
+                                                                                  unsigned int pos_id_a,
+                                                                                  unsigned int pos_id_b) {
         auto smarts_a = MolToSmarts(mol_a);
         auto smarts_b = MolToSmarts(mol_b);
 
