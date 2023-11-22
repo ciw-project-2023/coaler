@@ -11,6 +11,10 @@
 #include <cstdint>
 #include <filesystem>
 
+#include "../src/parser/FileParser.hpp"
+#include "../src/singlealign/SingleAligner.hpp"
+#include "catch2/catch.hpp"
+
 TEST_CASE("Single Aligner", "[aligner]") {
     SECTION("With H-atoms"){
         RDKit::RWMol *mol_a = RDKit::SmilesToMol("CCCN");
@@ -113,4 +117,3 @@ TEST_CASE("Single Aligner", "[aligner]") {
         };
     };
 }
-

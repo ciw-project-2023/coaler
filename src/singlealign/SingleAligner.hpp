@@ -1,9 +1,9 @@
 #pragma once
 
-#include <cstdint> // todo: is necessary when using RDKit libraries
-
 #include <GraphMol/ROMol.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
+
+#include <cstdint>  // todo: is necessary when using RDKit libraries
 
 namespace coaler {
 
@@ -30,7 +30,7 @@ namespace coaler {
 
 
         // TODO: multiple void align_molecules_* functions
-    private:
+      private:
         /**
          * Validates the core structure.
          * @param core
@@ -64,4 +64,4 @@ namespace coaler {
         bool with_hs_{false};
     };
 
-} // coaler
+}  // namespace coaler

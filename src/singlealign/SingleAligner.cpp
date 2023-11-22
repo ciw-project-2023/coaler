@@ -1,15 +1,15 @@
 #include "SingleAligner.hpp"
 
-#include <vector>
-
-#include <spdlog/spdlog.h>
-
 #include <GraphMol/MolAlign/AlignMolecules.h>
 #include <GraphMol/FMCS/FMCS.h>
-#include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
+
+#include <spdlog/spdlog.h>
+
+
+#include <vector>
 
 namespace coaler {
     SingleAligner::SingleAligner(int core_min_size, float core_max_percentage, bool with_hs) :
@@ -34,8 +34,8 @@ namespace coaler {
         return rmsd;
     }
 
-    void
-    SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a, RDKit::ROMol mol_b) const {
+    void SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a,
+                                                     RDKit::ROMol mol_b) const {
         if (core->getNumAtoms() < core_min_size_) {
             spdlog::error("Size of core is too small!");
             throw std::runtime_error("Size of core is too small!");
@@ -48,8 +48,8 @@ namespace coaler {
         }
     }
 
-    RDKit::MatchVectType
-    SingleAligner::get_core_mapping(RDKit::ROMOL_SPTR core_structure, RDKit::ROMol mol_a, RDKit::ROMol mol_b) {
+    RDKit::MatchVectType SingleAligner::get_core_mapping(RDKit::ROMOL_SPTR core_structure, RDKit::ROMol mol_a,
+                                                         RDKit::ROMol mol_b) {
         // find core inside molecules
         RDKit::MatchVectType match_vect_a;
         RDKit::SubstructMatch(mol_a, *core_structure, match_vect_a);
@@ -68,7 +68,7 @@ namespace coaler {
         }
         return mapping;
     }
-
+  
     std::tuple<RDKit::ROMol, RDKit::ROMol>
     SingleAligner::get_molecule_conformers(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
                                            unsigned int pos_id_b) {
@@ -92,5 +92,4 @@ namespace coaler {
         auto tuple = std::make_tuple(*mol_conf_a, *mol_conf_b);
         return tuple;
     }
-
-} // coaler
+}  // namespace coaler

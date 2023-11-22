@@ -1,11 +1,11 @@
-#include <cstdint> // todo: is necessary when using RDKit libraries
-#include <spdlog/spdlog.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
+#include <spdlog/spdlog.h>
+
+#include <cstdint>  // todo: is necessary when using RDKit libraries
 
 #include "singlealign/SingleAligner.hpp"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     RDKit::RWMol *mol_a = RDKit::SmilesToMol("CCCO");
     RDKit::RWMol *mol_b = RDKit::SmilesToMol("CCCN");
 
