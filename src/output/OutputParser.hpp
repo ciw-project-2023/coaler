@@ -8,9 +8,15 @@ namespace coaler {
      *  @var align_score
      *  @var mol_a
      *  @var mol_b
+     *  @var mol_a
+     *  @var mol_b
      */
     struct AlignedMolPair {
         double align_score;
+
+        int id_mol_a;
+        int id_mol_b;
+
         RDKit::ROMol mol_a;
         RDKit::ROMol mol_b;
     };
@@ -31,6 +37,11 @@ namespace coaler {
          * @param file_path
          */
         void save_molecules_w_scores_in_file(const std::string& file_path);
+
+        /**
+         *
+         */
+        void print_in_log_molecules_w_scores();
 
       private:
         std::vector<AlignedMolPair> aligned_mols_;

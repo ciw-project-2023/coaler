@@ -1,7 +1,7 @@
-#include <cstdint>
-
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
+
+#include <cstdint>
 
 #include "../src/output/OutputParser.hpp"
 #include "catch2/catch.hpp"
@@ -19,10 +19,13 @@ TEST_CASE("Output Parser", "[output]") {
         coaler::AlignedMolPair mol_pair;
         mol_pair.mol_a = RDKit::ROMol{*mol_a};
         mol_pair.mol_b = RDKit::ROMol{*mol_b};
+        mol_pair.id_mol_a = 0;
+        mol_pair.id_mol_b = 1;
         mol_pair.align_score = 0.55;
 
         output_parser.add_aligned_mols(mol_pair);
-    };
 
-    output_parser.save_molecules_w_scores_in_file("output");
+        SECTION("save output in file") { output_parser.save_molecules_w_scores_in_file("output"); };
+        SECTION("print output in log") { output_parser.print_in_log_molecules_w_scores(); };
+    };
 }
