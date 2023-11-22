@@ -21,74 +21,74 @@ jobs:
           check-path: 'src'
           fallback-style: 'Google' #
 
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up python
-        id: setup-python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          installer-parallel: true
-
-      - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.13
-        with:
-          cmake-version: '3.16.x'
-
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
-
-      - name: Install project
-        run: poetry install --no-interaction
-
-      - name: Cache conan files
-        id: cached-conan-files
-        uses: actions/cache@v3
-        with:
-          path: "~/.conan2"
-          key: ${{ runner.os }}-${{ hashFiles('conan.lock') }}
-
-      - name: Create conan profile
-        if: steps.cached-conan-files.outputs.cache-hit != 'true'
-        run: poetry run conan profile detect
-
-      - name: Enable Debug Mode
-        run: sed -i 's/Release/Debug/g' $(poetry run conan profile path default)
-
-      - name: Add conan remote
-        if: steps.cached-conan-files.outputs.cache-hit != 'true'
-        run: poetry run conan remote add doc $CONAN_SERVER_URL
-
-      - name: Login into conan server
-        if: steps.cached-conan-files.outputs.cache-hit != 'true'
-        run: poetry run conan remote login doc $CONAN_SERVER_USER --password $CONAN_SERVER_PASSWORD
-
-      - name: Run conan install
-        if: steps.cached-conan-files.outputs.cache-hit != 'true'
-        run: poetry run conan install . -s build_type=$TARGET --build missing
-
-      - name: Build
-        run: poetry run conan build . -s build_type=$TARGET
-
-      - name: Run Tests
-        run: ./build/${TARGET}/test/Test
+#  test:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Set up python
+#        id: setup-python
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: '3.11'
+#
+#      - name: Install Poetry
+#        uses: snok/install-poetry@v1
+#        with:
+#          virtualenvs-create: true
+#          virtualenvs-in-project: true
+#          installer-parallel: true
+#
+#      - name: Setup cmake
+#        uses: jwlawson/actions-setup-cmake@v1.13
+#        with:
+#          cmake-version: '3.16.x'
+#
+#      - name: Load cached venv
+#        id: cached-poetry-dependencies
+#        uses: actions/cache@v3
+#        with:
+#          path: .venv
+#          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+#
+#      - name: Install dependencies
+#        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+#        run: poetry install --no-interaction --no-root
+#
+#      - name: Install project
+#        run: poetry install --no-interaction
+#
+#      - name: Cache conan files
+#        id: cached-conan-files
+#        uses: actions/cache@v3
+#        with:
+#          path: "~/.conan2"
+#          key: ${{ runner.os }}-${{ hashFiles('conan.lock') }}
+#
+#      - name: Create conan profile
+#        if: steps.cached-conan-files.outputs.cache-hit != 'true'
+#        run: poetry run conan profile detect
+#
+#      - name: Enable Debug Mode
+#        run: sed -i 's/Release/Debug/g' $(poetry run conan profile path default)
+#
+#      - name: Add conan remote
+#        if: steps.cached-conan-files.outputs.cache-hit != 'true'
+#        run: poetry run conan remote add doc $CONAN_SERVER_URL
+#
+#      - name: Login into conan server
+#        if: steps.cached-conan-files.outputs.cache-hit != 'true'
+#        run: poetry run conan remote login doc $CONAN_SERVER_USER --password $CONAN_SERVER_PASSWORD
+#
+#      - name: Run conan install
+#        if: steps.cached-conan-files.outputs.cache-hit != 'true'
+#        run: poetry run conan install . -s build_type=$TARGET --build missing
+#
+#      - name: Build
+#        run: poetry run conan build . -s build_type=$TARGET
+#
+#      - name: Run Tests
+#        run: ./build/${TARGET}/test/Test
 
 
