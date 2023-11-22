@@ -1,56 +1,34 @@
 #include "SingleAligner.hpp"
 
-#include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/FMCS/FMCS.h>
 #include <GraphMol/MolAlign/AlignMolecules.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
+#include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <spdlog/spdlog.h>
 
 #include <vector>
 
 namespace coaler {
-    SingleAligner::SingleAligner(int core_min_size, float core_max_percentage)
-        : core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage} {}
+    SingleAligner::SingleAligner(int core_min_size, float core_max_percentage, bool with_hs)
+        : core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage}, with_hs_{with_hs} {}
 
-    std::tuple<double, RDKit::ROMOL_SPTR> SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b,
-                                                                                std::optional<RDKit::ROMol> core) {
-        /*TODO: Add more conformeres to the molecules with RDKit::DGeomHelpers::EmbedMultipleConfs or
-         * Multi-Align has to do these steps in advance, has to be discussed with the group
-         * */
+    double SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
+                                                 unsigned int pos_id_b, std::optional<RDKit::ROMol> core) {
         spdlog::info("Start single alignment with Kabsch' algorithm");
 
-        RDKit::MolOps::addHs(mol_a);
-        RDKit::MolOps::addHs(mol_b);
-
-        RDKit::DGeomHelpers::EmbedMolecule(mol_a);
-        RDKit::DGeomHelpers::EmbedMolecule(mol_b);
-
         RDKit::ROMOL_SPTR core_structure;
-        // calculate mcs if no core structure
-        if (!core.has_value()) {
-            spdlog::info("No core structure, start calculating MCS");
-
-            // zip mol_a and mol_b into a vector
-            std::vector<RDKit::ROMOL_SPTR> mols;
-            mols.emplace_back(boost::make_shared<RDKit::ROMol>(mol_a));
-            mols.emplace_back(boost::make_shared<RDKit::ROMol>(mol_b));
-
-            RDKit::MCSResult res = RDKit::findMCS(mols);
-            core_structure = res.QueryMol;
-            spdlog::info("MCS: " + res.SmartsString);
-        } else {
-            core_structure = boost::make_shared<RDKit::ROMol>(core.value());
-            spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
-        }
+        core_structure = boost::make_shared<RDKit::ROMol>(core.value());
+        spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
 
         validate_core_structure_size(core_structure, mol_a, mol_b);
 
-        RDKit::MatchVectType mapping = get_core_mapping(core_structure, mol_a, mol_b);
-        double rmsd = RDKit::MolAlign::alignMol(mol_a, mol_b, -1, -1, &mapping);
+        auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
+        RDKit::MatchVectType mapping = get_core_mapping(core_structure, std::get<0>(molecules), std::get<1>(molecules));
+        double rmsd = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
 
         spdlog::info("Molecules are align with a score of {}", rmsd);
-        return std::make_tuple(rmsd, core_structure);
+        return rmsd;
     }
 
     void SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a,
@@ -88,4 +66,28 @@ namespace coaler {
         return mapping;
     }
 
+    std::tuple<RDKit::ROMol, RDKit::ROMol> SingleAligner::get_molecule_conformers(RDKit::ROMol mol_a,
+                                                                                  RDKit::ROMol mol_b,
+                                                                                  unsigned int pos_id_a,
+                                                                                  unsigned int pos_id_b) {
+        auto smarts_a = MolToSmarts(mol_a);
+        auto smarts_b = MolToSmarts(mol_b);
+
+        RDKit::RWMol *mol_conf_a = RDKit::SmilesToMol(smarts_a);
+        RDKit::RWMol *mol_conf_b = RDKit::SmilesToMol(smarts_b);
+
+        if (with_hs_) {
+            RDKit::MolOps::addHs(*mol_conf_a);
+            RDKit::MolOps::addHs(*mol_conf_b);
+        }
+
+        auto conf_a = RDKit::Conformer{mol_a.getConformer(pos_id_a)};
+        auto conf_b = RDKit::Conformer{mol_b.getConformer(pos_id_b)};
+
+        mol_conf_a->addConformer(&conf_a, true);
+        mol_conf_b->addConformer(&conf_b, true);
+
+        auto tuple = std::make_tuple(*mol_conf_a, *mol_conf_b);
+        return tuple;
+    }
 }  // namespace coaler
