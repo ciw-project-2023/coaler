@@ -39,7 +39,7 @@ namespace coaler {
         void save_molecules_w_scores_in_file(const std::string& file_path);
 
         /**
-         *
+         * Prints the aligned molecules with score inside the log.
          */
         void print_in_log_molecules_w_scores();
 
