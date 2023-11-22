@@ -1,8 +1,6 @@
-#include <cstdint>
+#include <catch2/catch.hpp>
+#include <coaler/io/FileParser.hpp>
 #include <filesystem>
-
-#include "catch2/catch.hpp"
-#include "io/FileParser.hpp"
 
 TEST_CASE("File Parser", "[io]") {
     SECTION("SMILES") {

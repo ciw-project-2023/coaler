@@ -1,10 +1,9 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 
-#include <cstdint>
+#include <coaler/io/OutputWriter.hpp>
 
 #include "catch2/catch.hpp"
-#include "io/OutputWriter.hpp"
 
 TEST_CASE("Output Parser", "[io]") {
     coaler::io::OutputWriter output_parser;

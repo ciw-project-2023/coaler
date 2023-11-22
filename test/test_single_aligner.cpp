@@ -3,11 +3,9 @@
 #include <GraphMol/ROMol.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 
-#include <cstdint>
-
-#include "../src/singlealign/SingleAligner.hpp"
-#include "catch2/catch.hpp"
-#include "io/FileParser.hpp"
+#include <catch2/catch.hpp>
+#include <coaler/io/Forward.hpp>
+#include <coaler/singlealign/SingleAligner.hpp>
 
 TEST_CASE("Single Aligner", "[aligner]") {
     SECTION("With H-atoms") {

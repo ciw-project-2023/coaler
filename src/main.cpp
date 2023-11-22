@@ -4,8 +4,7 @@
 #include <spdlog/spdlog.h>
 
 #include <boost/program_options.hpp>
-
-#include "io/FileParser.hpp"
+#include <coaler/io/Forward.hpp>
 
 namespace opts = boost::program_options;
 

@@ -2,41 +2,19 @@ find_package(Catch2 REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Boost REQUIRED)
 
-add_executable (Test
-        test_runner.cpp
-        test_single_aligner.cpp
-        test_file_parser.cpp
-        test_output_writer.cpp
+file(GLOB test_src CONFIGURE_DEPENDS "*.hpp" "*.cpp")
 
-        ${CMAKE_SOURCE_DIR}/src/singlealign/SingleAligner.cpp # TODO: restructure this
-        ${CMAKE_SOURCE_DIR}/src/io/FileParser.cpp
-        ${CMAKE_SOURCE_DIR}/src/io/OutputWriter.cpp
-)
+add_executable (Test ${test_src})
 
 # Include additional headers here
 target_include_directories(Test PUBLIC
         ${Boost_INCLUDE_DIRS}
-        ${CMAKE_SOURCE_DIR}/src/
+        ${CMAKE_SOURCE_DIR}/src/lib/
 )
 
-# All the dependencies get linked here
-target_link_libraries(Test PUBLIC "-Wl,--disable-new-dtags")
 target_link_libraries(Test PRIVATE Catch2::Catch2)
 target_link_libraries(Test PUBLIC spdlog::spdlog)
-
-set(rdkitlibs "RDKitAbbreviations" "RDKitAlignment" "RDKitCatalogs" "RDKitChemicalFeatures" "RDKitChemReactions" "RDKitChemTransforms"
-        "RDKitCIPLabeler" "RDKitcoordgen" "RDKitDataStructs" "RDKitDepictor" "RDKitDeprotect" "RDKitDescriptors" "RDKitDistGeometry" "RDKitDistGeomHelpers"
-        "RDKitEigenSolvers" "RDKitFileParsers" "RDKitFilterCatalog" "RDKitFingerprints" "RDKitFMCS" "RDKitForceFieldHelpers" "RDKitForceField"
-        "RDKitFragCatalog" "RDKitga" "RDKitGeneralizedSubstruct" "RDKitGenericGroups" "RDKitGraphMol" "RDKithc" "RDKitInfoTheory" "RDKitmaeparser"
-        "RDKitMarvinParser" "RDKitMMPA" "RDKitMolAlign" "RDKitMolCatalog" "RDKitMolChemicalFeatures" "RDKitMolDraw2D" "RDKitMolEnumerator" "RDKitMolHash"
-        "RDKitMolInterchange" "RDKitMolStandardize" "RDKitMolTransforms" "RDKitO3AAlign" "RDKitOptimizer" "RDKitPartialCharges" "RDKitRascalMCES"
-        "RDKitRDGeneral" "RDKitRDGeometryLib" "RDKitRDStreams" "RDKitReducedGraphs" "RDKitRGroupDecomposition" "RDKitRingDecomposerLib" "RDKitScaffoldNetwork"
-        "RDKitShapeHelpers" "RDKitSimDivPickers" "RDKitSLNParse" "RDKitSmilesParse" "RDKitSubgraphs" "RDKitSubstructLibrary" "RDKitSubstructMatch"
-        "RDKitTautomerQuery" "RDKitTrajectory")
-
-foreach(lib IN LISTS rdkitlibs)
-    target_link_libraries(Test PUBLIC rdkit::${lib})
-endforeach()
+target_link_libraries(Test PUBLIC coaler_lib)
 
 set(TEST_DATA_FILES AID_1806504.smi)
 add_test(NAME MyTest COMMAND Test)
