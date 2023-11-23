@@ -8,6 +8,7 @@
 #include "PoseRegisterBuilder.hpp"
 #include "GraphMol/FMCS/FMCS.h"
 #include "MultiAlignerResult.hpp"
+#include "../singlealign/SingleAligner.hpp"
 
 namespace MultiAlign {
 
@@ -16,7 +17,8 @@ namespace MultiAlign {
 
         MultiAligner(
                 const std::vector<RDKit::RWMol>& molecules,
-                const RDKit::MCSResult& core);
+                const RDKit::ROMol& core,
+                const coaler::SingleAligner& aligner);
 
         MultiAlignerResult alignMolecules();
 
@@ -24,7 +26,8 @@ namespace MultiAlign {
 
         //singleAligner --> im constructior übergeben
 
-        RDKit::MCSResult m_core;
+        coaler::SingleAligner m_singleAligner;
+        RDKit::ROMol m_core;
         std::vector<RDKit::RWMol> m_molecules;
         PairwisePoseRegisters m_poseRegisters;
         PairwiseAlignment m_pairwiseAlignments;
