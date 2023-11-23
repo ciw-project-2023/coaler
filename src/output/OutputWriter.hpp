@@ -24,7 +24,7 @@ namespace coaler {
     /**
      * @brief This class is responsible for handling the output.
      */
-    class OutputParser {
+    class OutputWriter {
       public:
         /**
          * Add molecule pair with alignment score to aligned molecules

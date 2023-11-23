@@ -3,11 +3,11 @@
 
 #include <cstdint>
 
-#include "../src/output/OutputParser.hpp"
+#include "../src/output/OutputWriter.hpp"
 #include "catch2/catch.hpp"
 
 TEST_CASE("Output Parser", "[output]") {
-    coaler::OutputParser output_parser;
+    coaler::OutputWriter output_parser;
 
     SECTION("Add one pair to output") {
         RDKit::RWMol *mol_a = RDKit::SmilesToMol("CCCN");
