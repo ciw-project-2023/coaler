@@ -1,9 +1,9 @@
+#include "OutputWriter.hpp"
+
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <spdlog/spdlog.h>
 
-#include "OutputWriter.hpp"
-
-namespace coaler {
+namespace coaler::io {
     void OutputWriter::add_aligned_mols(AlignedMolPair& aligned_mol_pair) {
         aligned_mols_.emplace_back(aligned_mol_pair);
     }

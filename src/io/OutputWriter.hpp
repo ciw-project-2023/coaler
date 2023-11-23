@@ -2,7 +2,7 @@
 
 #include <GraphMol/ROMol.h>
 
-namespace coaler {
+namespace coaler::io {
     /** @struct AlignedMolPair
      *  @brief This structure represents an aligned molecule pair.
      *  @var align_score

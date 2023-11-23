@@ -9,8 +9,8 @@ add_executable (Test
         test_output_writer.cpp
 
         ${CMAKE_SOURCE_DIR}/src/singlealign/SingleAligner.cpp # TODO: restructure this
-        ${CMAKE_SOURCE_DIR}/src/parser/FileParser.cpp
-        ${CMAKE_SOURCE_DIR}/src/output/OutputWriter.cpp
+        ${CMAKE_SOURCE_DIR}/src/io/FileParser.cpp
+        ${CMAKE_SOURCE_DIR}/src/io/OutputWriter.cpp
 )
 
 # Include additional headers here

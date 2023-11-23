@@ -4,7 +4,7 @@
 #include <string>
 #include <utility>
 
-namespace coaler {
+namespace coaler::io {
     class FileNotFoundException : public std::exception {
       private:
         std::string file_path;

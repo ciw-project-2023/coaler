@@ -3,11 +3,11 @@
 
 #include <cstdint>
 
-#include "../src/output/OutputWriter.hpp"
 #include "catch2/catch.hpp"
+#include "io/OutputWriter.hpp"
 
-TEST_CASE("Output Parser", "[output]") {
-    coaler::OutputWriter output_parser;
+TEST_CASE("Output Parser", "[io]") {
+    coaler::io::OutputWriter output_parser;
 
     SECTION("Add one pair to output") {
         RDKit::RWMol *mol_a = RDKit::SmilesToMol("CCCN");
@@ -16,7 +16,7 @@ TEST_CASE("Output Parser", "[output]") {
         RDKit::DGeomHelpers::EmbedMolecule(*mol_a);
         RDKit::DGeomHelpers::EmbedMolecule(*mol_b);
 
-        coaler::AlignedMolPair mol_pair;
+        coaler::io::AlignedMolPair mol_pair;
         mol_pair.mol_a = RDKit::ROMol{*mol_a};
         mol_pair.mol_b = RDKit::ROMol{*mol_b};
         mol_pair.id_mol_a = 0;
