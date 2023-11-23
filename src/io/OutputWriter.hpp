@@ -47,4 +47,4 @@ namespace coaler::io {
         std::vector<AlignedMolPair> aligned_mols_;
     };
 
-}  // namespace coaler
+}  // namespace coaler::io

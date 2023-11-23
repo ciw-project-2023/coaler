@@ -21,4 +21,4 @@ namespace coaler::io {
         }
         spdlog::info("End of results. :)");
     }
-}  // namespace coaler
+}  // namespace coaler::io

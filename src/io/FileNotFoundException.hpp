@@ -14,4 +14,4 @@ namespace coaler::io {
 
         std::string what() { return file_path; }
     };
-}  // namespace coaler
+}  // namespace coaler::io

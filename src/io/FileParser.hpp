@@ -10,4 +10,4 @@ namespace coaler::io {
       public:
         static std::vector<RDKit::RWMol *> parse(const std::string &file_path);
     };
-}  // namespace coaler
+}  // namespace coaler::io

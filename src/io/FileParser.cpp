@@ -33,4 +33,4 @@ namespace coaler::io {
 
         return result;
     }
-}  // namespace coaler
+}  // namespace coaler::io
