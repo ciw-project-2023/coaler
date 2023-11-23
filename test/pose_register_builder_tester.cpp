@@ -4,8 +4,10 @@
 
 #include "catch2/catch.hpp"
 #include "../src/multialign/Forward.hpp"
-#include "../src/multialign/BasicClasses/PosePair.hpp"
+#include "../src/multialign/BasicClasses/Forward.hpp"
 #include "../src/multialign/PoseRegisterBuilder.hpp"
+#include "../src/multialign/PoseRegister.hpp"
+
 
 #include <GraphMol/SmilesParse/SmilesParse.h>
 
@@ -24,19 +26,20 @@ TEST_CASE("test_pose_register_builder", "[pose_register_builder_tester]") {
     Ligand l2(
             *RDKit::SmilesToMol("CO"),
             {m1p0, m1p1}, 1);
-    PosePair m0p0m1p0({0,0}, {1,0});
-    PosePair m0p0m1p1({0,0}, {1,1});
-    PosePair m0p1m1p0({0,1}, {1,0});
-    PosePair m0p1m1p1({0,1}, {1,1});
+    LigandPair ligandPair(l1.getID(),l2.getID());
+    PosePair m0p0m1p0(m0p0, m1p0);
+    PosePair m0p0m1p1(m0p0, m1p1);
+    PosePair m0p1m1p0(m0p1, m1p0);
+    PosePair m0p1m1p1(m0p1, m1p1);
     pairwiseScores.emplace(m0p0m1p0, 0.8);
     pairwiseScores.emplace(m0p1m1p0, 0.5);
     pairwiseScores.emplace(m0p0m1p1, 0.1);
     pairwiseScores.emplace(m0p1m1p1, 0.3);
 
-    INFO("build poses");
-
     PairwisePoseRegisters reg = PoseRegisterBuilder::buildPoseRegisters(
             pairwiseScores, {l1,l2});
 
     CHECK(reg.size() == 1);
+    CHECK(reg.at(ligandPair)->getSize() == 2);
+    CHECK(reg.at(ligandPair)->getHighestScoringPair() == m0p0m1p0);
 }

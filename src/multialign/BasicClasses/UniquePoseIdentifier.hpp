@@ -46,14 +46,12 @@ struct UniquePoseIdentifier //TODO move implementation to cpp
 
     bool operator>(const UniquePoseIdentifier &other) const
     {
-        if(this->m_ligandId > other.m_ligandId)
+        if(this->m_ligandId == other.m_ligandId)
         {
-            return true;
-        }
-        else {
             return this->m_ligandInternalPoseId >
-            other.m_ligandInternalPoseId;
+                   other.m_ligandInternalPoseId;
         }
+        return this->m_ligandId > other.m_ligandId;
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
