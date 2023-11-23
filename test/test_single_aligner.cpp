@@ -5,9 +5,9 @@
 
 #include <cstdint>
 
-#include "../src/parser/FileParser.hpp"
 #include "../src/singlealign/SingleAligner.hpp"
 #include "catch2/catch.hpp"
+#include "io/FileParser.hpp"
 
 TEST_CASE("Single Aligner", "[aligner]") {
     SECTION("With H-atoms") {

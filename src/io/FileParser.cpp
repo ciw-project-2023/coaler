@@ -9,7 +9,7 @@
 
 #include "FileNotFoundException.hpp"
 
-namespace coaler {
+namespace coaler::io {
 
     std::vector<RDKit::RWMol *> FileParser::parse(const std::string &file_path) {
         std::vector<RDKit::RWMol *> result;
@@ -33,4 +33,4 @@ namespace coaler {
 
         return result;
     }
-}  // namespace coaler
+}  // namespace coaler::io
