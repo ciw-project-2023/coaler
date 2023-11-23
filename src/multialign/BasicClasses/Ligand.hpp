@@ -23,6 +23,10 @@ namespace MultiAlign {
 
         unsigned getHeavyAtomSize() const noexcept;
 
+        unsigned getNofPoses() const noexcept;
+
+        RDKit::RWMol getMolecule() const noexcept;
+
     private:
         LigandID m_id;
         RDKit::RWMol m_molecule;

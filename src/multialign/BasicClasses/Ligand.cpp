@@ -14,16 +14,32 @@ namespace MultiAlign {
     {
     }
 
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     UniquePoseSet Ligand::getPoses() const noexcept {
         return m_poses;
     }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
 
     LigandID Ligand::getID() const noexcept {
         return m_id;
     }
 
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     unsigned Ligand::getHeavyAtomSize() const noexcept{
         return m_molecule.getNumHeavyAtoms();
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    unsigned Ligand::getNofPoses() const noexcept {
+        return m_poses.size();
+    }
+
+    RDKit::RWMol Ligand::getMolecule() const noexcept {
+        return m_molecule;
     }
 
 }
