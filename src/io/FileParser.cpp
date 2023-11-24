@@ -1,9 +1,9 @@
 #include "FileParser.hpp"
 
+#include <GraphMol/FileParsers/MolSupplier.h>
 #include <GraphMol/RWMol.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <spdlog/spdlog.h>
-#include <GraphMol/FileParsers/MolSupplier.h>
 
 #include <filesystem>
 #include <vector>
