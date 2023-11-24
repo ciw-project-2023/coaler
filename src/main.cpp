@@ -5,7 +5,7 @@
 
 #include <boost/program_options.hpp>
 
-#include "parser/FileParser.hpp"
+#include "io/FileParser.hpp"
 
 namespace opts = boost::program_options;
 
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 
     std::vector<RDKit::RWMol *> mols;
     if (opts.input_file_type == "smiles") {
-        mols = coaler::FileParser::parse(opts.input_file_path);
+        mols = coaler::io::FileParser::parse(opts.input_file_path);
     } else {
         spdlog::error("provided not supported molecule file format {}", opts.input_file_type);
 
