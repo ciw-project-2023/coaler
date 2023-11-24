@@ -1,5 +1,6 @@
 #include "FileParser.hpp"
 
+#include <GraphMol/FileParsers/MolSupplier.h>
 #include <GraphMol/RWMol.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <spdlog/spdlog.h>
@@ -23,12 +24,23 @@ namespace coaler::io {
             throw FileNotFoundException(file_path);
         }
 
-        std::string smiles;
-        while (std::getline(infile, smiles)) {
-            RDKit::RWMol *mol = RDKit::SmilesToMol(smiles);
-            RDKit::INT_VECT conf_ids;
-
-            result.push_back(mol);
+        std::string file_extension = std::filesystem::path(file_path).extension().string();
+        if (file_extension == ".sdf") {
+            // Parse as sdf file
+            RDKit::SDMolSupplier supplier(file_path, true, false, false);
+            while (!supplier.atEnd()) {
+                RDKit::RWMol *mol = new RDKit::RWMol(*supplier.next());
+                result.push_back(mol);
+            }
+        } else if (file_extension == ".smi") {
+            // Parse as smi file
+            RDKit::SmilesMolSupplier supplier(file_path, "\t", 0, -1, false, true);
+            while (!supplier.atEnd()) {
+                RDKit::RWMol *mol = new RDKit::RWMol(*supplier.next());
+                result.push_back(mol);
+            }
+        } else {
+            throw std::runtime_error("Unsupported file extension: " + file_extension);
         }
 
         return result;
