@@ -7,7 +7,9 @@
 
     namespace MultiAlign
     {
-
+        /**
+         * A pair of ligands.
+         */
         class LigandPair{
         public:
             LigandPair(LigandID first,

@@ -40,11 +40,7 @@ namespace MultiAlign {
                 {
                     for(const UniquePoseIdentifier secondLigandPose : ligands.at(secondLigand).getPoses())
                     {
-                        std::string first_s = firstLigandPose.toString();
-                        std::string second_s = secondLigandPose.toString();
-                        //spdlog::info(firstLigandPose.toString() + " : " + secondLigandPose.toString());
                         PosePair pair(firstLigandPose, secondLigandPose);
-
                         poseRegisters.at(currentLigandPair)->addPoses(
                                 pair,
                                 alignmentScores.at(pair));

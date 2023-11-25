@@ -26,12 +26,28 @@ namespace MultiAlign {
          */
         [[nodiscard]] UniquePoseSet getPoses() const noexcept;
 
+        /**
+         *
+         * @return
+         */
         [[nodiscard]] LigandID getID() const noexcept;
 
+        /**
+         *
+         * @return
+         */
         unsigned getHeavyAtomSize() const noexcept;
 
+        /**
+         *
+         * @return The number of conformers embedded in the ligand.
+         */
         unsigned getNofPoses() const noexcept;
 
+        /**
+         *
+         * @return The molecule represented by the ligand.
+         */
         RDKit::RWMol getMolecule() const noexcept;
 
     private:

@@ -9,6 +9,9 @@
 namespace MultiAlign
 {
 
+    /**
+     * A pair of conformers.
+     */
     class PosePair{
     public:
         PosePair(UniquePoseIdentifier first,

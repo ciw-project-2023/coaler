@@ -13,8 +13,10 @@ using PosePairAndScore = std::pair<MultiAlign::PosePair, double>;
 
 namespace MultiAlign
 {
-    using RegisterMap = std::unordered_map<PosePair, double, PosePairHash>;
 
+    /**
+     * For a pair of ligands this contains the best aligning pairwise poses.
+     */
     class PoseRegister {
 
     public:
@@ -23,16 +25,30 @@ namespace MultiAlign
                      LigandID secondLigand,
                      unsigned maxSize);
 
+        /**
+         *
+         * @return The number of aligned pose pairs in the register.
+         */
         [[nodiscard]] unsigned getSize() const noexcept;
-
-        void setMaxSize(unsigned max) noexcept;
 
         [[nodiscard]] LigandID getFirstLigandID() const noexcept;
 
         [[nodiscard]] LigandID getSecondLigandID() const noexcept;
 
+        /**
+         * Adds a pose pair to the register. If the register is full
+         * and the pose is inferior to the worst scoring pose in the register,
+         * it is discarded.
+         * @param pair The pose pair to add.
+         * @param score The score of the pairs alignment.
+         * @return True if the pose was added.
+         */
         bool addPoses(PosePair pair, double score);
 
+        /**
+         *
+         * @return The two poses yielding the best alignment of the registers ligands.
+         */
         PosePair getHighestScoringPair();
 
     private:

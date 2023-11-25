@@ -7,7 +7,10 @@
 
 namespace MultiAlign
 {
-
+/**
+ * Identifier for Conformers using the id of their ligand and the
+ * internal pose id.
+ */
 struct UniquePoseIdentifier //TODO move implementation to cpp
 {
     UniquePoseIdentifier()
@@ -24,7 +27,7 @@ struct UniquePoseIdentifier //TODO move implementation to cpp
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    std::string toString() const noexcept{
+    [[nodiscard]] std::string toString() const noexcept{
         return std::to_string(m_ligandId) + "-" + std::to_string(m_ligandInternalPoseId);
     }
 

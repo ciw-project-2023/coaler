@@ -43,9 +43,7 @@ namespace MultiAlign {
         return m_second;
     }
 
-    void PoseRegister::setMaxSize(unsigned int max) noexcept {
-        m_maxSize = max;
-    }
+    /*----------------------------------------------------------------------------------------------------------------*/
 
     bool PoseRegister::addPoses(const PosePair pair, const double score) {
         if(m_register.size() < m_maxSize)

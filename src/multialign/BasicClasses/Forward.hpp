@@ -17,9 +17,11 @@ namespace MultiAlign {
     struct UniquePoseIdentifier;
     struct UniquePoseIdentifierHash;
 
+    //hash structs
     struct PosePairHash;
     struct LigandPairHash;
 
+    //id declarations
     using LigandID = unsigned;
     using PoseID = unsigned;
 
