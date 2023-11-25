@@ -1,0 +1,14 @@
+//
+// Created by chris on 11/23/23.
+//
+
+#ifndef COALER_STARTINGASSEMBLYGENERATOR_HPP
+#define COALER_STARTINGASSEMBLYGENERATOR_HPP
+
+
+class StartingAssemblyGenerator {
+
+};
+
+
+#endif //COALER_STARTINGASSEMBLYGENERATOR_HPP
