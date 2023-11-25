@@ -30,6 +30,10 @@ namespace MultiAlign
         return registersContainingPose;
     }
 
+    PairwisePoseRegisters PoseRegisterCollection::getAllRegisters() const noexcept {
+        return m_registers;
+    }
+
     /*----------------------------------------------------------------------------------------------------------------*/
 
 }

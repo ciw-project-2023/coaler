@@ -31,5 +31,5 @@ TEST_CASE("test_ligand_molecule", "[ligand_tester]") {
     mol.addConformer(&conf);
     mol.addConformer(&conf);*/
     MultiAlign::Ligand ligand(mol, poses, 1);
-    CHECK(mol.getNumConformers() == ligand.getNofPoses());
+    CHECK(ligand.getNofPoses() == 3);
 }

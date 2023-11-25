@@ -27,6 +27,8 @@ public:
      */
     PairwisePoseRegisters getAllRegistersForPose(const UniquePoseIdentifier& pose) const noexcept;
 
+    PairwisePoseRegisters getAllRegisters() const noexcept;
+
 private:
 
     PairwisePoseRegisters m_registers;

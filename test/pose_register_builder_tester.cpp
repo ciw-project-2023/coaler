@@ -36,8 +36,10 @@ TEST_CASE("test_pose_register_builder", "[pose_register_builder_tester]") {
     pairwiseScores.emplace(m0p0m1p1, 0.1);
     pairwiseScores.emplace(m0p1m1p1, 0.3);
 
-    PairwisePoseRegisters reg = PoseRegisterBuilder::buildPoseRegisters(
+    PoseRegisterCollection collection = PoseRegisterBuilder::buildPoseRegisters(
             pairwiseScores, {l1,l2});
+
+    PairwisePoseRegisters reg = collection.getAllRegisters();
 
     CHECK(reg.size() == 1);
     CHECK(reg.at(ligandPair)->getSize() == 2);

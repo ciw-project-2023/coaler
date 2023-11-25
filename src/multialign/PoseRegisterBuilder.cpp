@@ -18,7 +18,7 @@ namespace
 
 namespace MultiAlign {
 
-    PairwisePoseRegisters PoseRegisterBuilder::buildPoseRegisters(
+    PoseRegisterCollection PoseRegisterBuilder::buildPoseRegisters(
             const PairwiseAlignment &alignmentScores,
             const std::vector<Ligand>& ligands) noexcept {
 
@@ -48,6 +48,11 @@ namespace MultiAlign {
                 }
             }
         }
-        return poseRegisters;
+        PoseRegisterCollection collection;
+        for(const auto& reg : poseRegisters)
+        {
+            collection.addRegister(reg.second);
+        }
+        return collection;
     }
 }
