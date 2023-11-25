@@ -13,9 +13,19 @@ namespace MultiAlign
 class PoseRegisterCollection {
 public:
 
+    // TODO prefer init in constructor.
+    /**
+     *
+     * @param poseRegister PoseRegister to add to the collection.
+     */
     void addRegister(const PoseRegisterPtr& poseRegister);
 
-    PairwisePoseRegisters getAllRegistersForPose(const UniquePoseIdentifier& pose);
+    /**
+     * Get all pose registers that contain a given pose.
+     * @param pose The pose to search in the register collection
+     * @return A subset of all the registers; all registers containing the pose.
+     */
+    PairwisePoseRegisters getAllRegistersForPose(const UniquePoseIdentifier& pose) const noexcept;
 
 private:
 

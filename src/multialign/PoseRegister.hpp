@@ -51,6 +51,13 @@ namespace MultiAlign
          */
         PosePair getHighestScoringPair();
 
+        /**
+         *
+         * @param pose The pose to check for.
+         * @return True if the register contains the @p pose.
+         */
+        bool containsPose(const UniquePoseIdentifier& pose);
+
     private:
 
         LigandID m_first;

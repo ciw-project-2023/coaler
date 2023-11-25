@@ -69,4 +69,13 @@ namespace MultiAlign {
         return m_register.at(0).first;
     }
 
+    bool PoseRegister::containsPose(const UniquePoseIdentifier &pose)
+    {
+        return std::any_of(m_register.begin(), m_register.end(),
+                    [pose](const auto entry){
+            return entry.first.getFirst() == pose
+                   || entry.first.getSecond() == pose;
+        });
+    }
+
 }

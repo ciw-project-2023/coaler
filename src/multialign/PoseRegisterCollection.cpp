@@ -15,8 +15,19 @@ namespace MultiAlign
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    PairwisePoseRegisters PoseRegisterCollection::getAllRegistersForPose(const UniquePoseIdentifier &pair) {
-        return MultiAlign::PairwisePoseRegisters();
+    PairwisePoseRegisters PoseRegisterCollection::getAllRegistersForPose(const UniquePoseIdentifier &pose) const noexcept{
+
+        PairwisePoseRegisters registersContainingPose;
+
+        for(const auto& [ligandPair, poseRegister] : m_registers)
+        {
+            if(poseRegister->containsPose(pose))
+            {
+                registersContainingPose.emplace(ligandPair, poseRegister);
+            }
+        }
+
+        return registersContainingPose;
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
