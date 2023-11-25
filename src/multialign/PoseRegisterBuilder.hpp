@@ -5,6 +5,8 @@
 #include "Forward.hpp"
 #include "BasicClasses/LigandPair.hpp"
 #include "BasicClasses/Ligand.hpp"
+#include "PoseRegisterCollection.hpp"
+
 
 namespace MultiAlign {
 

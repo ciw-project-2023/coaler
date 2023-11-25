@@ -31,8 +31,20 @@ namespace MultiAlign {
          */
         PoseID getPoseOfLigand(LigandID ligandId);
 
+        /**
+         * increase missing ligands count by one
+         */
+        void incrementMissingLigandsCount();
+
     private:
+        LigandAlignmentAssembly()=default;
+
+        bool insertLigandPose(LigandID ligand, PoseID pose);
+
         std::unordered_map<LigandID, PoseID> m_assembly;
+        unsigned m_missingLigandsCount{0};
+
+        friend class StartingAssemblyGenerator;
     };
 
 }

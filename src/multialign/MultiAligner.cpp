@@ -13,7 +13,7 @@ namespace{ //TODO move to own class?
             const RDKit::ROMol& core)
     {
         MultiAlign::PairwiseAlignment scores;
-        for(MultiAlign::LigandID firstMolId = 0; firstMolId < ligands.size(); firstMolId++)
+        for(MultiAlign::LigandID firstMolId = 0; firstMolId < ligands.size(); firstMolId++) //TODO use ligand vector iterator
         {
             for(MultiAlign::LigandID secondMolId = firstMolId + 1; secondMolId < ligands.size(); secondMolId++)
             {
@@ -76,9 +76,25 @@ namespace MultiAlign
                 allPosesAlignmentScores,
                 m_ligands);
 
-        assert(!m_poseRegisters.empty());
-
         // build starting ensembles from registers
+        for(const auto& firstLigand : m_ligands)
+        {
+            for(const auto& secondLigand : m_ligands)
+            {
+                if(firstLigand.getID() == secondLigand.getID())
+                {
+                    continue;
+                }
+
+                for(const UniquePoseIdentifier& firstPose : firstLigand.getPoses())
+                {
+                    for(const UniquePoseIdentifier& secondPose : secondLigand.getPoses())
+                    {
+
+                    }
+                }
+            }
+        }
 
         //optimize ensembles
 

@@ -24,12 +24,10 @@ namespace MultiAlign {
 
     private:
 
-        //singleAligner --> im constructior übergeben
-
         coaler::SingleAligner m_singleAligner;
         RDKit::ROMol m_core;
         std::vector<Ligand> m_ligands;
-        PairwisePoseRegisters m_poseRegisters;
+        PoseRegisterCollection m_poseRegisters;
         PairwiseAlignment m_pairwiseAlignments;
     };
 

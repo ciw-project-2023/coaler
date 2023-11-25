@@ -5,13 +5,16 @@
 #pragma once
 
 #include "LigandAlignmentAssembly.hpp"
+#include "PoseRegisterCollection.hpp"
 
 namespace MultiAlign
 {
     class StartingAssemblyGenerator {
-        LigandAlignmentAssembly generateStartingAssembly(
-                UniquePoseIdentifier Pose,
-                std::shared_ptr<PoseRegister> poseCompatibilities
+
+        static LigandAlignmentAssembly generateStartingAssembly(
+                UniquePoseIdentifier pose,
+                const PoseRegisterCollection& poseCompatibilities,
+                const std::vector<Ligand>& ligands
                 );
 
     };

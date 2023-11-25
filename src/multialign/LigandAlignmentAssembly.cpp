@@ -31,4 +31,16 @@ namespace MultiAlign {
         return m_assembly.at(ligandId);
     }
 
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    void LigandAlignmentAssembly::incrementMissingLigandsCount() {
+        m_missingLigandsCount++;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    bool LigandAlignmentAssembly::insertLigandPose(LigandID ligand, PoseID pose) {
+        return m_assembly.emplace(ligand, pose).second;
+    }
+
 }
