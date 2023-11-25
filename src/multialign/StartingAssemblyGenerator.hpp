@@ -2,13 +2,19 @@
 // Created by chris on 11/23/23.
 //
 
-#ifndef COALER_STARTINGASSEMBLYGENERATOR_HPP
-#define COALER_STARTINGASSEMBLYGENERATOR_HPP
+#pragma once
+
+#include "LigandAlignmentAssembly.hpp"
+
+namespace MultiAlign
+{
+    class StartingAssemblyGenerator {
+        LigandAlignmentAssembly generateStartingAssembly(
+                UniquePoseIdentifier Pose,
+                std::shared_ptr<PoseRegister> poseCompatibilities
+                );
+
+    };
+}
 
 
-class StartingAssemblyGenerator {
-
-};
-
-
-#endif //COALER_STARTINGASSEMBLYGENERATOR_HPP

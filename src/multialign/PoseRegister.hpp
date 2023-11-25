@@ -20,8 +20,8 @@ namespace MultiAlign
     public:
 
         PoseRegister(LigandID firstLigand,
-                              LigandID secondLigand,
-                              unsigned maxSize);
+                     LigandID secondLigand,
+                     unsigned maxSize);
 
         [[nodiscard]] unsigned getSize() const noexcept;
 

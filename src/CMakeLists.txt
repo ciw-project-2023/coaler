@@ -18,7 +18,7 @@ add_executable (coaler
         multialign/LigandAlignmentAssembly.cpp
         multialign/LigandAlignmentAssembly.hpp
         multialign/PoseRegisterBuilder.cpp
-        multialign/BasicClasses/UniquePoseIdentifier.hpp multialign/MultiAlignerResult.hpp)
+        multialign/BasicClasses/UniquePoseIdentifier.hpp multialign/MultiAlignerResult.hpp multialign/StartingAssemblyGenerator.cpp multialign/StartingAssemblyGenerator.hpp multialign/PoseRegisterCollection.cpp multialign/PoseRegisterCollection.hpp)
 
 find_package(spdlog REQUIRED)
 find_package(rdkit REQUIRED)

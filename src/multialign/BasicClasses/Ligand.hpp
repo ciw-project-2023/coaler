@@ -11,12 +11,19 @@
 
 namespace MultiAlign {
 
+    /**
+     * Represents a molecule.
+     */
     class Ligand {
     public:
         Ligand(const RDKit::RWMol& mol,
                const UniquePoseSet &poses,
                LigandID id);
 
+        /**
+         * get idenitifers of all poses embedded in ligand.
+         * @return
+         */
         [[nodiscard]] UniquePoseSet getPoses() const noexcept;
 
         [[nodiscard]] LigandID getID() const noexcept;

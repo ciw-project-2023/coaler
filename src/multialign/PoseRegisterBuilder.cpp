@@ -23,7 +23,6 @@ namespace MultiAlign {
             const std::vector<Ligand>& ligands) noexcept {
 
         PairwisePoseRegisters poseRegisters;
-        std::cout << "echo" << std::endl;
         for(LigandID firstLigand = 0; firstLigand < ligands.size(); firstLigand++)
         {
             for(LigandID secondLigand = 0; secondLigand < firstLigand; secondLigand++)
@@ -43,7 +42,7 @@ namespace MultiAlign {
                     {
                         std::string first_s = firstLigandPose.toString();
                         std::string second_s = secondLigandPose.toString();
-                        spdlog::info(firstLigandPose.toString() + " : " + secondLigandPose.toString());
+                        //spdlog::info(firstLigandPose.toString() + " : " + secondLigandPose.toString());
                         PosePair pair(firstLigandPose, secondLigandPose);
 
                         poseRegisters.at(currentLigandPair)->addPoses(

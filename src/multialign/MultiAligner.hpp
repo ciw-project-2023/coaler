@@ -17,7 +17,7 @@ namespace MultiAlign {
 
         MultiAligner(
                 const std::vector<RDKit::RWMol>& molecules,
-                RDKit::ROMol  core,
+                RDKit::ROMol core,
                 const coaler::SingleAligner& aligner);
 
         MultiAlignerResult alignMolecules();

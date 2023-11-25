@@ -66,6 +66,7 @@ namespace MultiAlign
     /*----------------------------------------------------------------------------------------------------------------*/
 
     MultiAlignerResult MultiAligner::alignMolecules(){
+        //calculate pairwise alignments
         PairwiseAlignment allPosesAlignmentScores = calculate_alignment_scores(
                 m_ligands,
                 std::make_shared<coaler::SingleAligner>(m_singleAligner),
@@ -74,6 +75,7 @@ namespace MultiAlign
         m_poseRegisters = PoseRegisterBuilder::buildPoseRegisters(
                 allPosesAlignmentScores,
                 m_ligands);
+
         assert(!m_poseRegisters.empty());
 
         // build starting ensembles from registers
