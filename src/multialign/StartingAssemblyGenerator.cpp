@@ -15,9 +15,9 @@ namespace MultiAlign
         LigandAlignmentAssembly assembly;
 
         //add already defined pose
-        assembly.insertLigandPose(pose.m_ligandId, pose.m_ligandInternalPoseId);
+        assembly.insertLigandPose(pose.getLigandId(), pose.getLigandInternalPoseId());
         PairwisePoseRegisters registers = poseCompatibilities.getAllRegistersForPose(pose);
-        LigandID ligandId = pose.m_ligandId;
+        LigandID ligandId = pose.getLigandId();
 
         for(const Ligand& otherLigand : ligands)
         {
@@ -29,7 +29,7 @@ namespace MultiAlign
             assert(pair.getFirst() == pose || pair.getSecond() == pose);
 
             UniquePoseIdentifier otherPose = pair.getFirst() == pose? pair.getSecond() : pair.getFirst();
-            assembly.insertLigandPose(otherPose.m_ligandId, otherPose.m_ligandInternalPoseId);
+            assembly.insertLigandPose(otherPose.getLigandId(), otherPose.getLigandInternalPoseId());
         }
         return assembly;
     }

@@ -13,51 +13,30 @@ namespace MultiAlign
  */
 struct UniquePoseIdentifier //TODO move implementation to cpp
 {
-    UniquePoseIdentifier()
-    {};
-
-    /*----------------------------------------------------------------------------------------------------------------*/
+    UniquePoseIdentifier() = default;
 
     UniquePoseIdentifier(LigandID ligandId,
-                         PoseID ligandInternalPoseId)
-                         : m_ligandId(ligandId)
-                         , m_ligandInternalPoseId(ligandInternalPoseId)
-    {
-    }
+                         PoseID ligandInternalPoseId);
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    [[nodiscard]] std::string toString() const noexcept{
-        return std::to_string(m_ligandId) + "-" + std::to_string(m_ligandInternalPoseId);
-    }
+    bool operator==(const UniquePoseIdentifier &other) const;
+
+    bool operator!=(const UniquePoseIdentifier &other) const;
+
+    bool operator<(const UniquePoseIdentifier &other) const;
+
+    bool operator>(const UniquePoseIdentifier &other) const;
+
+    [[maybe_unused]] [[nodiscard]] std::string toString() const noexcept;
+
+    [[nodiscard]] LigandID getLigandId() const;
+
+    [[nodiscard]] PoseID getLigandInternalPoseId() const;
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    //TODO wtf
-    bool operator!=(const UniquePoseIdentifier &other) const{
-        return this->m_ligandId != other.m_ligandId
-        || this->m_ligandInternalPoseId != other.m_ligandInternalPoseId;
-    }
-
-    /*----------------------------------------------------------------------------------------------------------------*/
-
-    bool operator==(const UniquePoseIdentifier &other) const{
-        return !(*this != other);
-    }
-
-    /*----------------------------------------------------------------------------------------------------------------*/
-
-    bool operator>(const UniquePoseIdentifier &other) const
-    {
-        if(this->m_ligandId == other.m_ligandId)
-        {
-            return this->m_ligandInternalPoseId >
-                   other.m_ligandInternalPoseId;
-        }
-        return this->m_ligandId > other.m_ligandId;
-    }
-
-    /*----------------------------------------------------------------------------------------------------------------*/
+  private:
 
     LigandID m_ligandId;
     PoseID m_ligandInternalPoseId;
@@ -65,11 +44,8 @@ struct UniquePoseIdentifier //TODO move implementation to cpp
 
 struct UniquePoseIdentifierHash
 {
-    std::size_t operator()(const UniquePoseIdentifier& id) const
-    {
-        std::size_t seed = 0;
-        std::string key = std::to_string(id.m_ligandId) + "-" +  std::to_string(id.m_ligandInternalPoseId);
-        return std::hash<std::string>{}(key);
-    }
+    std::size_t operator()(const UniquePoseIdentifier& uniquePoseId) const;
+
+    friend class UniquePoseIdentifier;
 };
 }
