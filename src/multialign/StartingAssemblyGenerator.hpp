@@ -10,7 +10,7 @@
 namespace MultiAlign
 {
     class StartingAssemblyGenerator {
-
+    public:
         static LigandAlignmentAssembly generateStartingAssembly(
                 UniquePoseIdentifier pose,
                 const PoseRegisterCollection& poseCompatibilities,
