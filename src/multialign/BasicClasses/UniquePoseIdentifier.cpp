@@ -75,8 +75,7 @@ namespace MultiAlign
     std::size_t UniquePoseIdentifierHash::operator()(const UniquePoseIdentifier& uniquePoseId) const
     {
         const std::size_t seed = 0;
-        const std::string key = std::to_string(uniquePoseId.getLigandId()) + "-" + \
-                                std::to_string(uniquePoseId.getLigandInternalPoseId());
+        const std::string key = uniquePoseId.toString();
         return std::hash<std::string>{}(key);
     }
 
