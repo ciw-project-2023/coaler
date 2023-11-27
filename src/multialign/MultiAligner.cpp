@@ -6,6 +6,9 @@
 
 #include <utility>
 
+#include "LigandAlignmentAssembly.hpp"
+#include "StartingAssemblyGenerator.hpp"
+
 namespace{ //TODO move to own class?
     MultiAlign::PairwiseAlignment calculate_alignment_scores(
             const std::vector<MultiAlign::Ligand>& ligands,
@@ -37,11 +40,15 @@ namespace{ //TODO move to own class?
                  }
             }
         }
+        return scores;
     }
 }
 
 namespace MultiAlign
 {
+
+    using AssemblyCollection = std::unordered_map<UniquePoseIdentifier, LigandAlignmentAssembly, UniquePoseIdentifierHash>;
+
     MultiAligner::MultiAligner(
             const std::vector<RDKit::RWMol>& molecules,
             RDKit::ROMol  core,
@@ -77,22 +84,16 @@ namespace MultiAlign
                 m_ligands);
 
         // build starting ensembles from registers
-        for(const auto& firstLigand : m_ligands)
+        AssemblyCollection assemblies;
+        for(const Ligand& ligand : m_ligands)
         {
-            for(const auto& secondLigand : m_ligands)
+            for(const UniquePoseIdentifier& pose : ligand.getPoses())
             {
-                if(firstLigand.getID() == secondLigand.getID())
-                {
-                    continue;
-                }
-
-                for(const UniquePoseIdentifier& firstPose : firstLigand.getPoses())
-                {
-                    for(const UniquePoseIdentifier& secondPose : secondLigand.getPoses())
-                    {
-
-                    }
-                }
+                assemblies.emplace(pose, StartingAssemblyGenerator::generateStartingAssembly(
+                    pose,
+                    m_poseRegisters,
+                    m_ligands
+                    ));
             }
         }
 
