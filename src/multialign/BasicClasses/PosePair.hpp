@@ -14,7 +14,7 @@ namespace MultiAlign
      */
     class PosePair{
     public:
-        PosePair(UniquePoseIdentifier first,
+        explicit PosePair(UniquePoseIdentifier first,
                  UniquePoseIdentifier second);
 
         [[nodiscard]] const UniquePoseIdentifier getFirst() const noexcept;

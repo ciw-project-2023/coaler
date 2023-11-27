@@ -95,8 +95,8 @@ namespace{ //TODO move to own class?
             {
                 continue;
             }
-            MultiAlign::UniquePoseIdentifier ligandPose =
-            assembly.getPoseOfLigand()
+            MultiAlign::UniquePoseIdentifier ligandPose = {ligand.getID(),
+            assembly.getPoseOfLigand(ligand.getID())};
         }
     }
 }
@@ -160,16 +160,15 @@ namespace MultiAlign
          * forall assemblies
          *      while [not aboirt condition]
          *          get ligand with worst score
-         *                 22222222222222200000000000000000 forall other ligands
-         *                      generate new pose of ligand aligned to poses of other ligand
-         *                  find new ligand pose with best fit
-         *                  exchange pose in assembly
+         *                 forall other ligands
+         *                 generate new pose of ligand aligned to poses of other ligand
+         *                 find new ligand pose with best fit
+         *                 exchange pose in assembly
          *
          *
          *
          *
          */
-
 
         return MultiAlignerResult();
     }
