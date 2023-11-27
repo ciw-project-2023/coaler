@@ -16,12 +16,15 @@ add_executable (Test
         ${CMAKE_SOURCE_DIR}/src/multialign/PoseRegisterBuilder.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/PoseRegisterCollection.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/LigandAlignmentAssembly.cpp
+        ${CMAKE_SOURCE_DIR}/src/multialign/BasicClasses/UniquePoseIdentifier.cpp
+
 
         ligand_tester.cpp multi_aligner_tester.cpp
         ligand_pair_tester.cpp
         pose_pair_tester.cpp
         ligand_alignment_assembly_tester.cpp
-        pose_register_builder_tester.cpp)
+        pose_register_builder_tester.cpp
+        unique_pose_identifier_tester.cpp)
 
 include_directories (${TEST_SOURCE_DIR}/src)
 
