@@ -21,6 +21,8 @@ namespace MultiAlign
     using PairwiseAlignment = std::unordered_map<PosePair, double, PosePairHash>;
     using PairwisePoseRegisters = std::unordered_map<LigandPair, PoseRegisterPtr, LigandPairHash>;
 
+    using LigandVector = std::vector<Ligand>;
+
 
 
 

@@ -5,6 +5,7 @@
 #include "MultiAligner.hpp"
 
 #include <utility>
+#include <spdlog/spdlog.h>
 
 #include "LigandAlignmentAssembly.hpp"
 #include "StartingAssemblyGenerator.hpp"
@@ -41,6 +42,62 @@ namespace{ //TODO move to own class?
             }
         }
         return scores;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    double calc_score_of_assembly( //TODO move to assemlby and store to avoid recalcing a lot?
+        const MultiAlign::LigandAlignmentAssembly& assembly,
+        const MultiAlign::PairwiseAlignment& scores,
+        const MultiAlign::LigandVector& ligands)
+    {
+        double assemblyScore = 0.0;
+        for(const MultiAlign::Ligand& firstLigand : ligands)
+        {
+            for(const MultiAlign::Ligand& secondLigand : ligands)
+            {
+                if(firstLigand.getID() >= secondLigand.getID())
+                {
+                    continue;
+                }
+                MultiAlign::PoseID firstLigandPoseID = assembly.getPoseOfLigand(firstLigand.getID());
+                MultiAlign::PoseID secondLigandPoseID = assembly.getPoseOfLigand(secondLigand.getID());
+
+                if(firstLigandPoseID == std::numeric_limits<MultiAlign::PoseID>::max()
+                    || secondLigandPoseID == std::numeric_limits<MultiAlign::PoseID>::max())
+                {
+                    spdlog::info("encountered invalid PosePair during optimization.");
+                    continue;
+                }
+
+                MultiAlign::UniquePoseIdentifier firstLigandPose{
+                    firstLigand.getID(), firstLigandPoseID};
+                MultiAlign::UniquePoseIdentifier secondLigandPose{
+                    secondLigand.getID(), secondLigandPoseID};
+                assemblyScore += scores.at({firstLigandPose, secondLigandPose});
+            }
+        }
+        return assemblyScore;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    double get_score_deficit_of_ligand(
+        const MultiAlign::Ligand& ligand,
+        const MultiAlign::LigandVector& ligands,
+        const MultiAlign::LigandAlignmentAssembly& assembly,
+        const MultiAlign::PairwiseAlignment& scores)
+    {
+        double scoreDeficit = 0.0;
+        for(const MultiAlign::Ligand& otherLigand : ligands)
+        {
+            if(ligand.getID() == otherLigand.getID())
+            {
+                continue;
+            }
+            MultiAlign::UniquePoseIdentifier ligandPose =
+            assembly.getPoseOfLigand()
+        }
     }
 }
 
@@ -98,6 +155,21 @@ namespace MultiAlign
         }
 
         //optimize ensembles
+
+        /**
+         * forall assemblies
+         *      while [not aboirt condition]
+         *          get ligand with worst score
+         *                 22222222222222200000000000000000 forall other ligands
+         *                      generate new pose of ligand aligned to poses of other ligand
+         *                  find new ligand pose with best fit
+         *                  exchange pose in assembly
+         *
+         *
+         *
+         *
+         */
+
 
         return MultiAlignerResult();
     }
