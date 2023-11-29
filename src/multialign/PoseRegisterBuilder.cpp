@@ -16,7 +16,7 @@ namespace
     }
 }
 
-namespace coaler::multialign {
+namespace MultiAlign {
 
     PoseRegisterCollection PoseRegisterBuilder::buildPoseRegisters(
             const PairwiseAlignment &alignmentScores,

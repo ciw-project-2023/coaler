@@ -4,7 +4,7 @@
 
 #include "Ligand.hpp"
 
-namespace coaler::multialign {
+namespace MultiAlign {
 
     Ligand::Ligand(const RDKit::RWMol& mol,
                    const UniquePoseSet &poses, LigandID id)

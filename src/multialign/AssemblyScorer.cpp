@@ -7,7 +7,7 @@
 #include <spdlog/spdlog.h>
 
 
-namespace coaler::multialign
+namespace MultiAlign
 {
 
     double AssemblyScorer::calculateAssemblyScore(const LigandAlignmentAssembly& assembly,

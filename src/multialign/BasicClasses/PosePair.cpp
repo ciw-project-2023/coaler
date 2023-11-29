@@ -5,7 +5,7 @@
 #include "PosePair.hpp"
 
 
-namespace coaler::multialign
+namespace MultiAlign
 {
     PosePair::PosePair(const UniquePoseIdentifier first, const UniquePoseIdentifier second) {
         //swap values to rule out duplicates

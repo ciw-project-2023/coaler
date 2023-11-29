@@ -17,7 +17,7 @@ namespace{
 
 }
 
-namespace coaler::multialign {
+namespace MultiAlign {
 
     PoseRegister::PoseRegister(LigandID firstLigand,
                                LigandID secondLigand,

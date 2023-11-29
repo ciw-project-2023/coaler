@@ -11,7 +11,7 @@
 using PosePairAndScore = std::pair<MultiAlign::PosePair, double>;
 
 
-namespace coaler::multialign
+namespace MultiAlign
 {
 
     /**

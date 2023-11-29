@@ -7,7 +7,7 @@
 #include "LigandAlignmentAssembly.hpp"
 #include "PoseRegisterCollection.hpp"
 
-namespace coaler::multialign
+namespace MultiAlign
 {
     class StartingAssemblyGenerator {
       public:

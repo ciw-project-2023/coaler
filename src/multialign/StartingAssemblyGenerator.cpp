@@ -4,7 +4,7 @@
 
 #include "StartingAssemblyGenerator.hpp"
 
-namespace coaler::multialign
+namespace MultiAlign
 {
 
     LigandAlignmentAssembly StartingAssemblyGenerator::generateStartingAssembly(

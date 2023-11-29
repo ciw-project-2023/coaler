@@ -6,7 +6,7 @@
 #include <boost/functional/hash.hpp>
 #include <unordered_set>
 
-namespace coaler::multialign{
+namespace MultiAlign {
 
     class Ligand;
 

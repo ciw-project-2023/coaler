@@ -9,7 +9,7 @@
 
 #include <unordered_set>
 
-namespace coaler::multialign {
+namespace MultiAlign {
 
     /**
      * Represents a molecule.

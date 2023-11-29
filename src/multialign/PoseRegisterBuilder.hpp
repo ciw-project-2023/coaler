@@ -8,7 +8,7 @@
 #include "PoseRegisterCollection.hpp"
 
 
-namespace coaler::multialign {
+namespace MultiAlign {
 
     class PoseRegisterBuilder {
 

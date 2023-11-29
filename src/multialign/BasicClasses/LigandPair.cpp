@@ -4,7 +4,7 @@
 
 #include "LigandPair.hpp"
 
-namespace coaler::multialign
+namespace MultiAlign
 {
     LigandPair::LigandPair(const LigandID first, const LigandID second) {
         //swap values to rule out duplicates

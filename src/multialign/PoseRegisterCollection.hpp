@@ -7,7 +7,7 @@
 #include "Forward.hpp"
 #include "PoseRegister.hpp"
 
-namespace coaler::multialign
+namespace MultiAlign
 {
 
 class PoseRegisterCollection {
