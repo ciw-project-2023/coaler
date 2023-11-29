@@ -6,6 +6,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include <queue>
 #include <utility>
 
 #include "AssemblyScorer.hpp"
@@ -13,6 +14,10 @@
 #include "StartingAssemblyGenerator.hpp"
 
 namespace {  // TODO move to own class?
+
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     coaler::multialign::PairwiseAlignment calculate_alignment_scores(
         const std::vector<coaler::multialign::Ligand>& ligands,
         const std::shared_ptr<coaler::SingleAligner>& alignerPtr, const RDKit::ROMol& core) {
@@ -43,8 +48,23 @@ namespace {  // TODO move to own class?
 
 namespace coaler::multialign {
 
-    using AssemblyCollection
-        = std::unordered_map<UniquePoseIdentifier, LigandAlignmentAssembly, UniquePoseIdentifierHash>;
+
+    using AssemblyWithScore = std::pair<coaler::multialign::LigandAlignmentAssembly, double>;
+
+    struct AssemblyWithScoreLess
+    {
+        bool operator()(const AssemblyWithScore& lhs,
+                        const AssemblyWithScore& rhs)
+        {
+            if(lhs.first.getMissingLigandsCount() != lhs.first.getMissingLigandsCount())
+            {
+                return lhs.first.getMissingLigandsCount() < lhs.first.getMissingLigandsCount();
+            }
+            else{
+                return lhs.second < rhs.second;
+            }
+        }
+    };
 
     MultiAligner::MultiAligner(const std::vector<RDKit::RWMol>& molecules, RDKit::ROMol core,
                                const coaler::SingleAligner& aligner)
@@ -69,18 +89,16 @@ namespace coaler::multialign {
         m_poseRegisters = PoseRegisterBuilder::buildPoseRegisters(allPosesAlignmentScores, m_ligands);
 
         // build starting ensembles from registers
-        AssemblyCollection assemblies;
-        std::unordered_map<UniquePoseIdentifier, std::pair<double, unsigned>,
-                           UniquePoseIdentifierHash>
-            assemblyScores;  // store scores of assemblies
+        //AssemblyCollection assemblies;
+        std::priority_queue<AssemblyWithScore, std::vector<AssemblyWithScore>, AssemblyWithScoreLess> assemblies;
 
         for (const Ligand& ligand : m_ligands) {
             for (const UniquePoseIdentifier& pose : ligand.getPoses()) {
-                assemblies.emplace(
-                    pose, StartingAssemblyGenerator::generateStartingAssembly(pose, m_poseRegisters, m_ligands));
-                assemblyScores.emplace(pose, std::make_pair(AssemblyScorer::calculateAssemblyScore(
-                                                                assemblies.at(pose), m_pairwiseAlignments, m_ligands),
-                                                            assemblies.at(pose).getMissingLigandsCount()));
+                LigandAlignmentAssembly assembly =
+                    StartingAssemblyGenerator::generateStartingAssembly(pose, m_poseRegisters, m_ligands);
+
+                assemblies.emplace(assembly, AssemblyScorer::calculateAssemblyScore(
+                    assembly, m_pairwiseAlignments, m_ligands));
             }
         }
 
