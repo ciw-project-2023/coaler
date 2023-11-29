@@ -36,27 +36,10 @@ namespace MultiAlign
                     firstLigand.getID(), firstLigandPoseID};
                 MultiAlign::UniquePoseIdentifier secondLigandPose{
                     secondLigand.getID(), secondLigandPoseID};
-                assemblyScore += scores.at({firstLigandPose, secondLigandPose});
+                assemblyScore += scores.at(PosePair{firstLigandPose, secondLigandPose});
             }
         }
         return assemblyScore;
-    }
-
-    /*----------------------------------------------------------------------------------------------------------------*/
-
-    double AssemblyScorer::calculateLigandScoreDeficit(const Ligand& ligand, const LigandVector& ligands,
-                                                       const LigandAlignmentAssembly& assembly,
-                                                       const PairwiseAlignment& scores) {
-        double scoreDeficit = 0.0;
-        for(const MultiAlign::Ligand& otherLigand : ligands)
-        {
-            if(ligand.getID() == otherLigand.getID())
-            {
-                continue;
-            }
-            MultiAlign::UniquePoseIdentifier ligandPose = {ligand.getID(),
-                                                           assembly.getPoseOfLigand(ligand.getID())};
-        }
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
@@ -66,7 +49,7 @@ namespace MultiAlign
         const LigandID maxLigandId,
         const LigandAlignmentAssembly& assembly,
         const PoseRegisterCollection& registers,
-        const PairwiseAlignment scores)
+        const PairwiseAlignment& scores)
     {
         PairwisePoseRegisters poseRegisters = registers.getAllRegisters();
         double scoreDeficit = 0.0;

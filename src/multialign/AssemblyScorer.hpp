@@ -26,11 +26,11 @@ class AssemblyScorer {
         );
 
     static double calculateScoreDeficitForLigand(
-        const LigandID ligandId,
-        const LigandID maxLigandId,
+        LigandID ligandId,
+        LigandID maxLigandId,
         const LigandAlignmentAssembly& assembly,
         const PoseRegisterCollection& registers,
-        const PairwiseAlignment scores
+        const PairwiseAlignment& scores
         );
 
 };
