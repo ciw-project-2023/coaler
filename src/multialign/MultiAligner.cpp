@@ -100,6 +100,7 @@ namespace coaler::multialign
                                                  m_pairwiseAlignments,
                                                  m_ligands
                                                  ), assemblies.at(pose).getMissingLigandsCount()));
+
             }
         }
 
