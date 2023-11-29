@@ -54,7 +54,8 @@ namespace coaler {
         RDKit::MatchVectType match_vect_b;
         RDKit::SubstructMatch(mol_b, *core_structure, match_vect_b);
 
-        if (match_vect_a.size() != match_vect_b.size()) {
+        if (match_vect_a.size() != core_structure->getNumAtoms()
+            || match_vect_b.size() != core_structure->getNumAtoms()) {
             spdlog::error("Core is not a common core structure of molecule a and molecule b!");
             throw std::runtime_error("Core is not a common core structure of molecule a and molecule b!");
         }
