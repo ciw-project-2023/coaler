@@ -6,24 +6,21 @@
 
 #include <GraphMol/ROMol.h>
 
+#include <unordered_map>
+
 namespace coaler::io {
-    /** @struct AlignedMolPair
-     *  @brief This structure represents an aligned molecule pair.
-     *  @var align_score
-     *  @var mol_a
-     *  @var mol_b
-     *  @var mol_a
-     *  @var mol_b
-     */
-    struct AlignedMolPair {
-        double align_score;
 
-        int id_mol_a;
-        int id_mol_b;
+    // TODO: Remove after MultiAlign is merged
+    using LigandID = unsigned;
+    using PoseID = unsigned;
 
-        RDKit::ROMol mol_a;
-        RDKit::ROMol mol_b;
+    struct MultiAlignerResult{
+        double score;
+
+        std::unordered_map<LigandID, PoseID> poseIDsByLigandID;
+        std::vector<RDKit::RWMol *> ligands;
     };
+    // TODO: END
 
     /**
      * @brief This class is responsible for handling the output.
@@ -31,24 +28,15 @@ namespace coaler::io {
     class OutputWriter {
       public:
         /**
-         * Add molecule pair with alignment score to aligned molecules
-         * @param aligned_mol_pair
-         */
-        void add_aligned_mols(AlignedMolPair& aligned_mol_pair);
-
-        /**
          * Writes the aligned molecules in an output file.
          * @param file_path
          */
-        void save_molecules_w_scores_in_file(const std::string& file_path);
+        static void save_molecules_w_scores_in_file(MultiAlignerResult result, const std::string& file_path);
 
         /**
          * Prints the aligned molecules with score inside the log.
          */
-        void print_in_log_molecules_w_scores();
-
-      private:
-        std::vector<AlignedMolPair> aligned_mols_;
+        static void print_multi_aligner_result(MultiAlignerResult result);
     };
 
 }  // namespace coaler::io
