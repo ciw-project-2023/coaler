@@ -46,6 +46,8 @@ namespace coaler::multialign {
         return m_assembly.emplace(ligand, pose).second;
     }
 
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     unsigned LigandAlignmentAssembly::getMissingLigandsCount() const noexcept {
         return m_missingLigandsCount;
     }

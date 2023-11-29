@@ -41,6 +41,7 @@ namespace coaler::multialign {
          */
         unsigned getMissingLigandsCount() const noexcept;
 
+
     private:
         LigandAlignmentAssembly()=default;
 
