@@ -11,5 +11,6 @@ namespace MultiAlign
     struct MultiAlignerResult{
         double score;
         std::unordered_map<LigandID, PoseID> poseIDsByLigandID;
+        std::vector<Ligand> ligands;
     };
 }

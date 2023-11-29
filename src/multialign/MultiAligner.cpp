@@ -91,6 +91,8 @@ namespace MultiAlign
             }
         }
 
+        //todo sort assemblies (quali and missing ligands) --> assign score to assembly to avoid recalc during sort?
+
         //optimize ensembles
 
         /**
