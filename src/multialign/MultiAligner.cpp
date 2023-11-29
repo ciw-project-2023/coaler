@@ -4,9 +4,11 @@
 
 #include "MultiAligner.hpp"
 
-#include <utility>
 #include <spdlog/spdlog.h>
 
+#include <utility>
+
+#include "AssemblyScorer.hpp"
 #include "LigandAlignmentAssembly.hpp"
 #include "StartingAssemblyGenerator.hpp"
 
@@ -142,6 +144,11 @@ namespace MultiAlign
 
         // build starting ensembles from registers
         AssemblyCollection assemblies;
+        std::unordered_map<
+            UniquePoseIdentifier,
+            std::pair<double, unsigned>,
+            UniquePoseIdentifierHash> assemblyScores; //store scores of assemblies
+
         for(const Ligand& ligand : m_ligands)
         {
             for(const UniquePoseIdentifier& pose : ligand.getPoses())
@@ -151,6 +158,11 @@ namespace MultiAlign
                     m_poseRegisters,
                     m_ligands
                     ));
+                assemblyScores.emplace(pose, std::make_pair(AssemblyScorer::calculateAssemblyScore(
+                                                 assemblies.at(pose),
+                                                 m_pairwiseAlignments,
+                                                 m_ligands
+                                                 ), assemblies.at(pose).getMissingLigandsCount());
             }
         }
 

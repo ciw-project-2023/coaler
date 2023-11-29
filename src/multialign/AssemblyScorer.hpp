@@ -12,6 +12,7 @@ namespace MultiAlign
 {
 class AssemblyScorer {
 
+  public:
     static double calculateAssemblyScore(
         const MultiAlign::LigandAlignmentAssembly& assembly,
         const MultiAlign::PairwiseAlignment& scores,

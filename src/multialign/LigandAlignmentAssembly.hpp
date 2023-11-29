@@ -36,6 +36,12 @@ namespace MultiAlign {
          */
         void incrementMissingLigandsCount();
 
+        /**
+         *
+         * @return  The number of missing Ligands
+         */
+        unsigned getMissingLigandsCount();
+
     private:
         LigandAlignmentAssembly()=default;
 

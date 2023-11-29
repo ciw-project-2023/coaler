@@ -46,4 +46,10 @@ namespace MultiAlign {
         return m_assembly.emplace(ligand, pose).second;
     }
 
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    unsigned LigandAlignmentAssembly::getMissingLigandsCount() {
+        return m_missingLigandsCount;
+    }
+
 }
