@@ -39,6 +39,8 @@ namespace coaler::multialign {
          */
         unsigned getMissingLigandsCount() const noexcept;
 
+        std::unordered_map<LigandID, PoseID> getAssemblyMapping();
+
       private:
         LigandAlignmentAssembly() = default;
 

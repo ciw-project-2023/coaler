@@ -11,9 +11,17 @@ namespace coaler {
     namespace multialign {
 
         struct MultiAlignerResult {
-            double score;
-            std::unordered_map<LigandID, PoseID> poseIDsByLigandID;
-            std::vector<Ligand> ligands;
+          public:
+            MultiAlignerResult(double score,
+                               const std::unordered_map<LigandID, PoseID>& mapping,
+                               const LigandVector& ligands)
+                : alignmentScore(score)
+                  , poseIDsByLigandID(mapping)
+                  , inputLigands(ligands)
+            {}
+            double alignmentScore;
+            const std::unordered_map<LigandID, PoseID> poseIDsByLigandID;
+            const std::vector<Ligand> inputLigands;
         };
 
     }  // namespace multialign

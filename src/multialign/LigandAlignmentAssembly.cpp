@@ -38,5 +38,11 @@ namespace coaler::multialign {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     unsigned LigandAlignmentAssembly::getMissingLigandsCount() const noexcept { return m_missingLigandsCount; }
+    
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    std::unordered_map<LigandID, PoseID> LigandAlignmentAssembly::getAssemblyMapping() {
+        return m_assembly;
+    }
 
 }  // namespace coaler::multialign
