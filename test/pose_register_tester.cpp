@@ -7,10 +7,10 @@
 #include "../src/multialign/PoseRegister.hpp"
 
 TEST_CASE("test_add_poses_to_register", "[pose_register]") {
-    MultiAlign::PoseRegister poseRegister(1,2,3);
-    MultiAlign::PosePair pair1({0,0},{1,0});
-    MultiAlign::PosePair pair2({0,0},{2,0});
-    MultiAlign::PosePair pair3({1,0},{2,0});
+    coaler::multialign::PoseRegister poseRegister(1,2,3);
+    coaler::multialign::PosePair pair1({0,0},{1,0});
+    coaler::multialign::PosePair pair2({0,0},{2,0});
+    coaler::multialign::PosePair pair3({1,0},{2,0});
 
     CHECK(poseRegister.addPoses(pair1, 1.7));
     CHECK(poseRegister.getHighestScoringPair() == pair1);
@@ -23,10 +23,10 @@ TEST_CASE("test_add_poses_to_register", "[pose_register]") {
 }
 
 TEST_CASE("test_add_pose_to_full_register", "[pose_register]") {
-    MultiAlign::PoseRegister poseRegister(1,2,2); //limit = 2
-    MultiAlign::PosePair pair1({0,0},{1,0});
-    MultiAlign::PosePair pair2({0,0},{2,0});
-    MultiAlign::PosePair pair3({1,0},{2,0});
+    coaler::multialign::PoseRegister poseRegister(1,2,2); //limit = 2
+    coaler::multialign::PosePair pair1({0,0},{1,0});
+    coaler::multialign::PosePair pair2({0,0},{2,0});
+    coaler::multialign::PosePair pair3({1,0},{2,0});
 
     CHECK(poseRegister.addPoses(pair1, 1.7));
     CHECK(poseRegister.addPoses(pair2, 2.3));

@@ -7,10 +7,10 @@
 #include "../src/multialign/BasicClasses/LigandPair.hpp"
 
 TEST_CASE("test_ligand_pair", "[ligand_pair_tester]") {
-    MultiAlign::LigandPair pair1(0 ,1);
-    MultiAlign::LigandPair pair2(1 ,0);
-    MultiAlign::LigandPair pair3(2 ,1);
-    MultiAlign::LigandPair pair4(0 ,1);
+    coaler::multialign::LigandPair pair1(0 ,1);
+    coaler::multialign::LigandPair pair2(1 ,0);
+    coaler::multialign::LigandPair pair3(2 ,1);
+    coaler::multialign::LigandPair pair4(0 ,1);
 
     CHECK(pair1.getFirst() == 0);
     CHECK(pair1.getSecond() == 1);

@@ -12,7 +12,7 @@
 #include <GraphMol/SmilesParse/SmilesParse.h>
 
 
-using namespace MultiAlign;
+using namespace coaler::multialign;
 
 TEST_CASE("test_pose_register_builder", "[pose_register_builder_tester]") {
     PairwiseAlignment pairwiseScores;

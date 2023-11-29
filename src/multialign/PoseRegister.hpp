@@ -8,7 +8,7 @@
 #include "BasicClasses/PosePair.hpp"
 #include <unordered_map>
 
-using PosePairAndScore = std::pair<MultiAlign::PosePair, double>;
+using PosePairAndScore = std::pair<coaler::multialign::PosePair, double>;
 
 
 namespace coaler::multialign

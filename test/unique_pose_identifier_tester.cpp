@@ -6,7 +6,7 @@
 #include "../src/multialign/Forward.hpp"
 #include "../src/multialign/BasicClasses/UniquePoseIdentifier.hpp"
 
-using namespace MultiAlign;
+using namespace coaler::multialign;
 
 TEST_CASE("test_getter_functions", "[unique_pose_identifier_tester]") {
     UniquePoseIdentifier pose1(0,0);

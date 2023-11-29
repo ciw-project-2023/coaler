@@ -10,7 +10,7 @@
 #include "../src/multialign/StartingAssemblyGenerator.hpp"
 #include <GraphMol/SmilesParse/SmilesParse.h>
 
-using namespace MultiAlign;
+using namespace coaler::multialign;
 
 TEST_CASE("test_ligand_alignment_assembly", "[ligand_alignment_assembly_tester]") {
 

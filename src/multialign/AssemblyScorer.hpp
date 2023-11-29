@@ -8,15 +8,15 @@
 #include "PoseRegisterCollection.hpp"
 
 
-namespace MultiAlign
+namespace coaler::multialign
 {
 class AssemblyScorer {
 
   public:
     static double calculateAssemblyScore(
-        const MultiAlign::LigandAlignmentAssembly& assembly,
-        const MultiAlign::PairwiseAlignment& scores,
-        const MultiAlign::LigandVector& ligands
+        const coaler::multialign::LigandAlignmentAssembly& assembly,
+        const coaler::multialign::PairwiseAlignment& scores,
+        const coaler::multialign::LigandVector& ligands
     );
 
     static double calculateScoreDeficitForLigand(

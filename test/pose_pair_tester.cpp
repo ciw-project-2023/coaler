@@ -6,7 +6,7 @@
 #include "../src/multialign/Forward.hpp"
 #include "../src/multialign/BasicClasses/PosePair.hpp"
 
-using namespace MultiAlign;
+using namespace coaler::multialign;
 TEST_CASE("test_pose_pair", "[pose_pair_tester]") {
     UniquePoseIdentifier pose1(0,0);
     UniquePoseIdentifier pose2(1,0);

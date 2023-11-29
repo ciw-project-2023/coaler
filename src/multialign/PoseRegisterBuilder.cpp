@@ -10,7 +10,8 @@
 
 namespace
 {
-    unsigned calculateRegisterSizeForLigand(MultiAlign::Ligand firstLigand, MultiAlign::Ligand secondLigand)
+    unsigned calculateRegisterSizeForLigand(const coaler::multialign::Ligand& firstLigand,
+                                            const coaler::multialign::Ligand& secondLigand)
     {
         return (int) sqrt(firstLigand.getHeavyAtomSize() + secondLigand.getHeavyAtomSize());
     }

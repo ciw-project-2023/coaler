@@ -14,27 +14,27 @@ namespace coaler::multialign
                                                   const PairwiseAlignment& scores,
                                                   const LigandVector& ligands) {
         double assemblyScore = 0.0;
-        for(const MultiAlign::Ligand& firstLigand : ligands)
+        for(const coaler::multialign::Ligand& firstLigand : ligands)
         {
-            for(const MultiAlign::Ligand& secondLigand : ligands)
+            for(const coaler::multialign::Ligand& secondLigand : ligands)
             {
                 if(firstLigand.getID() >= secondLigand.getID())
                 {
                     continue;
                 }
-                MultiAlign::PoseID firstLigandPoseID = assembly.getPoseOfLigand(firstLigand.getID());
-                MultiAlign::PoseID secondLigandPoseID = assembly.getPoseOfLigand(secondLigand.getID());
+                coaler::multialign::PoseID firstLigandPoseID = assembly.getPoseOfLigand(firstLigand.getID());
+                coaler::multialign::PoseID secondLigandPoseID = assembly.getPoseOfLigand(secondLigand.getID());
 
-                if(firstLigandPoseID == std::numeric_limits<MultiAlign::PoseID>::max()
-                   || secondLigandPoseID == std::numeric_limits<MultiAlign::PoseID>::max())
+                if(firstLigandPoseID == std::numeric_limits<coaler::multialign::PoseID>::max()
+                   || secondLigandPoseID == std::numeric_limits<coaler::multialign::PoseID>::max())
                 {
                     spdlog::info("Encountered invalid PosePair during optimization.");
                     continue;
                 }
 
-                MultiAlign::UniquePoseIdentifier firstLigandPose{
+                coaler::multialign::UniquePoseIdentifier firstLigandPose{
                     firstLigand.getID(), firstLigandPoseID};
-                MultiAlign::UniquePoseIdentifier secondLigandPose{
+                coaler::multialign::UniquePoseIdentifier secondLigandPose{
                     secondLigand.getID(), secondLigandPoseID};
                 assemblyScore += scores.at(PosePair{firstLigandPose, secondLigandPose});
             }

@@ -13,14 +13,14 @@
 #include "StartingAssemblyGenerator.hpp"
 
 namespace {  // TODO move to own class?
-    MultiAlign::PairwiseAlignment calculate_alignment_scores(const std::vector<MultiAlign::Ligand>& ligands,
+    coaler::multialign::PairwiseAlignment calculate_alignment_scores(const std::vector<coaler::multialign::Ligand>& ligands,
                                                              const std::shared_ptr<coaler::SingleAligner>& alignerPtr,
                                                              const RDKit::ROMol& core) {
-        MultiAlign::PairwiseAlignment scores;
-        for (MultiAlign::LigandID firstMolId = 0; firstMolId < ligands.size();
+        coaler::multialign::PairwiseAlignment scores;
+        for (coaler::multialign::LigandID firstMolId = 0; firstMolId < ligands.size();
              firstMolId++)  // TODO use ligand vector iterator
         {
-            for (MultiAlign::LigandID secondMolId = firstMolId + 1; secondMolId < ligands.size(); secondMolId++) {
+            for (coaler::multialign::LigandID secondMolId = firstMolId + 1; secondMolId < ligands.size(); secondMolId++) {
                 unsigned nofPosesFirst = ligands.at(firstMolId).getNofPoses();
                 unsigned nofPosesSecond = ligands.at(secondMolId).getNofPoses();
 
@@ -29,9 +29,9 @@ namespace {  // TODO move to own class?
                         double alignmentScore = alignerPtr->align_molecules_kabsch(
                             ligands.at(firstMolId).getMolecule(), ligands.at(secondMolId).getMolecule(), firstMolPoseId,
                             secondMolPoseId, core);
-                        MultiAlign::UniquePoseIdentifier firstPose(firstMolId, firstMolPoseId);
-                        MultiAlign::UniquePoseIdentifier secondPose(secondMolId, secondMolPoseId);
-                        scores.emplace(MultiAlign::PosePair(firstPose, secondPose), alignmentScore);
+                        coaler::multialign::UniquePoseIdentifier firstPose(firstMolId, firstMolPoseId);
+                        coaler::multialign::UniquePoseIdentifier secondPose(secondMolId, secondMolPoseId);
+                        scores.emplace(coaler::multialign::PosePair(firstPose, secondPose), alignmentScore);
                     }
                 }
             }
@@ -40,7 +40,7 @@ namespace {  // TODO move to own class?
     }
 }
 
-namespace MultiAlign
+namespace coaler::multialign
 {
 
     using AssemblyCollection = std::unordered_map<UniquePoseIdentifier, LigandAlignmentAssembly, UniquePoseIdentifierHash>;
@@ -99,7 +99,7 @@ namespace MultiAlign
                                                  assemblies.at(pose),
                                                  m_pairwiseAlignments,
                                                  m_ligands
-                                                 ), assemblies.at(pose).getMissingLigandsCount());
+                                                 ), assemblies.at(pose).getMissingLigandsCount()));
             }
         }
 
