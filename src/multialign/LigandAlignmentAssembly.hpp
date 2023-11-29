@@ -29,7 +29,7 @@ namespace MultiAlign {
          * @param ligandId Ligand to get the associated pose for.
          * @return The Pose that is associated with the @p ligandId.
          */
-        PoseID getPoseOfLigand(LigandID ligandId);
+        PoseID getPoseOfLigand(LigandID ligandId) const;
 
         /**
          * increase missing ligands count by one

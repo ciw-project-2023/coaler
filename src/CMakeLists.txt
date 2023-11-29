@@ -24,7 +24,8 @@ add_executable (coaler
         multialign/StartingAssemblyGenerator.cpp
         multialign/StartingAssemblyGenerator.hpp
         multialign/PoseRegisterCollection.cpp
-        multialign/PoseRegisterCollection.hpp)
+        multialign/PoseRegisterCollection.hpp
+        multialign/AssemblyScorer.cpp)
 
 find_package(spdlog REQUIRED)
 find_package(rdkit REQUIRED)
