@@ -5,7 +5,7 @@
 #pragma once
 #include "Forward.hpp"
 
-namespace MultiAlign
+namespace coaler::multialign
 {
 /**
  * Identifier for Conformers using the id of their ligand and the

@@ -6,7 +6,7 @@
 #include "Forward.hpp"
 #include "UniquePoseIdentifier.hpp"
 
-namespace MultiAlign
+namespace coaler::multialign
 {
 
     /**

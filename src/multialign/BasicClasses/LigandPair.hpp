@@ -5,7 +5,7 @@
 #pragma once
 #include "Forward.hpp"
 
-    namespace MultiAlign
+    namespace coaler::multialign
     {
         /**
          * A pair of ligands.

@@ -10,7 +10,7 @@
 #include "MultiAlignerResult.hpp"
 #include "../singlealign/SingleAligner.hpp"
 
-namespace MultiAlign {
+namespace coaler::multialign {
 
     class MultiAligner {
     public:

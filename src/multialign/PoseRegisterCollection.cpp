@@ -4,7 +4,7 @@
 
 #include "PoseRegisterCollection.hpp"
 
-namespace MultiAlign
+namespace coaler::multialign
 {
 
     void PoseRegisterCollection::addRegister(const PoseRegisterPtr &poseRegister) {

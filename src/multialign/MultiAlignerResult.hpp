@@ -6,11 +6,14 @@
 #include <unordered_map>
 #include "BasicClasses/Forward.hpp"
 
-namespace MultiAlign
-{
+namespace coaler{
+namespace multialign{
+
     struct MultiAlignerResult{
         double score;
         std::unordered_map<LigandID, PoseID> poseIDsByLigandID;
         std::vector<Ligand> ligands;
     };
-}
+
+}//multialign
+}//coaler

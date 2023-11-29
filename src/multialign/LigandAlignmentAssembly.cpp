@@ -5,7 +5,7 @@
 #include "LigandAlignmentAssembly.hpp"
 
 
-namespace MultiAlign {
+namespace coaler::multialign {
 
 
     LigandAlignmentAssembly::LigandAlignmentAssembly(

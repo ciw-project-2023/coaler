@@ -6,7 +6,7 @@
 #include "Forward.hpp"
 #include <unordered_map>
 
-namespace MultiAlign {
+namespace coaler::multialign {
 
     /**
      * An alignment of a set of ligands. Contains one pose for each ligand.

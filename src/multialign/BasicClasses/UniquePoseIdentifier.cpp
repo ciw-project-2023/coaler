@@ -4,7 +4,7 @@
 
 #include "UniquePoseIdentifier.hpp"
 
-namespace MultiAlign
+namespace coaler::multialign
 {
 
     UniquePoseIdentifier::UniquePoseIdentifier(LigandID ligandId,

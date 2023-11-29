@@ -11,7 +11,7 @@
 #include "BasicClasses/LigandPair.hpp"
 #include "BasicClasses/PosePair.hpp"
 
-namespace MultiAlign
+namespace coaler::multialign
 {
 
 
