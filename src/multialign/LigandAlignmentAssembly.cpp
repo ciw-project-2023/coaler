@@ -4,22 +4,14 @@
 
 #include "LigandAlignmentAssembly.hpp"
 
-
 namespace coaler::multialign {
 
-
-    LigandAlignmentAssembly::LigandAlignmentAssembly(
-            const std::unordered_map<LigandID, PoseID>& initialAssembly)
-        : m_assembly(initialAssembly)
-    {
-
-    }
+    LigandAlignmentAssembly::LigandAlignmentAssembly(const std::unordered_map<LigandID, PoseID>& initialAssembly)
+        : m_assembly(initialAssembly) {}
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    void LigandAlignmentAssembly::swapPoseForLigand(
-            const LigandID ligandId,
-            const PoseID newPoseId) {
+    void LigandAlignmentAssembly::swapPoseForLigand(const LigandID ligandId, const PoseID newPoseId) {
         assert(m_assembly.count(ligandId) != 0);
         m_assembly.at(ligandId) = newPoseId;
     }
@@ -27,8 +19,7 @@ namespace coaler::multialign {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     PoseID LigandAlignmentAssembly::getPoseOfLigand(LigandID ligandId) const {
-        if(m_assembly.count(ligandId) != 0)
-        {
+        if (m_assembly.count(ligandId) != 0) {
             return std::numeric_limits<PoseID>::max();
         }
         return m_assembly.at(ligandId);
@@ -36,9 +27,7 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    void LigandAlignmentAssembly::incrementMissingLigandsCount() {
-        m_missingLigandsCount++;
-    }
+    void LigandAlignmentAssembly::incrementMissingLigandsCount() { m_missingLigandsCount++; }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
@@ -48,8 +37,6 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    unsigned LigandAlignmentAssembly::getMissingLigandsCount() const noexcept {
-        return m_missingLigandsCount;
-    }
+    unsigned LigandAlignmentAssembly::getMissingLigandsCount() const noexcept { return m_missingLigandsCount; }
 
-}
+}  // namespace coaler::multialign

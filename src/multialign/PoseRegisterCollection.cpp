@@ -4,25 +4,21 @@
 
 #include "PoseRegisterCollection.hpp"
 
-namespace coaler::multialign
-{
+namespace coaler::multialign {
 
     void PoseRegisterCollection::addRegister(const PoseRegisterPtr &poseRegister) {
-        m_registers.emplace(LigandPair(poseRegister->getFirstLigandID(),
-                                      poseRegister->getSecondLigandID()),
-                           poseRegister);
+        m_registers.emplace(LigandPair(poseRegister->getFirstLigandID(), poseRegister->getSecondLigandID()),
+                            poseRegister);
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    PairwisePoseRegisters PoseRegisterCollection::getAllRegistersForPose(const UniquePoseIdentifier &pose) const noexcept{
-
+    PairwisePoseRegisters PoseRegisterCollection::getAllRegistersForPose(
+        const UniquePoseIdentifier &pose) const noexcept {
         PairwisePoseRegisters registersContainingPose;
 
-        for(const auto& [ligandPair, poseRegister] : m_registers)
-        {
-            if(poseRegister->containsPose(pose))
-            {
+        for (const auto &[ligandPair, poseRegister] : m_registers) {
+            if (poseRegister->containsPose(pose)) {
                 registersContainingPose.emplace(ligandPair, poseRegister);
             }
         }
@@ -30,10 +26,8 @@ namespace coaler::multialign
         return registersContainingPose;
     }
 
-    PairwisePoseRegisters PoseRegisterCollection::getAllRegisters() const noexcept {
-        return m_registers;
-    }
+    PairwisePoseRegisters PoseRegisterCollection::getAllRegisters() const noexcept { return m_registers; }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-}
+}  // namespace coaler::multialign

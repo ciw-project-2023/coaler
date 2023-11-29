@@ -3,11 +3,12 @@
 //
 #pragma once
 
-#include "Forward.hpp"
-#include "UniquePoseIdentifier.hpp"
 #include <GraphMol/GraphMol.h>
 
 #include <unordered_set>
+
+#include "Forward.hpp"
+#include "UniquePoseIdentifier.hpp"
 
 namespace coaler::multialign {
 
@@ -15,10 +16,8 @@ namespace coaler::multialign {
      * Represents a molecule.
      */
     class Ligand {
-    public:
-        Ligand(const RDKit::RWMol& mol,
-               const UniquePoseSet &poses,
-               LigandID id);
+      public:
+        Ligand(const RDKit::RWMol& mol, const UniquePoseSet& poses, LigandID id);
 
         /**
          * get idenitifers of all poses embedded in ligand.
@@ -50,10 +49,10 @@ namespace coaler::multialign {
          */
         RDKit::RWMol getMolecule() const noexcept;
 
-    private:
+      private:
         LigandID m_id;
         RDKit::RWMol m_molecule;
         UniquePoseSet m_poses;
     };
 
-}
+}  // namespace coaler::multialign

@@ -11,9 +11,7 @@
 #include "BasicClasses/LigandPair.hpp"
 #include "BasicClasses/PosePair.hpp"
 
-namespace coaler::multialign
-{
-
+namespace coaler::multialign {
 
     class PoseRegister;
     using PoseRegisterPtr = std::shared_ptr<PoseRegister>;
@@ -23,8 +21,4 @@ namespace coaler::multialign
 
     using LigandVector = std::vector<Ligand>;
 
-
-
-
-
-}
+}  // namespace coaler::multialign

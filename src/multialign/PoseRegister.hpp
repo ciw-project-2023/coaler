@@ -4,26 +4,21 @@
 
 #pragma once
 
-#include "Forward.hpp"
-#include "BasicClasses/PosePair.hpp"
 #include <unordered_map>
+
+#include "BasicClasses/PosePair.hpp"
+#include "Forward.hpp"
 
 using PosePairAndScore = std::pair<coaler::multialign::PosePair, double>;
 
-
-namespace coaler::multialign
-{
+namespace coaler::multialign {
 
     /**
      * For a pair of ligands this contains the best aligning pairwise poses.
      */
     class PoseRegister {
-
-    public:
-
-        PoseRegister(LigandID firstLigand,
-                     LigandID secondLigand,
-                     unsigned maxSize);
+      public:
+        PoseRegister(LigandID firstLigand, LigandID secondLigand, unsigned maxSize);
 
         /**
          *
@@ -58,13 +53,11 @@ namespace coaler::multialign
          */
         bool containsPose(const UniquePoseIdentifier& pose);
 
-    private:
-
+      private:
         LigandID m_first;
         LigandID m_second;
         unsigned m_maxSize;
         std::vector<PosePairAndScore> m_register;
     };
 
-}
-
+}  // namespace coaler::multialign

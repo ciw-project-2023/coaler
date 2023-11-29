@@ -6,7 +6,7 @@
 #include <boost/functional/hash.hpp>
 #include <unordered_set>
 
-namespace coaler::multialign{
+namespace coaler::multialign {
 
     class Ligand;
 
@@ -17,15 +17,14 @@ namespace coaler::multialign{
     struct UniquePoseIdentifier;
     struct UniquePoseIdentifierHash;
 
-    //hash structs
+    // hash structs
     struct PosePairHash;
     struct LigandPairHash;
 
-    //id declarations
+    // id declarations
     using LigandID = unsigned;
     using PoseID = unsigned;
 
     using UniquePoseSet = std::unordered_set<UniquePoseIdentifier, UniquePoseIdentifierHash>;
 
-
-}
+}  // namespace coaler::multialign

@@ -3,27 +3,23 @@
 //
 
 #pragma once
+#include "../singlealign/SingleAligner.hpp"
 #include "Forward.hpp"
-#include "PoseRegister.hpp"
-#include "PoseRegisterBuilder.hpp"
 #include "GraphMol/FMCS/FMCS.h"
 #include "MultiAlignerResult.hpp"
-#include "../singlealign/SingleAligner.hpp"
+#include "PoseRegister.hpp"
+#include "PoseRegisterBuilder.hpp"
 
 namespace coaler::multialign {
 
     class MultiAligner {
-    public:
-
-        MultiAligner(
-                const std::vector<RDKit::RWMol>& molecules,
-                RDKit::ROMol core,
-                const coaler::SingleAligner& aligner);
+      public:
+        MultiAligner(const std::vector<RDKit::RWMol>& molecules, RDKit::ROMol core,
+                     const coaler::SingleAligner& aligner);
 
         MultiAlignerResult alignMolecules();
 
-    private:
-
+      private:
         coaler::SingleAligner m_singleAligner;
         RDKit::ROMol m_core;
         std::vector<Ligand> m_ligands;
@@ -31,4 +27,4 @@ namespace coaler::multialign {
         PairwiseAlignment m_pairwiseAlignments;
     };
 
-}
+}  // namespace coaler::multialign

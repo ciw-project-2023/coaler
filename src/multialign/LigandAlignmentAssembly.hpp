@@ -3,8 +3,9 @@
 //
 
 #pragma once
-#include "Forward.hpp"
 #include <unordered_map>
+
+#include "Forward.hpp"
 
 namespace coaler::multialign {
 
@@ -12,18 +13,15 @@ namespace coaler::multialign {
      * An alignment of a set of ligands. Contains one pose for each ligand.
      */
     class LigandAlignmentAssembly {
-
-    public:
-        explicit LigandAlignmentAssembly(
-            const std::unordered_map<LigandID, PoseID>& initialAssembly);
+      public:
+        explicit LigandAlignmentAssembly(const std::unordered_map<LigandID, PoseID>& initialAssembly);
 
         /**
          * Exchange the associated pose for a given Ligand
          * @param ligandId The ligand whose pose is to be swapped.
          * @param newPoseId The new pose.
          */
-        void swapPoseForLigand(LigandID ligandId,
-                               PoseID newPoseId);
+        void swapPoseForLigand(LigandID ligandId, PoseID newPoseId);
 
         /**
          * @param ligandId Ligand to get the associated pose for.
@@ -41,9 +39,8 @@ namespace coaler::multialign {
          */
         unsigned getMissingLigandsCount() const noexcept;
 
-
-    private:
-        LigandAlignmentAssembly()=default;
+      private:
+        LigandAlignmentAssembly() = default;
 
         bool insertLigandPose(LigandID ligand, PoseID pose);
 
@@ -53,4 +50,4 @@ namespace coaler::multialign {
         friend class StartingAssemblyGenerator;
     };
 
-}
+}  // namespace coaler::multialign

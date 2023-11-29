@@ -2,27 +2,27 @@
 // Created by malte on 11/27/23.
 //
 
-#include "catch2/catch.hpp"
-#include "../src/multialign/Forward.hpp"
 #include "../src/multialign/BasicClasses/UniquePoseIdentifier.hpp"
+#include "../src/multialign/Forward.hpp"
+#include "catch2/catch.hpp"
 
 using namespace coaler::multialign;
 
 TEST_CASE("test_getter_functions", "[unique_pose_identifier_tester]") {
-    UniquePoseIdentifier pose1(0,0);
+    UniquePoseIdentifier pose1(0, 0);
     CHECK(pose1.getLigandId() == 0);
     CHECK(pose1.getLigandInternalPoseId() == 0);
 
-    UniquePoseIdentifier pose2(1,1);
+    UniquePoseIdentifier pose2(1, 1);
     CHECK(pose2.getLigandId() == 1);
     CHECK(pose2.getLigandInternalPoseId() == 1);
 }
 TEST_CASE("test_operator_functions", "[unique_pose_identifier_tester]") {
-    UniquePoseIdentifier pose1(0,0);
-    UniquePoseIdentifier pose2(0,0);
-    UniquePoseIdentifier pose3(0,1);
-    UniquePoseIdentifier pose4(1,0);
-    UniquePoseIdentifier pose5(1,1);
+    UniquePoseIdentifier pose1(0, 0);
+    UniquePoseIdentifier pose2(0, 0);
+    UniquePoseIdentifier pose3(0, 1);
+    UniquePoseIdentifier pose4(1, 0);
+    UniquePoseIdentifier pose5(1, 1);
     CHECK(pose1 == pose2);
     CHECK(pose1 != pose3);
     CHECK(pose1 != pose4);
@@ -46,7 +46,6 @@ TEST_CASE("test_operator_functions", "[unique_pose_identifier_tester]") {
     CHECK(pose4 < pose5);
     CHECK_FALSE(pose1 < pose1);
     CHECK_FALSE(pose3 < pose1);
-
 
     CHECK(pose3 > pose1);
     CHECK(pose4 > pose1);

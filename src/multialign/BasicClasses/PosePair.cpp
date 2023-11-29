@@ -4,13 +4,11 @@
 
 #include "PosePair.hpp"
 
-
-namespace coaler::multialign
-{
+namespace coaler::multialign {
     PosePair::PosePair(const UniquePoseIdentifier first, const UniquePoseIdentifier second) {
-        //swap values to rule out duplicates
+        // swap values to rule out duplicates
         assert(first != second);
-        if(first > second){
+        if (first > second) {
             m_firstPose = second;
             m_secondPose = first;
         } else {
@@ -20,15 +18,10 @@ namespace coaler::multialign
     }
 
     bool PosePair::operator==(const PosePair &other) const {
-        return this->m_firstPose == other.m_firstPose
-        && this->m_secondPose == other.m_secondPose;
+        return this->m_firstPose == other.m_firstPose && this->m_secondPose == other.m_secondPose;
     }
 
-    const UniquePoseIdentifier PosePair::getFirst() const noexcept {
-        return m_firstPose;
-    }
+    const UniquePoseIdentifier PosePair::getFirst() const noexcept { return m_firstPose; }
 
-    const UniquePoseIdentifier PosePair::getSecond() const noexcept {
-        return m_secondPose;
-    }
-}
+    const UniquePoseIdentifier PosePair::getSecond() const noexcept { return m_secondPose; }
+}  // namespace coaler::multialign
