@@ -17,6 +17,9 @@ namespace coaler::multialign {
         LigandID ligandId = pose.getLigandId();
 
         for (const Ligand& otherLigand : ligands) {
+            if (ligandId == otherLigand.getID()){
+                continue;
+            }
             if (registers.count(LigandPair(ligandId, otherLigand.getID())) != 0) {
                 assembly.incrementMissingLigandsCount();
             }
