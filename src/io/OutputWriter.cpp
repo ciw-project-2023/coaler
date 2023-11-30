@@ -6,7 +6,6 @@
 
 namespace coaler::io {
     void OutputWriter::save_molecules_w_scores_in_file(MultiAlignerResult result, const std::string& file_path) {
-#pragma unroll 100
         for (auto ligand_id_conformer_pair : result.poseIDsByLigandID) {
             LigandID ligand_id = std::get<0>(ligand_id_conformer_pair);
             PoseID poseId = std::get<1>(ligand_id_conformer_pair);
@@ -19,8 +18,6 @@ namespace coaler::io {
 
     void OutputWriter::print_multi_aligner_result(MultiAlignerResult result) {
         spdlog::info("Start printing results.");
-
-#pragma unroll 100
         for (auto ligand_id_conformer_pair : result.poseIDsByLigandID) {
             LigandID ligand_id = std::get<0>(ligand_id_conformer_pair);
             PoseID poseId = std::get<1>(ligand_id_conformer_pair);
