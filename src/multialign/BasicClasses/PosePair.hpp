@@ -23,6 +23,7 @@ namespace coaler::multialign {
       private:
         UniquePoseIdentifier m_firstPose;
         UniquePoseIdentifier m_secondPose;
+        std::string m_stringRep; //used for debugging purposes
     };
 
     struct PosePairHash {

@@ -9,7 +9,8 @@
 namespace coaler::multialign {
 
     double AssemblyScorer::calculateAssemblyScore(const LigandAlignmentAssembly& assembly,
-                                                  const PairwiseAlignment& scores, const LigandVector& ligands) {
+                                                  const PairwiseAlignment& scores,
+                                                  const LigandVector& ligands) {
         double assemblyScore = 0.0;
         for (const coaler::multialign::Ligand& firstLigand : ligands) {
             for (const coaler::multialign::Ligand& secondLigand : ligands) {
@@ -27,7 +28,8 @@ namespace coaler::multialign {
 
                 coaler::multialign::UniquePoseIdentifier firstLigandPose{firstLigand.getID(), firstLigandPoseID};
                 coaler::multialign::UniquePoseIdentifier secondLigandPose{secondLigand.getID(), secondLigandPoseID};
-                assemblyScore += scores.at(PosePair{firstLigandPose, secondLigandPose});
+                PosePair pair(firstLigandPose, secondLigandPose);
+                assemblyScore += scores.at(pair);
             }
         }
         return assemblyScore;

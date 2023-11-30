@@ -14,7 +14,8 @@
 namespace {
     unsigned calculateRegisterSizeForLigand(const coaler::multialign::Ligand& firstLigand,
                                             const coaler::multialign::Ligand& secondLigand) {
-        return (int)sqrt(firstLigand.getHeavyAtomSize() + secondLigand.getHeavyAtomSize());
+        //return (int)sqrt(firstLigand.getHeavyAtomSize() + secondLigand.getHeavyAtomSize());
+        return firstLigand.getNofPoses() + secondLigand.getNofPoses(); //TODO this is modified --> no missing ligands count
     }
 }  // namespace
 

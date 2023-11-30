@@ -53,6 +53,8 @@ namespace coaler::multialign {
          */
         bool containsPose(const UniquePoseIdentifier& pose);
 
+        PosePair getHighestScoringPosePairForPose(const UniquePoseIdentifier& pose);
+
       private:
         LigandID m_first;
         LigandID m_second;

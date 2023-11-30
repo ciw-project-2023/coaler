@@ -15,6 +15,11 @@ namespace coaler::multialign {
             m_firstPose = first;
             m_secondPose = second;
         }
+
+        m_stringRep = "(" + std::to_string(m_firstPose.getLigandId())
+                      + " - " + std::to_string(m_firstPose.getLigandInternalPoseId()) + "), ("
+            + std::to_string(m_secondPose.getLigandId()) + " - "
+            + std::to_string(m_secondPose.getLigandInternalPoseId()) + ")";
     }
 
     bool PosePair::operator==(const PosePair &other) const {

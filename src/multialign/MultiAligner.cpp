@@ -112,16 +112,15 @@ namespace coaler::multialign {
             }
             m_ligands.emplace_back(molecules.at(id), poses, id);
         }
+        m_pairwiseAlignments =
+            calculate_alignment_scores(m_ligands, std::make_shared<coaler::SingleAligner>(m_singleAligner), m_core);
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
     MultiAlignerResult MultiAligner::alignMolecules() {
-        // calculate pairwise alignments
-        PairwiseAlignment allPosesAlignmentScores
-            = calculate_alignment_scores(m_ligands, std::make_shared<coaler::SingleAligner>(m_singleAligner), m_core);
 
-        m_poseRegisters = PoseRegisterBuilder::buildPoseRegisters(allPosesAlignmentScores, m_ligands);
+        m_poseRegisters = PoseRegisterBuilder::buildPoseRegisters(m_pairwiseAlignments, m_ligands);
 
         // build starting ensembles from registers
         // AssemblyCollection assemblies;
@@ -155,8 +154,13 @@ namespace coaler::multialign {
             set_all_ligands_to_available(ligandAvailabilities, m_ligands);
             while(std::any_of(ligandAvailabilities.begin(), ligandAvailabilities.end(), LigandIsAvailable()))
             {
+                bool madeSwap = false;
                 for(const Ligand& ligand : m_ligands)
                 {
+                    if(madeSwap)
+                    {
+                        break; //start iterating over all ligands again since while cond is true
+                    }
                     if(!ligandAvailabilities.at(ligand.getID()))
                     {
                         continue;
@@ -179,9 +183,12 @@ namespace coaler::multialign {
                         {
                             assembly = assemblyCopy;
                             set_all_ligands_to_available(ligandAvailabilities, m_ligands);
+                            madeSwap = true;
+                        }
+                        else{
+                            ligandAvailabilities.at(ligand.getID()) = false;
                         }
                     }
-
                 }
             }
             double assemblyScore = AssemblyScorer::calculateAssemblyScore(assembly,

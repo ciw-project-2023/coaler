@@ -11,6 +11,8 @@ add_executable (Test
         pose_register_tester.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/BasicClasses/PosePair.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/PoseRegister.cpp
+        ${CMAKE_SOURCE_DIR}/src/multialign/MultiAligner.cpp
+        ${CMAKE_SOURCE_DIR}/src/multialign/AssemblyScorer.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/BasicClasses/Ligand.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/BasicClasses/LigandPair.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/PoseRegisterBuilder.cpp
