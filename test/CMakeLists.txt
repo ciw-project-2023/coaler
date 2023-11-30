@@ -16,6 +16,7 @@ add_executable (Test
         ${CMAKE_SOURCE_DIR}/src/multialign/PoseRegisterBuilder.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/PoseRegisterCollection.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/LigandAlignmentAssembly.cpp
+        ${CMAKE_SOURCE_DIR}/src/multialign/StartingAssemblyGenerator.cpp
         ${CMAKE_SOURCE_DIR}/src/multialign/BasicClasses/UniquePoseIdentifier.cpp
 
 

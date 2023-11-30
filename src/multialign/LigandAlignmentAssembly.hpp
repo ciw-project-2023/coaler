@@ -47,6 +47,7 @@ namespace coaler::multialign {
         bool insertLigandPose(LigandID ligand, PoseID pose);
 
         std::unordered_map<LigandID, PoseID> m_assembly;
+
         unsigned m_missingLigandsCount{0};
 
         friend class StartingAssemblyGenerator;
