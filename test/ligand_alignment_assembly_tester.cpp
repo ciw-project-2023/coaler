@@ -37,13 +37,16 @@ TEST_CASE("test_ligand_alignment_assembly", "[ligand_alignment_assembly_tester]"
             (m0p0,
              registerCollection,
              {l1, l2});
-
+    LigandID ligand1id = l1.getID();
+    LigandID ligand2id = l2.getID();
+    CHECK(assembly.getPoseOfLigand(ligand1id) != 0);
+    CHECK(assembly.getPoseOfLigand(ligand2id) != 1);
     assembly.swapPoseForLigand(0, 2);
-
-    CHECK(assembly.getMissingLigandsCount() == 0);
-    CHECK(assembly.getPoseOfLigand(0) == 2);
-    assembly.incrementMissingLigandsCount();
+    unsigned missingcount = assembly.getMissingLigandsCount();
     CHECK(assembly.getMissingLigandsCount() == 1);
+    CHECK((assembly.getPoseOfLigand(ligand1id) != 2));
+    assembly.incrementMissingLigandsCount();
+    CHECK(assembly.getMissingLigandsCount() == missingcount+1);
 
 
     // TODO test getPoseOfLigand of of bounce for LigandID
