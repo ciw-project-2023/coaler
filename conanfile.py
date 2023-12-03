@@ -17,9 +17,7 @@ class coalerRecipe(ConanFile):
     exports_sources = "CMakeLists.txt", "src/*", "test/*"
 
     def requirements(self):
-        with open(os.path.expanduser("~/.conan2/profiles/default"), "rb") as profile:
-            hash = hashlib.md5(profile.read()).hexdigest()
-            self.requires("rdkit/0.0.1@ciw/{}".format(hash))
+        self.requires("rdkit/0.0.1")
         self.requires("boost/1.83.0")
         self.requires("catch2/2.13.10")
         self.requires("spdlog/1.12.0")
