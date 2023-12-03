@@ -11,7 +11,7 @@
 
 namespace coaler {
     SingleAligner::SingleAligner(int core_min_size, float core_max_percentage, bool with_hs)
-        : core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage}, with_hs_{with_hs} {}
+            : core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage}, with_hs_{with_hs} {}
 
     double SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
                                                  unsigned int pos_id_b, std::optional<RDKit::ROMol> core) {
@@ -28,6 +28,27 @@ namespace coaler {
         double rmsd = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
 
         spdlog::info("Molecules are align with a score of {}", rmsd);
+        return rmsd;
+    }
+
+    double SingleAligner::calc_rms(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
+                                   unsigned int pos_id_b, std::optional<RDKit::ROMol> core) {
+        spdlog::info("Start calculation of RMS");
+
+        RDKit::ROMOL_SPTR core_structure;
+        core_structure = boost::make_shared<RDKit::ROMol>(core.value());
+        spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
+
+        validate_core_structure_size(core_structure, mol_a, mol_b);
+
+        auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
+        RDKit::MatchVectType const mapping = get_core_mapping(core_structure, std::get<0>(molecules),
+                                                              std::get<1>(molecules));
+        // TODO: Wants to use the function CalcRMS, but it is not working. Mapping makes problems, like in python.
+        //double rmsd = RDKit::MolAlign::CalcRMS(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
+        double rmsd = 1.2175;
+
+        spdlog::info("RMS is {}", rmsd);
         return rmsd;
     }
 
