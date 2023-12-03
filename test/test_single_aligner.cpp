@@ -97,7 +97,7 @@ TEST_CASE("Single Aligner", "[aligner]") {
     };
 }
 
-TEST_CASE("Single Aligner", "[CalcRMS]") {
+TEST_CASE("Calc RMS", "[CalcRMS]") {
     SECTION("With H-atoms") {
         auto molecules = coaler::io::FileParser::parse("test/data/two_mols.sdf");
         RDKit::RWMol *mol_a = molecules.at(0);
