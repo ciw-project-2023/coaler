@@ -1,3 +1,7 @@
+/*
+ * Copyright 2023 CoAler Group, all rights reserved.
+ */
+
 #include "ConformerEmbedder.hpp"
 
 #include <GraphMol/DistGeomHelpers/Embedder.h>
