@@ -2,12 +2,11 @@
 
 #include <GraphMol/FMCS/FMCS.h>
 #include <GraphMol/MolAlign/AlignMolecules.h>
+#include <GraphMol/RGroupDecomposition/RGroupDecomp.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
-#include <GraphMol/RGroupDecomposition/RGroupDecomp.h>
-
 #include <spdlog/spdlog.h>
 
 #include <vector>
@@ -16,8 +15,9 @@ namespace coaler {
     SingleAligner::SingleAligner(int core_min_size, float core_max_percentage, bool with_hs)
         : core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage}, with_hs_{with_hs} {}
 
-    std::tuple<double, double> SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
-                                                 unsigned int pos_id_b, std::optional<RDKit::ROMol> core) {
+    std::tuple<double, double> SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b,
+                                                                     unsigned int pos_id_a, unsigned int pos_id_b,
+                                                                     std::optional<RDKit::ROMol> core) {
         spdlog::info("Start single alignment with Kabsch' algorithm");
 
         double core_rmsd = 0;
@@ -58,16 +58,35 @@ namespace coaler {
             RDKit::RGroupRows rows;
 
             int r_count = RDKit::RGroupDecompose(cores, mols, rows);
-
-            for(auto row: rows){
-                for(auto elem: row){
-                    spdlog::info("{}, Substructure {}", std::get<0>(elem), RDKit::MolToSmiles(*std::get<1>(elem)));
-                }
-            }
+//            for (auto row : rows) {
+//                for (auto elem : row) {
+//                    spdlog::info("{}, Substructure {}", std::get<0>(elem), RDKit::MolToSmiles(*std::get<1>(elem)));
+//                }
+//            }
 
             spdlog::info("R Count {}", r_count);
+            std::vector<int> rgroup_sizes;
 
-            // TODO: Different size of r group
+            for (auto row : rows) {
+                rgroup_sizes.emplace_back(row.size());
+            }
+
+            spdlog::info("Molecule 1 has {} RGroups", rgroup_sizes[0]);
+            spdlog::info("Molecule 2 has {} RGroups", rgroup_sizes[1]);
+
+            for (int i = 0; i < rgroup_sizes[0]; i++) {
+                double best_rmsd = 0.0;
+                int best_rmsd_idx = 0;
+                for (int j = 0; j < rgroup_sizes[1]; j++) {
+                    // rmsd calculation here
+                    int rmsd = j;
+                    if (rmsd < best_rmsd) {
+                        best_rmsd = rmsd;
+                        best_rmsd_idx = j;
+                    }
+                }
+                spdlog::info("Best RMSD is {} between RGroup {} and RGroup {}", best_rmsd, i, best_rmsd_idx);
+            }
         }
 
         // TODO: score without core
