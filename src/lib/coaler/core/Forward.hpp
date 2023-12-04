@@ -4,11 +4,13 @@
 
 #pragma once
 
+#include <GraphMol/RWMol.h>
+#include <GraphMol/Substruct/SubstructMatch.h>
+
 #include <cassert>
 #include <string>
-#include <vector>
 #include <utility>
-#include <GraphMol/RWMol.h>
+#include <vector>
 
 namespace coaler::core {
 
@@ -20,6 +22,8 @@ namespace coaler::core {
         MurckoGeneric [[maybe_unused]],
     };
 
-    using CoreAsMol = RDKit::RWMol;
+    using CoreAsMol = RDKit::ROMol;
+    using CorePtr = RDKit::ROMOL_SPTR;
+    using CoreMolMatch = std::vector<RDKit::MatchVectType>;
 
 }

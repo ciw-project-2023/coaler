@@ -4,61 +4,56 @@
 
 #include "Core.hpp"
 #include "GraphMol/FMCS/FMCS.h"
-#include "GraphMol/Substruct/SubstructMatch.h"
 #include "GraphMol/ChemTransforms/ChemTransforms.h"
+#include <GraphMol/SmilesParse/SmilesParse.h>
+#include <GraphMol/SmilesParse/SmartsWrite.h>
 
 namespace coaler::core {
 
-
     Core::Core(const std::vector<RDKit::RWMol>& molecules, const coreType coreType)
-        :m_molecules(std::move(molecules)), m_coreType(coreType) {
-        assert(m_molecules.size() > 0);
+        : m_molecules(molecules), m_coreType(coreType) {
+        assert(!m_molecules.empty());
+
+        if (coreType == coreType::MCS) {
+            m_core = calculateCoreMcs();
+        }
+        else {
+            m_core = calculateCoreMurcko();
+        }
+
     }
 
-    coreType Core::getScaffoldType() const {
-        return m_coreType;
-    }
 
-    CoreAsMol Core::getCore() const {
-        return m_core;
-    }
+    coreType Core::getScaffoldType() const { return m_coreType; }
 
-    std::vector<RDKit::RWMol> Core::calculateCoreMcs() const {
 
+    CoreAsMol Core::getCore() const { return m_core; }
+
+    CoreAsMol Core::calculateCoreMcs() const {
         std::vector<RDKit::ROMOL_SPTR> shared_mols;
-        for(RDKit::RWMol mol : m_molecules) {
+        for (RDKit::RWMol mol : m_molecules) {
             shared_mols.emplace_back(boost::make_shared<RDKit::ROMol>(mol));
         }
 
+        RDKit::MCSResult const mcs = RDKit::findMCS(shared_mols);
+        RDKit::ROMOL_SPTR const mcs_structure = mcs.QueryMol;
 
-        RDKit::MCSResult mcs = RDKit::findMCS(shared_mols);
-        RDKit::ROMOL_SPTR mcs_structure = mcs.QueryMol;
+        // Ja das hier ist extrem hässlich aber ich habe noch keine bessere Möglichkeit gefunden
+        // Die Methode findMCS() scheint bei der Erstellung vom ROMOL keine Infos über die Ringstruktur
+        // zu machen und daher gibt MurkoDecompose Errors aus.
+        const std::string molAsSmarts = RDKit::MolToSmarts(*mcs_structure);
+        RDKit::ROMol molAsROMol = *RDKit::SmilesToMol(molAsSmarts);
 
-        std::vector<RDKit::RWMol> result;
-
-        for(RDKit::RWMol mol : m_molecules) {
-            auto match = RDKit::SubstructMatch(mol, *mcs_structure);
-        }
+        return molAsROMol;
     }
 
-    std::vector<RDKit::RWMol> Core::calculateCoreMurcko() const {
+    CoreAsMol Core::calculateCoreMurcko() const {
+        RDKit::ROMol const mcs_structure = calculateCoreMcs();
 
-        std::vector<RDKit::ROMOL_SPTR> shared_mols;
-        for(RDKit::RWMol mol : m_molecules) {
-            shared_mols.emplace_back(boost::make_shared<RDKit::ROMol>(mol));
-        }
-
-        RDKit::MCSResult mcs = RDKit::findMCS(shared_mols);
-        RDKit::ROMOL_SPTR mcs_structure = mcs.QueryMol;
-
-
-        std::vector<RDKit::RWMol> result;
-
-        for(RDKit::RWMol mol : m_molecules) {
-            RDKit::ROMol* scaffold = RDKit::MurckoDecompose(mol);
-
-            result.emplace_back(*scaffold);
-        }
-
-        return result;
+        //CoreAsMol ret = *RDKit::MurckoDecompose(*RDKit::SmilesToMol("c1ccncc1"));
+        CoreAsMol ret = *RDKit::MurckoDecompose(mcs_structure);
+        return ret;
     }
+
+
+}
