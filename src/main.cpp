@@ -9,6 +9,10 @@
 
 #include <boost/program_options.hpp>
 #include <coaler/io/Forward.hpp>
+#include <coaler/embedder/ConformerEmbedder.hpp>
+#include <coaler/multialign/MultiAligner.hpp>
+#include <coaler/multialign/MultiAlignerResult.hpp>
+#include <coaler/singlealign/SingleAligner.hpp>
 
 namespace opts = boost::program_options;
 
@@ -37,7 +41,6 @@ std::optional<ProgrammOptions> parseArgs(int argc, char *argv[]) {
         "type,t", opts::value<std::string>(&parsed_options.input_file_type)->default_value("smiles"),
         "type of input file (sdf, smiles)")(
         "file,f", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
-        "out,o", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to output file")(
         "conformers", opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10))(
         "dont-add-hydrogens", opts::value<bool>(&parsed_options.dont_add_hydrogens)->default_value(false));
 
@@ -80,12 +83,27 @@ int main(int argc, char *argv[]) {
 
     spdlog::info("read {} molecules from {} file", mols.size(), opts.input_file_type);
 
-    spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
-    for (auto *mol : mols) {
-        auto params = RDKit::DGeomHelpers::EmbedParameters{};
-        params.randNegEig = false;  // TODO figure out if we need to adjust this and other params here
-        RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, opts.num_conformers, params);
+    // generate random core with coordinates. TODO: get coordinates from input
+    const std::string smiles = "c1ccccc1";
+    RDKit::ROMol* core = RDKit::SmilesToMol(smiles);
+    RDKit::DGeomHelpers::EmbedParameters params;
+    RDKit::DGeomHelpers::EmbedMolecule(*core, params);
+
+    coaler::embedder::CoreAtomMapping coreMapping;
+
+    for(int id = 0; id < core->getNumAtoms(); id++)
+    {
+        coreMapping.emplace(id, core->getConformer(0).getAtomPos(id));
     }
+
+    spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
+    for (RDKit::ROMol* mol : mols) {
+        coaler::embedder::ConformerEmbedder conformerEmbedder(*core, coreMapping);
+        conformerEmbedder.embedWithFixedCore(*mol, opts.num_conformers);
+    }
+    const coaler::SingleAligner singleAligner;
+    coaler::multialign::MultiAligner aligner(mols, *core, singleAligner);
+    const coaler::multialign::MultiAlignerResult result = aligner.alignMolecules();
 
     spdlog::info("done: exiting");
 }

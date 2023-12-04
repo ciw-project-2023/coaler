@@ -10,11 +10,6 @@
 #include "PoseRegister.hpp"
 #include "models/Ligand.hpp"
 
-namespace {
-    unsigned calculateRegisterSizeForLigand(const coaler::multialign::Ligand &firstLigand,
-                                            const coaler::multialign::Ligand &secondLigand) {}
-}  // namespace
-
 namespace coaler::multialign {
 
     PoseRegisterCollection PoseRegisterBuilder::buildPoseRegisters(const PairwiseAlignment &alignmentScores,
