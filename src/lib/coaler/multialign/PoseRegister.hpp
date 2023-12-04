@@ -48,6 +48,13 @@ namespace coaler::multialign {
 
         /**
          *
+         * @param pose The pose to search for
+         * @return The highest scoring entry in the register that is composed by @p pose
+         */
+        PosePair getHighestScoringPosePairForPose(const UniquePoseID& pose);
+
+        /**
+         *
          * @param pose The pose to check for.
          * @return True if the register contains the @p pose.
          */

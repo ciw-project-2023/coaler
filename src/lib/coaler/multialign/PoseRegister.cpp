@@ -41,12 +41,34 @@ namespace coaler::multialign {
         }
     }
 
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     PosePair PoseRegister::getHighestScoringPair() { return m_register.at(0).first; }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
 
     bool PoseRegister::containsPose(const UniquePoseID &pose) {
         return std::any_of(m_register.begin(), m_register.end(), [pose](const auto entry) {
             return entry.first.getFirst() == pose || entry.first.getSecond() == pose;
         });
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    PosePair PoseRegister::getHighestScoringPosePairForPose(const UniquePoseID &pose) {
+        assert(this->containsPose(pose));
+        PosePairAndScore currentBest = std::make_pair(m_register.at(0).first, -1); //dummy value, will be overwritten
+        for(const PosePairAndScore& entry : m_register)
+        {
+            if(entry.first.getFirst() == pose || entry.first.getSecond() == pose)
+            {
+                if(entry.second > currentBest.second)
+                {
+                    currentBest = entry;
+                }
+            }
+        }
+        return currentBest.first;
     }
 
 }  // namespace coaler::multialign
