@@ -1,7 +1,3 @@
-//
-// Created by chris on 12/4/23.
-//
-
 #include "ConformerEmbedder.hpp"
 
 #include <GraphMol/DistGeomHelpers/Embedder.h>
@@ -45,7 +41,15 @@ namespace coaler::embedder
             RDGeom::Point3D atomCoords = coreConformer.getAtomPos(coreAtomId);
             moleculeCoreCoords.emplace(molAtomId, atomCoords);
         }
-        //embedd molecule conformers
+
+        //embed molecule conformers
+        RDKit::DGeomHelpers::EmbedParameters params;
+        params.randomSeed = seed;
+        params.coordMap = &moleculeCoreCoords;
+        params.useRandomCoords = true;
+        RDKit::DGeomHelpers::EmbedMolecule(mol, numConfs, params);
+
+        return mol.getNumConformers() == numConfs;
     }
 }
 

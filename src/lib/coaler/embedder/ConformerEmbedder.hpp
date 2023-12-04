@@ -1,7 +1,3 @@
-//
-// Created by chris on 12/4/23.
-//
-
 #pragma once
 #include <GraphMol/ROMol.h>
 
