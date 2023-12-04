@@ -26,4 +26,4 @@ namespace coaler::core {
     using CorePtr = RDKit::ROMOL_SPTR;
     using CoreMolMatch = std::vector<RDKit::MatchVectType>;
 
-}
+}  // namespace coaler::core

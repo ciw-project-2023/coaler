@@ -10,7 +10,6 @@ namespace coaler::core {
 
     class Core {
       public:
-
         /**
          * constructor for object of class Core
          * @param molecules the molecules a core will be calculated for
@@ -30,7 +29,6 @@ namespace coaler::core {
          */
         [[nodiscard]] CoreAsMol getCore() const;
 
-
       private:
         /**
          * calculates the MCS of the molecules
@@ -48,4 +46,4 @@ namespace coaler::core {
         std::vector<RDKit::RWMol> m_molecules;
         coreType m_coreType;
     };
-}
+}  // namespace coaler::core

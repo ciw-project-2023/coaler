@@ -3,10 +3,12 @@
 //
 
 #include "Core.hpp"
-#include "GraphMol/FMCS/FMCS.h"
-#include "GraphMol/ChemTransforms/ChemTransforms.h"
-#include <GraphMol/SmilesParse/SmilesParse.h>
+
 #include <GraphMol/SmilesParse/SmartsWrite.h>
+#include <GraphMol/SmilesParse/SmilesParse.h>
+
+#include "GraphMol/ChemTransforms/ChemTransforms.h"
+#include "GraphMol/FMCS/FMCS.h"
 
 namespace coaler::core {
 
@@ -16,16 +18,12 @@ namespace coaler::core {
 
         if (coreType == coreType::MCS) {
             m_core = calculateCoreMcs();
-        }
-        else {
+        } else {
             m_core = calculateCoreMurcko();
         }
-
     }
 
-
     coreType Core::getScaffoldType() const { return m_coreType; }
-
 
     CoreAsMol Core::getCore() const { return m_core; }
 
@@ -50,10 +48,9 @@ namespace coaler::core {
     CoreAsMol Core::calculateCoreMurcko() const {
         RDKit::ROMol const mcs_structure = calculateCoreMcs();
 
-        //CoreAsMol ret = *RDKit::MurckoDecompose(*RDKit::SmilesToMol("c1ccncc1"));
+        // CoreAsMol ret = *RDKit::MurckoDecompose(*RDKit::SmilesToMol("c1ccncc1"));
         CoreAsMol ret = *RDKit::MurckoDecompose(mcs_structure);
         return ret;
     }
 
-
-}
+}  // namespace coaler::core
