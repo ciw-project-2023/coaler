@@ -1,6 +1,6 @@
-//
-// Created by chris on 11/23/23.
-//
+/*
+ * Copyright 2023 CoAler Group, all rights reserved.
+ */
 
 #pragma once
 
