@@ -1,6 +1,6 @@
-//
-// Created by malte on 11/27/23.
-//
+/*
+ * Copyright 2023 CoAler Group, all rights reserved.
+ */
 
 #include "UniquePoseID.hpp"
 
