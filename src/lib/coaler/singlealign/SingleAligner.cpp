@@ -25,10 +25,21 @@ namespace coaler {
 
         auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
         RDKit::MatchVectType mapping = get_core_mapping(core_structure, std::get<0>(molecules), std::get<1>(molecules));
-        double rmsd = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
 
-        spdlog::info("Molecules are align with a score of {}", rmsd);
-        return rmsd;
+
+        // Align core structure of molecules.
+        double core_rmsd = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
+        spdlog::info("Cores of the molecules are align with a score of {}", core_rmsd);
+
+        /**
+         * 1. Calculate Atom Map (MMFF, Crippen)
+         * 2. score = RDKit::CalcRMS(Mol1, Mol2, Atommap_total)
+         * 3. return tuple(score, core_rmsd)
+         */
+
+        // TODO: score without core
+
+        return core_rmsd;
     }
 
     double SingleAligner::calc_rms(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
