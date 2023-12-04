@@ -1,7 +1,6 @@
-//
-// Created by chris on 11/5/23.
-//
-
+/*
+ * Copyright 2023 CoAler Group, all rights reserved.
+ */
 #pragma once
 #include <unordered_map>
 

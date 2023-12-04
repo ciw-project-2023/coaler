@@ -1,7 +1,6 @@
-//
-// Created by chris on 11/16/23.
-//
-
+/*
+ * Copyright 2023 CoAler Group, all rights reserved.
+ */
 #pragma once
 #include "Forward.hpp"
 
