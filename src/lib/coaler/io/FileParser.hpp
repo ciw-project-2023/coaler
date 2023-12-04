@@ -1,3 +1,7 @@
+/*
+ * Copyright 2023 CoAler Group, all rights reserved.
+ */
+
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <spdlog/spdlog.h>
 
