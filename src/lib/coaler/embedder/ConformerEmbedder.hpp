@@ -15,7 +15,7 @@ namespace coaler::embedder{
                           const CoreAtomMapping& coreMap);
 
         bool embedWithFixedCore(
-            const RDKit::ROMol& mol,
+            RDKit::ROMol& mol,
             unsigned numConfs
         );
 

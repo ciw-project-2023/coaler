@@ -9,7 +9,7 @@ const unsigned seed = 42;
 
 namespace coaler::embedder
 {
-    ConformerEmbedder::ConformerEmbedder(RDKit::ROMol core, const coaler::embedder::CoreAtomMapping& coreMap)
+    ConformerEmbedder::ConformerEmbedder(RDKit::ROMol core, const CoreAtomMapping& coreMap)
     : m_core(std::move(core)){
         RDKit::DGeomHelpers::EmbedParameters params;
         params.randomSeed = seed;
@@ -21,7 +21,7 @@ namespace coaler::embedder
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    bool ConformerEmbedder::embedWithFixedCore(const RDKit::ROMol& mol, unsigned numConfs) {
+    bool ConformerEmbedder::embedWithFixedCore(RDKit::ROMol& mol, unsigned numConfs) {
         //match molecule and core
         std::vector<RDKit::MatchVectType> substructureResults;
         if(RDKit::SubstructMatch(mol , m_core , substructureResults) == 0) {
@@ -47,7 +47,7 @@ namespace coaler::embedder
         params.randomSeed = seed;
         params.coordMap = &moleculeCoreCoords;
         params.useRandomCoords = true;
-        RDKit::DGeomHelpers::EmbedMolecule(mol, numConfs, params);
+        RDKit::DGeomHelpers::EmbedMultipleConfs(mol, numConfs, params);
 
         return mol.getNumConformers() == numConfs;
     }
