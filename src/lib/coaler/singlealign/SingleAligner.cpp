@@ -58,11 +58,12 @@ namespace coaler {
             RDKit::RGroupRows rows;
 
             int r_count = RDKit::RGroupDecompose(cores, mols, rows);
-//            for (auto row : rows) {
-//                for (auto elem : row) {
-//                    spdlog::info("{}, Substructure {}", std::get<0>(elem), RDKit::MolToSmiles(*std::get<1>(elem)));
-//                }
-//            }
+            //            for (auto row : rows) {
+            //                for (auto elem : row) {
+            //                    spdlog::info("{}, Substructure {}", std::get<0>(elem),
+            //                    RDKit::MolToSmiles(*std::get<1>(elem)));
+            //                }
+            //            }
 
             spdlog::info("R Count {}", r_count);
             std::vector<int> rgroup_sizes;
@@ -78,14 +79,14 @@ namespace coaler {
                 double best_rmsd = 0.0;
                 int best_rmsd_idx = 0;
                 for (int j = 0; j < rgroup_sizes[1]; j++) {
-                    // rmsd calculation here
+                    // TODO: rmsd calculation here
                     int rmsd = j;
                     if (rmsd < best_rmsd) {
                         best_rmsd = rmsd;
                         best_rmsd_idx = j;
                     }
                 }
-                spdlog::info("Best RMSD is {} between RGroup {} and RGroup {}", best_rmsd, i, best_rmsd_idx);
+                //spdlog::info("Best RMSD is {} between RGroup {} and RGroup {}", best_rmsd, i, best_rmsd_idx);
             }
         }
 
