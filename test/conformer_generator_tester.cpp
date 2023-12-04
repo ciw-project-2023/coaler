@@ -8,26 +8,24 @@
 
 using namespace coaler::embedder;
 
-namespace{
-    CoreAtomMapping getRandomCoreConfMapping(RDKit::ROMol& core)
-    {
+namespace {
+    CoreAtomMapping getRandomCoreConfMapping(RDKit::ROMol& core) {
         RDKit::DGeomHelpers::EmbedParameters params;
-        //generate Conformer with given coords for core
+        // generate Conformer with given coords for core
         RDKit::DGeomHelpers::EmbedMolecule(core, params);
 
         CoreAtomMapping atomMapping;
 
         RDKit::Conformer coreConf = core.getConformer();
-        //auto coords = coreConf.
+        // auto coords = coreConf.
 
-        for(int id = 0; id < core.getNumAtoms(); id++)
-        {
+        for (int id = 0; id < core.getNumAtoms(); id++) {
             RDGeom::Point3D pos = coreConf.getAtomPos(id);
             atomMapping.emplace(id, pos);
         }
         return atomMapping;
     }
-}
+}  // namespace
 
 TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
     RDKit::ROMol mol1 = *RDKit::SmilesToMol("c1ccccc1CCCO");
@@ -41,20 +39,17 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
     embedder.embedWithFixedCore(mol2, 10);
     std::vector<RDKit::ROMol> mols = {mol1, mol2};
 
-    for(const RDKit::ROMol& mol : mols)
-    {
+    for (const RDKit::ROMol& mol : mols) {
         std::vector<RDKit::MatchVectType> substructureResults;
-        if(RDKit::SubstructMatch(mol, core , substructureResults) == 0) {
+        if (RDKit::SubstructMatch(mol, core, substructureResults) == 0) {
             CHECK(false);
         }
-        //for now only use first substructure result //TODO adapt when changing class behavior
+        // for now only use first substructure result //TODO adapt when changing class behavior
         RDKit::MatchVectType match = substructureResults.at(0);
-        for(int id = 0; id < mol.getNumConformers(); id++)
-        {
+        for (int id = 0; id < mol.getNumConformers(); id++) {
             RDKit::Conformer conf = mol.getConformer(id);
 
-            for(const auto& matchPosition : match)
-            {
+            for (const auto& matchPosition : match) {
                 int coreAtomId = matchPosition.first;
                 int molAtomId = matchPosition.second;
                 RDGeom::Point3D atomCoords = core.getConformer().getAtomPos(coreAtomId);
@@ -66,6 +61,4 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
             }
         }
     }
-
-
 }
