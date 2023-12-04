@@ -12,15 +12,15 @@ namespace coaler::embedder{
     class ConformerEmbedder {
       public:
 
-        ConformerEmbedder(const RDKit::ROMol& core,
-                          unsigned numCoreConfigs);
+        //ConformerEmbedder(const RDKit::ROMol& core,
+        //                  unsigned numCoreConfigs);
 
-        ConformerEmbedder(const RDKit::ROMol& core,
+        ConformerEmbedder(RDKit::ROMol  core,
                           const CoreAtomMapping& coreMap);
 
-        void embedWithFixedCore(
+        bool embedWithFixedCore(
             const RDKit::ROMol& mol,
-            const RDKit::ROMol& core
+            unsigned numConfs
         );
 
       private:
