@@ -10,7 +10,8 @@ set(rdkitlibs "RDKitAbbreviations" "RDKitAlignment" "RDKitCatalogs" "RDKitChemic
         "RDKitShapeHelpers" "RDKitSimDivPickers" "RDKitSLNParse" "RDKitSmilesParse" "RDKitSubgraphs" "RDKitSubstructLibrary" "RDKitSubstructMatch"
         "RDKitTautomerQuery" "RDKitTrajectory")
 
-add_library(coaler_lib STATIC ${library_src} coaler/embedder/ConformerEmbedder.cpp coaler/embedder/ConformerEmbedder.hpp)
+add_library(coaler_lib STATIC ${library_src} coaler/embedder/ConformerEmbedder.cpp coaler/embedder/ConformerEmbedder.hpp coaler/core/Core.cpp coaler/core/Core.hpp coaler/core/Forward.hpp
+        coaler/core/Core.cpp)
 
 find_package(spdlog REQUIRED)
 find_package(rdkit REQUIRED)
