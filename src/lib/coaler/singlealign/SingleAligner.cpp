@@ -4,46 +4,79 @@
 #include <GraphMol/MolAlign/AlignMolecules.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
+#include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
+#include <GraphMol/RGroupDecomposition/RGroupDecomp.h>
+
 #include <spdlog/spdlog.h>
 
 #include <vector>
 
 namespace coaler {
     SingleAligner::SingleAligner(int core_min_size, float core_max_percentage, bool with_hs)
-            : core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage}, with_hs_{with_hs} {}
+        : core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage}, with_hs_{with_hs} {}
 
-    double SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
+    std::tuple<double, double> SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
                                                  unsigned int pos_id_b, std::optional<RDKit::ROMol> core) {
         spdlog::info("Start single alignment with Kabsch' algorithm");
 
-        RDKit::ROMOL_SPTR core_structure;
-        core_structure = boost::make_shared<RDKit::ROMol>(core.value());
-        spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
+        double core_rmsd = 0;
+        double score_rest = 0;
+        if (core != std::nullopt) {
+            RDKit::ROMOL_SPTR core_structure;
+            core_structure = boost::make_shared<RDKit::ROMol>(core.value());
+            spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
 
-        validate_core_structure_size(core_structure, mol_a, mol_b);
+            validate_core_structure_size(core_structure, mol_a, mol_b);
 
-        auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
-        RDKit::MatchVectType mapping = get_core_mapping(core_structure, std::get<0>(molecules), std::get<1>(molecules));
+            auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
+            RDKit::MatchVectType mapping
+                = get_core_mapping(core_structure, std::get<0>(molecules), std::get<1>(molecules));
 
+            // Align core structure of molecules.
+            core_rmsd = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
+            spdlog::info("Cores of the molecules are align with a score of {}", core_rmsd);
 
-        // Align core structure of molecules.
-        double core_rmsd = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
-        spdlog::info("Cores of the molecules are align with a score of {}", core_rmsd);
+            /** Variant A
+             * 1. Calculate Atom Map (MMFF, Crippen)
+             * 2. score = RDKit::CalcRMS(Mol1, Mol2, Atommap_total)
+             * 3. return tuple(score, core_rmsd)
+             */
 
-        /**
-         * 1. Calculate Atom Map (MMFF, Crippen)
-         * 2. score = RDKit::CalcRMS(Mol1, Mol2, Atommap_total)
-         * 3. return tuple(score, core_rmsd)
-         */
+            /** Variant B
+             * 1. Match R-groups
+             * 2. calculate alignment scores of R-groups
+             */
+
+            std::vector<RDKit::ROMOL_SPTR> cores;
+            cores.emplace_back(core_structure);
+
+            std::vector<RDKit::ROMOL_SPTR> mols;
+            mols.emplace_back(boost::make_shared<RDKit::ROMol>(std::get<0>(molecules)));
+            mols.emplace_back(boost::make_shared<RDKit::ROMol>(std::get<1>(molecules)));
+
+            RDKit::RGroupRows rows;
+
+            int r_count = RDKit::RGroupDecompose(cores, mols, rows);
+
+            for(auto row: rows){
+                for(auto elem: row){
+                    spdlog::info("{}, Substructure {}", std::get<0>(elem), RDKit::MolToSmiles(*std::get<1>(elem)));
+                }
+            }
+
+            spdlog::info("R Count {}", r_count);
+
+            // TODO: Different size of r group
+        }
 
         // TODO: score without core
 
-        return core_rmsd;
+        return std::make_tuple(score_rest, core_rmsd);
     }
 
-    double SingleAligner::calc_rms(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
-                                   unsigned int pos_id_b, std::optional<RDKit::ROMol> core) {
+    double SingleAligner::calc_rms(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a, unsigned int pos_id_b,
+                                   std::optional<RDKit::ROMol> core) {
         spdlog::info("Start calculation of RMS");
 
         RDKit::ROMOL_SPTR core_structure;
@@ -53,10 +86,10 @@ namespace coaler {
         validate_core_structure_size(core_structure, mol_a, mol_b);
 
         auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
-        RDKit::MatchVectType const mapping = get_core_mapping(core_structure, std::get<0>(molecules),
-                                                              std::get<1>(molecules));
+        RDKit::MatchVectType const mapping
+            = get_core_mapping(core_structure, std::get<0>(molecules), std::get<1>(molecules));
         // TODO: Wants to use the function CalcRMS, but it is not working. Mapping makes problems, like in python.
-        //double rmsd = RDKit::MolAlign::CalcRMS(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
+        // double rmsd = RDKit::MolAlign::CalcRMS(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
         double rmsd = 1.2175;
 
         spdlog::info("RMS is {}", rmsd);
