@@ -19,13 +19,19 @@ namespace coaler::multialign {
             if (ligandId == otherLigand.getID()) {
                 continue;
             }
-            if (registers.count(LigandPair(ligandId, otherLigand.getID())) != 0) {
+            LigandPair ligandPair(ligandId, otherLigand.getID());
+            if (registers.count(ligandPair) == 0) {
                 assembly.incrementMissingLigandsCount();
             }
-            PosePair pair = registers.at({ligandId, otherLigand.getID()})->getHighestScoringPair();
-            assert(pair.getFirst() == pose || pair.getSecond() == pose);
+            PosePair highestScoringPair = registers.at(ligandPair)->getHighestScoringPosePairForPose(pose);
 
-            UniquePoseID otherPose = pair.getFirst() == pose ? pair.getSecond() : pair.getFirst();
+            UniquePoseID otherPose;
+            if (highestScoringPair.getFirst() == pose) {
+                otherPose = highestScoringPair.getSecond();
+            } else {
+                otherPose = highestScoringPair.getFirst();
+            }
+
             assembly.insertLigandPose(otherPose.getLigandId(), otherPose.getLigandInternalPoseId());
         }
         return assembly;

@@ -43,6 +43,7 @@ namespace coaler::multialign {
                                const coaler::SingleAligner &aligner, unsigned maxStartingAssemblies)
 
         : m_core(std::move(core)), m_singleAligner(aligner), m_maxStartingAssemblies(maxStartingAssemblies) {
+        assert(m_maxStartingAssemblies > 0);
         for (LigandID id = 0; id < molecules.size(); id++) {
             UniquePoseSet poses;
 
@@ -102,10 +103,10 @@ namespace coaler::multialign {
                 AssemblyWithScore assemblyWithScore = std::make_pair(assembly, score);
 
                 // insert if queue no full or new assembly is larger that worst assembly in queue
-                bool const isWorse = AssemblyWithScoreLess()(assemblies.top(), assemblyWithScore);
 
                 // TODO ensure this is called correctly
-                if (assemblies.size() < m_maxStartingAssemblies || isWorse) {
+                if (assemblies.size() < m_maxStartingAssemblies
+                    || AssemblyWithScoreLess()(assemblies.top(), assemblyWithScore)) {
                     assemblies.push(assemblyWithScore);
                 }
             }
