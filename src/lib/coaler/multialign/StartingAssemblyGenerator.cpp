@@ -16,7 +16,7 @@ namespace coaler::multialign {
         LigandID ligandId = pose.getLigandId();
 
         for (const Ligand& otherLigand : ligands) {
-            if (ligandId == otherLigand.getID()){
+            if (ligandId == otherLigand.getID()) {
                 continue;
             }
             LigandPair ligandPair(ligandId, otherLigand.getID());
@@ -26,8 +26,7 @@ namespace coaler::multialign {
             PosePair highestScoringPair = registers.at(ligandPair)->getHighestScoringPosePairForPose(pose);
 
             UniquePoseID otherPose;
-            if(highestScoringPair.getFirst() == pose)
-            {
+            if (highestScoringPair.getFirst() == pose) {
                 otherPose = highestScoringPair.getSecond();
             } else {
                 otherPose = highestScoringPair.getFirst();

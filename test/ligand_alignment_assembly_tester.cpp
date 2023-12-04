@@ -39,8 +39,8 @@ TEST_CASE("test_ligand_alignment_assembly", "[ligand_alignment_assembly_tester]"
     CHECK(assembly.getPoseOfLigand(ligand1id) != 0);
     CHECK(assembly.getPoseOfLigand(ligand2id) != 1);
     assembly.swapPoseForLigand(0, 2);
-    //unsigned missingcount = assembly.getMissingLigandsCount();
-    //NOTE current configuration of multialigner doesnt generate missing poses. This will change!
+    // unsigned missingcount = assembly.getMissingLigandsCount();
+    // NOTE current configuration of multialigner doesnt generate missing poses. This will change!
     /*CHECK(assembly.getMissingLigandsCount() == 1);
     CHECK((assembly.getPoseOfLigand(ligand1id) != 2));
     assembly.incrementMissingLigandsCount();

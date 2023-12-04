@@ -57,13 +57,10 @@ namespace coaler::multialign {
 
     PosePair PoseRegister::getHighestScoringPosePairForPose(const UniquePoseID &pose) {
         assert(this->containsPose(pose));
-        PosePairAndScore currentBest = std::make_pair(m_register.at(0).first, -1); //dummy value, will be overwritten
-        for(const PosePairAndScore& entry : m_register)
-        {
-            if(entry.first.getFirst() == pose || entry.first.getSecond() == pose)
-            {
-                if(entry.second > currentBest.second)
-                {
+        PosePairAndScore currentBest = std::make_pair(m_register.at(0).first, -1);  // dummy value, will be overwritten
+        for (const PosePairAndScore &entry : m_register) {
+            if (entry.first.getFirst() == pose || entry.first.getSecond() == pose) {
+                if (entry.second > currentBest.second) {
                     currentBest = entry;
                 }
             }
