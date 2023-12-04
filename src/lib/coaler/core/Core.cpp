@@ -40,6 +40,7 @@ namespace coaler::core {
             return true;
         }
         else if (m_coreType == coreType::Murcko) {
+            RDKit::RWMol murcko = RDKit::getScaffoldForMol(mcs);
         }
     }
 
