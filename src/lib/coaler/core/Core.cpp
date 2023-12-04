@@ -4,7 +4,8 @@
 
 #include "Core.hpp"
 #include "GraphMol/FMCS/FMCS.h"
-// TODO: Add Chem lib Chem/Scaffolds/MurckoScaffold
+#include "GraphMol/Substruct/SubstructMatch.h"
+#include "GraphMol/ChemTransforms/ChemTransforms.h"
 
 namespace coaler::core {
 
@@ -12,9 +13,6 @@ namespace coaler::core {
     Core::Core(const std::vector<RDKit::RWMol>& molecules, const coreType coreType)
         :m_molecules(std::move(molecules)), m_coreType(coreType) {
         assert(m_molecules.size() > 0);
-
-        bool isCalculated = calculateCore();
-        assert(isCalculated);
     }
 
     coreType Core::getScaffoldType() const {
@@ -25,7 +23,7 @@ namespace coaler::core {
         return m_core;
     }
 
-    bool Core::calculateCore() const {
+    std::vector<RDKit::RWMol> Core::calculateCoreMcs() const {
 
         std::vector<RDKit::ROMOL_SPTR> shared_mols;
         for(RDKit::RWMol mol : m_molecules) {
@@ -36,12 +34,31 @@ namespace coaler::core {
         RDKit::MCSResult mcs = RDKit::findMCS(shared_mols);
         RDKit::ROMOL_SPTR mcs_structure = mcs.QueryMol;
 
-        if (m_coreType == coreType::MCS) {
-            return true;
-        }
-        else if (m_coreType == coreType::Murcko) {
-            RDKit::RWMol murcko = RDKit::getScaffoldForMol(mcs);
+        std::vector<RDKit::RWMol> result;
+
+        for(RDKit::RWMol mol : m_molecules) {
+            auto match = RDKit::SubstructMatch(mol, *mcs_structure);
         }
     }
 
-}
+    std::vector<RDKit::RWMol> Core::calculateCoreMurcko() const {
+
+        std::vector<RDKit::ROMOL_SPTR> shared_mols;
+        for(RDKit::RWMol mol : m_molecules) {
+            shared_mols.emplace_back(boost::make_shared<RDKit::ROMol>(mol));
+        }
+
+        RDKit::MCSResult mcs = RDKit::findMCS(shared_mols);
+        RDKit::ROMOL_SPTR mcs_structure = mcs.QueryMol;
+
+
+        std::vector<RDKit::RWMol> result;
+
+        for(RDKit::RWMol mol : m_molecules) {
+            RDKit::ROMol* scaffold = RDKit::MurckoDecompose(mol);
+
+            result.emplace_back(*scaffold);
+        }
+
+        return result;
+    }

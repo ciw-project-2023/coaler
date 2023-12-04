@@ -19,7 +19,8 @@ namespace coaler::core {
 
 
       private:
-        bool calculateCore() const;
+        std::vector<RDKit::RWMol> calculateCoreMcs() const;
+        std::vector<RDKit::RWMol> calculateCoreMurcko() const;
 
         CoreAsMol m_core;
         std::vector<RDKit::RWMol> m_molecules{};
