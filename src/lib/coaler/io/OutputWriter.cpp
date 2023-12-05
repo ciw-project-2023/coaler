@@ -1,3 +1,7 @@
+/*
+ * Copyright 2023 CoAler Group, all rights reserved.
+ */
+
 #include "OutputWriter.hpp"
 
 #include <GraphMol/SmilesParse/SmartsWrite.h>

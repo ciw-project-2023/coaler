@@ -1,0 +1,59 @@
+/*
+ * Copyright 2023 CoAler Group, all rights reserved.
+ */
+
+#include "AssemblyScorer.hpp"
+
+#include <spdlog/spdlog.h>
+
+namespace coaler::multialign {
+    double AssemblyScorer::calculateAssemblyScore(const LigandAlignmentAssembly& assembly,
+                                                  const PairwiseAlignment& scores, const LigandVector& ligands) {
+        double assemblyScore = 0.0;
+        for (const Ligand& firstLigand : ligands) {
+            for (const Ligand& secondLigand : ligands) {
+                if (firstLigand.getID() >= secondLigand.getID()) {
+                    continue;
+                }
+
+                PoseID const firstLigandPoseID = assembly.getPoseOfLigand(firstLigand.getID());
+                PoseID const secondLigandPoseID = assembly.getPoseOfLigand(secondLigand.getID());
+
+                if (firstLigandPoseID == std::numeric_limits<PoseID>::max()
+                    || secondLigandPoseID == std::numeric_limits<PoseID>::max()) {
+                    spdlog::info("Encountered invalid PosePair during optimization.");
+                    continue;
+                }
+
+                UniquePoseID const firstLigandPose{firstLigand.getID(), firstLigandPoseID};
+                UniquePoseID const secondLigandPose{secondLigand.getID(), secondLigandPoseID};
+                assemblyScore += scores.at(PosePair{firstLigandPose, secondLigandPose});
+            }
+        }
+        return assemblyScore;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    double AssemblyScorer::calculateScoreDeficitForLigand(const LigandID ligandId, const LigandID maxLigandId,
+                                                          const LigandAlignmentAssembly& assembly,
+                                                          const PoseRegisterCollection& registers,
+                                                          const PairwiseAlignment& scores) {
+        PairwisePoseRegisters poseRegisters = registers.getAllRegisters();
+        double scoreDeficit = 0.0;
+
+        for (LigandID id = 0; id <= maxLigandId; id++) {
+            if (id == ligandId) {
+                continue;
+            }
+
+            double const scoreInAssembly = scores.at(
+                PosePair({id, assembly.getPoseOfLigand(id)}, {ligandId, assembly.getPoseOfLigand(ligandId)}));
+            double const optimalScore = scores.at(poseRegisters.at(LigandPair(id, ligandId))->getHighestScoringPair());
+
+            scoreDeficit += (scoreInAssembly - optimalScore);
+        }
+        return scoreDeficit;
+    }
+
+}  // namespace coaler::multialign

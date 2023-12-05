@@ -1,3 +1,7 @@
+/*
+ * Copyright 2023 CoAler Group, all rights reserved.
+ */
+
 #include "SingleAligner.hpp"
 
 #include <GraphMol/FMCS/FMCS.h>

@@ -1,3 +1,7 @@
+/*
+ * Copyright 2023 CoAler Group, all rights reserved.
+ */
+
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/FileParsers/MolSupplier.h>
 #include <GraphMol/MolOps.h>
