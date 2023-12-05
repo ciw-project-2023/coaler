@@ -21,7 +21,7 @@ namespace coaler {
     SingleAligner::SingleAligner(int core_min_size, float core_max_percentage, bool with_hs)
         : core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage}, with_hs_{with_hs} {}
 
-    std::tuple<double, double> SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b,
+    double SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b,
                                                                      unsigned int pos_id_a, unsigned int pos_id_b,
                                                                      std::optional<RDKit::ROMol> core) {
         spdlog::info("Start single alignment");
@@ -49,7 +49,9 @@ namespace coaler {
             spdlog::info("RMS is {}", score_core_rmsd);
             spdlog::info("Score is {}", score_shape_similarity);
         }
-        return std::make_tuple(score_core_rmsd, score_shape_similarity);
+
+        //return std::make_tuple(score_core_rmsd, score_shape_similarity);
+        return score_shape_similarity;
     }
 
     void SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a,
