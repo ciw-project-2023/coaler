@@ -66,8 +66,15 @@ namespace coaler {
             //                        }
 
             spdlog::info("R Count {}", r_count);
-            int rgroups_mol_a = rows[0].size() - 1;
-            int rgroups_mol_b = rows[0].size() - 1;
+
+            RDKit::RGroupRow row_mol_a = rows[0];
+            RDKit::RGroupRow row_mol_b = rows[1];
+
+            row_mol_a.erase("Core");
+            row_mol_b.erase("Core")
+
+            int rgroups_mol_a = row_mol_a.size();
+            int rgroups_mol_b = row_mol_b.size();
 
             spdlog::info("Molecule A has {} RGroups", rgroups_mol_a);
             spdlog::info("Molecule B has {} RGroups", rgroups_mol_b);
