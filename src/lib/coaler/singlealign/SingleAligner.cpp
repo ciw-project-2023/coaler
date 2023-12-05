@@ -72,8 +72,8 @@ namespace coaler {
 
             // Solution 1: Naiiver Algorithm:
             std::vector<std::vector<double>> score_matrix(rgroups_mol_a);
-            for (auto row_vec : score_matrix) {
-                row_vec.resize(rgroups_mol_b);
+            for (int i=0; i < score_matrix.size(); i++) {
+                score_matrix.at(i).resize(rgroups_mol_b);
             }
 
             int i = 0;
@@ -108,7 +108,7 @@ namespace coaler {
             //                best_rmsd_idx);
             //            }
 
-            score_rest += core_rmsd + best_score;
+            score_rest += core_rmsd + 0;
         }
 
         // TODO: score without core
