@@ -4,8 +4,6 @@ find_package(Boost REQUIRED)
 
 file(GLOB test_src CONFIGURE_DEPENDS "*.hpp" "*.cpp")
 
-
-
 add_executable (Test ${test_src} conformer_generator_tester.cpp)
 
 target_link_libraries(Test PUBLIC "-Wl,--disable-new-dtags")
