@@ -90,17 +90,7 @@ namespace coaler {
 
             // TODO: What happened when unequal count of R's
 
-            // Calculate best combination of R assignments
-            double best_score = 0;
-            for (int i = 0; i < score_matrix.size(); i++) {
-                double current_score = 0;
-                for (auto elem : score_matrix.at(i)) {
-                    current_score += elem;
-                }
-                if (current_score > best_score) {
-                    best_score = current_score;
-                }
-            }
+            // TODO: Calculate best combination of R assignments
             // END Solution 1
 
             //            for (int i = 0; i < rgroups_mol_a; i++) {
