@@ -55,9 +55,10 @@ namespace coaler::multialign {
         }
     }
 
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     PairwiseAlignment MultiAligner::calculateAlignmentScores(const LigandVector &ligands, const RDKit::ROMol &core) {
         PairwiseAlignment scores;
-
         for (LigandID firstMolId = 0; firstMolId < ligands.size(); firstMolId++) {
             for (LigandID secondMolId = firstMolId + 1; secondMolId < ligands.size(); secondMolId++) {
                 unsigned nofPosesFirst = ligands.at(firstMolId).getNumPoses();
@@ -86,10 +87,10 @@ namespace coaler::multialign {
     /*----------------------------------------------------------------------------------------------------------------*/
     MultiAlignerResult MultiAligner::alignMolecules() {
         // calculate pairwise alignments
-        PairwiseAlignment allPosesAlignmentScores = this->calculateAlignmentScores(m_ligands, m_core);
+        m_pairwiseAlignments = this->calculateAlignmentScores(m_ligands, m_core);
 
         //build pose registers
-        m_poseRegisters = PoseRegisterBuilder::buildPoseRegisters(allPosesAlignmentScores, m_ligands);
+        m_poseRegisters = PoseRegisterBuilder::buildPoseRegisters(m_pairwiseAlignments, m_ligands);
 
         // build starting ensembles from registers
         // AssemblyCollection assemblies;
@@ -113,7 +114,7 @@ namespace coaler::multialign {
             }
         }
         // top #m_maxStartingAssemblies are now in queue. find best scoring assembly by optimizing all
-
+        //TODO SYMMETRIE?
         // optimize all starting assemblies.
         LigandAlignmentAssembly currentBestAssembly = assemblies.top().first;  // TODO default constructor for assembly?
         double currentBestScore
@@ -123,7 +124,7 @@ namespace coaler::multialign {
             LigandAlignmentAssembly assembly = assemblies.top().first;
             assemblies.pop();
 
-            LigandAvailabilityMapping ligandAvailable;  // TODO init here and only set all true in anon function
+            LigandAvailabilityMapping ligandAvailable;
             ligandAvailable.setAllAvailable();
 
             while (std::any_of(ligandAvailable.begin(), ligandAvailable.end(), LigandIsAvailable())) {

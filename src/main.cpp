@@ -5,7 +5,10 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/FileParsers/MolSupplier.h>
 #include <GraphMol/MolOps.h>
+#include <GraphMol/FileParsers/MolWriters.h>
 #include <spdlog/spdlog.h>
+
+#include <sstream>
 
 #include <boost/program_options.hpp>
 #include <coaler/io/Forward.hpp>
@@ -104,6 +107,18 @@ int main(int argc, char *argv[]) {
     const coaler::SingleAligner singleAligner;
     coaler::multialign::MultiAligner aligner(mols, *core, singleAligner);
     const coaler::multialign::MultiAlignerResult result = aligner.alignMolecules();
+
+    //write some basic output here to evaluate results
+
+    std::ostringstream oss;
+    // takeOwnership must be false for this, as we don't want the SDWriter trying
+    // to delete the std::ostringstream.
+    bool takeOwnership = false;
+    boost::shared_ptr<RDKit::SDWriter> sdf_writer( new RDKit::SDWriter( &oss , takeOwnership ) );
+    for( const auto& entry : result.inputLigands ) {
+        sdf_writer->write(entry.getMolecule(), result.poseIDsByLigandID.at(entry.getID()));
+    }
+    std::cout << oss.str() << std::endl;
 
     spdlog::info("done: exiting");
 }

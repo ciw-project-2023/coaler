@@ -9,6 +9,7 @@
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
+#include <GraphMol/ShapeHelpers/ShapeUtils.h>
 #include <spdlog/spdlog.h>
 
 #include <vector>
@@ -23,13 +24,15 @@ namespace coaler {
 
         RDKit::ROMOL_SPTR core_structure;
         core_structure = boost::make_shared<RDKit::ROMol>(core.value());
-        spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
+        //spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
 
         validate_core_structure_size(core_structure, mol_a, mol_b);
 
         auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
         RDKit::MatchVectType mapping = get_core_mapping(core_structure, std::get<0>(molecules), std::get<1>(molecules));
-        double rmsd = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
+        //double rmsd = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
+
+        double rmsd = RDKit::MolShapes::tanimotoDistance(mol_a, mol_b, pos_id_a, pos_id_b);
 
         spdlog::info("Molecules are align with a score of {}", rmsd);
         return rmsd;
