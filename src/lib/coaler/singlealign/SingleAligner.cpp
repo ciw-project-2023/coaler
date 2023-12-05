@@ -80,13 +80,17 @@ namespace coaler {
             for (auto r_a : row_mol_a) {
                 int j = 0;
                 for (auto r_b : row_mol_b) {
-                    double score_rs = 0;  // TODO: compare score of both R's
+                    // TODO: molecules of different size?
+                    double score_rs = 0;  // TODO: calculate score
                     score_matrix.at(i).at(j) = score_rs;
                     j++;
                 }
                 i++;
             }
 
+            // TODO: What happened when unequal count of R's
+
+            // Calculate best combination of R assignments
             double best_score = 0;
             for (int i = 0; i < score_matrix.size(); i++) {
                 double current_score = 0;
