@@ -16,7 +16,7 @@ namespace coaler::core {
 
     class Core;
 
-    enum class coreType {
+    enum class CoreType {
         MCS [[maybe_unused]],
         Murcko [[maybe_unused]],
         MurckoGeneric [[maybe_unused]],

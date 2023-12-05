@@ -15,13 +15,13 @@ namespace coaler::core {
          * @param molecules the molecules a core will be calculated for
          * @param coreType type of core calculated: MCS or Murcko Scaffold
          */
-        Core(const std::vector<RDKit::RWMol>& molecules, const coreType coreType);
+        Core(const std::vector<RDKit::RWMol>& molecules, const CoreType coreType);
 
         /**
          * getter function for the type of scaffold the core is calculated on
          * @return coreType of core
          */
-        [[nodiscard]] coreType getScaffoldType() const;
+        [[nodiscard]] CoreType getCoreType() const;
 
         /**
          * getter function for the core
@@ -44,6 +44,6 @@ namespace coaler::core {
 
         CoreAsMol m_core;
         std::vector<RDKit::RWMol> m_molecules;
-        coreType m_coreType;
+        CoreType m_coreType;
     };
 }  // namespace coaler::core

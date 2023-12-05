@@ -12,24 +12,24 @@
 
 namespace coaler::core {
 
-    Core::Core(const std::vector<RDKit::RWMol>& molecules, const coreType coreType)
+    Core::Core(const std::vector<RDKit::RWMol>& molecules, const CoreType coreType)
         : m_molecules(molecules), m_coreType(coreType) {
         assert(!m_molecules.empty());
 
-        if (coreType == coreType::MCS) {
+        if (coreType == CoreType::MCS) {
             m_core = calculateCoreMcs();
         } else {
             m_core = calculateCoreMurcko();
         }
     }
 
-    coreType Core::getScaffoldType() const { return m_coreType; }
+    CoreType Core::getCoreType() const { return m_coreType; }
 
     CoreAsMol Core::getCore() const { return m_core; }
 
     CoreAsMol Core::calculateCoreMcs() const {
         std::vector<RDKit::ROMOL_SPTR> shared_mols;
-        for (RDKit::RWMol mol : m_molecules) {
+        for (const RDKit::RWMol& mol : m_molecules) {
             shared_mols.emplace_back(boost::make_shared<RDKit::ROMol>(mol));
         }
 
