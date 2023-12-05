@@ -23,6 +23,15 @@ namespace coaler::multialign {
                 pair.second = true;
             }
         }
+
+        /*----------------------------------------------------------------------------------------------------------------*/
+
+        void init(const LigandVector& ligands) {
+            for(const Ligand& ligand : ligands)
+            {
+                this->emplace(ligand.getID(), true);
+            }
+        }
     };
 
     struct LigandIsAvailable {
@@ -59,6 +68,10 @@ namespace coaler::multialign {
 
     PairwiseAlignment MultiAligner::calculateAlignmentScores(const LigandVector &ligands, const RDKit::ROMol &core) {
         PairwiseAlignment scores;
+        unsigned n = ligands.size();
+        unsigned m = ligands.at(0).getNumPoses();
+        unsigned combinations = (int) (0.5 * ((n-1)*(n-1)*m*m));
+        unsigned calced = 0;
         for (LigandID firstMolId = 0; firstMolId < ligands.size(); firstMolId++) {
             for (LigandID secondMolId = firstMolId + 1; secondMolId < ligands.size(); secondMolId++) {
                 unsigned nofPosesFirst = ligands.at(firstMolId).getNumPoses();
@@ -71,16 +84,20 @@ namespace coaler::multialign {
 
                         double score = m_singleAligner.align_molecules_kabsch(firstMol, secondMol, firstMolPoseId,
                                                                               secondMolPoseId, core);
-
+                        calced++;
                         UniquePoseID firstPose(firstMolId, firstMolPoseId);
                         UniquePoseID secondPose(secondMolId, secondMolPoseId);
 
                         scores.emplace(PosePair(firstPose, secondPose), score);
                     }
                 }
+                if(calced % 1000 == 0)
+                {
+                    spdlog::info("Calculated {}/{} combinations", calced, combinations);
+                }
             }
         }
-
+        spdlog::info("finished calculating pairwise alignments");
         return scores;
     }
 
@@ -113,6 +130,7 @@ namespace coaler::multialign {
                 }
             }
         }
+
         // top #m_maxStartingAssemblies are now in queue. find best scoring assembly by optimizing all
         //TODO SYMMETRIE?
         // optimize all starting assemblies.
@@ -122,10 +140,11 @@ namespace coaler::multialign {
 
         while (!assemblies.empty()) {
             LigandAlignmentAssembly assembly = assemblies.top().first;
+            if(assembly.getMissingLigandsCount() != 0) continue;
             assemblies.pop();
 
             LigandAvailabilityMapping ligandAvailable;
-            ligandAvailable.setAllAvailable();
+            ligandAvailable.init(m_ligands);
 
             while (std::any_of(ligandAvailable.begin(), ligandAvailable.end(), LigandIsAvailable())) {
                 for (const Ligand &ligand : m_ligands) {
@@ -133,8 +152,11 @@ namespace coaler::multialign {
                         continue;
                     }
 
+                    //TODO set current assembly score here
+
                     // official: create new pose for each other pose in assembly
                     // MVP impl: check if any given pose improves assembly
+                    bool swappedLigandPose = false;
                     for (const UniquePoseID &pose : ligand.getPoses()) {
                         // check if using this pose improves assembly
                         LigandAlignmentAssembly assemblyCopy = assembly;
@@ -148,7 +170,13 @@ namespace coaler::multialign {
                         if (newAssemblyScore > currentAssemblyScore) {
                             assembly = assemblyCopy;
                             ligandAvailable.setAllAvailable();
+                            swappedLigandPose = true;
+                            break;
                         }
+                    }
+                    if(!swappedLigandPose)
+                    {
+                        ligandAvailable.at(ligand.getID()) = false;
                     }
                 }
             }

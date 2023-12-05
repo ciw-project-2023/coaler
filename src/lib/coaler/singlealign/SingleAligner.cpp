@@ -20,7 +20,7 @@ namespace coaler {
 
     double SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
                                                  unsigned int pos_id_b, std::optional<RDKit::ROMol> core) {
-        spdlog::info("Start single alignment with Kabsch' algorithm");
+        //spdlog::info("Start single alignment with Kabsch' algorithm");
 
         RDKit::ROMOL_SPTR core_structure;
         core_structure = boost::make_shared<RDKit::ROMol>(core.value());
@@ -34,7 +34,7 @@ namespace coaler {
 
         double rmsd = RDKit::MolShapes::tanimotoDistance(mol_a, mol_b, pos_id_a, pos_id_b);
 
-        spdlog::info("Molecules are align with a score of {}", rmsd);
+        //spdlog::info("Molecules are align with a score of {}", rmsd);
         return rmsd;
     }
 

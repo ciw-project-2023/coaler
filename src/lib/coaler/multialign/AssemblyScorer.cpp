@@ -30,7 +30,7 @@ namespace coaler::multialign {
                 assemblyScore += scores.at(PosePair{firstLigandPose, secondLigandPose});
             }
         }
-        spdlog::info(assemblyScore);
+        //spdlog::info(assemblyScore);
         return assemblyScore;
     }
 

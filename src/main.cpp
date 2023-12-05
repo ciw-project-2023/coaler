@@ -6,6 +6,7 @@
 #include <GraphMol/FileParsers/MolSupplier.h>
 #include <GraphMol/MolOps.h>
 #include <GraphMol/FileParsers/MolWriters.h>
+#include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <spdlog/spdlog.h>
 
 #include <sstream>
@@ -87,7 +88,7 @@ int main(int argc, char *argv[]) {
     spdlog::info("read {} molecules from {} file", mols.size(), opts.input_file_type);
 
     // generate random core with coordinates. TODO: get coordinates from input
-    const std::string smiles = "c1ccccc1";
+    const std::string smiles = "Cc1nnc2n1-c1sc3c(c1CNC2)CCC3";
     RDKit::ROMol* core = RDKit::SmilesToMol(smiles);
     RDKit::DGeomHelpers::EmbedParameters params;
     RDKit::DGeomHelpers::EmbedMolecule(*core, params);
@@ -102,10 +103,15 @@ int main(int argc, char *argv[]) {
     spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
     for (RDKit::ROMol* mol : mols) {
         coaler::embedder::ConformerEmbedder conformerEmbedder(*core, coreMapping);
-        conformerEmbedder.embedWithFixedCore(*mol, opts.num_conformers);
+        if(!conformerEmbedder.embedWithFixedCore(*mol, opts.num_conformers))
+        {
+            spdlog::error("Unable to generate conformers. Molecule {} does not match core {}. Aborting.",
+                          RDKit::MolToSmiles(*mol), RDKit::MolToSmiles(*core));
+            return 1;
+        }
     }
     const coaler::SingleAligner singleAligner;
-    coaler::multialign::MultiAligner aligner(mols, *core, singleAligner);
+    coaler::multialign::MultiAligner aligner(mols, *core, singleAligner, 10);
     const coaler::multialign::MultiAlignerResult result = aligner.alignMolecules();
 
     //write some basic output here to evaluate results
