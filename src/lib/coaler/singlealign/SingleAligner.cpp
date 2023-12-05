@@ -7,6 +7,7 @@
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
+#include <GraphMol/ShapeHelpers/ShapeUtils.h>
 #include <spdlog/spdlog.h>
 
 #include <vector>
@@ -81,7 +82,9 @@ namespace coaler {
                 int j = 0;
                 for (auto r_b : row_mol_b) {
                     // TODO: molecules of different size?
-                    double score_rs = 0;  // TODO: calculate score
+                    //double score_rs = 0;  // TODO: calculate score
+                    double score_rs = RDKit::MolShapes::tanimotoDistance(*std::get<1>(r_a), *std::get<1>(r_b));
+
                     score_matrix.at(i).at(j) = score_rs;
                     j++;
                 }
