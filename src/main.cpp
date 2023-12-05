@@ -121,6 +121,11 @@ int main(int argc, char *argv[]) {
     // to delete the std::ostringstream.
     bool takeOwnership = false;
     boost::shared_ptr<RDKit::SDWriter> sdf_writer( new RDKit::SDWriter( &oss , takeOwnership ) );
+    if(result.poseIDsByLigandID.size() != result.inputLigands.size())
+    {
+        spdlog::info("only generated an incomplete alignment.");
+        return 1;
+    }
     for( const auto& entry : result.inputLigands ) {
         sdf_writer->write(entry.getMolecule(), result.poseIDsByLigandID.at(entry.getID()));
     }
