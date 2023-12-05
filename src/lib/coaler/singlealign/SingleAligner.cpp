@@ -56,42 +56,65 @@ namespace coaler {
             mols.emplace_back(boost::make_shared<RDKit::ROMol>(std::get<1>(molecules)));
 
             RDKit::RGroupRows rows;
-
             int r_count = RDKit::RGroupDecompose(cores, mols, rows);
-            //                        for (auto row : rows) {
-            //                            for (auto elem : row) {
-            //                                spdlog::info("{}, Substructure {}", std::get<0>(elem),
-            //                                RDKit::MolToSmiles(*std::get<1>(elem)));
-            //                            }
-            //                        }
-
             spdlog::info("R Count {}", r_count);
 
             RDKit::RGroupRow row_mol_a = rows[0];
             RDKit::RGroupRow row_mol_b = rows[1];
-
             row_mol_a.erase("Core");
-            row_mol_b.erase("Core")
+            row_mol_b.erase("Core");
 
-            int rgroups_mol_a = row_mol_a.size();
-            int rgroups_mol_b = row_mol_b.size();
+            const int rgroups_mol_a = row_mol_a.size();
+            const int rgroups_mol_b = row_mol_b.size();
 
             spdlog::info("Molecule A has {} RGroups", rgroups_mol_a);
             spdlog::info("Molecule B has {} RGroups", rgroups_mol_b);
 
-            for (int i = 0; i < rgroups_mol_a; i++) {
-                double best_rmsd = 0.0;
-                int best_rmsd_idx = 0;
-                for (int j = 0; j < rgroups_mol_b; j++) {
-                    // TODO: rmsd calculation here
-                    int rmsd = j;
-                    if (rmsd < best_rmsd) {
-                        best_rmsd = rmsd;
-                        best_rmsd_idx = j;
-                    }
-                }
-                // spdlog::info("Best RMSD is {} between RGroup {} and RGroup {}", best_rmsd, i, best_rmsd_idx);
+            // Solution 1: Naiiver Algorithm:
+            std::vector<std::vector<double>> score_matrix(rgroups_mol_a);
+            for (auto row_vec : score_matrix) {
+                row_vec.resize(rgroups_mol_b);
             }
+
+            int i = 0;
+            for (auto r_a : row_mol_a) {
+                int j = 0;
+                for (auto r_b : row_mol_b) {
+                    double score_rs = 0;  // TODO: compare score of both R's
+                    score_matrix.at(i).at(j) = score_rs;
+                    j++;
+                }
+                i++;
+            }
+
+            double best_score = 0;
+            for (int i = 0; i < score_matrix.size(); i++) {
+                double current_score = 0;
+                for (auto elem : score_matrix.at(i)) {
+                    current_score += elem;
+                }
+                if (current_score > best_score) {
+                    best_score = current_score;
+                }
+            }
+            // END Solution 1
+
+            //            for (int i = 0; i < rgroups_mol_a; i++) {
+            //                double best_rmsd = 0.0;
+            //                int best_rmsd_idx = 0;
+            //                for (int j = 0; j < rgroups_mol_b; j++) {
+            //                    // TODO: rmsd calculation here
+            //                    int rmsd = j;
+            //                    if (rmsd < best_rmsd) {
+            //                        best_rmsd = rmsd;
+            //                        best_rmsd_idx = j;
+            //                    }
+            //                }
+            //                // spdlog::info("Best RMSD is {} between RGroup {} and RGroup {}", best_rmsd, i,
+            //                best_rmsd_idx);
+            //            }
+
+            score_rest += core_rmsd + best_score;
         }
 
         // TODO: score without core
