@@ -11,7 +11,7 @@ namespace coaler {
      * @brief This class is responsible for alignments of two molecules.
      */
     class SingleAligner {
-    public:
+      public:
         explicit SingleAligner(int core_min_size = 0, float core_max_percentage = 80, bool with_hs = false);
 
         /**
@@ -25,13 +25,9 @@ namespace coaler {
          * @return RMDS score and the core structure of the molecules.
          */
         std::tuple<double, double> align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
-                                      unsigned int pos_id_b, std::optional<RDKit::ROMol> core);
+                                                          unsigned int pos_id_b, std::optional<RDKit::ROMol> core);
 
-        double calc_rms(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a, unsigned int pos_id_b,
-                        std::optional<RDKit::ROMol> core);
-
-        // TODO: multiple void align_molecules_* functions
-    private:
+      private:
         /**
          * Validates the core structure.
          * @param core
