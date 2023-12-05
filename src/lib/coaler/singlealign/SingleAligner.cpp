@@ -66,19 +66,16 @@ namespace coaler {
             //                        }
 
             spdlog::info("R Count {}", r_count);
-            std::vector<int> rgroup_sizes;
+            int rgroups_mol_a = rows[0].size() - 1;
+            int rgroups_mol_b = rows[0].size() - 1;
 
-            for (auto row : rows) {
-                rgroup_sizes.emplace_back(row.size() - 1);
-            }
+            spdlog::info("Molecule A has {} RGroups", rgroups_mol_a);
+            spdlog::info("Molecule B has {} RGroups", rgroups_mol_b);
 
-            spdlog::info("Molecule 1 has {} RGroups", rgroup_sizes[0]);
-            spdlog::info("Molecule 2 has {} RGroups", rgroup_sizes[1]);
-
-            for (int i = 0; i < rgroup_sizes[0]; i++) {
+            for (int i = 0; i < rgroups_mol_a; i++) {
                 double best_rmsd = 0.0;
                 int best_rmsd_idx = 0;
-                for (int j = 0; j < rgroup_sizes[1]; j++) {
+                for (int j = 0; j < rgroups_mol_b; j++) {
                     // TODO: rmsd calculation here
                     int rmsd = j;
                     if (rmsd < best_rmsd) {
