@@ -24,11 +24,11 @@ TEST_CASE("Core_constructor", "[core]") {
     molVec.emplace_back(mol1);
     molVec.emplace_back(mol2);
 
-    Core coreMCS(molVec, coreType::MCS);
+    Core coreMCS(molVec, CoreType::MCS);
     RDKit::ROMol coreScaffoldMCS = coreMCS.getCore();
     CHECK(RDKit::MolToSmarts(coreScaffoldMCS) == "[#6]1:[#6]:[#6](:[#6]:[#6]:[#6]:1)-[#7](-[#6]-[#6]-[#6])-[#6]");
 
-    Core coreMurcko(molVec, coreType::Murcko);
+    Core coreMurcko(molVec, CoreType::Murcko);
     RDKit::ROMol coreScaffoldMurcko = coreMurcko.getCore();
     CHECK(RDKit::MolToSmarts(coreScaffoldMurcko) == "[#6]1:[#6]:[#6]:[#6]:[#6]:[#6]:1");
 }
