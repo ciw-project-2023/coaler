@@ -4,3 +4,5 @@ project(coaler CXX)
 add_subdirectory(src)
 enable_testing()
 add_subdirectory (test)
+
+SET(CMAKE_CXX_FLAGS  "-fopenmp")
