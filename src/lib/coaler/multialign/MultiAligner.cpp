@@ -2,13 +2,13 @@
  * Copyright 2023 CoAler Group, all rights reserved.
  */
 
-#include "MultiAligner.hpp"
-
+#include <omp.h>
 #include <spdlog/spdlog.h>
 
 #include <queue>
 #include <utility>
 
+#include "MultiAligner.hpp"
 #include "AssemblyScorer.hpp"
 #include "LigandAlignmentAssembly.hpp"
 #include "StartingAssemblyGenerator.hpp"
@@ -74,19 +74,25 @@ namespace coaler::multialign {
         }
     }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "readability-magic-numbers"
     /*----------------------------------------------------------------------------------------------------------------*/
 
     PairwiseAlignment MultiAligner::calculateAlignmentScores(const LigandVector &ligands, const RDKit::ROMol &core) {
         PairwiseAlignment scores;
         unsigned n = ligands.size();
         unsigned m = ligands.at(0).getNumPoses();
-        unsigned combinations = (int) (0.5 * ((n-1)*(n-1)*m*m));
-        unsigned calced = 0;
+        unsigned combinations = 0.5 * n * (n+1) * m * m; //TODO how many?
+        spdlog::info("Calculating {} combinations. This may take some time", combinations);
+
         for (LigandID firstMolId = 0; firstMolId < ligands.size(); firstMolId++) {
+            spdlog::info("calculated {} combinations so far.", scores.size());
             for (LigandID secondMolId = firstMolId + 1; secondMolId < ligands.size(); secondMolId++) {
                 unsigned nofPosesFirst = ligands.at(firstMolId).getNumPoses();
                 unsigned nofPosesSecond = ligands.at(secondMolId).getNumPoses();
-
+                omp_lock_t maplock;
+                omp_init_lock(&maplock);
+#pragma omp parallel for shared(maplock, ligands, core, scores, nofPosesFirst, nofPosesSecond, firstMolId, secondMolId) default(none) num_threads(10) // NOLINT(cppcoreguidelines-avoid-magic-numbers)
                 for (unsigned firstMolPoseId = 0; firstMolPoseId < nofPosesFirst; firstMolPoseId++) {
                     for (unsigned secondMolPoseId = 0; secondMolPoseId < nofPosesSecond; secondMolPoseId++) {
                         RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
@@ -94,28 +100,26 @@ namespace coaler::multialign {
 
                         double score = m_singleAligner.align_molecules_kabsch(firstMol, secondMol, firstMolPoseId,
                                                                               secondMolPoseId, core);
-                        calced++;
                         UniquePoseID firstPose(firstMolId, firstMolPoseId);
                         UniquePoseID secondPose(secondMolId, secondMolPoseId);
-
+                        omp_set_lock(&maplock);
                         scores.emplace(PosePair(firstPose, secondPose), score);
+                        omp_unset_lock(&maplock);
                     }
-                }
-                if(calced % 1000 == 0)
-                {
-                    spdlog::info("Calculated {}/{} combinations", calced, combinations);
                 }
             }
         }
         spdlog::info("finished calculating pairwise alignments");
         return scores;
     }
+#pragma clang diagnostic pop
 
     /*----------------------------------------------------------------------------------------------------------------*/
     MultiAlignerResult MultiAligner::alignMolecules() {
         // calculate pairwise alignments
         m_pairwiseAlignments = this->calculateAlignmentScores(m_ligands, m_core);
-
+        spdlog::info("Mols: {} | Confs/Mol: {} | total pairwise scores: {}",
+                     m_ligands.size(), m_ligands.begin()->getNumPoses(), m_pairwiseAlignments.size());
         //build pose registers
         m_poseRegisters = PoseRegisterBuilder::buildPoseRegisters(m_pairwiseAlignments, m_ligands);
 
