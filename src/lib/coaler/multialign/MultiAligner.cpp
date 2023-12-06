@@ -94,7 +94,7 @@ namespace coaler::multialign {
                 omp_init_lock(&maplock);
 
 #pragma omp parallel for shared(maplock, ligands, core, scores, nofPosesFirst, nofPosesSecond, firstMolId, \
-secondMolId) default(none)
+                                    secondMolId) default(none)
                 for (unsigned firstMolPoseId = 0; firstMolPoseId < nofPosesFirst; firstMolPoseId++) {
                     for (unsigned secondMolPoseId = 0; secondMolPoseId < nofPosesSecond; secondMolPoseId++) {
                         RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
@@ -191,10 +191,9 @@ secondMolId) default(none)
                         maxScoreDeficit = ligandScoreDeficit;
                     }
                 }
-                if(maxScoreDeficit == 0)
-                {
-                    //all pairwise alignments are optimal
-                    //TODO can we return this assembly and be sure its the optimum?
+                if (maxScoreDeficit == 0) {
+                    // all pairwise alignments are optimal
+                    // TODO can we return this assembly and be sure its the optimum?
                     break;
                 }
 
