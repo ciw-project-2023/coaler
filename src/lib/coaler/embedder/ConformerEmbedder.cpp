@@ -9,6 +9,8 @@
 
 #include <utility>
 
+#include "CoreSymmetryCalculator.hpp"
+
 const unsigned seed = 42;
 
 namespace coaler::embedder {
@@ -51,5 +53,24 @@ namespace coaler::embedder {
         RDKit::DGeomHelpers::EmbedMultipleConfs(mol, numConfs, params);
 
         return mol.getNumConformers() == numConfs;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    bool ConformerEmbedder::embedEvenlyAcrossSymmetryAxes(RDKit::ROMol& mol, unsigned minNofConfs,
+                                                          unsigned maxNofConfs) {
+        // unsigned nofSymmetryAxes = CoreSymmetryCalculator::getNofSymmetryAxes(mol);
+        std::vector<RDKit::MatchVectType> substructureResults;
+        if (RDKit::SubstructMatch(mol, m_core, substructureResults) == 0) {
+            return false;
+        }
+
+        unsigned conformationsPerMatch = maxNofConfs / substructureResults.size();
+        // TODO ensure large enough
+
+        // match all substructures
+        // embedd mol with match coordinates
+
+        return false;
     }
 }  // namespace coaler::embedder

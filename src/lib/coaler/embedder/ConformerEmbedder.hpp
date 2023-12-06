@@ -18,6 +18,8 @@ namespace coaler::embedder {
 
         bool embedWithFixedCore(RDKit::ROMol& mol, unsigned numConfs);
 
+        bool embedEvenlyAcrossSymmetryAxes(RDKit::ROMol& mol, unsigned minNofConfs, unsigned maxNofConfs);
+
       private:
         RDKit::ROMol m_core;
     };

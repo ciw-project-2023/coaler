@@ -80,14 +80,13 @@ int main(int argc, char* argv[]) {
         mols = coaler::io::FileParser::parse(opts.input_file_path);
     } else {
         spdlog::error("provided not supported molecule file format {}", opts.input_file_type);
-
         return 1;
     }
 
     spdlog::info("read {} molecules from {} file", mols.size(), opts.input_file_type);
 
     // generate random core with coordinates. TODO: get coordinates from input
-    const std::string coreSmiles = "c1cncnc1";
+    const std::string coreSmiles = "c1ccccc1";
     RDKit::ROMol* core = RDKit::SmilesToMol(coreSmiles);
     RDKit::DGeomHelpers::EmbedParameters params;
     RDKit::DGeomHelpers::EmbedMolecule(*core, params);
@@ -101,14 +100,15 @@ int main(int argc, char* argv[]) {
     spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
     for (RDKit::ROMol* mol : mols) {
         coaler::embedder::ConformerEmbedder conformerEmbedder(*core, coreMapping);
-        if (!conformerEmbedder.embedWithFixedCore(*mol, opts.num_conformers)) {
+        //if (!conformerEmbedder.embedWithFixedCore(*mol, opts.num_conformers)) {
+        if (!conformerEmbedder.embedWithFixedCore(*mol, 10)) {
             spdlog::error("Unable to generate conformers. Molecule {} does not match core {}. Aborting.",
                           RDKit::MolToSmiles(*mol), RDKit::MolToSmiles(*core));
             return 1;
         }
     }
     const coaler::SingleAligner singleAligner;
-    coaler::multialign::MultiAligner aligner(mols, *core, singleAligner);
+    coaler::multialign::MultiAligner aligner(mols, *core, singleAligner, 1);
     const coaler::multialign::MultiAlignerResult result = aligner.alignMolecules();
 
     // write some basic output here to evaluate results

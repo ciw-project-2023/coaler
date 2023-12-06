@@ -1,10 +1,11 @@
 find_package(Catch2 REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Boost REQUIRED)
+find_package(OpenMP REQUIRED)
 
 file(GLOB test_src CONFIGURE_DEPENDS "*.hpp" "*.cpp")
 
-add_executable (Test ${test_src} conformer_generator_tester.cpp)
+add_executable (Test ${test_src} conformer_generator_tester.cpp core_symmetry_tester.cpp)
 
 target_link_libraries(Test PUBLIC "-Wl,--disable-new-dtags")
 
@@ -17,6 +18,7 @@ target_include_directories(Test PUBLIC
 target_link_libraries(Test PRIVATE Catch2::Catch2)
 target_link_libraries(Test PUBLIC spdlog::spdlog)
 target_link_libraries(Test PUBLIC coaler_lib)
+target_link_libraries(Test PRIVATE OpenMP::OpenMP_CXX)
 
 set(TEST_DATA_FILES AID_1806504.smi)
 add_test(NAME MyTest COMMAND Test)
