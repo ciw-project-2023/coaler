@@ -45,6 +45,6 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    void LigandAlignmentAssembly::setMissingLigandsCount(unsigned count) { m_missingLigandsCount = count;}
+    void LigandAlignmentAssembly::setMissingLigandsCount(unsigned count) { m_missingLigandsCount = count; }
 
 }  // namespace coaler::multialign

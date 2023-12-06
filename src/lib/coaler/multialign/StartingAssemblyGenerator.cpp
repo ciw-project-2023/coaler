@@ -13,7 +13,7 @@ namespace coaler::multialign {
         // add already defined pose
         assembly.insertLigandPose(pose.getLigandId(), pose.getLigandInternalPoseId());
         PairwisePoseRegisters registers = poseCompatibilities.getAllRegistersForPose(pose);
-        if(registers.empty()) //in case that pose is in no registers
+        if (registers.empty())  // in case that pose is in no registers
         {
             assembly.setMissingLigandsCount(ligands.size() - 1);
             return assembly;
