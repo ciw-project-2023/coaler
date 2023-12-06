@@ -37,9 +37,9 @@ namespace coaler::embedder {
         CoreAtomMapping moleculeCoreCoords;
         RDKit::Conformer coreConformer = m_core.getConformer(0);
         for (const auto& matchAtom : match) {
-            int coreAtomId = matchAtom.first;
-            int molAtomId = matchAtom.second;
-            RDGeom::Point3D atomCoords = coreConformer.getAtomPos(coreAtomId);
+            const int coreAtomId = matchAtom.first;
+            const int molAtomId = matchAtom.second;
+            const RDGeom::Point3D atomCoords = coreConformer.getAtomPos(coreAtomId);
             moleculeCoreCoords.emplace(molAtomId, atomCoords);
         }
 
