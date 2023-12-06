@@ -15,6 +15,7 @@ set(rdkitlibs "RDKitAbbreviations" "RDKitAlignment" "RDKitCatalogs" "RDKitChemic
         "RDKitShapeHelpers" "RDKitSimDivPickers" "RDKitSLNParse" "RDKitSmilesParse" "RDKitSubgraphs" "RDKitSubstructLibrary" "RDKitSubstructMatch"
         "RDKitTautomerQuery" "RDKitTrajectory")
 
+
 add_library(coaler_lib STATIC ${library_src})
 
 target_include_directories(coaler_lib PUBLIC ${rdkit_INCLUDE_DIRS})
