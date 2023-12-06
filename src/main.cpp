@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
     for( const auto& entry : result.inputLigands ) {
         sdf_writer->write(entry.getMolecule(), result.poseIDsByLigandID.at(entry.getID()));
     }
-    std::cout << oss.str() << std::endl;
+    //std::cout << oss.str() << std::endl;
 
     spdlog::info("done: exiting");
 }

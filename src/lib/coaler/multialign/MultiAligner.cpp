@@ -148,10 +148,10 @@ namespace coaler::multialign {
         }
 
         // top #m_maxStartingAssemblies are now in queue. find best scoring assembly by optimizing all
-        //TODO SYMMETRIE?
+        //TODO SYMMETRY?
         // optimize all starting assemblies.
         LigandAlignmentAssembly currentBestAssembly = assemblies.top().first;  // TODO default constructor for assembly?
-        double currentBestScore
+        double currentBestAssemblyScore
             = AssemblyScorer::calculateAssemblyScore(currentBestAssembly, m_pairwiseAlignments, m_ligands);
 
         while (!assemblies.empty()) {
@@ -170,58 +170,67 @@ namespace coaler::multialign {
             ligandAvailable.init(m_ligands);
 
             //TODO dont recalc score but use assemblies score
-
+            //assembly optimization step
             while (std::any_of(ligandAvailable.begin(), ligandAvailable.end(), LigandIsAvailable())) {
+                //determine ligand with highest score deficit TODO move to own func
                 double maxScoreDeficit = 0;
+                Ligand worstLigand = *m_ligands.begin(); //dummy init --> better idea?
                 for(const Ligand& ligand : m_ligands)
                 {
-                    double ligandScoreDeficit =
-                        AssemblyScorer::calculateScoreDeficitForLigand(ligand, currentAssembly);
-                }
-                for (const Ligand &ligand : m_ligands) {
-                    if (!ligandAvailable.at(ligand.getID())) {
+                    if(!ligandAvailable.at(ligand.getID()))
+                    {
                         continue;
                     }
-                    // official: create new pose for each other pose in currentAssembly
-                    // MVP impl: check if any given pose improves currentAssembly
-                    bool swappedLigandPose = false;
-                    for (const UniquePoseID &pose : ligand.getPoses()) {
-                        // check if using this pose improves currentAssembly
-                        if(pose.getLigandInternalPoseId() == currentAssembly.getPoseOfLigand(ligand.getID()))
-                        {
-                            continue;
-                        }
-                        LigandAlignmentAssembly assemblyCopy = currentAssembly;
-                        assemblyCopy.swapPoseForLigand(ligand.getID(), pose.getLigandInternalPoseId());
-                        //avoid identity swap
-                        double const newAssemblyScore
-                            = AssemblyScorer::calculateAssemblyScore(assemblyCopy, m_pairwiseAlignments, m_ligands);
-
-                        if (newAssemblyScore > currentAssemblyScore) {
-                            currentAssembly = assemblyCopy;
-                            currentAssemblyScore = newAssemblyScore;
-                            ligandAvailable.setAllAvailable();
-                            swappedLigandPose = true;
-                            break;
-                        }
-                    }
-                    if(!swappedLigandPose)
+                    double ligandScoreDeficit =
+                        AssemblyScorer::calculateScoreDeficitForLigand(ligand.getID(),
+                                                                       m_ligands.size() - 1,
+                                                                       currentAssembly,
+                                                                       m_poseRegisters,
+                                                                       m_pairwiseAlignments);
+                    if(maxScoreDeficit < ligandScoreDeficit)
                     {
-                        ligandAvailable.at(ligand.getID()) = false;
+                        worstLigand = ligand;
+                        maxScoreDeficit = ligandScoreDeficit;
                     }
                 }
 
+                bool swappedLigandPose = false;
+                for (const UniquePoseID &pose : worstLigand.getPoses()) {
+                    // check if using this pose improves currentAssembly
+                    if(pose.getLigandInternalPoseId() == currentAssembly.getPoseOfLigand(worstLigand.getID()))
+                    {
+                        continue;
+                    }
+                    LigandAlignmentAssembly assemblyCopy = currentAssembly;
+                    assemblyCopy.swapPoseForLigand(worstLigand.getID(), pose.getLigandInternalPoseId());
+                    //avoid identity swap
+                    double const newAssemblyScore
+                        = AssemblyScorer::calculateAssemblyScore(assemblyCopy, m_pairwiseAlignments, m_ligands);
+
+                    if (newAssemblyScore > currentAssemblyScore) {
+                        currentAssembly = assemblyCopy;
+                        currentAssemblyScore = newAssemblyScore;
+                        ligandAvailable.setAllAvailable();
+                        swappedLigandPose = true;
+                        break;
+                    }
+                }
+                if(!swappedLigandPose)
+                {
+                        ligandAvailable.at(worstLigand.getID()) = false;
+                }
             }
+
             double const assemblyScore
                 = AssemblyScorer::calculateAssemblyScore(currentAssembly, m_pairwiseAlignments, m_ligands);
             spdlog::info("Score after opt: {}", assemblyScore);
-            if (assemblyScore > currentBestScore) {
+            if (assemblyScore > currentBestAssemblyScore) {
                 currentBestAssembly = currentAssembly;
-                currentBestScore = assemblyScore;
+                currentBestAssemblyScore = assemblyScore;
             }
         }
 
-        return {currentBestScore, currentBestAssembly.getAssemblyMapping(), m_ligands};
+        return {currentBestAssemblyScore, currentBestAssembly.getAssemblyMapping(), m_ligands};
     }
 
 }  // namespace coaler::multialign
