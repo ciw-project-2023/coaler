@@ -92,9 +92,9 @@ namespace coaler::multialign {
                 unsigned nofPosesSecond = ligands.at(secondMolId).getNumPoses();
                 omp_lock_t maplock;
                 omp_init_lock(&maplock);
+
 #pragma omp parallel for shared(maplock, ligands, core, scores, nofPosesFirst, nofPosesSecond, firstMolId, \
-                                    secondMolId) default(none)                                             \
-    num_threads(10)  // NOLINT(cppcoreguidelines-avoid-magic-numbers)
+secondMolId) default(none)
                 for (unsigned firstMolPoseId = 0; firstMolPoseId < nofPosesFirst; firstMolPoseId++) {
                     for (unsigned secondMolPoseId = 0; secondMolPoseId < nofPosesSecond; secondMolPoseId++) {
                         RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
@@ -190,6 +190,12 @@ namespace coaler::multialign {
                         worstLigand = ligand;
                         maxScoreDeficit = ligandScoreDeficit;
                     }
+                }
+                if(maxScoreDeficit == 0)
+                {
+                    //all pairwise alignments are optimal
+                    //TODO can we return this assembly and be sure its the optimum?
+                    break;
                 }
 
                 bool swappedLigandPose = false;
