@@ -35,6 +35,6 @@ TEST_CASE("test_pose_register_builder", "[pose_register_builder_tester]") {
     PairwisePoseRegisters reg = collection.getAllRegisters();
 
     CHECK(reg.size() == 1);
-    CHECK(reg.at(ligandPair)->getSize() == 2);
+    CHECK(reg.at(ligandPair)->getSize() == 4);
     CHECK(reg.at(ligandPair)->getHighestScoringPair() == m0p0m1p0);
 }

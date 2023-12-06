@@ -48,7 +48,7 @@ namespace coaler::multialign {
 
     unsigned PoseRegisterBuilder::calculateRegisterSizeForLigand(const Ligand &firstLigand,
                                                                  const Ligand &secondLigand) {
-        return firstLigand.getNumHeavyAtoms() + secondLigand.getNumHeavyAtoms();
+        return firstLigand.getNumHeavyAtoms() + secondLigand.getNumHeavyAtoms();  // TODO find appropriate value
         // return sqrt(firstLigand.getNumHeavyAtoms() + secondLigand.getNumHeavyAtoms());
     }
 }  // namespace coaler::multialign
