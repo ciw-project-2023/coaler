@@ -10,6 +10,7 @@ namespace coaler::core {
 
     class Core {
       public:
+        Core();
         /**
          * constructor for object of class Core
          * @param molecules the molecules a core will be calculated for

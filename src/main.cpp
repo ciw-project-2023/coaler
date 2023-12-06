@@ -11,6 +11,8 @@
 
 #include <boost/program_options.hpp>
 #include <coaler/embedder/ConformerEmbedder.hpp>
+#include <coaler/core/Forward.hpp>
+#include <coaler/core/Core.hpp>
 #include <coaler/io/Forward.hpp>
 #include <coaler/multialign/MultiAligner.hpp>
 #include <coaler/multialign/MultiAlignerResult.hpp>
@@ -24,6 +26,7 @@ struct ProgrammOptions {
     std::string input_file_type;
     unsigned num_conformers;
     bool dont_add_hydrogens;
+    std::string core_type;
 };
 
 const std::string help
@@ -33,6 +36,7 @@ const std::string help
       "  -t, --type <type>\t\t\tType of input file (sdf, smiles)\tdefault: smiles\n"
       "  -f, --file <path>\t\t\tPath to input file\n"
       "  -o, --out <path>\t\t\tPath to output file\n"
+      "  --core <type>\t\t\tType of core structure used(mcs, murcko)\tdefault: murcko\n"
       "  --conformers <amount>\t\t\tNumber of conformers to generate for each input molecule\tdefault: 10\n"
       "  --dont-add-hydrogens \t\t\tDisabled adding hydrogens to molecules\n";
 
@@ -44,6 +48,8 @@ std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
         "type,t", opts::value<std::string>(&parsed_options.input_file_type)->default_value("smiles"),
         "type of input file (sdf, smiles)")(
         "file,f", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
+        "core", opts::value<std::string>(&parsed_options.input_file_type)->default_value("murcko"),
+        "type of core structure (mcs,murcko)")(
         "conformers", opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10))(
         "dont-add-hydrogens", opts::value<bool>(&parsed_options.dont_add_hydrogens)->default_value(false));
 
@@ -87,28 +93,38 @@ int main(int argc, char* argv[]) {
     spdlog::info("read {} molecules from {} file", mols.size(), opts.input_file_type);
 
     // generate random core with coordinates. TODO: get coordinates from input
-    const std::string coreSmiles = "c1cncnc1";
-    RDKit::ROMol* core = RDKit::SmilesToMol(coreSmiles);
+
+
+    coaler::core::Core core;
+    if (opts.core_type == "mcs") {
+        core = coaler::core::Core(mols, coaler::core::CoreType::MCS);
+    }
+    else {
+        core = coaler::core::Core(mols, coaler::core::CoreType::Murcko);
+    }
+
+
+    RDKit::ROMol coreAsMol = core.getCore();
     RDKit::DGeomHelpers::EmbedParameters params;
-    RDKit::DGeomHelpers::EmbedMolecule(*core, params);
+    RDKit::DGeomHelpers::EmbedMolecule(coreAsMol, params);
 
     coaler::embedder::CoreAtomMapping coreMapping;
 
-    for (int id = 0; id < core->getNumAtoms(); id++) {
-        coreMapping.emplace(id, core->getConformer(0).getAtomPos(id));
+    for (int id = 0; id < coreAsMol.getNumAtoms(); id++) {
+        coreMapping.emplace(id, coreAsMol.getConformer(0).getAtomPos(id));
     }
 
     spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
     for (RDKit::ROMol& mol : mols) {
-        coaler::embedder::ConformerEmbedder conformerEmbedder(*core, coreMapping);
+        coaler::embedder::ConformerEmbedder conformerEmbedder(coreAsMol, coreMapping);
         if (!conformerEmbedder.embedWithFixedCore(mol, opts.num_conformers)) {
             spdlog::error("Unable to generate conformers. Molecule {} does not match core {}. Aborting.",
-                          RDKit::MolToSmiles(mol), RDKit::MolToSmiles(*core));
+                          RDKit::MolToSmiles(mol), RDKit::MolToSmiles(coreAsMol));
             return 1;
         }
     }
     const coaler::SingleAligner singleAligner;
-    coaler::multialign::MultiAligner aligner(mols, *core, singleAligner);
+    coaler::multialign::MultiAligner aligner(mols, coreAsMol, singleAligner);
     const coaler::multialign::MultiAlignerResult result = aligner.alignMolecules();
 
     // write some basic output here to evaluate results
