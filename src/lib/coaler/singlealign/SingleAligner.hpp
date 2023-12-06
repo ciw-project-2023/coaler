@@ -31,7 +31,6 @@ namespace coaler {
         double align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
                                       unsigned int pos_id_b, std::optional<RDKit::ROMol> core);
 
-        // TODO: multiple void align_molecules_* functions
       private:
         /**
          * Validates the core structure.

@@ -13,6 +13,11 @@ namespace coaler::multialign {
         // add already defined pose
         assembly.insertLigandPose(pose.getLigandId(), pose.getLigandInternalPoseId());
         PairwisePoseRegisters registers = poseCompatibilities.getAllRegistersForPose(pose);
+        if (registers.empty())  // in case that pose is in no registers
+        {
+            assembly.setMissingLigandsCount(ligands.size() - 1);
+            return assembly;
+        }
         LigandID ligandId = pose.getLigandId();
 
         for (const Ligand& otherLigand : ligands) {
@@ -22,6 +27,7 @@ namespace coaler::multialign {
             LigandPair ligandPair(ligandId, otherLigand.getID());
             if (registers.count(ligandPair) == 0) {
                 assembly.incrementMissingLigandsCount();
+                continue;
             }
             PosePair highestScoringPair = registers.at(ligandPair)->getHighestScoringPosePairForPose(pose);
 

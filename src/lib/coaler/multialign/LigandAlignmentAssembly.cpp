@@ -19,7 +19,7 @@ namespace coaler::multialign {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     PoseID LigandAlignmentAssembly::getPoseOfLigand(LigandID ligandId) const {
-        if (m_assembly.count(ligandId) != 0) {
+        if (m_assembly.count(ligandId) == 0) {
             return std::numeric_limits<PoseID>::max();
         }
         return m_assembly.at(ligandId);
@@ -42,5 +42,9 @@ namespace coaler::multialign {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     std::unordered_map<LigandID, PoseID> LigandAlignmentAssembly::getAssemblyMapping() { return m_assembly; }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    void LigandAlignmentAssembly::setMissingLigandsCount(unsigned count) { m_missingLigandsCount = count; }
 
 }  // namespace coaler::multialign
