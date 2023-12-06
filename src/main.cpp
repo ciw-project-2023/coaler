@@ -87,8 +87,8 @@ int main(int argc, char* argv[]) {
     spdlog::info("read {} molecules from {} file", mols.size(), opts.input_file_type);
 
     // generate random core with coordinates. TODO: get coordinates from input
-    const std::string smiles = "Cc1nnc2n1-c1sc3c(c1CNC2)CCC3";
-    RDKit::ROMol* core = RDKit::SmilesToMol(smiles);
+    const std::string coreSmiles = "c1cncnc1";
+    RDKit::ROMol* core = RDKit::SmilesToMol(coreSmiles);
     RDKit::DGeomHelpers::EmbedParameters params;
     RDKit::DGeomHelpers::EmbedMolecule(*core, params);
 
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
         }
     }
     const coaler::SingleAligner singleAligner;
-    coaler::multialign::MultiAligner aligner(mols, *core, singleAligner, 10);
+    coaler::multialign::MultiAligner aligner(mols, *core, singleAligner);
     const coaler::multialign::MultiAlignerResult result = aligner.alignMolecules();
 
     // write some basic output here to evaluate results

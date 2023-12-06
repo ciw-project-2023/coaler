@@ -23,7 +23,7 @@ namespace coaler {
 
     double SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
                                                  unsigned int pos_id_b, std::optional<RDKit::ROMol> core) {
-        spdlog::info("Start single alignment");
+        //spdlog::info("Start single alignment");
 
         double score_core_rmsd = 0;
         double score_shape_similarity = 0;
