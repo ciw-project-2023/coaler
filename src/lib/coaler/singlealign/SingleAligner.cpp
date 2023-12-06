@@ -31,7 +31,7 @@ namespace coaler {
         if (core != std::nullopt) {
             RDKit::ROMOL_SPTR core_structure;
             core_structure = boost::make_shared<RDKit::ROMol>(core.value());
-            spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
+            //spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
 
             validate_core_structure_size(core_structure, mol_a, mol_b);
 
@@ -39,15 +39,15 @@ namespace coaler {
             RDKit::MatchVectType mapping
                 = get_core_mapping(core_structure, std::get<0>(molecules), std::get<1>(molecules));
 
-            score_shape_similarity = RDKit::MolShapes::tanimotoDistance(std::get<0>(molecules), std::get<1>(molecules));
+            score_shape_similarity = 1 - RDKit::MolShapes::tanimotoDistance(std::get<0>(molecules), std::get<1>(molecules));
             // Align core structure of molecules.
             score_core_rmsd
                 = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
 
             // TODO: print mols as molblock and check alignment
 
-            spdlog::info("RMS is {}", score_core_rmsd);
-            spdlog::info("Score is {}", score_shape_similarity);
+            //spdlog::info("RMS is {}", score_core_rmsd);
+            //spdlog::info("Score is {}", score_shape_similarity);
         }
 
         //return std::make_tuple(score_core_rmsd, score_shape_similarity);
