@@ -1,5 +1,3 @@
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fopenmp")
-
 add_executable (coaler main.cpp)
 add_subdirectory(lib)
 
