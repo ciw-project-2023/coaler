@@ -65,12 +65,34 @@ namespace coaler::embedder {
             return false;
         }
 
-        unsigned conformationsPerMatch = maxNofConfs / substructureResults.size();
+        unsigned nofMatches = substructureResults.size();
+
+        unsigned conformersPerMatch
+            = nofMatches * minNofConfs < maxNofConfs ?(int) maxNofConfs / nofMatches : minNofConfs;
         // TODO ensure large enough
 
         // match all substructures
         // embedd mol with match coordinates
 
         return false;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    std::vector<unsigned> ConformerEmbedder::distributeApproxEvenly(unsigned int nofMatches,
+                                                                    unsigned int maxConformers) {
+        std::vector<unsigned> confsForMatch(nofMatches);
+        unsigned decrementPosition = maxConformers % nofMatches;
+        int baseNofConfs = maxConformers / nofMatches;
+
+        std::fill(confsForMatch.begin(),
+                  confsForMatch.begin() + decrementPosition,
+                  baseNofConfs + 1);
+
+        std::fill(confsForMatch.begin() + decrementPosition + 1,
+                  confsForMatch.end(),
+                  (int)(maxConformers / nofMatches));
+
+        return confsForMatch;
     }
 }  // namespace coaler::embedder
