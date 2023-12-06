@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
 
     auto opts = mOpts.value();
 
-    std::vector<RDKit::RWMol*> mols;
+    std::vector<RDKit::RWMol> mols;
     if (opts.input_file_type == "smiles") {
         mols = coaler::io::FileParser::parse(opts.input_file_path);
     } else {
@@ -99,11 +99,11 @@ int main(int argc, char* argv[]) {
     }
 
     spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
-    for (RDKit::ROMol* mol : mols) {
+    for (RDKit::ROMol& mol : mols) {
         coaler::embedder::ConformerEmbedder conformerEmbedder(*core, coreMapping);
-        if (!conformerEmbedder.embedWithFixedCore(*mol, opts.num_conformers)) {
+        if (!conformerEmbedder.embedWithFixedCore(mol, opts.num_conformers)) {
             spdlog::error("Unable to generate conformers. Molecule {} does not match core {}. Aborting.",
-                          RDKit::MolToSmiles(*mol), RDKit::MolToSmiles(*core));
+                          RDKit::MolToSmiles(mol), RDKit::MolToSmiles(*core));
             return 1;
         }
     }

@@ -14,7 +14,7 @@ namespace coaler::multialign {
 
     class MultiAligner {
       public:
-        MultiAligner(const std::vector<RDKit::RWMol*>& molecules, RDKit::ROMol core,
+        MultiAligner(const std::vector<RDKit::RWMol>& molecules, RDKit::ROMol core,
                      const coaler::SingleAligner& aligner, unsigned maxStartingAssemblies = 250);
 
         MultiAlignerResult alignMolecules();

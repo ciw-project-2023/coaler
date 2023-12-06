@@ -58,7 +58,7 @@ namespace coaler::multialign {
         }
     };
 
-    MultiAligner::MultiAligner(const std::vector<RDKit::RWMol *> &molecules, RDKit::ROMol core,
+    MultiAligner::MultiAligner(const std::vector<RDKit::RWMol> &molecules, RDKit::ROMol core,
                                const coaler::SingleAligner &aligner, unsigned maxStartingAssemblies)
 
         : m_core(std::move(core)), m_singleAligner(aligner), m_maxStartingAssemblies(maxStartingAssemblies) {
@@ -66,11 +66,11 @@ namespace coaler::multialign {
         for (LigandID id = 0; id < molecules.size(); id++) {
             UniquePoseSet poses;
 
-            for (PoseID poseId = 0; poseId < molecules.at(id)->getNumConformers(); poseId++) {
+            for (PoseID poseId = 0; poseId < molecules.at(id).getNumConformers(); poseId++) {
                 poses.emplace(id, poseId);
             }
 
-            m_ligands.emplace_back(*molecules.at(id), poses, id);
+            m_ligands.emplace_back(molecules.at(id), poses, id);
         }
     }
 

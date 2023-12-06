@@ -12,6 +12,6 @@
 namespace coaler::io {
     class FileParser {
       public:
-        static std::vector<RDKit::RWMol *> parse(const std::string &file_path);
+        static std::vector<RDKit::RWMol> parse(const std::string &file_path);
     };
 }  // namespace coaler::io

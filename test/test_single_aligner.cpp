@@ -9,21 +9,21 @@
 
 TEST_CASE("Single Aligner", "[aligner]") {
     auto molecules = coaler::io::FileParser::parse("test/data/two_mols.sdf");
-    RDKit::RWMol *mol_a = molecules.at(0);
-    RDKit::RWMol *mol_b = molecules.at(1);
+    RDKit::RWMol mol_a = molecules.at(0);
+    RDKit::RWMol mol_b = molecules.at(1);
 
-    RDKit::MolOps::addHs(*mol_a);
-    RDKit::MolOps::addHs(*mol_b);
+    RDKit::MolOps::addHs(mol_a);
+    RDKit::MolOps::addHs(mol_b);
 
     std::vector<RDKit::ROMOL_SPTR> mols;
-    mols.emplace_back(boost::make_shared<RDKit::ROMol>(*mol_a));
-    mols.emplace_back(boost::make_shared<RDKit::ROMol>(*mol_b));
+    mols.emplace_back(boost::make_shared<RDKit::ROMol>(mol_a));
+    mols.emplace_back(boost::make_shared<RDKit::ROMol>(mol_b));
 
     RDKit::MCSResult res = RDKit::findMCS(mols);
     RDKit::ROMOL_SPTR core_structure = res.QueryMol;
 
     coaler::SingleAligner single_aligner(1, 1, true);
-    single_aligner.align_molecules_kabsch(*mol_a, *mol_b, 0, 0, *core_structure);
+    single_aligner.align_molecules_kabsch(mol_a, mol_b, 0, 0, *core_structure);
 
     //    SECTION("With H-atoms") {
     //        auto molecules = coaler::io::FileParser::parse("test/data/two_mols.sdf");
