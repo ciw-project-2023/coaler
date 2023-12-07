@@ -48,8 +48,8 @@ std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
         "type,t", opts::value<std::string>(&parsed_options.input_file_type)->default_value("smiles"),
         "type of input file (sdf, smiles)")(
         "file,f", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
-        "core", opts::value<std::string>(&parsed_options.input_file_type)->default_value("murcko"),
-        "type of core structure (mcs,murcko)")(
+        "core", opts::value<std::string>(&parsed_options.core_type)->default_value("murcko"),
+        "type of core structure (mcs, murcko)")(
         "conformers", opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10))(
         "dont-add-hydrogens", opts::value<bool>(&parsed_options.dont_add_hydrogens)->default_value(false));
 
@@ -94,17 +94,34 @@ int main(int argc, char* argv[]) {
 
     // generate random core with coordinates. TODO: get coordinates from input
 
-
+    /*for (auto mol : mols) {
+        std::cout << MolToSmiles(mol) << std::endl;
+    }
     coaler::core::Core core;
     if (opts.core_type == "mcs") {
         core = coaler::core::Core(mols, coaler::core::CoreType::MCS);
     }
     else {
         core = coaler::core::Core(mols, coaler::core::CoreType::Murcko);
-    }
+    }*/
 
 
-    RDKit::ROMol coreAsMol = core.getCore();
+    RDKit::RWMol *mol_a = RDKit::SmilesToMol("CCCC");
+    RDKit::RWMol *mol_b = RDKit::SmilesToMol("CCCC");
+    std::cout << RDKit::MolToSmiles(*mol_a) << std::endl;
+
+    std::vector<RDKit::ROMOL_SPTR> molse;
+    molse.emplace_back(boost::make_shared<RDKit::ROMol>(*mol_a));
+    molse.emplace_back(boost::make_shared<RDKit::ROMol>(*mol_b));
+
+    RDKit::MCSResult const mcs = RDKit::findMCS(molse);
+    RDKit::RWMol coreAsMol = *mcs.QueryMol;
+
+    std::string coreAsString = RDKit::MolToSmiles(coreAsMol);
+    std::cout << coreAsString << std::endl;
+    std::cout << mcs.SmartsString << std::endl;
+
+    //RDKit::ROMol coreAsMol = core.getCore();
     RDKit::DGeomHelpers::EmbedParameters params;
     RDKit::DGeomHelpers::EmbedMolecule(coreAsMol, params);
 

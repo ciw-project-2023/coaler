@@ -39,7 +39,7 @@ namespace coaler::core {
         RDKit::MCSResult const mcs = RDKit::findMCS(shared_mols);
         RDKit::RWMol mcsAsMol = *mcs.QueryMol;
 
-        RDKit::MolOps::sanitizeMol(mcsAsMol);
+        //RDKit::MolOps::sanitizeMol(mcsAsMol);
 
         return mcsAsMol;
     }
@@ -49,6 +49,8 @@ namespace coaler::core {
 
         // CoreAsMol ret = *RDKit::MurckoDecompose(*RDKit::SmilesToMol("c1ccncc1"));
         CoreAsMol ret = *RDKit::MurckoDecompose(mcs_structure);
+        ret.RDKit::ROMol::clearComputedProps();
+        ret.RDKit::ROMol::updatePropertyCache();
         return ret;
     }
 
