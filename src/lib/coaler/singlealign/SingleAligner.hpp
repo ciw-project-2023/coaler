@@ -7,8 +7,6 @@
 #include <GraphMol/ROMol.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
 
-#include <cstdint>  // todo: is necessary when using RDKit libraries
-
 namespace coaler {
 
     /**
@@ -19,17 +17,27 @@ namespace coaler {
         explicit SingleAligner(int core_min_size = 0, float core_max_percentage = 80, bool with_hs = false);
 
         /**
-         * Computes the alignment of two molecules with a common core structure using the Kabsch' algorithm.
-         * If the core structure is not set, then the MCS of the two molecules is calculated.
+         * Computes the RMSD of the core inside the molecule using the Kabsch' algorithm.
          * @param mol_a
          * @param mol_b
-         * @param pos_id_
-         * @param pos_id_
-         * @param core: optional set core structure.
-         * @return RMDS score and the core structure of the molecules.
+         * @param pos_id_a: Conforemere ID for molecules A
+         * @param pos_id_b: Conforemere ID for molecules B
+         * @param core
+         * @return RMDS score of the core inside the molecules.
          */
         double align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
-                                      unsigned int pos_id_b, std::optional<RDKit::ROMol> core);
+                                      unsigned int pos_id_b, RDKit::ROMol core);
+
+        /**
+         * Computes the tanimoto shape similarity between two molecules.
+         * @param mol_a
+         * @param mol_b
+         * @param pos_id_a: Conforemere ID for molecules A
+         * @param pos_id_b: Conforemere ID for molecules B
+         * @return Tanimoto shape similarity of molecules
+         */
+        double calculate_tanimoto_shape_similarity(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
+                                                   unsigned int pos_id_b);
 
       private:
         /**
