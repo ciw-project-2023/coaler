@@ -1,4 +1,3 @@
-
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
@@ -27,7 +26,7 @@ namespace {
     }
 }  // namespace
 
-TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
+TEST_CASE("test_shared_core", "[embedder]") {
     RDKit::ROMol mol1 = *RDKit::SmilesToMol("c1ccccc1CCCO");
     RDKit::ROMol mol2 = *RDKit::SmilesToMol("c1c(CC)cc(CC)cc1CC");
     RDKit::ROMol core = *RDKit::SmilesToMol("c1ccccc1");

@@ -1,14 +1,10 @@
-//
-// Created by chris on 11/5/23.
-//
-
 #include <GraphMol/SmilesParse/SmilesParse.h>
 
 #include "catch2/catch.hpp"
 #include "coaler/multialign/Forward.hpp"
 
 using namespace coaler::multialign;
-TEST_CASE("test_ligand", "[ligand_tester]") {
+TEST_CASE("test_ligand", "[multialign]") {
     UniquePoseSet poses = {UniquePoseID(0, 0), UniquePoseID(0, 1), UniquePoseID(0, 2)};
     RDKit::RWMol mol = *RDKit::SmilesToMol("CN");
     coaler::multialign::Ligand ligand(mol, poses, 1);
