@@ -43,6 +43,7 @@ namespace coaler::io {
                 result.push_back(mol);
             }
         } else {
+            spdlog::error("Unsupported file extension: {}", file_extension);
             throw std::runtime_error("Unsupported file extension: " + file_extension);
         }
 
