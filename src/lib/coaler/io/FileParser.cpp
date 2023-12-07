@@ -24,7 +24,6 @@ namespace coaler::io {
         std::ifstream infile(file_path);
         if (!infile) {
             spdlog::error("file not found: {}", file_path);
-
             throw FileNotFoundException(file_path);
         }
 
