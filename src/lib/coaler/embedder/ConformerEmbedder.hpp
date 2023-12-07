@@ -11,14 +11,17 @@ namespace coaler::embedder {
 
     class ConformerEmbedder {
       public:
-        // ConformerEmbedder(const RDKit::ROMol& core,
-        //                   unsigned numCoreConfigs);
 
         ConformerEmbedder(RDKit::ROMol core, const CoreAtomMapping& coreMap);
 
         bool embedWithFixedCore(RDKit::ROMol& mol, unsigned numConfs);
 
+        bool embedEvenlyAcrossAllMatches(RDKit::ROMol& mol, unsigned minNofConfs, unsigned maxNofConfs);
+
+        static std::vector<unsigned> distributeApproxEvenly(unsigned nofMatches, unsigned maxConformers);
+
       private:
+
         RDKit::ROMol m_core;
     };
 }  // namespace coaler::embedder
