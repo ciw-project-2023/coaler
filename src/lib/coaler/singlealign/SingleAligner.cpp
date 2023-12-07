@@ -36,6 +36,13 @@ namespace coaler {
         return RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
     }
 
+    double SingleAligner::calculate_tanimoto_shape_simularity(RDKit::ROMol mol_a, RDKit::ROMol mol_b,
+                                                              unsigned int pos_id_a, unsigned int pos_id_b) {
+        auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
+
+        return 1 - RDKit::MolShapes::tanimotoDistance(std::get<0>(molecules), std::get<1>(molecules));
+    }
+
     void SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a,
                                                      RDKit::ROMol mol_b) const {
         if (core->getNumAtoms() < core_min_size_) {
