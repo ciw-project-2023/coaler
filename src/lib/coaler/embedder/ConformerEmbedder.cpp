@@ -7,11 +7,28 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
 
+#include <boost/range/combine.hpp>
 #include <utility>
 
 #include "CoreSymmetryCalculator.hpp"
 
 const unsigned seed = 42;
+
+namespace {
+    coaler::embedder::CoreAtomMapping getAtomMappingFromMatch(const RDKit::MatchVectType& match,
+                                                              const RDKit::Conformer& matchConformer) {
+        coaler::embedder::CoreAtomMapping matchCoords;
+        for (const auto& matchAtom : match) {
+            const int coreAtomId = matchAtom.first;
+            const int molAtomId = matchAtom.second;
+            const RDGeom::Point3D& atomCoords = matchConformer.getAtomPos(coreAtomId);
+            matchCoords.emplace(molAtomId, atomCoords);
+        }
+        return matchCoords;
+    }
+}  // namespace
+
+/*----------------------------------------------------------------------------------------------------------------*/
 
 namespace coaler::embedder {
     ConformerEmbedder::ConformerEmbedder(RDKit::ROMol core, const CoreAtomMapping& coreMap) : m_core(std::move(core)) {
@@ -36,7 +53,7 @@ namespace coaler::embedder {
         RDKit::MatchVectType match = substructureResults.at(0);
 
         // determine coordinates for atoms using core conformer
-        CoreAtomMapping moleculeCoreCoords;
+        CoreAtomMapping moleculeCoreCoords; //todo call getAtomMappingFromMatch()
         RDKit::Conformer coreConformer = m_core.getConformer(0);
         for (const auto& matchAtom : match) {
             const int coreAtomId = matchAtom.first;
@@ -66,10 +83,14 @@ namespace coaler::embedder {
         }
 
         unsigned nofMatches = substructureResults.size();
+        std::vector<unsigned> nofConformersForMatch = distributeApproxEvenly(nofMatches, maxNofConfs);
+        assert(nofConformersForMatch.size() == substructureResults.size());
 
-        unsigned conformersPerMatch
-            = nofMatches * minNofConfs < maxNofConfs ?(int) maxNofConfs / nofMatches : minNofConfs;
-        // TODO ensure large enough
+        for(const auto& iter : boost::combine(nofConformersForMatch, substructureResults)) {
+            const unsigned nofConformers = iter.get<0>();
+            const RDKit::MatchVectType& match = iter.get<>()
+            CoreAtomMapping matchCoords = getAtomMappingFromMatch();
+        }
 
         // match all substructures
         // embedd mol with match coordinates
@@ -79,6 +100,7 @@ namespace coaler::embedder {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
+    //TODO add max per match
     std::vector<unsigned> ConformerEmbedder::distributeApproxEvenly(unsigned int nofMatches,
                                                                     unsigned int maxConformers) {
         std::vector<unsigned> confsForMatch(nofMatches);
@@ -86,12 +108,12 @@ namespace coaler::embedder {
         int baseNofConfs = maxConformers / nofMatches;
 
         std::fill(confsForMatch.begin(),
-                  confsForMatch.begin() + decrementPosition,
+                  confsForMatch.begin() + decrementPosition ,
                   baseNofConfs + 1);
 
-        std::fill(confsForMatch.begin() + decrementPosition + 1,
+        std::fill(confsForMatch.begin() + decrementPosition,
                   confsForMatch.end(),
-                  (int)(maxConformers / nofMatches));
+                  baseNofConfs);
 
         return confsForMatch;
     }

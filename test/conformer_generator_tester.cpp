@@ -6,6 +6,8 @@
 #include "catch2/catch.hpp"
 #include "coaler/embedder/ConformerEmbedder.hpp"
 
+#include <boost/range/combine.hpp>
+
 using namespace coaler::embedder;
 
 namespace {
@@ -61,4 +63,20 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
             }
         }
     }
+}
+
+void check_distribution(unsigned nofMatches, unsigned maxConfs, const std::vector<unsigned>& expected_dist) {
+    std::vector<unsigned> dist = ConformerEmbedder::distributeApproxEvenly(nofMatches, maxConfs);
+    REQUIRE(dist.size() == expected_dist.size());
+    for(const auto& itertuple : boost::combine(dist, expected_dist))
+    {
+        CHECK(itertuple.get<0>() == itertuple.get<1>());
+    }
+}
+
+TEST_CASE("validate_distribute_evenly") {
+    check_distribution(3,7, {3,2,2});
+    check_distribution(2,7, {4,3});
+    check_distribution(5,10, {2,2,2,2,2});
+    check_distribution(6,20, {4,4,3,3,3,3});
 }
