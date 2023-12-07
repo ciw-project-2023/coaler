@@ -82,7 +82,7 @@ namespace coaler::multialign {
         PairwiseAlignment scores;
         unsigned n = ligands.size();
         unsigned m = ligands.at(0).getNumPoses();
-        unsigned combinations = 0.5 * n * (n + 1) * m * m;  // TODO how many?
+        unsigned combinations = 0.5 * n * (n - 1) * m * m;  // TODO how many?
         spdlog::info("Calculating {} combinations. This may take some time", combinations);
 
         for (LigandID firstMolId = 0; firstMolId < ligands.size(); firstMolId++) {
