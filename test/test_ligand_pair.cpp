@@ -1,12 +1,7 @@
-//
-// Created by follenburg on 15.11.23.
-//
-
 #include "catch2/catch.hpp"
-// #include "coaler/multialign/Forward.hpp"
 #include "coaler/multialign/models/LigandPair.hpp"
 
-TEST_CASE("test_ligand_pair", "[ligand_pair_tester]") {
+TEST_CASE("test_ligand_pair", "[multialign]") {
     coaler::multialign::LigandPair pair1(0, 1);
     coaler::multialign::LigandPair pair2(1, 0);
     coaler::multialign::LigandPair pair3(2, 1);

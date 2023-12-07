@@ -1,7 +1,3 @@
-//
-// Created by follenburg on 15.11.23.
-//
-
 #include <GraphMol/SmilesParse/SmilesParse.h>
 
 #include "catch2/catch.hpp"
@@ -12,7 +8,7 @@
 
 using namespace coaler::multialign;
 
-TEST_CASE("test_ligand_alignment_assembly", "[ligand_alignment_assembly_tester]") {
+TEST_CASE("test_ligand_alignment_assembly", "[multialign]") {
     UniquePoseID m0p0(0, 0);
     UniquePoseID m0p1(0, 1);
     UniquePoseID m1p0(1, 0);

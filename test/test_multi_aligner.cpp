@@ -1,18 +1,16 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
-#include <GraphMol/FileParsers/FileParsers.h>
 #include <GraphMol/GraphMol.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 
 #include <iostream>
 
 #include "catch2/catch.hpp"
-#include "coaler/multialign/Forward.hpp"
 #include "coaler/multialign/MultiAligner.hpp"
 #include "coaler/singlealign/SingleAligner.hpp"
 
 using namespace coaler;
 
-TEST_CASE("basic_test", "[multialigner_tester]") {
+TEST_CASE("basic_test", "[multialign]") {
     RDKit::RWMol *mol1 = RDKit::SmilesToMol("Cc1ccccc1");
     RDKit::RWMol *mol2 = RDKit::SmilesToMol("Oc1ccccc1");
     RDKit::RWMol *core = RDKit::SmilesToMol("c1ccccc1");

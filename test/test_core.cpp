@@ -1,14 +1,7 @@
-//
-// Created by malte on 12/4/23.
-//
-
-#include <GraphMol/FileParsers/FileParsers.h>
-#include <GraphMol/FileParsers/MolSupplier.h>
 #include <GraphMol/RDKitBase.h>
 #include <GraphMol/RWMol.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
-#include <spdlog/spdlog.h>
 
 #include <catch2/catch.hpp>
 #include <string>

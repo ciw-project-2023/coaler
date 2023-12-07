@@ -1,13 +1,9 @@
-//
-// Created by follenburg on 15.11.23.
-//
-
 #include "catch2/catch.hpp"
 #include "coaler/multialign/Forward.hpp"
 #include "coaler/multialign/models/PosePair.hpp"
 
 using namespace coaler::multialign;
-TEST_CASE("test_pose_pair", "[pose_pair_tester]") {
+TEST_CASE("test_pose_pair", "[multialign]") {
     UniquePoseID pose1(0, 0);
     UniquePoseID pose2(1, 0);
     UniquePoseID pose3(2, 0);
