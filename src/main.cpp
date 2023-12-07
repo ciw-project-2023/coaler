@@ -41,8 +41,6 @@ std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
 
     opts::options_description desc("Allowed options");
     desc.add_options()("help,h", "print help message")(
-        "type,t", opts::value<std::string>(&parsed_options.input_file_type)->default_value("smiles"),
-        "type of input file (sdf, smiles)")(
         "file,f", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
         "conformers", opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10))(
         "dont-add-hydrogens", opts::value<bool>(&parsed_options.dont_add_hydrogens)->default_value(false));
@@ -76,13 +74,7 @@ int main(int argc, char* argv[]) {
     auto opts = mOpts.value();
 
     std::vector<RDKit::RWMol*> mols;
-    if (opts.input_file_type == "smiles") {
-        mols = coaler::io::FileParser::parse(opts.input_file_path);
-    } else {
-        spdlog::error("provided not supported molecule file format {}", opts.input_file_type);
-
-        return 1;
-    }
+    mols = coaler::io::FileParser::parse(opts.input_file_path);
 
     spdlog::info("read {} molecules from {} file", mols.size(), opts.input_file_type);
 

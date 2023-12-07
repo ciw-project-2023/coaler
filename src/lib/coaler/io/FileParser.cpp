@@ -24,7 +24,6 @@ namespace coaler::io {
         std::ifstream infile(file_path);
         if (!infile) {
             spdlog::error("file not found: {}", file_path);
-
             throw FileNotFoundException(file_path);
         }
 
@@ -44,6 +43,7 @@ namespace coaler::io {
                 result.push_back(mol);
             }
         } else {
+            spdlog::error("Unsupported file extension: {}", file_extension);
             throw std::runtime_error("Unsupported file extension: " + file_extension);
         }
 
