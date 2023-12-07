@@ -23,29 +23,27 @@ struct ProgrammOptions {
     std::string input_file_path;
     std::string input_file_type;
     unsigned num_conformers;
-    bool dont_add_hydrogens;
+    std::string out_file;
 };
 
 const std::string help
-    = "Usage: aligner [options]\n"
-      "Options:\n"
-      "  -h, --help\t\t\t\tPrint this help message\n"
-      "  -t, --type <type>\t\t\tType of input file (sdf, smiles)\tdefault: smiles\n"
-      "  -f, --file <path>\t\t\tPath to input file\n"
-      "  -o, --out <path>\t\t\tPath to output file\n"
-      "  --conformers <amount>\t\t\tNumber of conformers to generate for each input molecule\tdefault: 10\n"
-      "  --dont-add-hydrogens \t\t\tDisabled adding hydrogens to molecules\n";
+        = "Usage: aligner [options]\n"
+          "Options:\n"
+          "  -h, --help\t\t\t\tPrint this help message\n"
+          "  -f, --files <path>\t\t\tPath to input files\n"
+          "  -o, --out <path>\t\t\tPath to output files\n"
+          "  --conformers <amount>\t\t\tNumber of conformers to generate for each input molecule (default: 10)\n";
 
 std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
     ProgrammOptions parsed_options;
 
     opts::options_description desc("Allowed options");
-    desc.add_options()("help,h", "print help message")(
-        "type,t", opts::value<std::string>(&parsed_options.input_file_type)->default_value("smiles"),
-        "type of input file (sdf, smiles)")(
-        "file,f", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
-        "conformers", opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10))(
-        "dont-add-hydrogens", opts::value<bool>(&parsed_options.dont_add_hydrogens)->default_value(false));
+    desc.add_options()
+            ("help,h", "print help message")
+            ("file,f", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")
+            ("out,o", opts::value<std::string>(&parsed_options.out_file)->default_value("out.sdf"), "path to output file"),
+            ("conformers,c", opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10),
+             "number of conformers to generate");
 
     opts::variables_map vm;
     opts::store(opts::parse_command_line(argc, argv, desc), vm);
@@ -111,21 +109,7 @@ int main(int argc, char* argv[]) {
     coaler::multialign::MultiAligner aligner(mols, *core, singleAligner);
     const coaler::multialign::MultiAlignerResult result = aligner.alignMolecules();
 
-    // write some basic output here to evaluate results
-
-    std::ostringstream oss;
-    // takeOwnership must be false for this, as we don't want the SDWriter trying
-    // to delete the std::ostringstream.
-    bool takeOwnership = false;
-    boost::shared_ptr<RDKit::SDWriter> sdf_writer(new RDKit::SDWriter(&oss, takeOwnership));
-    if (result.poseIDsByLigandID.size() != result.inputLigands.size()) {
-        spdlog::info("only generated an incomplete alignment.");
-        return 1;
-    }
-    for (const auto& entry : result.inputLigands) {
-        sdf_writer->write(entry.getMolecule(), result.poseIDsByLigandID.at(entry.getID()));
-    }
-    std::cout << oss.str() << std::endl;
+    coaler::io::OutputWriter::save_molecules_w_scores_in_file(opts.out_file, result);
 
     spdlog::info("done: exiting");
 }
