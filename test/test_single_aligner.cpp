@@ -15,12 +15,12 @@ TEST_CASE("Singlealign", "[singlealign]") {
 
     SECTION("Tanimoto Similarity"){
         SECTION("Two similar molecules") {
-            double similarity = singleAligner.calculate_tanimoto_shape_simularity(*mol_a, *mol_a, -1, -1);
+            double similarity = singleAligner.calculate_tanimoto_shape_similarity(*mol_a, *mol_a, -1, -1);
             CHECK(similarity == 1);
         }
 
         SECTION("Two different molecules") {
-            double similarity = singleAligner.calculate_tanimoto_shape_simularity(*mol_a, *mol_b, -1, -1);
+            double similarity = singleAligner.calculate_tanimoto_shape_similarity(*mol_a, *mol_b, -1, -1);
             // Fix for floating point precision
             similarity = static_cast<unsigned int>(similarity * 100000) / 100000.0;
             CHECK(similarity == 0.01809);
@@ -53,6 +53,32 @@ TEST_CASE("Singlealign", "[singlealign]") {
             // Fix for floating point precision
             similarity = static_cast<unsigned int>(similarity * 100000) / 100000.0;
             CHECK(similarity == 1.34124);
+        }
+
+        SECTION("Core too small") {
+            singleAligner = coaler::SingleAligner(20);
+
+            std::vector<RDKit::ROMOL_SPTR> mols;
+            mols.emplace_back(boost::make_shared<RDKit::ROMol>(*mol_a));
+            mols.emplace_back(boost::make_shared<RDKit::ROMol>(*mol_b));
+
+            RDKit::MCSResult res = RDKit::findMCS(mols);
+            RDKit::ROMOL_SPTR core_structure = res.QueryMol;
+
+            CHECK_THROWS(singleAligner.align_molecules_kabsch(*mol_a, *mol_b, -1, -1, *core_structure));
+        }
+
+        SECTION("Core too big") {
+            singleAligner = coaler::SingleAligner(1, 20);
+
+            std::vector<RDKit::ROMOL_SPTR> mols;
+            mols.emplace_back(boost::make_shared<RDKit::ROMol>(*mol_a));
+            mols.emplace_back(boost::make_shared<RDKit::ROMol>(*mol_b));
+
+            RDKit::MCSResult res = RDKit::findMCS(mols);
+            RDKit::ROMOL_SPTR core_structure = res.QueryMol;
+
+            CHECK(singleAligner.align_molecules_kabsch(*mol_a, *mol_b, -1, -1, *core_structure));
         }
     }
 }
