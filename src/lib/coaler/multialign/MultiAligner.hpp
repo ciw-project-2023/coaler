@@ -14,8 +14,8 @@ namespace coaler::multialign {
 
     class MultiAligner {
       public:
-        MultiAligner(const std::vector<RDKit::RWMol*>& molecules, RDKit::ROMol core,
-                     const coaler::SingleAligner& aligner, unsigned maxStartingAssemblies = 250);
+        MultiAligner(RDKit::MOL_SPTR_VECT molecules, RDKit::ROMOL_SPTR core, const coaler::SingleAligner& aligner,
+                     unsigned maxStartingAssemblies = 250);
 
         MultiAlignerResult alignMolecules();
 
@@ -24,7 +24,7 @@ namespace coaler::multialign {
 
         unsigned m_maxStartingAssemblies;
         coaler::SingleAligner m_singleAligner;
-        RDKit::ROMol m_core;
+        RDKit::ROMOL_SPTR m_core;
         std::vector<Ligand> m_ligands;
         PoseRegisterCollection m_poseRegisters;
         PairwiseAlignment m_pairwiseAlignments;

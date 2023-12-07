@@ -58,7 +58,7 @@ namespace coaler::multialign {
         }
     };
 
-    MultiAligner::MultiAligner(const std::vector<RDKit::RWMol *> &molecules, RDKit::ROMol core,
+    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, RDKit::ROMOL_SPTR core,
                                const coaler::SingleAligner &aligner, unsigned maxStartingAssemblies)
 
         : m_core(std::move(core)), m_singleAligner(aligner), m_maxStartingAssemblies(maxStartingAssemblies) {
@@ -119,7 +119,7 @@ namespace coaler::multialign {
     /*----------------------------------------------------------------------------------------------------------------*/
     MultiAlignerResult MultiAligner::alignMolecules() {
         // calculate pairwise alignments
-        m_pairwiseAlignments = this->calculateAlignmentScores(m_ligands, m_core);
+        m_pairwiseAlignments = this->calculateAlignmentScores(m_ligands, *m_core);
         spdlog::info("Mols: {} | Confs/Mol: {} | total pairwise scores: {}", m_ligands.size(),
                      m_ligands.begin()->getNumPoses(), m_pairwiseAlignments.size());
         // build pose registers

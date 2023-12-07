@@ -14,11 +14,12 @@ namespace coaler::embedder {
         // ConformerEmbedder(const RDKit::ROMol& core,
         //                   unsigned numCoreConfigs);
 
-        ConformerEmbedder(RDKit::ROMol core, const CoreAtomMapping& coreMap);
+        explicit ConformerEmbedder(RDKit::ROMOL_SPTR& core, int threads = 1);
 
-        bool embedWithFixedCore(RDKit::ROMol& mol, unsigned numConfs);
+        void embedConformersWithFixedCore(RDKit::ROMOL_SPTR mol, unsigned numConfs);
 
       private:
-        RDKit::ROMol m_core;
+        RDKit::ROMOL_SPTR m_core;
+        int m_threads;
     };
 }  // namespace coaler::embedder

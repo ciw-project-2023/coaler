@@ -4,33 +4,28 @@
 
 #include "OutputWriter.hpp"
 
-#include <GraphMol/SmilesParse/SmilesWrite.h>
+#include <GraphMol/FileParsers/MolWriters.h>
 #include <GraphMol/RWMol.h>
+#include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <spdlog/spdlog.h>
 
 namespace coaler::io {
-    void OutputWriter::save_molecules_w_scores_in_file(MultiAlignerResult result, const std::string& file_path) {
-        for (auto ligand_id_conformer_pair : result.poseIDsByLigandID) {
-            LigandID ligand_id = std::get<0>(ligand_id_conformer_pair);
-            PoseID poseId = std::get<1>(ligand_id_conformer_pair);
-            RDKit::RWMol* ligand_w_ptr = result.ligands.at(ligand_id);
-            const RDKit::ROMol ligand_o = *ligand_w_ptr;
+
+    void OutputWriter::writeSDF(const std::string &file_path, const coaler::multialign::MultiAlignerResult &result) {
+        std::ofstream output_file(file_path);
+        if (!output_file.is_open()) {
+            spdlog::error("Cannot open file: {}", file_path);
+            return;
         }
 
-        // TODO: write sdf file
-    }
-
-    void OutputWriter::print_multi_aligner_result(MultiAlignerResult result) {
-        spdlog::info("Start printing results.");
-        for (auto ligand_id_conformer_pair : result.poseIDsByLigandID) {
-            LigandID ligand_id = std::get<0>(ligand_id_conformer_pair);
-            PoseID poseId = std::get<1>(ligand_id_conformer_pair);
-            RDKit::RWMol* ligand_w_ptr = result.ligands.at(ligand_id);
-            const RDKit::ROMol ligand_o = *ligand_w_ptr;
-
-            spdlog::info("Molecule Smiles:{} ID:{} Conformere: {}", RDKit::MolToSmiles(ligand_o), ligand_id, poseId);
+        boost::shared_ptr<RDKit::SDWriter> const sdf_writer(new RDKit::SDWriter(&output_file, false));
+        if (result.poseIDsByLigandID.size() != result.inputLigands.size()) {
+            spdlog::info("only generated an incomplete alignment.");
+            return;
         }
-        spdlog::info("Multi Alginement Score: {}", result.score);
-        spdlog::info("End of results. :)");
+
+        for (const auto &entry : result.inputLigands) {
+            sdf_writer->write(entry.getMolecule(), result.poseIDsByLigandID.at(entry.getID()));
+        }
     }
 }  // namespace coaler::io

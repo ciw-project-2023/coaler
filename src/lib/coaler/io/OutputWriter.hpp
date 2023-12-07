@@ -8,20 +8,10 @@
 
 #include <unordered_map>
 
+#include "../multialign/Forward.hpp"
+#include "../multialign/MultiAlignerResult.hpp"
+
 namespace coaler::io {
-
-    // TODO: Remove after MultiAlign is merged
-    using LigandID = unsigned;
-    using PoseID = unsigned;
-
-    struct MultiAlignerResult{
-        double score;
-
-        std::unordered_map<LigandID, PoseID> poseIDsByLigandID;
-        std::vector<RDKit::RWMol *> ligands;
-    };
-    // TODO: END
-
     /**
      * @brief This class is responsible for handling the output.
      */
@@ -31,12 +21,7 @@ namespace coaler::io {
          * Writes the aligned molecules in an output file.
          * @param file_path
          */
-        static void save_molecules_w_scores_in_file(MultiAlignerResult result, const std::string& file_path);
-
-        /**
-         * Prints the aligned molecules with score inside the log.
-         */
-        static void print_multi_aligner_result(MultiAlignerResult result);
+        static void writeSDF(const std::string &file_path, const coaler::multialign::MultiAlignerResult &result);
     };
 
 }  // namespace coaler::io
