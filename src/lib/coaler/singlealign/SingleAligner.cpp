@@ -6,25 +6,29 @@
 
 #include <GraphMol/FMCS/FMCS.h>
 #include <GraphMol/MolAlign/AlignMolecules.h>
-#include <GraphMol/RGroupDecomposition/RGroupDecomp.h>
 #include <GraphMol/ShapeHelpers/ShapeUtils.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
-#include <RDGeneral/export.h>
 #include <spdlog/spdlog.h>
 
 #include <vector>
 
 namespace coaler {
     SingleAligner::SingleAligner(int core_min_size, float core_max_percentage, bool with_hs)
-        : core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage}, with_hs_{with_hs} {}
+        : core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage}, with_hs_{with_hs} {
+        if (with_hs_) {
+            spdlog::info("SingleAligner is initiated, minimum core size set to {} and does consider H-Atoms ",
+                         core_min_size_);
+        } else {
+            spdlog::info("SingleAligner is initiated, minimum core size set to {} and does not consider H-Atoms ",
+                         core_min_size_);
+        }
+    }
 
     double SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
                                                  unsigned int pos_id_b, RDKit::ROMol core) {
-        spdlog::info("Calculatin");
-
         RDKit::ROMOL_SPTR core_structure;
         core_structure = boost::make_shared<RDKit::ROMol>(core);
 
@@ -36,10 +40,9 @@ namespace coaler {
         return RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
     }
 
-    double SingleAligner::calculate_tanimoto_shape_simularity(RDKit::ROMol mol_a, RDKit::ROMol mol_b,
+    double SingleAligner::calculate_tanimoto_shape_similarity(RDKit::ROMol mol_a, RDKit::ROMol mol_b,
                                                               unsigned int pos_id_a, unsigned int pos_id_b) {
         auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
-
         return 1 - RDKit::MolShapes::tanimotoDistance(std::get<0>(molecules), std::get<1>(molecules));
     }
 
@@ -59,7 +62,7 @@ namespace coaler {
 
     RDKit::MatchVectType SingleAligner::get_core_mapping(RDKit::ROMOL_SPTR core_structure, RDKit::ROMol mol_a,
                                                          RDKit::ROMol mol_b) {
-        // find core inside molecules
+        // Find core inside molecules.
         RDKit::MatchVectType match_vect_a;
         RDKit::SubstructMatch(mol_a, *core_structure, match_vect_a);
 
