@@ -3,11 +3,11 @@
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
 
+#include <boost/range/combine.hpp>
+
 #include "catch2/catch.hpp"
 #include "coaler/embedder/ConformerEmbedder.hpp"
 #include "coaler/embedder/SubstructureAnalyzer.hpp"
-
-#include <boost/range/combine.hpp>
 
 using namespace coaler::embedder;
 
@@ -73,8 +73,7 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
 void check_distribution(unsigned nofMatches, unsigned maxConfs, const std::vector<unsigned>& expected_dist) {
     std::vector<unsigned> dist = ConformerEmbedder::distributeApproxEvenly(nofMatches, maxConfs);
     REQUIRE(dist.size() == expected_dist.size());
-    for(const auto& itertuple : boost::combine(dist, expected_dist))
-    {
+    for (const auto& itertuple : boost::combine(dist, expected_dist)) {
         CHECK(itertuple.get<0>() == itertuple.get<1>());
     }
 }
@@ -82,10 +81,10 @@ void check_distribution(unsigned nofMatches, unsigned maxConfs, const std::vecto
 /*----------------------------------------------------------------------------------------------------------------*/
 
 TEST_CASE("validate_distribute_evenly", "[conformer_generator_tester]") {
-    check_distribution(3,7, {3,2,2});
-    check_distribution(2,7, {4,3});
-    check_distribution(5,10, {2,2,2,2,2});
-    check_distribution(6,20, {4,4,3,3,3,3});
+    check_distribution(3, 7, {3, 2, 2});
+    check_distribution(2, 7, {4, 3});
+    check_distribution(5, 10, {2, 2, 2, 2, 2});
+    check_distribution(6, 20, {4, 4, 3, 3, 3, 3});
 }
 
 /*----------------------------------------------------------------------------------------------------------------*/
@@ -99,6 +98,6 @@ TEST_CASE("test_ring_symmetry_determination", "[conformer_generator_tester]") {
     CHECK(SubstructureAnalyzer::getNumberOfRingRotations(*RDKit::SmilesToMol("C1NCNCNCN1")) == 4);
     CHECK(SubstructureAnalyzer::getNumberOfRingRotations(*RDKit::SmilesToMol("C1NSOCNSO1")) == 2);
 
-    //rings of odd size are not rotation symmetric
+    // rings of odd size are not rotation symmetric
     CHECK(SubstructureAnalyzer::getNumberOfRingRotations(*RDKit::SmilesToMol("C1CCCCCC1")) == 1);
 }

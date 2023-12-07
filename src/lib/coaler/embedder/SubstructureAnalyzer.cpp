@@ -2,23 +2,20 @@
 // Created by chris on 12/7/23.
 //
 
-#include <GraphMol/Substruct/SubstructMatch.h>
-#include <GraphMol/new_canon.h>
 #include "SubstructureAnalyzer.hpp"
 
+#include <GraphMol/Substruct/SubstructMatch.h>
+#include <GraphMol/new_canon.h>
+
 namespace {
-    struct hasDegreeTwo{
-        bool operator()(RDKit::Atom* atom){
-            return atom->getDegree() == 2;
-        }
+    struct hasDegreeTwo {
+        bool operator()(RDKit::Atom* atom) { return atom->getDegree() == 2; }
     };
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
     bool allElementsEqual(const std::vector<unsigned> vector) {
-        return std::all_of(vector.begin(), vector.end(), [vector](unsigned i){
-            return i == vector.at(0);
-        });
+        return std::all_of(vector.begin(), vector.end(), [vector](unsigned i) { return i == vector.at(0); });
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
@@ -26,15 +23,15 @@ namespace {
     std::vector<unsigned> makeSteadyRankVector(const std::vector<unsigned> originalRanks) {
         std::unordered_map<unsigned, unsigned> originalToSteadyRank;
         unsigned rank = 0;
-        for(unsigned orignalRank : originalRanks) {
-            if(originalToSteadyRank.count(orignalRank) == 0) {
+        for (unsigned orignalRank : originalRanks) {
+            if (originalToSteadyRank.count(orignalRank) == 0) {
                 originalToSteadyRank.emplace(orignalRank, rank);
-                rank ++;
+                rank++;
             }
         }
 
         std::vector<unsigned> newRanks;
-        for(unsigned originalRank : originalRanks) {
+        for (unsigned originalRank : originalRanks) {
             newRanks.push_back(originalToSteadyRank.at(originalRank));
         }
         return newRanks;
@@ -54,14 +51,14 @@ unsigned coaler::embedder::SubstructureAnalyzer::getNumberOfUniqueSubstructureMa
 /*----------------------------------------------------------------------------------------------------------------*/
 
 unsigned coaler::embedder::SubstructureAnalyzer::getNumberOfRingRotations(const RDKit::ROMol& molecule) {
-    //catch mols that have chains
-    if(!std::all_of(molecule.atoms().begin(), molecule.atoms().end(), hasDegreeTwo())) {
+    // catch mols that have chains
+    if (!std::all_of(molecule.atoms().begin(), molecule.atoms().end(), hasDegreeTwo())) {
         return 1;
     }
 
     unsigned nofAtoms = molecule.getNumAtoms();
-    //only even sized rings can be rotation symmetric
-    if(nofAtoms % 2 != 0) {
+    // only even sized rings can be rotation symmetric
+    if (nofAtoms % 2 != 0) {
         return 1;
     }
 
@@ -71,9 +68,9 @@ unsigned coaler::embedder::SubstructureAnalyzer::getNumberOfRingRotations(const 
 
     unsigned max = *std::max_element(canonIDs.begin(), canonIDs.end()) + 1;
 
-    //get number of atoms having rank [index]
+    // get number of atoms having rank [index]
     std::vector<unsigned> ranksCount(max);
-    for(unsigned rank : canonIDs) {
+    for (unsigned rank : canonIDs) {
         ranksCount.at(rank)++;
     }
     /*
@@ -90,13 +87,11 @@ unsigned coaler::embedder::SubstructureAnalyzer::getNumberOfRingRotations(const 
             nofRotations = *std::min_element(ranksCount.begin(), ranksCount.end());
             break;
         default:
-            if(allElementsEqual(ranksCount)) {
+            if (allElementsEqual(ranksCount)) {
                 return *ranksCount.begin();
             }
             nofRotations = 1;
     }
-
-
 
     return nofRotations;
 }
