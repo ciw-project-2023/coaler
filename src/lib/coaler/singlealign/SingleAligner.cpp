@@ -22,36 +22,18 @@ namespace coaler {
         : core_min_size_{core_min_size}, core_max_percentage_{core_max_percentage}, with_hs_{with_hs} {}
 
     double SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
-                                                 unsigned int pos_id_b, std::optional<RDKit::ROMol> core) {
-        // spdlog::info("Start single alignment");
+                                                 unsigned int pos_id_b, RDKit::ROMol core) {
+        spdlog::info("Calculatin");
 
-        double score_core_rmsd = 0;
-        double score_shape_similarity = 0;
-        if (core != std::nullopt) {
-            RDKit::ROMOL_SPTR core_structure;
-            core_structure = boost::make_shared<RDKit::ROMol>(core.value());
-            // spdlog::info("Use core: {}", RDKit::MolToSmarts(core.value()));
+        RDKit::ROMOL_SPTR core_structure;
+        core_structure = boost::make_shared<RDKit::ROMol>(core);
 
-            validate_core_structure_size(core_structure, mol_a, mol_b);
+        validate_core_structure_size(core_structure, mol_a, mol_b);
 
-            auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
-            RDKit::MatchVectType mapping
-                = get_core_mapping(core_structure, std::get<0>(molecules), std::get<1>(molecules));
+        auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
+        RDKit::MatchVectType mapping = get_core_mapping(core_structure, std::get<0>(molecules), std::get<1>(molecules));
 
-            score_shape_similarity
-                = 1 - RDKit::MolShapes::tanimotoDistance(std::get<0>(molecules), std::get<1>(molecules));
-            // Align core structure of molecules.
-            score_core_rmsd
-                = RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
-
-            // TODO: print mols as molblock and check alignment
-
-            // spdlog::info("RMS is {}", score_core_rmsd);
-            // spdlog::info("Score is {}", score_shape_similarity);
-        }
-
-        // return std::make_tuple(score_core_rmsd, score_shape_similarity);
-        return score_shape_similarity;
+        return RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
     }
 
     void SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a,
