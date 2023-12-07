@@ -25,7 +25,9 @@ namespace coaler::io {
         boost::shared_ptr<RDKit::SDWriter> const sdf_writer(new RDKit::SDWriter(&output_file, false));
         for (const auto &[ligand_id, pose_id] : result.poseIDsByLigandID) {
             auto entry = result.inputLigands.at(ligand_id);
-            sdf_writer->write(entry.getMolecule(), pose_id);
+            auto mol = entry.getMolecule();
+            mol.setProp("_Score", result.alignmentScore);
+            sdf_writer->write(mol, pose_id);
         }
     }
 }  // namespace coaler::io
