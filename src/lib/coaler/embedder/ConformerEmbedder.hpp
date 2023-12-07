@@ -16,7 +16,7 @@ namespace coaler::embedder {
 
         bool embedWithFixedCore(RDKit::ROMol& mol, unsigned numConfs);
 
-        bool embedEvenlyAcrossSymmetryAxes(RDKit::ROMol& mol, unsigned minNofConfs, unsigned maxNofConfs);
+        bool embedEvenlyAcrossAllMatches(RDKit::ROMol& mol, unsigned minNofConfs, unsigned maxNofConfs);
 
         static std::vector<unsigned> distributeApproxEvenly(unsigned nofMatches, unsigned maxConformers);
 

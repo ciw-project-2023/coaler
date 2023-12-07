@@ -6,6 +6,7 @@
 
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
+#include <spdlog/spdlog.h>
 
 #include <boost/range/combine.hpp>
 #include <utility>
@@ -74,7 +75,7 @@ namespace coaler::embedder {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    bool ConformerEmbedder::embedEvenlyAcrossSymmetryAxes(RDKit::ROMol& mol, unsigned minNofConfs,
+    bool ConformerEmbedder::embedEvenlyAcrossAllMatches(RDKit::ROMol& mol, unsigned minNofConfs,
                                                           unsigned maxNofConfs) {
         // unsigned nofSymmetryAxes = CoreSymmetryCalculator::getNofSymmetryAxes(mol);
         std::vector<RDKit::MatchVectType> substructureResults;
@@ -84,18 +85,29 @@ namespace coaler::embedder {
 
         unsigned nofMatches = substructureResults.size();
         std::vector<unsigned> nofConformersForMatch = distributeApproxEvenly(nofMatches, maxNofConfs);
+
+        if(std::any_of(nofConformersForMatch.begin(), nofConformersForMatch.end(), [minNofConfs](unsigned confs){
+                return confs < minNofConfs;
+            })){
+            spdlog::info("Symmetry of core and/or substructure matches in structure too high for given minimum"
+                "number of conformations per substructure match.");
+        }
         assert(nofConformersForMatch.size() == substructureResults.size());
 
         for(const auto& iter : boost::combine(nofConformersForMatch, substructureResults)) {
             const unsigned nofConformers = iter.get<0>();
-            const RDKit::MatchVectType& match = iter.get<>()
-            CoreAtomMapping matchCoords = getAtomMappingFromMatch();
+            const RDKit::MatchVectType& match = iter.get<1>();
+            CoreAtomMapping matchCoords = getAtomMappingFromMatch(match, m_core.getConformer(0));
+            RDKit::DGeomHelpers::EmbedParameters params;
+            params.randomSeed = seed;
+            params.coordMap = &matchCoords;
+            params.useRandomCoords = true;
+            params.clearConfs = false;
+            RDKit::DGeomHelpers::EmbedMultipleConfs(mol, nofConformers, params);
         }
 
-        // match all substructures
-        // embedd mol with match coordinates
-
-        return false;
+        //TODO is this nessecary?
+        return mol.getNumConformers() <= maxNofConfs;
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
@@ -105,7 +117,7 @@ namespace coaler::embedder {
                                                                     unsigned int maxConformers) {
         std::vector<unsigned> confsForMatch(nofMatches);
         unsigned decrementPosition = maxConformers % nofMatches;
-        int baseNofConfs = maxConformers / nofMatches;
+        unsigned baseNofConfs = maxConformers / nofMatches;
 
         std::fill(confsForMatch.begin(),
                   confsForMatch.begin() + decrementPosition ,
