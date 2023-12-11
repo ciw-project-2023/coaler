@@ -3,7 +3,6 @@
  */
 
 #include <GraphMol/DistGeomHelpers/Embedder.h>
-#include <GraphMol/FileParsers/MolSupplier.h>
 #include <GraphMol/FileParsers/MolWriters.h>
 #include <GraphMol/MolOps.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>

@@ -23,5 +23,5 @@ TEST_CASE("basic_test", "[multialign]") {
     std::vector<RDKit::RWMol *> mols = {mol1, mol2};
     multialign::MultiAligner aligner(mols, *core, singleAligner, 2);
     multialign::MultiAlignerResult result = aligner.alignMolecules();
-    CHECK(result.poseIDsByLigandID.size() == 2);  // ´
+    CHECK(result.poseIDsByLigandID.size() == 2);  // :(´
 }
