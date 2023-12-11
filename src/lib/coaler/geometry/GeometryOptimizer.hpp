@@ -4,7 +4,7 @@
 
 namespace coaler {
 
-    class GeometricOptimizer {
+    class GeometryOptimizer {
 
     };
 

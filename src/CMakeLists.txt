@@ -15,8 +15,8 @@ target_include_directories(coaler PUBLIC ${spdlog_INCLUDE_DIRS})
 target_include_directories(coaler PRIVATE lib)
 target_link_directories(coaler PRIVATE lib)
 
-#target_link_libraries(coaler PUBLIC Open3D::Open3D)
 target_link_libraries(coaler PUBLIC spdlog::spdlog)
+target_link_libraries(coaler PUBLIC Open3D::Open3D)
 target_link_libraries(coaler PUBLIC coaler_lib)
 
 install(TARGETS coaler

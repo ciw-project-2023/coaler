@@ -27,8 +27,7 @@ foreach(lib IN LISTS rdkitlibs)
     target_link_libraries(coaler_lib PUBLIC rdkit::${lib})
 endforeach()
 
-
-target_link_libraries(coaler_lib PUBLIC Open3D::Open3D)
 target_link_libraries(coaler_lib PUBLIC OpenMP::OpenMP_CXX)
 target_link_libraries(coaler_lib PUBLIC spdlog::spdlog)
+target_link_libraries(coaler_lib PUBLIC Open3D::Open3D)
 target_link_libraries(coaler_lib PUBLIC ${Boost_LIBRARIES})

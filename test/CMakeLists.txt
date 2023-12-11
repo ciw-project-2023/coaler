@@ -1,7 +1,7 @@
 find_package(Catch2 REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Boost REQUIRED)
-#find_package(Open3D REQUIRED)
+find_package(Open3D REQUIRED)
 
 file(GLOB test_src CONFIGURE_DEPENDS "*.hpp" "*.cpp")
 
@@ -19,7 +19,7 @@ target_include_directories(Test PUBLIC
 
 target_link_libraries(Test PRIVATE Catch2::Catch2)
 target_link_libraries(Test PUBLIC spdlog::spdlog)
-#target_link_libraries(Test PUBLIC Open3D::Open3D)
+target_link_libraries(Test PUBLIC Open3D::Open3D)
 target_link_libraries(Test PUBLIC coaler_lib)
 
 set(TEST_DATA_FILES AID_1806504.smi)
