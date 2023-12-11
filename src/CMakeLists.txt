@@ -3,6 +3,7 @@ add_subdirectory(lib)
 
 target_link_libraries(coaler PUBLIC "-Wl,--disable-new-dtags")
 
+find_package(Open3D REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Boost REQUIRED COMPONENTS
         program_options
@@ -14,6 +15,7 @@ target_include_directories(coaler PUBLIC ${spdlog_INCLUDE_DIRS})
 target_include_directories(coaler PRIVATE lib)
 target_link_directories(coaler PRIVATE lib)
 
+#target_link_libraries(coaler PUBLIC Open3D::Open3D)
 target_link_libraries(coaler PUBLIC spdlog::spdlog)
 target_link_libraries(coaler PUBLIC coaler_lib)
 
