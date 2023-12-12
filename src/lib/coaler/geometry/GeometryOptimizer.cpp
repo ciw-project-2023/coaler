@@ -29,24 +29,18 @@ namespace coaler {
             auto cur_mol = cur_ligand.getMolecule();
             RDKit::Conformer cur_conformere = cur_mol.getConformer(id_pair.second);
 
-            open3d::core::Tensor points;
-            auto positions = cur_conformere.getPositions();
+            int i = 0;
+            open3d::core::Tensor points = open3d::core::Tensor::Empty({cur_mol.getNumAtoms(), 3}, open3d::core::Float32);
             for (auto pos : cur_conformere.getPositions()) {
-                spdlog::info("Start Point creation");
-                //cur_3d_vec.emplace_back(pos.x, pos.y, pos.z);
-                open3d::core::Tensor point;
-                point.Add(pos.x);
-                point.Add(pos.y);
-                point.Add(pos.z);
-                points.Add(point);
-                spdlog::info("Point Created");
+                open3d::core::Tensor point = open3d::core::Tensor::Init<double>({pos.x, pos.y, pos.z});
+                points[i] = point;
+                i++;
             }
             open3d::t::geometry::PointCloud cur_cloud(points);
             point_clouds.emplace_back(cur_cloud);
-            spdlog::info("Cloud emplaced");
         }
 
-        spdlog::info("Clouds created");
+        spdlog::info("Molecule Point Clouds Created");
 
         open3d::t::geometry::PointCloud target_cloud = point_clouds.at(0);
         for (int idx = 1; idx < point_clouds.size(); idx++) {
