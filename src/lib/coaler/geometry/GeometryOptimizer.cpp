@@ -50,6 +50,9 @@ namespace coaler {
             auto tranformation
                 = open3d::t::pipelines::registration::ICP(point_clouds.at(idx), target_cloud, max_distance_);
 
+            point_clouds.at(idx).Transform(tranformation.transformation_);
+
+
             spdlog::info(std::to_string(idx));
             spdlog::info(point_clouds.at(idx).GetPointPositions().ToString());
         }
