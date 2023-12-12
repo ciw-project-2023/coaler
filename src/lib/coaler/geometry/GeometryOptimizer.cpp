@@ -25,18 +25,12 @@ namespace coaler {
 
         std::vector<open3d::t::geometry::PointCloud> point_clouds;
         for (auto id_pair : not_opt_alignment.poseIDsByLigandID) {
-            spdlog::info("Start getiing conf");
             auto cur_ligand = not_opt_alignment.inputLigands.at(id_pair.first);
-            RDKit::Conformer cur_conformere = cur_ligand.getMolecule().getConformer(id_pair.second); //get_molecule_conformer(cur_ligand.getMolecule(), id_pair.second);
-            spdlog::info("conf gettet");
-
-            // point clouds append point cloud of current point moleucle clouds
-            //std::vector<Eigen::Vector3d> cur_3d_vec;
+            auto cur_mol = cur_ligand.getMolecule();
+            RDKit::Conformer cur_conformere = cur_mol.getConformer(id_pair.second);
 
             open3d::core::Tensor points;
-            spdlog::info("tensor points created");
-            const RDGeom::Point3D x = cur_conformere.getAtomPos(0);
-            spdlog::info("Conf Positions {}", x.x);
+            auto positions = cur_conformere.getPositions();
             for (auto pos : cur_conformere.getPositions()) {
                 spdlog::info("Start Point creation");
                 //cur_3d_vec.emplace_back(pos.x, pos.y, pos.z);

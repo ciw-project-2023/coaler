@@ -27,6 +27,11 @@ TEST_CASE("GeometryOptimizer", "[geometry]") {
     coaler::multialign::MultiAlignerResult result = aligner.alignMolecules();
 
 
+    auto positions = mol2->getConformer().getPositions();
+    spdlog::info("Position get");
+    auto ligand = result.inputLigands.at(0).getMolecule().getConformer().getPositions();
+    spdlog::info("Positions of ligand get");
+
     spdlog::info("Multialigner succes????");
 
     coaler::GeometryOptimizer optimizer(0.5);
