@@ -22,8 +22,13 @@ namespace coaler {
          */
         multialign::MultiAlignerResult get_optimized_alignment();
 
+        std::vector<RDKit::RWMol> get_optimized_ligands();
+
       private:
         std::optional<multialign::MultiAlignerResult> geo_opt_alignment_{};
+        std::vector<RDKit::RWMol> geo_opt_ligands_{};
+        //RDKit::RWMol tmp_mol_{};
+        //RDKit::Conformer tmp_conf_{};
         double max_distance_{0};
     };
 
