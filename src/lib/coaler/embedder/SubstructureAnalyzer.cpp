@@ -76,7 +76,7 @@ unsigned coaler::embedder::SubstructureAnalyzer::getNumberOfRingRotations(const 
     /*
      * considers symmetries:
      *  all the same, e.g. c1ccccc1
-     *  repeating patterns, e.g. C1NCNCN1 or stuff like C1NOSCNOSCNOS1 idk might happen i guess
+     *  repeating patterns, e.g. C1NCNCN1 or structures like C1NOSCNOSCNOS1
      */
     unsigned nofRotations = 0;
     switch (max) {
