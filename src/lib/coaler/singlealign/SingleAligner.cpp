@@ -27,8 +27,10 @@ namespace coaler {
         }
     }
 
-    double SingleAligner::align_molecules_kabsch(const RDKit::ROMol& mol_a, const RDKit::ROMol& mol_b, unsigned int pos_id_a,
-                                                 unsigned int pos_id_b, RDKit::ROMol core) {
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    double SingleAligner::align_molecules_kabsch(const RDKit::ROMol& mol_a, const RDKit::ROMol& mol_b,
+                                                 unsigned int pos_id_a, unsigned int pos_id_b, RDKit::ROMol core) {
         RDKit::ROMOL_SPTR core_structure;
         core_structure = boost::make_shared<RDKit::ROMol>(core);
 
@@ -40,14 +42,18 @@ namespace coaler {
         return RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
     }
 
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     double SingleAligner::calculate_tanimoto_shape_similarity(const RDKit::ROMol& mol_a, const RDKit::ROMol& mol_b,
                                                               unsigned int pos_id_a, unsigned int pos_id_b) {
-        auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
-        return 1 - RDKit::MolShapes::tanimotoDistance(std::get<0>(molecules), std::get<1>(molecules));
+        // auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
+        // return 1 - RDKit::MolShapes::tanimotoDistance(std::get<0>(molecules), std::get<1>(molecules));
+        return 1 - RDKit::MolShapes::tanimotoDistance(mol_a, mol_b, pos_id_a, pos_id_b);
     }
 
-    void SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core,
-                                                     const RDKit::ROMol& mol_a,
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    void SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core, const RDKit::ROMol& mol_a,
                                                      const RDKit::ROMol& mol_b) const {
         if (core->getNumAtoms() < core_min_size_) {
             spdlog::error("Size of core is too small!");
@@ -61,8 +67,9 @@ namespace coaler {
         }
     }
 
-    RDKit::MatchVectType SingleAligner::get_core_mapping(RDKit::ROMOL_SPTR core_structure,
-                                                         const RDKit::ROMol& mol_a,
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    RDKit::MatchVectType SingleAligner::get_core_mapping(RDKit::ROMOL_SPTR core_structure, const RDKit::ROMol& mol_a,
                                                          const RDKit::ROMol& mol_b) {
         // Find core inside molecules.
         RDKit::MatchVectType match_vect_a;
@@ -82,30 +89,5 @@ namespace coaler {
             mapping.push_back(std::make_pair(match_vect_a[i].second, match_vect_b[i].second));
         }
         return mapping;
-    }
-
-    std::tuple<RDKit::ROMol, RDKit::ROMol> SingleAligner::get_molecule_conformers(const RDKit::ROMol& mol_a,
-                                                                                  const RDKit::ROMol& mol_b,
-                                                                                  unsigned int pos_id_a,
-                                                                                  unsigned int pos_id_b) {
-        auto smarts_a = MolToSmarts(mol_a);
-        auto smarts_b = MolToSmarts(mol_b);
-
-        RDKit::RWMol *mol_conf_a = RDKit::SmilesToMol(smarts_a);
-        RDKit::RWMol *mol_conf_b = RDKit::SmilesToMol(smarts_b);
-
-        if (with_hs_) {
-            RDKit::MolOps::addHs(*mol_conf_a);
-            RDKit::MolOps::addHs(*mol_conf_b);
-        }
-
-        auto conf_a = RDKit::Conformer{mol_a.getConformer(pos_id_a)};
-        auto conf_b = RDKit::Conformer{mol_b.getConformer(pos_id_b)};
-
-        mol_conf_a->addConformer(&conf_a, true);
-        mol_conf_b->addConformer(&conf_b, true);
-
-        auto tuple = std::make_tuple(*mol_conf_a, *mol_conf_b);
-        return tuple;
     }
 }  // namespace coaler

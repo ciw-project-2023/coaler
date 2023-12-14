@@ -100,8 +100,8 @@ namespace coaler::multialign {
                         RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
                         RDKit::RWMol const secondMol = ligands.at(secondMolId).getMolecule();
 
-                        double score = m_singleAligner.calculate_tanimoto_shape_similarity(firstMol, secondMol, firstMolPoseId,
-                                                                              secondMolPoseId);
+                        double score = m_singleAligner.calculate_tanimoto_shape_similarity(
+                            firstMol, secondMol, firstMolPoseId, secondMolPoseId);
                         UniquePoseID firstPose(firstMolId, firstMolPoseId);
                         UniquePoseID secondPose(secondMolId, secondMolPoseId);
                         omp_set_lock(&maplock);
