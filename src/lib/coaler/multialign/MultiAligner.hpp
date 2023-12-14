@@ -20,7 +20,7 @@ namespace coaler::multialign {
         MultiAlignerResult alignMolecules();
 
       private:
-        PairwiseAlignment calculateAlignmentScores(const LigandVector& ligands, const RDKit::ROMol& core);
+        PairwiseAlignment calculateAlignmentScores(const LigandVector& ligands);
 
         unsigned m_maxStartingAssemblies;
         coaler::SingleAligner m_singleAligner;

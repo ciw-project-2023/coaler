@@ -27,7 +27,7 @@ namespace coaler {
         }
     }
 
-    double SingleAligner::align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
+    double SingleAligner::align_molecules_kabsch(const RDKit::ROMol& mol_a, const RDKit::ROMol& mol_b, unsigned int pos_id_a,
                                                  unsigned int pos_id_b, RDKit::ROMol core) {
         RDKit::ROMOL_SPTR core_structure;
         core_structure = boost::make_shared<RDKit::ROMol>(core);
@@ -40,14 +40,15 @@ namespace coaler {
         return RDKit::MolAlign::alignMol(std::get<0>(molecules), std::get<1>(molecules), -1, -1, &mapping);
     }
 
-    double SingleAligner::calculate_tanimoto_shape_similarity(RDKit::ROMol mol_a, RDKit::ROMol mol_b,
+    double SingleAligner::calculate_tanimoto_shape_similarity(const RDKit::ROMol& mol_a, const RDKit::ROMol& mol_b,
                                                               unsigned int pos_id_a, unsigned int pos_id_b) {
         auto molecules = get_molecule_conformers(mol_a, mol_b, pos_id_a, pos_id_b);
         return 1 - RDKit::MolShapes::tanimotoDistance(std::get<0>(molecules), std::get<1>(molecules));
     }
 
-    void SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a,
-                                                     RDKit::ROMol mol_b) const {
+    void SingleAligner::validate_core_structure_size(RDKit::ROMOL_SPTR core,
+                                                     const RDKit::ROMol& mol_a,
+                                                     const RDKit::ROMol& mol_b) const {
         if (core->getNumAtoms() < core_min_size_) {
             spdlog::error("Size of core is too small!");
             throw std::runtime_error("Size of core is too small!");
@@ -60,8 +61,9 @@ namespace coaler {
         }
     }
 
-    RDKit::MatchVectType SingleAligner::get_core_mapping(RDKit::ROMOL_SPTR core_structure, RDKit::ROMol mol_a,
-                                                         RDKit::ROMol mol_b) {
+    RDKit::MatchVectType SingleAligner::get_core_mapping(RDKit::ROMOL_SPTR core_structure,
+                                                         const RDKit::ROMol& mol_a,
+                                                         const RDKit::ROMol& mol_b) {
         // Find core inside molecules.
         RDKit::MatchVectType match_vect_a;
         RDKit::SubstructMatch(mol_a, *core_structure, match_vect_a);
@@ -82,8 +84,8 @@ namespace coaler {
         return mapping;
     }
 
-    std::tuple<RDKit::ROMol, RDKit::ROMol> SingleAligner::get_molecule_conformers(RDKit::ROMol mol_a,
-                                                                                  RDKit::ROMol mol_b,
+    std::tuple<RDKit::ROMol, RDKit::ROMol> SingleAligner::get_molecule_conformers(const RDKit::ROMol& mol_a,
+                                                                                  const RDKit::ROMol& mol_b,
                                                                                   unsigned int pos_id_a,
                                                                                   unsigned int pos_id_b) {
         auto smarts_a = MolToSmarts(mol_a);

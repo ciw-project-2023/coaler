@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
     }
 
     const SingleAligner singleAligner;
-    multialign::MultiAligner aligner(mols, core.value(), singleAligner);
+    multialign::MultiAligner aligner(mols, core.value(), singleAligner, 20);
     const multialign::MultiAlignerResult result = aligner.alignMolecules();
 
     io::OutputWriter::writeSDF(opts.out_file, result);

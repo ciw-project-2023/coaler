@@ -25,7 +25,7 @@ namespace coaler {
          * @param core
          * @return RMDS score of the core inside the molecules.
          */
-        double align_molecules_kabsch(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
+        double align_molecules_kabsch(const RDKit::ROMol& mol_a, const RDKit::ROMol& mol_b, unsigned int pos_id_a,
                                       unsigned int pos_id_b, RDKit::ROMol core);
 
         /**
@@ -36,7 +36,7 @@ namespace coaler {
          * @param pos_id_b: Conforemere ID for molecules B
          * @return Tanimoto shape similarity of molecules
          */
-        double calculate_tanimoto_shape_similarity(RDKit::ROMol mol_a, RDKit::ROMol mol_b, unsigned int pos_id_a,
+        double calculate_tanimoto_shape_similarity(const RDKit::ROMol& mol_a, const RDKit::ROMol& mol_b, unsigned int pos_id_a,
                                                    unsigned int pos_id_b);
 
       private:
@@ -44,7 +44,7 @@ namespace coaler {
          * Validates the core structure.
          * @param core
          */
-        void validate_core_structure_size(RDKit::ROMOL_SPTR core, RDKit::ROMol mol_a, RDKit::ROMol mol_b) const;
+        void validate_core_structure_size(RDKit::ROMOL_SPTR core, const RDKit::ROMol& mol_a, const RDKit::ROMol& mol_b) const;
 
         /**
          * Returns the mapping from the subgraph of the core inside molecule a to the subgraph of the core inside
@@ -54,7 +54,7 @@ namespace coaler {
          * @param mol_b
          * @return
          */
-        RDKit::MatchVectType get_core_mapping(RDKit::ROMOL_SPTR core_structure, RDKit::ROMol mol_a, RDKit::ROMol mol_b);
+        RDKit::MatchVectType get_core_mapping(RDKit::ROMOL_SPTR core_structure, const RDKit::ROMol& mol_a, const RDKit::ROMol& mol_b);
 
         /**
          * Returns a tuple of molecules with only one conformer, which is specified with the ids.
@@ -64,7 +64,7 @@ namespace coaler {
          * @param pos_id_b
          * @return
          */
-        std::tuple<RDKit::ROMol, RDKit::ROMol> get_molecule_conformers(RDKit::ROMol mol_a, RDKit::ROMol mol_b,
+        std::tuple<RDKit::ROMol, RDKit::ROMol> get_molecule_conformers(const RDKit::ROMol& mol_a, const RDKit::ROMol& mol_b,
                                                                        unsigned int pos_id_a, unsigned int pos_id_b);
 
         int core_min_size_{0};
