@@ -10,11 +10,11 @@
 
 #include <boost/program_options.hpp>
 #include <coaler/embedder/ConformerEmbedder.hpp>
+#include <coaler/geometry/GeometryOptimizer.hpp>
 #include <coaler/io/Forward.hpp>
 #include <coaler/multialign/MultiAligner.hpp>
 #include <coaler/multialign/MultiAlignerResult.hpp>
 #include <coaler/singlealign/SingleAligner.hpp>
-#include <coaler/geometry/GeometryOptimizer.hpp>
 #include <sstream>
 
 namespace opts = boost::program_options;
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
 
     coaler::GeometryOptimizer optimizer(0.6);
     optimizer.optimize_alignment_w_icp(result);
-    //coaler::multialign::MultiAlignerResult optimized_result = optimizer.get_optimized_alignment();
+    // coaler::multialign::MultiAlignerResult optimized_result = optimizer.get_optimized_alignment();
 
     auto ligands = optimizer.get_optimized_ligands();
     spdlog::info("OPTIMIZED LIGANDS {}", ligands.size());
@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
     }
 
     boost::shared_ptr<RDKit::SDWriter> const sdf_writer(new RDKit::SDWriter(&output_file, false));
-    for (const auto &entry : ligands) {
+    for (const auto& entry : ligands) {
         auto conf = entry.getConformer();
 
         spdlog::info(std::to_string(entry.getNumConformers()));
@@ -134,23 +134,22 @@ int main(int argc, char* argv[]) {
             spdlog::info("DONE {}", std::to_string(pos.z));
         }
 
-
         sdf_writer->write(entry);
     }
 
-//    std::ostringstream oss;
-//    // takeOwnership must be false for this, as we don't want the SDWriter trying
-//    // to delete the std::ostringstream.
-//    bool takeOwnership = false;
-//    boost::shared_ptr<RDKit::SDWriter> sdf_writer(new RDKit::SDWriter(&oss, takeOwnership));
-//    if (result.poseIDsByLigandID.size() != result.inputLigands.size()) {
-//        spdlog::info("only generated an incomplete alignment.");
-//        return 1;
-//    }
-//    for (const auto& entry : result.inputLigands) {
-//        sdf_writer->write(entry.getMolecule(), result.poseIDsByLigandID.at(entry.getID()));
-//    }
-//    std::cout << oss.str() << std::endl;
+    //    std::ostringstream oss;
+    //    // takeOwnership must be false for this, as we don't want the SDWriter trying
+    //    // to delete the std::ostringstream.
+    //    bool takeOwnership = false;
+    //    boost::shared_ptr<RDKit::SDWriter> sdf_writer(new RDKit::SDWriter(&oss, takeOwnership));
+    //    if (result.poseIDsByLigandID.size() != result.inputLigands.size()) {
+    //        spdlog::info("only generated an incomplete alignment.");
+    //        return 1;
+    //    }
+    //    for (const auto& entry : result.inputLigands) {
+    //        sdf_writer->write(entry.getMolecule(), result.poseIDsByLigandID.at(entry.getID()));
+    //    }
+    //    std::cout << oss.str() << std::endl;
 
     spdlog::info("done: exiting");
 }

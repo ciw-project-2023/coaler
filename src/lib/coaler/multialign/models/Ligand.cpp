@@ -27,8 +27,6 @@ namespace coaler::multialign {
 
     RDKit::RWMol Ligand::getMolecule() const noexcept { return m_molecule; }
 
-    void Ligand::setMolecule(RDKit::RWMol new_mol) {
-        m_molecule = new_mol;
-    }
+    void Ligand::setMolecule(RDKit::RWMol new_mol) { m_molecule = new_mol; }
 
 }  // namespace coaler::multialign

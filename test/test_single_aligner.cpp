@@ -13,7 +13,7 @@ TEST_CASE("Singlealign", "[singlealign]") {
     RDKit::RWMol *mol_b = input.at(1);
     coaler::SingleAligner singleAligner;
 
-    SECTION("Tanimoto Similarity"){
+    SECTION("Tanimoto Similarity") {
         SECTION("Two similar molecules") {
             double similarity = singleAligner.calculate_tanimoto_shape_similarity(*mol_a, *mol_a, -1, -1);
             CHECK(similarity == 1);
@@ -27,7 +27,7 @@ TEST_CASE("Singlealign", "[singlealign]") {
         }
     }
 
-    SECTION("Kabsch Alignment"){
+    SECTION("Kabsch Alignment") {
         SECTION("Two similar molecules") {
             std::vector<RDKit::ROMOL_SPTR> mols;
             mols.emplace_back(boost::make_shared<RDKit::ROMol>(*mol_a));

@@ -1,20 +1,16 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
-#include <GraphMol/GraphMol.h>
-#include <GraphMol/SmilesParse/SmilesParse.h>
-
 #include <GraphMol/FileParsers/MolWriters.h>
+#include <GraphMol/GraphMol.h>
 #include <GraphMol/RWMol.h>
+#include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
-
-#include <iostream>
+#include <spdlog/spdlog.h>
 
 #include <catch2/catch.hpp>
 #include <coaler/geometry/GeometryOptimizer.hpp>
 #include <coaler/multialign/MultiAligner.hpp>
 #include <coaler/singlealign/SingleAligner.hpp>
-
-
-#include <spdlog/spdlog.h>
+#include <iostream>
 
 TEST_CASE("GeometryOptimizer", "[geometry]") {
     RDKit::RWMol *mol1 = RDKit::SmilesToMol("Cc1ccccc1");
@@ -32,7 +28,7 @@ TEST_CASE("GeometryOptimizer", "[geometry]") {
 
     coaler::GeometryOptimizer optimizer(0.5);
     optimizer.optimize_alignment_w_icp(result);
-    //coaler::multialign::MultiAlignerResult optimized_result = optimizer.get_optimized_alignment();
+    // coaler::multialign::MultiAlignerResult optimized_result = optimizer.get_optimized_alignment();
 
     auto ligands = optimizer.get_optimized_ligands();
     spdlog::info("OPTIMIZED LIGANDS {}", ligands.size());
@@ -58,7 +54,6 @@ TEST_CASE("GeometryOptimizer", "[geometry]") {
             spdlog::info("DONE {}", std::to_string(pos.y));
             spdlog::info("DONE {}", std::to_string(pos.z));
         }
-
 
         sdf_writer->write(entry);
     }

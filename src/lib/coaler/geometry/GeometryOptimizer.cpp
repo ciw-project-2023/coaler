@@ -19,7 +19,7 @@ namespace coaler {
 
     GeometryOptimizer::GeometryOptimizer(double max_distance) : max_distance_{max_distance} {}
 
-    void GeometryOptimizer::optimize_alignment_w_icp(multialign::MultiAlignerResult &not_opt_alignment) {
+    void GeometryOptimizer::optimize_alignment_w_icp(multialign::MultiAlignerResult& not_opt_alignment) {
         spdlog::info("Start Optimizing");
 
         // Create Point Clouds from Conformer
@@ -67,7 +67,7 @@ namespace coaler {
 
             auto tmp_mol_ = cur_ligand.getMolecule();
             int conformer_count = tmp_mol_.getNumConformers();
-            for(int j=0; j < conformer_count - 1; j++){
+            for (int j = 0; j < conformer_count - 1; j++) {
                 auto one_conf = tmp_mol_.getConformer();
                 tmp_mol_.removeConformer(one_conf.getId());
             }
@@ -77,28 +77,33 @@ namespace coaler {
             auto& cur_cloud = point_clouds.at(idx);
             auto& cur_tensor = cur_cloud.GetPointPositions();
 
-//            auto& positions = tmp_conf_.getPositions();
-//            for(int i = 0; i < positions.size(); i++){
-//                spdlog::info(cur_tensor[i].ToString());
-//                spdlog::info("Before {}", std::to_string(positions[i].x));
-//                positions[i].x = std::stod(cur_tensor[i][0].ToString());// static_cast<double *>(cur_vector[0].GetDataPtr())[0];
-//                spdlog::info("After {}", std::to_string(positions[i].x));
-//                positions[i].y = std::stod(cur_tensor[i][1].ToString());//static_cast<double *>(cur_vector[1].GetDataPtr())[0];
-//                positions[i].z = std::stod(cur_tensor[i][2].ToString());//static_cast<double *>(cur_vector[2].GetDataPtr())[0];
-//                i++;
-//            }
+            //            auto& positions = tmp_conf_.getPositions();
+            //            for(int i = 0; i < positions.size(); i++){
+            //                spdlog::info(cur_tensor[i].ToString());
+            //                spdlog::info("Before {}", std::to_string(positions[i].x));
+            //                positions[i].x = std::stod(cur_tensor[i][0].ToString());// static_cast<double
+            //                *>(cur_vector[0].GetDataPtr())[0]; spdlog::info("After {}",
+            //                std::to_string(positions[i].x)); positions[i].y =
+            //                std::stod(cur_tensor[i][1].ToString());//static_cast<double
+            //                *>(cur_vector[1].GetDataPtr())[0]; positions[i].z =
+            //                std::stod(cur_tensor[i][2].ToString());//static_cast<double
+            //                *>(cur_vector[2].GetDataPtr())[0]; i++;
+            //            }
             int i = 0;
             for (auto& pos : tmp_conf_.getPositions()) {
                 spdlog::info(cur_tensor[i].ToString());
                 spdlog::info("Before {}", std::to_string(pos.x));
-                pos.x = std::stod(cur_tensor[i][0].ToString());// static_cast<double *>(cur_vector[0].GetDataPtr())[0];
+                pos.x
+                    = std::stod(cur_tensor[i][0].ToString());  // static_cast<double *>(cur_vector[0].GetDataPtr())[0];
                 spdlog::info("After {}", std::to_string(pos.x));
-                pos.y = std::stod(cur_tensor[i][1].ToString());//static_cast<double *>(cur_vector[1].GetDataPtr())[0];
-                pos.z = std::stod(cur_tensor[i][2].ToString());//static_cast<double *>(cur_vector[2].GetDataPtr())[0];
+                pos.y = std::stod(cur_tensor[i][1].ToString());  // static_cast<double
+                                                                 // *>(cur_vector[1].GetDataPtr())[0];
+                pos.z = std::stod(cur_tensor[i][2].ToString());  // static_cast<double
+                                                                 // *>(cur_vector[2].GetDataPtr())[0];
                 i++;
             }
 
-            //tmp_mol_.addConformer(&tmp_conf_);
+            // tmp_mol_.addConformer(&tmp_conf_);
 
             geo_opt_ligands_.emplace_back(tmp_mol_);
             for (auto pos : tmp_mol_.getConformer().getPositions()) {
@@ -107,17 +112,16 @@ namespace coaler {
                 spdlog::info("GEO DONE {}", std::to_string(pos.z));
             }
 
-            //cur_ligand.setMolecule(tmp_mol_);
+            // cur_ligand.setMolecule(tmp_mol_);
         }
 
         spdlog::info("DONE");
         // Save in MultiAlignerResult
-        //geo_opt_alignment_.emplace(not_opt_alignment.alignmentScore, not_opt_alignment.poseIDsByLigandID, new_ligands);
+        // geo_opt_alignment_.emplace(not_opt_alignment.alignmentScore, not_opt_alignment.poseIDsByLigandID,
+        // new_ligands);
     }
 
-    std::vector<RDKit::RWMol> GeometryOptimizer::get_optimized_ligands() {
-        return geo_opt_ligands_;
-    }
+    std::vector<RDKit::RWMol> GeometryOptimizer::get_optimized_ligands() { return geo_opt_ligands_; }
 
     multialign::MultiAlignerResult GeometryOptimizer::get_optimized_alignment() { return geo_opt_alignment_.value(); }
 }  // namespace coaler
