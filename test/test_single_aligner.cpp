@@ -9,8 +9,8 @@
 
 TEST_CASE("Singlealign", "[singlealign]") {
     auto input = coaler::io::FileParser::parse("test/data/two_mols.sdf");
-    RDKit::RWMol *mol_a = input.at(0);
-    RDKit::RWMol *mol_b = input.at(1);
+    auto mol_a = input.at(0);
+    auto mol_b = input.at(1);
     coaler::SingleAligner singleAligner;
 
     SECTION("Tanimoto Similarity") {

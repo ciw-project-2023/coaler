@@ -17,24 +17,29 @@
 #include <coaler/singlealign/SingleAligner.hpp>
 #include <sstream>
 
+#include "coaler/core/Matcher.hpp"
+
 namespace opts = boost::program_options;
+using namespace coaler;
 
 struct ProgrammOptions {
     std::string input_file_path;
     std::string input_file_type;
     unsigned num_conformers;
-    bool dont_add_hydrogens;
+    std::string out_file;
+    int num_threads;
+    std::string core_type;
 };
 
 const std::string help
     = "Usage: aligner [options]\n"
       "Options:\n"
       "  -h, --help\t\t\t\tPrint this help message\n"
-      "  -t, --type <type>\t\t\tType of input file (sdf, smiles)\tdefault: smiles\n"
-      "  -f, --file <path>\t\t\tPath to input file\n"
-      "  -o, --out <path>\t\t\tPath to output file\n"
-      "  --conformers <amount>\t\t\tNumber of conformers to generate for each input molecule\tdefault: 10\n"
-      "  --dont-add-hydrogens \t\t\tDisabled adding hydrogens to molecules\n";
+      "  -f, --files <path>\t\t\tPath to input files\n"
+      "  -o, --out <path>\t\t\tPath to output files\n"
+      "  -j, --threads <amount>\t\t\tNumber of threads to use (default: 1)\n"
+      "  --conformers <amount>\t\t\tNumber of conformers to generate for each input molecule (default: 10)\n"
+      "  --core <algorithm>\t\t\tAlgorithm to detect core structure (default: mcs, allowed: mcs, murcko)\n";
 
 std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
     ProgrammOptions parsed_options;
@@ -42,14 +47,18 @@ std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
     opts::options_description desc("Allowed options");
     desc.add_options()("help,h", "print help message")(
         "file,f", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
-        "conformers", opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10))(
-        "dont-add-hydrogens", opts::value<bool>(&parsed_options.dont_add_hydrogens)->default_value(false));
+        "out,o", opts::value<std::string>(&parsed_options.out_file)->default_value("out.sdf"), "path to output file")(
+        "threads,j", opts::value<int>(&parsed_options.num_threads)->default_value(1), "number of threads to use")(
+        "core", opts::value<std::string>(&parsed_options.core_type)->default_value("mcs"),
+        "algo to detect core structure")("conformers,c",
+                                         opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10),
+                                         "number of conformers to generate");
 
     opts::variables_map vm;
     opts::store(opts::parse_command_line(argc, argv, desc), vm);
 
     if (vm.count("help")) {
-        std::cout << help << std::endl;
+        std::cout << help << '\n';
 
         return std::nullopt;
     }
@@ -63,8 +72,8 @@ int main(int argc, char* argv[]) {
     std::optional<ProgrammOptions> mOpts;
     try {
         mOpts = parseArgs(argc, argv);
-    } catch (...) {
-        spdlog::error("failed to parse program arguments");
+    } catch (const boost::program_options::error& e) {
+        spdlog::error("failed to parse program arguments: {}", e.what());
     }
 
     if (!mOpts.has_value()) {
@@ -72,22 +81,36 @@ int main(int argc, char* argv[]) {
     }
 
     auto opts = mOpts.value();
+    auto mols = io::FileParser::parse(opts.input_file_path);
 
-    std::vector<RDKit::RWMol*> mols;
-    mols = coaler::io::FileParser::parse(opts.input_file_path);
+    std::optional<RDKit::ROMOL_SPTR> core;
+    if (opts.core_type == "mcs") {
+        core = core::Matcher::calculateCoreMcs(mols);
+    } else if (opts.core_type == "murcko") {
+        core = core::Matcher::calculateCoreMurcko(mols);
+    } else {
+        spdlog::error("unknown core calculation algorithm '{}' (allowed values are 'mcs' and 'murcko')",
+                      opts.core_type);
+        return 1;
+    }
 
-    spdlog::info("read {} molecules from {} file", mols.size(), opts.input_file_type);
-
+    if (!core.has_value()) {
+        spdlog::error("failed to calculate core structure");
+        return 1;
+    }
     // generate random core with coordinates. TODO: get coordinates from input
+
     const std::string coreSmiles = "C(c1ccccc1)NC";
     RDKit::ROMol* core = RDKit::SmilesToMol(coreSmiles);
     RDKit::DGeomHelpers::EmbedParameters params;
     RDKit::DGeomHelpers::EmbedMolecule(*core, params);
 
-    coaler::embedder::CoreAtomMapping coreMapping;
 
-    for (int id = 0; id < core->getNumAtoms(); id++) {
-        coreMapping.emplace(id, core->getConformer(0).getAtomPos(id));
+    spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
+
+    embedder::ConformerEmbedder embedder(core.value(), opts.num_threads);
+    for (auto& mol : mols) {
+        embedder.embedConformersWithFixedCore(mol, opts.num_conformers);
     }
 
     spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
@@ -150,6 +173,7 @@ int main(int argc, char* argv[]) {
     //        sdf_writer->write(entry.getMolecule(), result.poseIDsByLigandID.at(entry.getID()));
     //    }
     //    std::cout << oss.str() << std::endl;
+
 
     spdlog::info("done: exiting");
 }
