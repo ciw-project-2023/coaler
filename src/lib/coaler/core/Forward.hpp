@@ -12,18 +12,17 @@
 #include <utility>
 #include <vector>
 
+#include "Matcher.hpp"
+
 namespace coaler::core {
-
-    class Core;
-
     enum class CoreType {
         MCS [[maybe_unused]],
         Murcko [[maybe_unused]],
         MurckoGeneric [[maybe_unused]],
     };
 
-    using CoreAsMol = RDKit::ROMol;
     using CorePtr = RDKit::ROMOL_SPTR;
+    using CoreAsMol = CorePtr;
     using CoreMolMatch = std::vector<RDKit::MatchVectType>;
 
 }  // namespace coaler::core

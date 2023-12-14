@@ -6,22 +6,21 @@
 #include <catch2/catch.hpp>
 #include <string>
 
-#include "coaler/core/Core.hpp"
+#include "coaler/core/Matcher.hpp"
+#include "test_helper.h"
 
 using namespace coaler::core;
 
 TEST_CASE("Core_constructor", "[core]") {
-    RDKit::ROMol mol1 = *RDKit::SmilesToMol("c1cc(ccc1N2CCOCC2=O)N3C[C@@H](OC3=O)CNC(=O)c4ccc(s4)Cl");
-    RDKit::ROMol mol2 = *RDKit::SmilesToMol("CC1(C(=O)N(C(=S)N1c2ccc(c(c2)F)C(=O)NC)c3ccc(c(c3)C(F)(F)F)C#N)C");
-    std::vector<RDKit::RWMol> molVec;
-    molVec.emplace_back(mol1);
-    molVec.emplace_back(mol2);
+    auto mol1 = MolFromSmiles("c1cc(ccc1N2CCOCC2=O)N3C[C@@H](OC3=O)CNC(=O)c4ccc(s4)Cl");
+    auto mol2 = MolFromSmiles("CC1(C(=O)N(C(=S)N1c2ccc(c(c2)F)C(=O)NC)c3ccc(c(c3)C(F)(F)F)C#N)C");
+    RDKit::MOL_SPTR_VECT mols;
+    mols.emplace_back(mol1);
+    mols.emplace_back(mol2);
 
-    Core coreMCS(molVec, CoreType::MCS);
-    RDKit::ROMol coreScaffoldMCS = coreMCS.getCore();
-    CHECK(RDKit::MolToSmarts(coreScaffoldMCS) == "[#6]1:[#6]:[#6](:[#6]:[#6]:[#6]:1)-[#7](-[#6]-[#6]-[#6])-[#6]");
+    auto coreScaffoldMCS = Matcher::calculateCoreMcs(mols);
+    CHECK(RDKit::MolToSmarts(*coreScaffoldMCS.value()) == "[#6]1:[#6]:[#6]:[#6]:[#6]:[#6]:1");
 
-    Core coreMurcko(molVec, CoreType::Murcko);
-    RDKit::ROMol coreScaffoldMurcko = coreMurcko.getCore();
-    CHECK(RDKit::MolToSmarts(coreScaffoldMurcko) == "[#6]1:[#6]:[#6]:[#6]:[#6]:[#6]:1");
+    auto coreScaffoldMurcko = Matcher::calculateCoreMurcko(mols);
+    CHECK(RDKit::MolToSmarts(*coreScaffoldMurcko.value()) == "[#6]1:[#6]:[#6]:[#6]:[#6]:[#6]:1");
 }

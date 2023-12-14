@@ -1,30 +1,39 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
+#include <GraphMol/SmilesParse/SmilesWrite.h>
 
+#include <coaler/io/FileParser.hpp>
 #include <coaler/io/OutputWriter.hpp>
+#include <vector>
 
 #include "catch2/catch.hpp"
 
-TEST_CASE("Output Parser", "[io]") {
-    coaler::io::OutputWriter output_parser;
+using namespace coaler::multialign;
+using namespace coaler::io;
 
+TEST_CASE("Output Parser", "[io]") {
     SECTION("Add one pair to output") {
-        RDKit::RWMol *mol_a = RDKit::SmilesToMol("CCCN");
-        RDKit::RWMol *mol_b = RDKit::SmilesToMol("CCCO");
+        const auto mol_a = RDKit::SmilesToMol("CCCN");
+        const auto mol_b = RDKit::SmilesToMol("CCCO");
 
         RDKit::DGeomHelpers::EmbedMolecule(*mol_a);
         RDKit::DGeomHelpers::EmbedMolecule(*mol_b);
 
-        coaler::io::AlignedMolPair mol_pair;
-        mol_pair.mol_a = RDKit::ROMol{*mol_a};
-        mol_pair.mol_b = RDKit::ROMol{*mol_b};
-        mol_pair.id_mol_a = 0;
-        mol_pair.id_mol_b = 1;
-        mol_pair.align_score = 0.55;
+        const auto lig_a = Ligand(*mol_a, UniquePoseSet{0}, 0);
+        const auto lig_b = Ligand(*mol_b, UniquePoseSet{0}, 0);
 
-        output_parser.add_aligned_mols(mol_pair);
+        auto score = 0.55;
+        const MultiAlignerResult result(score, std::unordered_map<LigandID, PoseID>{{0, 0}, {1, 1}},
+                                        std::vector<Ligand>{lig_a, lig_b});
 
-        SECTION("save output in file") { output_parser.save_molecules_w_scores_in_file("output"); };
-        SECTION("print output in log") { output_parser.print_in_log_molecules_w_scores(); };
+        SECTION("save output in file") {
+            auto outputLocation = "/tmp/test_output_write.sdf";
+            OutputWriter::writeSDF(outputLocation, result);
+
+            auto result = FileParser::parse("/tmp/test_output_write.sdf");
+            REQUIRE(result.size() == 2);
+            REQUIRE(RDKit::MolToSmiles(*result[0]) == "CCCN");
+            REQUIRE(RDKit::MolToSmiles(*result[1]) == "CCCO");
+        };
     };
 }
