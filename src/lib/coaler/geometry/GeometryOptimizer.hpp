@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GraphMol/ROMol.h>
+#include <open3d/Open3D.h>
 
 #include "../multialign/MultiAlignerResult.hpp"
 
@@ -25,6 +26,11 @@ namespace coaler {
         std::vector<RDKit::RWMol> get_optimized_ligands();
 
       private:
+        void transform_point_clouds_w_icp(std::vector<open3d::t::geometry::PointCloud>& point_clouds);
+
+        void set_conformer_pos_to_point_cloud(multialign::Ligand& cur_ligand,
+                                              std::vector<open3d::t::geometry::PointCloud>& point_clouds, size_t idx);
+
         std::optional<multialign::MultiAlignerResult> geo_opt_alignment_{};
         std::vector<RDKit::RWMol> geo_opt_ligands_{};
         // RDKit::RWMol tmp_mol_{};

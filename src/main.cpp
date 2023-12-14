@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
     spdlog::info("read {} molecules from {} file", mols.size(), opts.input_file_type);
 
     // generate random core with coordinates. TODO: get coordinates from input
-    const std::string coreSmiles = "c1ccccc1";
+    const std::string coreSmiles = "C(c1ccccc1)NC";
     RDKit::ROMol* core = RDKit::SmilesToMol(coreSmiles);
     RDKit::DGeomHelpers::EmbedParameters params;
     RDKit::DGeomHelpers::EmbedMolecule(*core, params);
