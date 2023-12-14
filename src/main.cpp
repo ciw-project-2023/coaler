@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
 
     // write some basic output here to evaluate results
 
-    coaler::GeometryOptimizer optimizer(0.6);
+    coaler::GeometryOptimizer optimizer(0.005);
     optimizer.optimize_alignment_w_icp(result);
     // coaler::multialign::MultiAlignerResult optimized_result = optimizer.get_optimized_alignment();
 
