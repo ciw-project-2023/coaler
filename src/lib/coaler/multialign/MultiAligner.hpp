@@ -13,7 +13,7 @@ namespace coaler::multialign {
 
     class MultiAligner {
       public:
-        MultiAligner(RDKit::MOL_SPTR_VECT molecules, RDKit::ROMOL_SPTR core, unsigned maxStartingAssemblies = 250);
+        MultiAligner(RDKit::MOL_SPTR_VECT molecules, unsigned maxStartingAssemblies = 250);
 
         MultiAlignerResult alignMolecules();
 
