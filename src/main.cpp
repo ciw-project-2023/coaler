@@ -6,7 +6,6 @@
 #include <coaler/io/Forward.hpp>
 #include <coaler/multialign/MultiAligner.hpp>
 #include <coaler/multialign/MultiAlignerResult.hpp>
-#include <coaler/singlealign/SingleAligner.hpp>
 #include <sstream>
 
 #include "coaler/core/Matcher.hpp"
@@ -99,8 +98,7 @@ int main(int argc, char* argv[]) {
         embedder.embedConformersWithFixedCore(mol, opts.num_conformers);
     }
 
-    const SingleAligner singleAligner;
-    multialign::MultiAligner aligner(mols, core.value(), singleAligner);
+    multialign::MultiAligner aligner(mols, core.value(), 5);
     const multialign::MultiAlignerResult result = aligner.alignMolecules();
 
     io::OutputWriter::writeSDF(opts.out_file, result);
