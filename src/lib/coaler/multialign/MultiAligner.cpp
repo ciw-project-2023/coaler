@@ -4,6 +4,7 @@
 
 #include "MultiAligner.hpp"
 
+#include <GraphMol/ShapeHelpers/ShapeUtils.h>
 #include <omp.h>
 #include <spdlog/spdlog.h>
 
@@ -58,10 +59,9 @@ namespace coaler::multialign {
         }
     };
 
-    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, RDKit::ROMOL_SPTR core,
-                               const coaler::SingleAligner &aligner, unsigned maxStartingAssemblies)
+    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, RDKit::ROMOL_SPTR core, unsigned maxStartingAssemblies)
 
-        : m_core(std::move(core)), m_singleAligner(aligner), m_maxStartingAssemblies(maxStartingAssemblies) {
+        : m_core(std::move(core)), m_maxStartingAssemblies(maxStartingAssemblies) {
         assert(m_maxStartingAssemblies > 0);
         for (LigandID id = 0; id < molecules.size(); id++) {
             UniquePoseSet poses;
@@ -100,8 +100,9 @@ namespace coaler::multialign {
                         RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
                         RDKit::RWMol const secondMol = ligands.at(secondMolId).getMolecule();
 
-                        double score = m_singleAligner.calculate_tanimoto_shape_similarity(
-                            firstMol, secondMol, firstMolPoseId, secondMolPoseId);
+                        double score = 1
+                                       - RDKit::MolShapes::tanimotoDistance(firstMol, secondMol, firstMolPoseId,
+                                                                            secondMolPoseId);
                         UniquePoseID firstPose(firstMolId, firstMolPoseId);
                         UniquePoseID secondPose(secondMolId, secondMolPoseId);
                         omp_set_lock(&maplock);
