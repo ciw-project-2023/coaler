@@ -161,12 +161,26 @@ namespace coaler::multialign {
         double currentBestAssemblyScore
             = AssemblyScorer::calculateAssemblyScore(currentBestAssembly, m_pairwiseAlignments, m_ligands);
 
+        // write queue content to vector to allow for parallel for
+        std::vector<AssemblyWithScore> assembliesList;
         while (!assemblies.empty()) {
-            LigandAlignmentAssembly currentAssembly = assemblies.top().first;
-            spdlog::info("remaining assemblies to be opimized: {}", assemblies.size());
-            double currentAssemblyScore = assemblies.top().second;
-            spdlog::info("Score before opt: {}", currentAssemblyScore);
+            assembliesList.push_back(assemblies.top());
             assemblies.pop();
+        }
+
+        // locks for shared variables
+        omp_lock_t bestAssemblyScoreLock;
+        omp_init_lock(&bestAssemblyScoreLock);
+        omp_lock_t bestAssemblyLock;
+        omp_init_lock(&bestAssemblyLock);
+
+#pragma omp parallel for shared(bestAssemblyScoreLock, bestAssemblyLock, currentBestAssembly, \
+                                    currentBestAssemblyScore, assembliesList) default(none)
+        for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
+            auto iterTuple = assembliesList.at(assemblyID);
+            LigandAlignmentAssembly currentAssembly = iterTuple.first;
+            double currentAssemblyScore = iterTuple.second;
+            spdlog::info("Score before opt: {}", currentAssemblyScore);
             if (currentAssembly.getMissingLigandsCount() != 0) {
                 spdlog::info("Skip assembly because its missing ligands.");
                 continue;
