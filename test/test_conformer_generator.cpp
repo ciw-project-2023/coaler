@@ -2,13 +2,10 @@
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
 
-#include <boost/range/combine.hpp>
-
 #include "catch2/catch.hpp"
 #include "coaler/core/Forward.hpp"
 #include "coaler/embedder/ConformerEmbedder.hpp"
 #include "coaler/embedder/SubstructureAnalyzer.hpp"
-
 #include "test_helper.h"
 
 using namespace coaler::embedder;
@@ -20,7 +17,7 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
     auto mol2 = MolFromSmiles("c1c(O)cc(O)cc1O");
 
     RDKit::MOL_SPTR_VECT const mols = {mol1, mol2};
- auto core = core::Matcher::calculateCoreMcs(mols);
+    auto core = core::Matcher::calculateCoreMcs(mols);
 
     ConformerEmbedder embedder(core.value());
     auto numConfs = 10;
@@ -90,25 +87,6 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
 //         }
 //     }
 // }
-
-/*----------------------------------------------------------------------------------------------------------------*/
-
-void check_distribution(unsigned nofMatches, unsigned maxConfs, const std::vector<unsigned>& expected_dist) {
-    std::vector<unsigned> dist = ConformerEmbedder::distributeApproxEvenly(nofMatches, maxConfs);
-    REQUIRE(dist.size() == expected_dist.size());
-    for (const auto& itertuple : boost::combine(dist, expected_dist)) {
-        CHECK(itertuple.get<0>() == itertuple.get<1>());
-    }
-}
-
-/*----------------------------------------------------------------------------------------------------------------*/
-
-TEST_CASE("validate_distribute_evenly", "[conformer_generator_tester]") {
-    check_distribution(3, 7, {3, 2, 2});
-    check_distribution(2, 7, {4, 3});
-    check_distribution(5, 10, {2, 2, 2, 2, 2});
-    check_distribution(6, 20, {4, 4, 3, 3, 3, 3});
-}
 
 /*----------------------------------------------------------------------------------------------------------------*/
 

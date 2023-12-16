@@ -15,10 +15,9 @@ namespace coaler::embedder {
      */
     class ConformerEmbedder {
       public:
-
         explicit ConformerEmbedder(RDKit::ROMOL_SPTR& core, int threads = 1);
 
-        void embedConformersWithFixedCore(RDKit::ROMOL_SPTR mol, unsigned numConfs);
+        void embedConformersWithFixedCore(const RDKit::ROMOL_SPTR& mol, unsigned numConfs);
 
         /**
          * Embed an even amount of Conformers at every core match.
@@ -31,12 +30,8 @@ namespace coaler::embedder {
          */
         bool embedEvenlyAcrossAllMatches(RDKit::ROMol& mol, unsigned minNofConfs, unsigned maxNofConfs);
 
-        static std::vector<unsigned> distributeApproxEvenly(unsigned nofMatches, unsigned maxConformers);
-
       private:
-
         RDKit::ROMOL_SPTR m_core;
         int m_threads;
-
     };
 }  // namespace coaler::embedder
