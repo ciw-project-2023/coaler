@@ -59,9 +59,9 @@ namespace coaler::multialign {
         }
     };
 
-    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, RDKit::ROMOL_SPTR core, unsigned maxStartingAssemblies)
+    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, unsigned maxStartingAssemblies)
 
-        : m_core(std::move(core)), m_maxStartingAssemblies(maxStartingAssemblies) {
+        : m_maxStartingAssemblies(maxStartingAssemblies) {
         assert(m_maxStartingAssemblies > 0);
         for (LigandID id = 0; id < molecules.size(); id++) {
             UniquePoseSet poses;
