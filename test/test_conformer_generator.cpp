@@ -1,9 +1,5 @@
-
-<<<<<<< HEAD
-=======
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
->>>>>>> moved tests to renamed file
 #include <GraphMol/Substruct/SubstructMatch.h>
 
 #include <boost/range/combine.hpp>
@@ -11,11 +7,9 @@
 #include "catch2/catch.hpp"
 #include "coaler/core/Forward.hpp"
 #include "coaler/embedder/ConformerEmbedder.hpp"
-<<<<<<< HEAD
-#include "test_helper.h"
-=======
 #include "coaler/embedder/SubstructureAnalyzer.hpp"
->>>>>>> moved tests to renamed file
+
+#include "test_helper.h"
 
 using namespace coaler::embedder;
 
@@ -26,9 +20,7 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
     auto mol2 = MolFromSmiles("c1c(O)cc(O)cc1O");
 
     RDKit::MOL_SPTR_VECT const mols = {mol1, mol2};
-
-    auto core = core::Matcher::calculateCoreMcs(mols);
-
+ auto core = core::Matcher::calculateCoreMcs(mols);
 
     ConformerEmbedder embedder(core.value());
     auto numConfs = 10;
@@ -98,6 +90,7 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
 //         }
 //     }
 // }
+
 /*----------------------------------------------------------------------------------------------------------------*/
 
 void check_distribution(unsigned nofMatches, unsigned maxConfs, const std::vector<unsigned>& expected_dist) {
