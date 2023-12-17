@@ -40,6 +40,7 @@ namespace coaler::embedder {
             RDKit::DGeomHelpers::EmbedParameters params;
             params = RDKit::DGeomHelpers::ETKDGv3;
             params.optimizerForceTol = forceTol;
+            params.useSmallRingTorsions = true;
             params.randomSeed = seed;
             params.coordMap = &molQueryCoords;
             params.useBasicKnowledge = false;
