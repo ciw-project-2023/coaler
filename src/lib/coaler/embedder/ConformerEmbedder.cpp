@@ -20,7 +20,7 @@ const float forceTol = 0.0135;
 
 namespace coaler::embedder {
     ConformerEmbedder::ConformerEmbedder(RDKit::ROMOL_SPTR &query, CoreAtomMapping &coords, const int threads)
-            : m_core(query), m_threads(threads), m_coords(coords) {}
+        : m_core(query), m_threads(threads), m_coords(coords) {}
 
     void ConformerEmbedder::embedConformersWithFixedCore(RDKit::ROMOL_SPTR mol, unsigned numConfs) {
         spdlog::info("Embedding {}", RDKit::MolToSmiles(*mol));
