@@ -6,6 +6,7 @@ CMakeFiles/*
 .cmake/*
 
 .idea/*
+.venv/
 TestRDkit
 
 cmake_install.cmake
