@@ -16,6 +16,7 @@
 #include <utility>
 
 const unsigned seed = 42;
+const float forceTol = 0.0135;
 
 namespace coaler::embedder {
     ConformerEmbedder::ConformerEmbedder(RDKit::ROMOL_SPTR& query, CoreAtomMapping& coords, const int threads)
@@ -37,6 +38,8 @@ namespace coaler::embedder {
 
             // embed molecule conformers
             RDKit::DGeomHelpers::EmbedParameters params;
+            params = RDKit::DGeomHelpers::ETKDGv3;
+            params.optimizerForceTol = forceTol;
             params.randomSeed = seed;
             params.coordMap = &molQueryCoords;
             params.useBasicKnowledge = false;
@@ -45,6 +48,11 @@ namespace coaler::embedder {
             params.useSmallRingTorsions = false;
             params.useRandomCoords = true;
             params.numThreads = m_threads;
+
+
+            spdlog::info("OptimizerForceTol: {}", params.optimizerForceTol);
+
+
 
             RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
             spdlog::info("Embedded {} conformers.", mol->getNumConformers());
