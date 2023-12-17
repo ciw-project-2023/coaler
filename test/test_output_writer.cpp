@@ -1,6 +1,8 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
+#include <string>
+#include <boost/filesystem.hpp>
 
 #include <coaler/io/FileParser.hpp>
 #include <coaler/io/OutputWriter.hpp>
@@ -23,7 +25,7 @@ TEST_CASE("Output Parser", "[io]") {
         const auto lig_b = Ligand(*mol_b, UniquePoseSet{0}, 0);
 
         auto score = 0.55;
-        const MultiAlignerResult result(score, std::unordered_map<LigandID, PoseID>{{0, 0}, {1, 1}},
+        const MultiAlignerResult result(score, std::unordered_map<LigandID, PoseID>{{0, 0}, {1, 0}},
                                         std::vector<Ligand>{lig_a, lig_b});
         
         SECTION("save output in file") {
