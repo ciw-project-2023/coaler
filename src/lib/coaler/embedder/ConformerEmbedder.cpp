@@ -19,8 +19,8 @@ const unsigned seed = 42;
 const float forceTol = 0.0135;
 
 namespace coaler::embedder {
-    ConformerEmbedder::ConformerEmbedder(RDKit::ROMOL_SPTR& query, CoreAtomMapping& coords, const int threads)
-        : m_core(query), m_threads(threads), m_coords(coords) {}
+    ConformerEmbedder::ConformerEmbedder(RDKit::ROMOL_SPTR &query, CoreAtomMapping &coords, const int threads)
+            : m_core(query), m_threads(threads), m_coords(coords) {}
 
     void ConformerEmbedder::embedConformersWithFixedCore(RDKit::ROMOL_SPTR mol, unsigned numConfs) {
         spdlog::info("Embedding {}", RDKit::MolToSmiles(*mol));
@@ -30,9 +30,9 @@ namespace coaler::embedder {
         auto matches = RDKit::SubstructMatch(*mol, *m_core, matchParams);
         assert(!matches.empty());
 
-        for (auto const& match : matches) {
+        for (auto const &match: matches) {
             CoreAtomMapping molQueryCoords;
-            for (const auto& [queryId, molId] : match) {
+            for (const auto &[queryId, molId]: match) {
                 molQueryCoords[molId] = m_coords.at(queryId);
             }
 
@@ -51,7 +51,6 @@ namespace coaler::embedder {
 
 
             spdlog::info("OptimizerForceTol: {}", params.optimizerForceTol);
-
 
 
             RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
