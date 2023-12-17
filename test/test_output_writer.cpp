@@ -1,8 +1,6 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
-#include <string>
-#include <boost/filesystem.hpp>
 
 #include <coaler/io/FileParser.hpp>
 #include <coaler/io/OutputWriter.hpp>
