@@ -30,9 +30,9 @@ namespace coaler::embedder {
         auto matches = RDKit::SubstructMatch(*mol, *m_core, matchParams);
         assert(!matches.empty());
 
-        for (auto const &match: matches) {
+        for (auto const &match : matches) {
             CoreAtomMapping molQueryCoords;
-            for (const auto &[queryId, molId]: match) {
+            for (const auto &[queryId, molId] : match) {
                 molQueryCoords[molId] = m_coords.at(queryId);
             }
 
