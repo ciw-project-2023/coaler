@@ -49,10 +49,6 @@ namespace coaler::embedder {
             params.useRandomCoords = true;
             params.numThreads = m_threads;
 
-
-            spdlog::info("OptimizerForceTol: {}", params.optimizerForceTol);
-
-
             RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
             spdlog::info("Embedded {} conformers.", mol->getNumConformers());
 
