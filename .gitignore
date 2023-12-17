@@ -43,4 +43,6 @@ CMakeUserPresets.json
 *.out
 *.app
 
+#default outfile
+out.sdf
 build/
