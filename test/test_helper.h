@@ -11,6 +11,7 @@ namespace {
     RDKit::RWMOL_SPTR MolFromSmiles(const std::string &smiles) {
         return boost::make_shared<RDKit::RWMol>(*RDKit::SmilesToMol(smiles));
     }
+
     RDKit::ROMOL_SPTR ROMolFromSmiles(const std::string &smiles) {
         return boost::make_shared<RDKit::ROMol>(*RDKit::SmilesToMol(smiles));
     }

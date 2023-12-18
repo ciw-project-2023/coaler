@@ -1,15 +1,19 @@
 ---
-BasedOnStyle: Google
+Language: Cpp
 AccessModifierOffset: '-2'
 AlignTrailingComments: 'true'
-AllowAllParametersOfDeclarationOnNextLine: 'false'
+AllowAllParametersOfDeclarationOnNextLine: 'true'
 AlwaysBreakTemplateDeclarations: 'No'
+BasedOnStyle: Google
+BreakBeforeBinaryOperators: All
 BreakBeforeBraces: Attach
+BreakBeforeTernaryOperators: 'true'
 ColumnLimit: '120'
 ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
+EmptyLineBeforeAccessModifier: LogicalBlock
 IncludeBlocks: Regroup
 IndentPPDirectives: AfterHash
 IndentWidth: '4'
 NamespaceIndentation: All
-BreakBeforeBinaryOperators: All
-BreakBeforeTernaryOperators: 'true'
+QualifierAlignment: Left
+SeparateDefinitionBlocks: Always

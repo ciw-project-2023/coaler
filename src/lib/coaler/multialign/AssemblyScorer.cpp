@@ -16,8 +16,8 @@ namespace coaler::multialign {
                     continue;
                 }
 
-                PoseID const firstLigandPoseID = assembly.getPoseOfLigand(firstLigand.getID());
-                PoseID const secondLigandPoseID = assembly.getPoseOfLigand(secondLigand.getID());
+                const PoseID firstLigandPoseID = assembly.getPoseOfLigand(firstLigand.getID());
+                const PoseID secondLigandPoseID = assembly.getPoseOfLigand(secondLigand.getID());
 
                 // check whether assembly didnt contain one of the ligands
                 if (firstLigandPoseID == std::numeric_limits<PoseID>::max()
@@ -25,8 +25,8 @@ namespace coaler::multialign {
                     continue;
                 }
 
-                UniquePoseID const firstLigandPose{firstLigand.getID(), firstLigandPoseID};
-                UniquePoseID const secondLigandPose{secondLigand.getID(), secondLigandPoseID};
+                const UniquePoseID firstLigandPose{firstLigand.getID(), firstLigandPoseID};
+                const UniquePoseID secondLigandPose{secondLigand.getID(), secondLigandPoseID};
                 assemblyScore += scores.at(PosePair{firstLigandPose, secondLigandPose});
             }
         }
@@ -47,10 +47,10 @@ namespace coaler::multialign {
             if (id == ligandId) {
                 continue;
             }
-            UniquePoseID ligandPose(ligandId, assembly.getPoseOfLigand(ligandId));
-            UniquePoseID otherPose(id, assembly.getPoseOfLigand(id));
-            double const scoreInAssembly = scores.at(PosePair(ligandPose, otherPose));
-            double const optimalScore = scores.at(poseRegisters.at(LigandPair(id, ligandId))->getHighestScoringPair());
+            const UniquePoseID ligandPose(ligandId, assembly.getPoseOfLigand(ligandId));
+            const UniquePoseID otherPose(id, assembly.getPoseOfLigand(id));
+            const double scoreInAssembly = scores.at(PosePair(ligandPose, otherPose));
+            const double optimalScore = scores.at(poseRegisters.at(LigandPair(id, ligandId))->getHighestScoringPair());
 
             scoreDeficit += std::abs(optimalScore - scoreInAssembly);
         }

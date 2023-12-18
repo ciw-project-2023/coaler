@@ -7,7 +7,7 @@
 namespace coaler::multialign {
 
     void PoseRegisterCollection::addRegister(const PoseRegisterPtr &poseRegister) {
-        LigandPair const pair(poseRegister->getFirstLigandID(), poseRegister->getSecondLigandID());
+        const LigandPair pair(poseRegister->getFirstLigandID(), poseRegister->getSecondLigandID());
 
         m_registers.emplace(pair, poseRegister);
     }

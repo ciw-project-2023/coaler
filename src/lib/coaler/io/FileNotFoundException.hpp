@@ -11,11 +11,11 @@
 namespace coaler::io {
     class FileNotFoundException : public std::exception {
       private:
-        std::string file_path;
+        std::string m_file_path;
 
       public:
-        FileNotFoundException(std::string path) : file_path(std::move(path)) {}
+        explicit FileNotFoundException(std::string path) : m_file_path(std::move(path)) {}
 
-        std::string what() { return file_path; }
+        std::string what() { return m_file_path; }
     };
 }  // namespace coaler::io

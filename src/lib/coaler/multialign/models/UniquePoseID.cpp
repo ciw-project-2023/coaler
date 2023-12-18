@@ -54,7 +54,6 @@ namespace coaler::multialign {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     std::size_t UniquePoseIdentifierHash::operator()(const UniquePoseID &uniquePoseId) const {
-        const std::size_t seed = 0;
         const std::string key = uniquePoseId.toString();
         return std::hash<std::string>{}(key);
     }

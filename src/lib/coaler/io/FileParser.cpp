@@ -6,7 +6,6 @@
 
 #include <GraphMol/FileParsers/MolSupplier.h>
 #include <GraphMol/RWMol.h>
-#include <GraphMol/SmilesParse/SmilesParse.h>
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
@@ -21,7 +20,7 @@ namespace coaler::io {
 
         spdlog::debug("searching at: {}", std::filesystem::current_path().string());
 
-        std::ifstream infile(file_path);
+        std::ifstream const infile(file_path);
         if (!infile) {
             spdlog::error("file not found: {}", file_path);
             throw FileNotFoundException(file_path);

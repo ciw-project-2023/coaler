@@ -20,8 +20,8 @@ namespace coaler::multialign {
         bool operator==(const PosePair& other) const;
 
       private:
-        UniquePoseID m_firstPose;
-        UniquePoseID m_secondPose;
+        UniquePoseID m_firstPose{};
+        UniquePoseID m_secondPose{};
     };
 
     struct PosePairHash {

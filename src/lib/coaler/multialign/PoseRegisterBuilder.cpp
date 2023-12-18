@@ -5,8 +5,6 @@
 
 #include <spdlog/spdlog.h>
 
-#include <iostream>
-
 #include "PoseRegister.hpp"
 #include "models/Ligand.hpp"
 
@@ -21,7 +19,7 @@ namespace coaler::multialign {
                     continue;
                 }
 
-                unsigned size = calculateRegisterSizeForLigand(ligands.at(firstLigand), ligands.at(secondLigand));
+                const unsigned size = calculateRegisterSizeForLigand(ligands.at(firstLigand), ligands.at(secondLigand));
                 LigandPair currentLigandPair(firstLigand, secondLigand);
 
                 std::shared_ptr<PoseRegister> registerPtr

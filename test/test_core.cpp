@@ -9,7 +9,7 @@
 
 using namespace coaler::core;
 
-TEST_CASE("Core_constructor", "[core]") {
+TEST_CASE("Core_constructor", "[core_]") {
     auto mol1 = MolFromSmiles("c1cc(ccc1N2CCOCC2=O)N3C[C@@H](OC3=O)CNC(=O)c4ccc(s4)Cl");
     auto mol2 = MolFromSmiles("CC1(C(=O)N(C(=S)N1c2ccc(c(c2)F)C(=O)NC)c3ccc(c(c3)C(F)(F)F)C#N)C");
     RDKit::MOL_SPTR_VECT mols;

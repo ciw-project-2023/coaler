@@ -59,9 +59,9 @@ namespace coaler::multialign {
         }
     };
 
-    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, unsigned maxStartingAssemblies)
+    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, unsigned max_starting_assemblies)
 
-        : m_maxStartingAssemblies(maxStartingAssemblies) {
+        : m_maxStartingAssemblies(max_starting_assemblies) {
         assert(m_maxStartingAssemblies > 0);
         for (LigandID id = 0; id < molecules.size(); id++) {
             UniquePoseSet poses;
@@ -76,20 +76,21 @@ namespace coaler::multialign {
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "readability-magic-numbers"
+
     /*----------------------------------------------------------------------------------------------------------------*/
 
     PairwiseAlignment MultiAligner::calculateAlignmentScores(const LigandVector &ligands) {
         PairwiseAlignment scores;
-        unsigned n = ligands.size();
-        unsigned m = ligands.at(0).getNumPoses();
+        const unsigned n = ligands.size();
+        const unsigned m = ligands.at(0).getNumPoses();
         unsigned combinations = 0.5 * n * (n - 1) * m * m;  // TODO how many?
         spdlog::info("Calculating {} combinations. This may take some time", combinations);
 
         for (LigandID firstMolId = 0; firstMolId < ligands.size(); firstMolId++) {
             spdlog::info("calculated {} combinations so far.", scores.size());
             for (LigandID secondMolId = firstMolId + 1; secondMolId < ligands.size(); secondMolId++) {
-                unsigned nofPosesFirst = ligands.at(firstMolId).getNumPoses();
-                unsigned nofPosesSecond = ligands.at(secondMolId).getNumPoses();
+                const unsigned nofPosesFirst = ligands.at(firstMolId).getNumPoses();
+                const unsigned nofPosesSecond = ligands.at(secondMolId).getNumPoses();
                 omp_lock_t maplock;
                 omp_init_lock(&maplock);
 
@@ -100,11 +101,11 @@ namespace coaler::multialign {
                         RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
                         RDKit::RWMol const secondMol = ligands.at(secondMolId).getMolecule();
 
-                        double score = 1
-                                       - RDKit::MolShapes::tanimotoDistance(firstMol, secondMol, firstMolPoseId,
-                                                                            secondMolPoseId);
-                        UniquePoseID firstPose(firstMolId, firstMolPoseId);
-                        UniquePoseID secondPose(secondMolId, secondMolPoseId);
+                        const double score = 1
+                                             - RDKit::MolShapes::tanimotoDistance(firstMol, secondMol, firstMolPoseId,
+                                                                                  secondMolPoseId);
+                        const UniquePoseID firstPose(firstMolId, firstMolPoseId);
+                        const UniquePoseID secondPose(secondMolId, secondMolPoseId);
                         omp_set_lock(&maplock);
                         scores.emplace(PosePair(firstPose, secondPose), score);
                         omp_unset_lock(&maplock);
@@ -115,6 +116,7 @@ namespace coaler::multialign {
         spdlog::info("finished calculating pairwise alignments");
         return scores;
     }
+
 #pragma clang diagnostic pop
 
     /*----------------------------------------------------------------------------------------------------------------*/
@@ -132,11 +134,11 @@ namespace coaler::multialign {
         std::priority_queue<AssemblyWithScore, std::vector<AssemblyWithScore>, AssemblyWithScoreGreater> assemblies;
         for (const Ligand &ligand : m_ligands) {
             for (const UniquePoseID &pose : ligand.getPoses()) {
-                LigandAlignmentAssembly assembly
+                const LigandAlignmentAssembly assembly
                     = StartingAssemblyGenerator::generateStartingAssembly(pose, m_poseRegisters, m_ligands);
 
-                double const score = AssemblyScorer::calculateAssemblyScore(assembly, m_pairwiseAlignments, m_ligands);
-                AssemblyWithScore newAssembly = std::make_pair(assembly, score);
+                const double score = AssemblyScorer::calculateAssemblyScore(assembly, m_pairwiseAlignments, m_ligands);
+                const AssemblyWithScore newAssembly = std::make_pair(assembly, score);
 
                 // insert if queue no full or new assembly is larger that worst assembly in queue
 
@@ -145,7 +147,7 @@ namespace coaler::multialign {
                     assemblies.push(newAssembly);
                     continue;
                 }
-                AssemblyWithScore topAssembly = assemblies.top();
+                const AssemblyWithScore topAssembly = assemblies.top();
                 if (AssemblyWithScoreGreater()(newAssembly, topAssembly)) {
                     assemblies.pop();
                     assemblies.push(newAssembly);
@@ -185,7 +187,7 @@ namespace coaler::multialign {
                     if (!ligandAvailable.at(ligand.getID())) {
                         continue;
                     }
-                    double ligandScoreDeficit = AssemblyScorer::calculateScoreDeficitForLigand(
+                    const double ligandScoreDeficit = AssemblyScorer::calculateScoreDeficitForLigand(
                         ligand.getID(), m_ligands.size() - 1, currentAssembly, m_poseRegisters, m_pairwiseAlignments);
                     if (maxScoreDeficit < ligandScoreDeficit) {
                         worstLigand = ligand;
@@ -207,7 +209,7 @@ namespace coaler::multialign {
                     LigandAlignmentAssembly assemblyCopy = currentAssembly;
                     assemblyCopy.swapPoseForLigand(worstLigand.getID(), pose.getLigandInternalPoseId());
                     // avoid identity swap
-                    double const newAssemblyScore
+                    const double newAssemblyScore
                         = AssemblyScorer::calculateAssemblyScore(assemblyCopy, m_pairwiseAlignments, m_ligands);
 
                     if (newAssemblyScore > currentAssemblyScore) {
@@ -223,7 +225,7 @@ namespace coaler::multialign {
                 }
             }
 
-            double const assemblyScore
+            const double assemblyScore
                 = AssemblyScorer::calculateAssemblyScore(currentAssembly, m_pairwiseAlignments, m_ligands);
             spdlog::info("Score after opt: {}", assemblyScore);
             if (assemblyScore > currentBestAssemblyScore) {

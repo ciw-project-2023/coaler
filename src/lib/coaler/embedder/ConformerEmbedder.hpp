@@ -17,13 +17,11 @@ namespace coaler::embedder {
 
         explicit ConformerEmbedder(RDKit::ROMOL_SPTR& query, CoreAtomMapping& coords, int threads = 1);
 
-        void embedConformersWithFixedCore(RDKit::ROMOL_SPTR mol, unsigned numConfs);
+        void embedConformersWithFixedCore(const RDKit::ROMOL_SPTR& mol, unsigned numConfs);
 
       private:
         RDKit::ROMOL_SPTR m_core;
         CoreAtomMapping m_coords;
         int m_threads;
-
-        std::vector<RDKit::MatchVectType> filterMatches(const std::vector<RDKit::MatchVectType>& matches);
     };
 }  // namespace coaler::embedder

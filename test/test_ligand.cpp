@@ -4,6 +4,7 @@
 #include "coaler/multialign/Forward.hpp"
 
 using namespace coaler::multialign;
+
 TEST_CASE("test_ligand", "[multialign]") {
     UniquePoseSet poses = {UniquePoseID(0, 0), UniquePoseID(0, 1), UniquePoseID(0, 2)};
     RDKit::RWMol mol = *RDKit::SmilesToMol("CN");

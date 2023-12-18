@@ -33,7 +33,7 @@ const std::string help
       "  -o, --out <path>\t\t\tPath to output files\n"
       "  -j, --threads <amount>\t\t\tNumber of threads to use (default: 1)\n"
       "  --conformers <amount>\t\t\tNumber of conformers to generate for each input molecule (default: 10)\n"
-      "  --core <algorithm>\t\t\tAlgorithm to detect core structure (default: mcs, allowed: mcs, murcko)\n";
+      "  --core_ <algorithm>\t\t\tAlgorithm to detect core_ structure (default: mcs, allowed: mcs, murcko)\n";
 
 std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
     ProgrammOptions parsed_options;
@@ -43,10 +43,10 @@ std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
         "file,f", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
         "out,o", opts::value<std::string>(&parsed_options.out_file)->default_value("out.sdf"), "path to output file")(
         "threads,j", opts::value<int>(&parsed_options.num_threads)->default_value(1), "number of threads to use")(
-        "core", opts::value<std::string>(&parsed_options.core_type)->default_value("mcs"),
-        "algo to detect core structure")("conformers,c",
-                                         opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10),
-                                         "number of conformers to generate");
+        "core_", opts::value<std::string>(&parsed_options.core_type)->default_value("mcs"),
+        "algo to detect core_ structure")("conformers,c",
+                                          opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10),
+                                          "number of conformers to generate");
 
     opts::variables_map vm;
     opts::store(opts::parse_command_line(argc, argv, desc), vm);
@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
 
     auto core = coreResult.value();
 
-    spdlog::info("core structure: {}", RDKit::MolToSmarts(*core.first));
+    spdlog::info("core_ structure: {}", RDKit::MolToSmarts(*core.first));
 
     // generate random coreResult with coordinates. TODO: get coordinates from input
 

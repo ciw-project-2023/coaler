@@ -3,6 +3,7 @@
 #include "coaler/multialign/models/PosePair.hpp"
 
 using namespace coaler::multialign;
+
 TEST_CASE("test_pose_pair", "[multialign]") {
     UniquePoseID pose1(0, 0);
     UniquePoseID pose2(1, 0);

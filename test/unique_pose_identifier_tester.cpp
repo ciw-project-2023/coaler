@@ -17,6 +17,7 @@ TEST_CASE("test_getter_functions", "[unique_pose_identifier_tester]") {
     CHECK(pose2.getLigandId() == 1);
     CHECK(pose2.getLigandInternalPoseId() == 1);
 }
+
 TEST_CASE("test_operator_functions", "[unique_pose_identifier_tester]") {
     UniquePoseID pose1(0, 0);
     UniquePoseID pose2(0, 0);

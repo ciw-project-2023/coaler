@@ -18,20 +18,22 @@ namespace coaler::multialign {
             assembly.setMissingLigandsCount(ligands.size() - 1);
             return assembly;
         }
-        LigandID ligandId = pose.getLigandId();
+        const LigandID ligandId = pose.getLigandId();
 
         for (const Ligand& otherLigand : ligands) {
             if (ligandId == otherLigand.getID()) {
                 continue;
             }
-            LigandPair ligandPair(ligandId, otherLigand.getID());
+
+            const LigandPair ligandPair(ligandId, otherLigand.getID());
             if (registers.count(ligandPair) == 0) {
                 assembly.incrementMissingLigandsCount();
                 continue;
             }
-            PosePair highestScoringPair = registers.at(ligandPair)->getHighestScoringPosePairForPose(pose);
 
-            UniquePoseID otherPose;
+            const PosePair highestScoringPair = registers.at(ligandPair)->getHighestScoringPosePairForPose(pose);
+
+            UniquePoseID otherPose{};
             if (highestScoringPair.getFirst() == pose) {
                 otherPose = highestScoringPair.getSecond();
             } else {
@@ -40,6 +42,7 @@ namespace coaler::multialign {
 
             assembly.insertLigandPose(otherPose.getLigandId(), otherPose.getLigandInternalPoseId());
         }
+
         return assembly;
     }
 }  // namespace coaler::multialign
