@@ -2,9 +2,6 @@ name: Clang-Tidy
 
 on:
   pull_request:
-    paths:
-      - '**/*.cpp'
-      - '**/*.h'
 
 env:
   CONAN_SERVER_USER: ciw
