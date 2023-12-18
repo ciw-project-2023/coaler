@@ -1,32 +1,26 @@
-name: Clang-Tidy Check
+name: Clang-Tidy
 
 on:
   pull_request:
-    branches:
-      - main
+    paths:
+      - '**/*.cpp'
+      - '**/*.h'
 
 jobs:
-  clang-tidy-check:
+  clang-tidy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
+    - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up CMake
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y cmake
-        cmake --version
+    - name: Set up clang-tidy
+      run: sudo apt-get install clang-tidy
 
-    - name: Configure and Build
+    - name: Run clang-tidy
       run: |
         mkdir build
         cd build
         cmake ..
         make
-
-    - name: Run Clang-Tidy
-      run: |
-        cd build
-        make clang-tidy
+        clang-tidy -p=build source/**/*.cpp
