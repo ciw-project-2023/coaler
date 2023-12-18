@@ -1,0 +1,32 @@
+name: Clang-Tidy Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  clang-tidy-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up CMake
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake
+        cmake --version
+
+    - name: Configure and Build
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make
+
+    - name: Run Clang-Tidy
+      run: |
+        cd build
+        make clang-tidy
