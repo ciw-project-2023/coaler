@@ -1,12 +1,12 @@
 /*
  * Copyright 2023 CoAler Group, all rights reserved.
  */
-
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/FileParsers/MolWriters.h>
 #include <GraphMol/MolOps.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <spdlog/spdlog.h>
+
 
 #include <boost/program_options.hpp>
 #include <coaler/embedder/ConformerEmbedder.hpp>
@@ -14,7 +14,6 @@
 #include <coaler/io/Forward.hpp>
 #include <coaler/multialign/MultiAligner.hpp>
 #include <coaler/multialign/MultiAlignerResult.hpp>
-#include <coaler/singlealign/SingleAligner.hpp>
 #include <sstream>
 
 #include "coaler/core/Matcher.hpp"
@@ -83,22 +82,27 @@ int main(int argc, char* argv[]) {
     auto opts = mOpts.value();
     auto mols = io::FileParser::parse(opts.input_file_path);
 
-    std::optional<RDKit::ROMOL_SPTR> core;
+    std::optional<coaler::core::CoreResult> coreResult;
     if (opts.core_type == "mcs") {
-        core = core::Matcher::calculateCoreMcs(mols);
+        coreResult = core::Matcher::calculateCoreMcs(mols);
     } else if (opts.core_type == "murcko") {
-        core = core::Matcher::calculateCoreMurcko(mols);
+        coreResult = core::Matcher::calculateCoreMurcko(mols);
     } else {
-        spdlog::error("unknown core calculation algorithm '{}' (allowed values are 'mcs' and 'murcko')",
+        spdlog::error("unknown coreResult calculation algorithm '{}' (allowed values are 'mcs' and 'murcko')",
                       opts.core_type);
         return 1;
     }
 
-    if (!core.has_value()) {
-        spdlog::error("failed to calculate core structure");
+    if (!coreResult.has_value()) {
+        spdlog::error("failed to calculate coreResult structure");
         return 1;
     }
-    // generate random core with coordinates. TODO: get coordinates from input
+
+    auto core = coreResult.value();
+
+    spdlog::info("core structure: {}", RDKit::MolToSmarts(*core.first));
+
+    // generate random coreResult with coordinates. TODO: get coordinates from input
 
     const std::string coreSmiles = "C(c1ccccc1)NC";
     RDKit::ROMol* core = RDKit::SmilesToMol(coreSmiles);
@@ -108,7 +112,7 @@ int main(int argc, char* argv[]) {
 
     spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
 
-    embedder::ConformerEmbedder embedder(core.value(), opts.num_threads);
+    embedder::ConformerEmbedder embedder(coreResult->first, coreResult->second, opts.num_threads);
     for (auto& mol : mols) {
         embedder.embedConformersWithFixedCore(mol, opts.num_conformers);
     }
@@ -173,7 +177,6 @@ int main(int argc, char* argv[]) {
     //        sdf_writer->write(entry.getMolecule(), result.poseIDsByLigandID.at(entry.getID()));
     //    }
     //    std::cout << oss.str() << std::endl;
-
 
     spdlog::info("done: exiting");
 }

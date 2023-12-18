@@ -3,7 +3,6 @@
  */
 
 #pragma once
-#include "../singlealign/SingleAligner.hpp"
 #include "Forward.hpp"
 #include "GraphMol/FMCS/FMCS.h"
 #include "MultiAlignerResult.hpp"
@@ -14,16 +13,14 @@ namespace coaler::multialign {
 
     class MultiAligner {
       public:
-        MultiAligner(RDKit::MOL_SPTR_VECT molecules, RDKit::ROMOL_SPTR core, const coaler::SingleAligner& aligner,
-                     unsigned maxStartingAssemblies = 250);
+        MultiAligner(RDKit::MOL_SPTR_VECT molecules, unsigned maxStartingAssemblies = 250);
 
         MultiAlignerResult alignMolecules();
 
       private:
-        PairwiseAlignment calculateAlignmentScores(const LigandVector& ligands, const RDKit::ROMol& core);
+        PairwiseAlignment calculateAlignmentScores(const LigandVector& ligands);
 
         unsigned m_maxStartingAssemblies;
-        coaler::SingleAligner m_singleAligner;
         RDKit::ROMOL_SPTR m_core;
         std::vector<Ligand> m_ligands;
         PoseRegisterCollection m_poseRegisters;

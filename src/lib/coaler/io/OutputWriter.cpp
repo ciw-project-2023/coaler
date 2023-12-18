@@ -19,13 +19,9 @@ namespace coaler::io {
         }
 
         boost::shared_ptr<RDKit::SDWriter> const sdf_writer(new RDKit::SDWriter(&output_file, false));
-        if (result.poseIDsByLigandID.size() != result.inputLigands.size()) {
-            spdlog::info("only generated an incomplete alignment.");
-            return;
-        }
-
-        for (const auto &entry : result.inputLigands) {
-            sdf_writer->write(entry.getMolecule(), result.poseIDsByLigandID.at(entry.getID()));
+        for (const auto &[ligand_id, pose_id] : result.poseIDsByLigandID) {
+            auto entry = result.inputLigands.at(ligand_id);
+            sdf_writer->write(entry.getMolecule(), pose_id);
         }
     }
 }  // namespace coaler::io
