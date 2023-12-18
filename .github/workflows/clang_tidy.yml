@@ -6,6 +6,11 @@ on:
       - '**/*.cpp'
       - '**/*.h'
 
+env:
+  CONAN_SERVER_USER: ciw
+  CONAN_SERVER_PASSWORD: VZKhzh2v5nCnijAS3A8R
+  TARGET: Debug
+
 jobs:
   clang-tidy:
     runs-on: ubuntu-latest
@@ -19,7 +24,6 @@ jobs:
 
     - name: Run clang-tidy
       run: |
-        mkdir build
         cd build
         cmake ..
         make
