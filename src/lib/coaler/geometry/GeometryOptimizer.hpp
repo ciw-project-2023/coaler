@@ -1,5 +1,6 @@
 #pragma once
 
+#include <GraphMol/RGroupDecomposition/RGroupDecomp.h>
 #include <GraphMol/ROMol.h>
 #include <open3d/Open3D.h>
 
@@ -9,7 +10,7 @@ namespace coaler {
 
     class GeometryOptimizer {
       public:
-        GeometryOptimizer(double max_distance);
+        GeometryOptimizer(double max_distance, RDKit::ROMOL_SPTR& core);
 
         /**
          *
@@ -26,15 +27,24 @@ namespace coaler {
         std::vector<RDKit::RWMol> get_optimized_ligands();
 
       private:
-        void transform_point_clouds_w_icp(std::vector<open3d::t::geometry::PointCloud>& point_clouds);
+        void transform_point_clouds_w_icp(std::vector<std::vector<open3d::t::geometry::PointCloud>>& point_clouds);
 
-        void set_conformer_pos_to_point_cloud(multialign::Ligand& cur_ligand,
-                                              std::vector<open3d::t::geometry::PointCloud>& point_clouds, size_t idx);
+        void set_conformer_pos_to_point_cloud(std::vector<std::vector<open3d::t::geometry::PointCloud>>&);
+
+        std::vector<std::vector<open3d::t::geometry::PointCloud>> create_point_clouds_from_molecules();
+
+        void save_multi_result_in_vector(multialign::MultiAlignerResult& not_opt_alignment);
 
         std::optional<multialign::MultiAlignerResult> geo_opt_alignment_{};
         std::vector<RDKit::RWMol> geo_opt_ligands_{};
+
+        std::vector<RDKit::ROMOL_SPTR> mol_vec_{};
+        std::vector<multialign::PoseID> pos_id_vec_{};
         // RDKit::RWMol tmp_mol_{};
         // RDKit::Conformer tmp_conf_{};
+        RDKit::RGroupDecomposition decomposer_;
+
+        RDKit::RGroupRows rows_{};
         double max_distance_{0};
     };
 

@@ -18,5 +18,6 @@ namespace coaler::multialign {
         double alignmentScore;
         const std::unordered_map<LigandID, PoseID> poseIDsByLigandID;
         std::vector<Ligand> inputLigands;
+        //std::vector<std::tuple<mol, PoseID>> inputLigands;
     };
 }  // namespace coaler::multialign
