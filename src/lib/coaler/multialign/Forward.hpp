@@ -13,6 +13,11 @@
 
 namespace coaler::multialign {
 
+    namespace Constants {
+        constexpr unsigned DEFAULT_NOF_STARTING_ASSEMBLIES = 50;
+        constexpr unsigned DEFAULT_NOF_THREADS = 1;
+    }  // namespace Constants
+
     class PoseRegister;
     using PoseRegisterPtr = std::shared_ptr<PoseRegister>;
 
