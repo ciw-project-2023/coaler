@@ -94,7 +94,8 @@ namespace coaler {
                     // spdlog::info("No R-group for mol {} at rgroup {}", mol_idx, group_idx);
                     mol_idx++;
                     continue;
-                } else if (!target_set) {
+                }
+                if (!target_set) {
                     spdlog::info("Target cloud set to {} for group {}", mol_idx, group_idx);
                     target_cloud = point_clouds.at(group_idx).at(mol_idx);
                     target_set = true;
@@ -139,13 +140,15 @@ namespace coaler {
             for (auto mol : col.second) {
                 RDKit::ROMol& r_mol = *mol;
 
-                // Delete old conformers except one
                 int conformer_count = r_mol.getNumConformers();
                 if(conformer_count == 0){
+                    spdlog::info("No Conformere <=> No R Group");
+                    decomposed.at(mol_idx).emplace_back(boost::make_shared<RDKit::ROMol>(r_mol));
                     mol_idx++;
                     continue;
                 }
 
+                // Delete old conformers except one
                 auto helper_conf = r_mol.getConformer(pos_id_vec_.at(mol_idx));
                 for (int j = 0; j < conformer_count - 1; j++) {
                     auto one_conf = r_mol.getConformer();
@@ -184,8 +187,14 @@ namespace coaler {
         }
 
         for (auto decomposed_mol : decomposed) {
+            for(auto r_group: decomposed_mol){
+                spdlog::info("RGroup {}", RDKit::MolToSmiles(*r_group));
+            }
+
             auto tmp_mol_ = RDKit::molzip(decomposed_mol);
             RDKit::RWMol mol = *tmp_mol_;
+            spdlog::info("Molzip {}", RDKit::MolToSmiles(mol));
+
             geo_opt_ligands_.emplace_back(mol);
         }
 
