@@ -16,28 +16,14 @@
 
 const unsigned seed = 42;
 
-namespace {
-    coaler::embedder::CoreAtomMapping getAtomMappingFromMatch(const RDKit::MatchVectType& match,
-                                                              const RDKit::Conformer& matchConformer) {
-        coaler::embedder::CoreAtomMapping matchCoords;
-        for (const auto& matchAtom : match) {
-            const int coreAtomId = matchAtom.first;
-            const int molAtomId = matchAtom.second;
-            const RDGeom::Point3D& atomCoords = matchConformer.getAtomPos(coreAtomId);
-            matchCoords.emplace(molAtomId, atomCoords);
-        }
-        return matchCoords;
-    }
-}  // namespace
-
 /*----------------------------------------------------------------------------------------------------------------*/
 
 namespace coaler::embedder {
-    ConformerEmbedder::ConformerEmbedder(RDKit::ROMOL_SPTR& core, const int threads)
-        : m_core(core), m_threads(threads) {}
 
-    // TODO make shared_ptr const ref!
-    void ConformerEmbedder::embedConformersWithFixedCore(const RDKit::ROMOL_SPTR& mol, unsigned numConfs) {
+    ConformerEmbedder::ConformerEmbedder(RDKit::ROMOL_SPTR &core, CoreAtomMapping coords, int threads)
+            : m_core(core), m_coords(std::move(coords)), m_threads(threads) {}
+
+    void ConformerEmbedder::embedForFirstMatch(const RDKit::ROMOL_SPTR &mol, unsigned numConfs) {
         // match molecule and core
         std::vector<RDKit::MatchVectType> substructureResults;
         if (RDKit::SubstructMatch(*mol, *m_core, substructureResults) == 0) {
@@ -48,60 +34,66 @@ namespace coaler::embedder {
         const auto match = substructureResults.at(0);
 
         // determine coordinates for atoms using core conformer
-        RDKit::Conformer coreConformer = m_core->getConformer(0);
-        CoreAtomMapping moleculeCoreCoords = getAtomMappingFromMatch(match, coreConformer);
-        for (const auto& matchAtom : match) {
-            const int coreAtomId = matchAtom.first;
-            const int molAtomId = matchAtom.second;
-            const RDGeom::Point3D atomCoords = coreConformer.getAtomPos(coreAtomId);
-            moleculeCoreCoords.emplace(molAtomId, atomCoords);
+        RDKit::Conformer const coreConformer = m_core->getConformer(0);
+
+        coaler::embedder::CoreAtomMapping matchCoords;
+        for (const auto &[queryId, molId]: match) {
+            const RDGeom::Point3D &atomCoords = m_coords.at(queryId);
+            matchCoords.emplace(molId, atomCoords);
         }
 
         // embed molecule conformers
-        auto params = RDKit::DGeomHelpers::srETKDGv3;
-        params.randomSeed = seed;
-        params.coordMap = &moleculeCoreCoords;
-        params.numThreads = m_threads;
-        params.useRandomCoords = true;
+        auto params = this->getEmbeddingParameters(matchCoords);
         RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    bool ConformerEmbedder::embedEvenlyAcrossAllMatches(RDKit::ROMol& mol, unsigned minNofConfs, unsigned maxNofConfs) {
+    bool
+    ConformerEmbedder::embedEvenlyAcrossAllMatches(RDKit::ROMOL_SPTR &mol, unsigned minNofConfs, unsigned maxNofConfs) {
         // unsigned nofSymmetryAxes = CoreSymmetryCalculator::getNofSymmetryAxes(mol);
         std::vector<RDKit::MatchVectType> substructureResults;
-        if (RDKit::SubstructMatch(mol, *(m_core.get()), substructureResults) == 0) {
+        if (RDKit::SubstructMatch(*mol, *(m_core.get()), substructureResults) == 0) {
             return false;
         }
 
         unsigned nofMatches = substructureResults.size();
         std::vector<unsigned> nofConformersForMatch
-            = BucketDistributor::distributeApproxEvenly(nofMatches, maxNofConfs);
+                = BucketDistributor::distributeApproxEvenly(nofMatches, maxNofConfs);
 
         if (std::any_of(nofConformersForMatch.begin(), nofConformersForMatch.end(),
                         [minNofConfs](unsigned confs) { return confs < minNofConfs; })) {
-            spdlog::info(
-                "Symmetry of core and/or substructure matches in structure too high for given minimum"
-                "number of conformations per substructure match.");
+            spdlog::warn(
+                    "Symmetry of core and/or substructure matches in structure too high for given minimum"
+                    "number of conformations per substructure match.");
         }
         assert(nofConformersForMatch.size() == substructureResults.size());
 
-        for (const auto& iter : boost::combine(nofConformersForMatch, substructureResults)) {
-            const unsigned nofConformers = iter.get<0>();
-            const RDKit::MatchVectType& match = iter.get<1>();
-            CoreAtomMapping matchCoords = getAtomMappingFromMatch(match, m_core->getConformer(0));
+        for (const auto &iter: boost::combine(nofConformersForMatch, substructureResults)) {
+            const auto nofConformers = iter.get<0>();
+            const auto match = iter.get<1>();
 
-            auto params = RDKit::DGeomHelpers::srETKDGv3;
-            params.randomSeed = seed;
-            params.coordMap = &matchCoords;
-            params.numThreads = m_threads;
-            params.useRandomCoords = true;
-            RDKit::DGeomHelpers::EmbedMultipleConfs(mol, nofConformers, params);
+            coaler::embedder::CoreAtomMapping matchCoords;
+            for (const auto &[queryId, molId]: match) {
+                const RDGeom::Point3D &atomCoords = m_coords.at(queryId);
+                matchCoords.emplace(molId, atomCoords);
+            }
+
+            auto params = this->getEmbeddingParameters(matchCoords);
+            RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, nofConformers, params);
         }
 
-        // TODO is this nessecary?
-        return mol.getNumConformers() <= maxNofConfs;
+        return mol->getNumConformers() <= maxNofConfs;
     }
+
+    RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbeddingParameters(const CoreAtomMapping& coords) {
+        auto params = RDKit::DGeomHelpers::srETKDGv3;
+        params.randomSeed = seed;
+        params.coordMap = &coords;
+        params.numThreads = m_threads;
+        params.useRandomCoords = true;
+        return params;
+    }
+
 
 }  // namespace coaler::embedder

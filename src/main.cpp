@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
 
     embedder::ConformerEmbedder embedder(coreResult->first, coreResult->second, opts.num_threads);
     for (auto& mol : mols) {
-        embedder.embedConformersWithFixedCore(mol, opts.num_conformers);
+        embedder.embedForFirstMatch(mol, opts.num_conformers);
     }
 
     multialign::MultiAligner aligner(mols, 10, opts.num_threads);
