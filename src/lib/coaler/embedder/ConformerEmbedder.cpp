@@ -11,6 +11,7 @@
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
+#include <GraphMol/MolAlign/AlignMolecules.h>
 #include <spdlog/spdlog.h>
 
 #include <utility>
@@ -19,12 +20,12 @@ const unsigned seed = 42;
 const float forceTol = 0.0135;
 
 namespace coaler::embedder {
-    ConformerEmbedder::ConformerEmbedder(RDKit::ROMOL_SPTR &query, CoreAtomMapping &coords, const int threads)
-        : m_core(query), m_threads(threads), m_coords(coords) {}
+    ConformerEmbedder::ConformerEmbedder(coaler::core::Matcher& coreMatcher, CoreAtomMapping &coords, const int threads)
+        : m_core(coreMatcher), m_threads(threads), m_coords(coords) {}
 
     void ConformerEmbedder::embedConformersWithFixedCore(RDKit::ROMOL_SPTR mol, unsigned numConfs) {
-        spdlog::info("Embedding {}", RDKit::MolToSmiles(*mol));
-        spdlog::info("Pattern {}", RDKit::MolToSmarts(*m_core));
+        spdlog::info("embedding {}", RDKit::MolToSmiles(*mol));
+        spdlog::info("pattern {}", RDKit::MolToSmarts(*m_core));
         // firstMatch molecule and core
         RDKit::SubstructMatchParameters matchParams;
         auto matches = RDKit::SubstructMatch(*mol, *m_core, matchParams);
@@ -37,27 +38,27 @@ namespace coaler::embedder {
             }
 
             // embed molecule conformers
-            RDKit::DGeomHelpers::EmbedParameters params;
-            params = RDKit::DGeomHelpers::ETKDGv3;
+            auto params = RDKit::DGeomHelpers::srETKDGv3;;
             params.optimizerForceTol = forceTol;
-            params.useSmallRingTorsions = true;
             params.randomSeed = seed;
             params.coordMap = &molQueryCoords;
-            params.useBasicKnowledge = false;
-            params.enforceChirality = false;
-            params.useSymmetryForPruning = false;
-            params.useSmallRingTorsions = false;
-            params.useRandomCoords = true;
             params.numThreads = m_threads;
 
             RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
-            spdlog::info("Embedded {} conformers.", mol->getNumConformers());
+            spdlog::info("embedded {} conformers.", mol->getNumConformers());
 
             if (mol->getNumConformers() == numConfs) {
                 std::vector<std::pair<int, double>> result;
                 RDKit::MMFF::MMFFOptimizeMoleculeConfs(*mol, result, m_threads);
 
-                spdlog::info("Optimized {} conformers.", mol->getNumConformers());
+                std::vector<unsigned> atomIds;
+                for (auto const& [queryId, molId]: match) {
+                    atomIds.push_back(molId);
+                }
+
+                RDKit::MolAlign::alignMolConformers(*mol, &atomIds);
+
+                spdlog::info("optimized and aligned {} conformers.", mol->getNumConformers());
 
                 break;
             }

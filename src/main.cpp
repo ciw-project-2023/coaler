@@ -3,6 +3,7 @@
  */
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
+#include <GraphMol/MolAlign/AlignMolecules.h>
 
 #include <boost/program_options.hpp>
 #include <coaler/embedder/ConformerEmbedder.hpp>
@@ -12,6 +13,7 @@
 #include <sstream>
 
 #include "coaler/core/Matcher.hpp"
+#include "coaler/core/MatcherMCS.h"
 
 namespace opts = boost::program_options;
 using namespace coaler;
@@ -77,17 +79,18 @@ int main(int argc, char* argv[]) {
     auto opts = mOpts.value();
     auto mols = io::FileParser::parse(opts.input_file_path);
 
-    std::optional<coaler::core::CoreResult> coreResult;
+    core::Matcher coreMatcher;
     if (opts.core_type == "mcs") {
-        coreResult = core::Matcher::calculateCoreMcs(mols);
+        coreMatcher = core::MatcherMCS(mols);
     } else if (opts.core_type == "murcko") {
-        coreResult = core::Matcher::calculateCoreMurcko(mols);
+        // coreResult = core::Matcher::calculateCoreMurcko(mols);
     } else {
         spdlog::error("unknown coreResult calculation algorithm '{}' (allowed values are 'mcs' and 'murcko')",
                       opts.core_type);
         return 1;
     }
 
+    auto coreResult = coreMatcher.getResult();
     if (!coreResult.has_value()) {
         spdlog::error("failed to calculate coreResult structure");
         return 1;
@@ -104,6 +107,15 @@ int main(int argc, char* argv[]) {
     embedder::ConformerEmbedder embedder(coreResult->first, coreResult->second, opts.num_threads);
     for (auto& mol : mols) {
         embedder.embedConformersWithFixedCore(mol, opts.num_conformers);
+    }
+
+    auto tail = mols;
+    tail.erase(tail.begin());
+    auto reference = mols.at(0);
+    for (auto& mol : tail) {
+        for (auto confId = 0; confId < mol->getNumConformers(); confId++) {
+            RDKit::MolAlign::alignMol(*mol, *reference, confId, 0);
+        }
     }
 
     multialign::MultiAligner aligner(mols);

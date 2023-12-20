@@ -12,6 +12,8 @@
 namespace coaler::io {
 
     void OutputWriter::writeSDF(const std::string &file_path, const coaler::multialign::MultiAlignerResult &result) {
+        assert(result.inputLigands.size() == result.poseIDsByLigandID.size());
+
         std::ofstream output_file(file_path);
         if (!output_file.is_open()) {
             spdlog::error("Cannot open file: {}", file_path);

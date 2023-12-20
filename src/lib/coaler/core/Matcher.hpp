@@ -4,24 +4,32 @@
 
 #pragma once
 
-#include "Forward.hpp"
+#include <GraphMol/RWMol.h>
+#include <GraphMol/SmilesParse/SmartsWrite.h>
+#include <spdlog/spdlog.h>
+#include "GraphMol/RDKitBase.h"
+#include "GraphMol/ChemTransforms/ChemTransforms.h"
+#include "GraphMol/DistGeomHelpers/Embedder.h"
+#include "GraphMol/FMCS/FMCS.h"
 
 namespace coaler::core {
     using AtomMap = std::map<int, RDGeom::Point3D>;
+    using CoreMatch = std::vector<RDKit::MatchVectType>;
     using CoreResult = std::pair<RDKit::ROMOL_SPTR, AtomMap>;
 
     class Matcher {
       public:
-        /**
-         * calculates the MCS of the molecules
-         * @return MCS as ROMol
-         */
-        static std::optional<CoreResult> calculateCoreMcs(RDKit::MOL_SPTR_VECT mols);
+        virtual ~Matcher() = default;
 
-        /**
-         * calculates the Murcko scaffold of the molecules
-         * @return Murcko Scaffold as ROMol
-         */
-        static std::optional<CoreResult> calculateCoreMurcko(RDKit::MOL_SPTR_VECT mols);
+        Matcher() = default;
+
+        virtual std::optional<RDKit::MCSResult> findMCS(RDKit::MOL_SPTR_VECT mols);
+
+        std::optional<CoreResult> getResult();
+
+        std::optional<CoreMatch> matchMolecule(RDKit::ROMOL_SPTR mol);
+
+    protected:
+        CoreResult core_;
     };
 }  // namespace coaler::core

@@ -4,12 +4,5 @@
 
 #pragma once
 
-#include <GraphMol/RWMol.h>
-#include <GraphMol/Substruct/SubstructMatch.h>
-
-#include <cassert>
-#include <string>
-#include <utility>
-#include <vector>
-
 #include "Matcher.hpp"
+#include "MatcherMCS.h"

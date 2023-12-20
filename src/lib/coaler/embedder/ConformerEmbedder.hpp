@@ -5,6 +5,7 @@
 #pragma once
 #include <GraphMol/ROMol.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
+#include "coaler/core/Matcher.hpp"
 
 namespace coaler::embedder {
 
@@ -15,12 +16,12 @@ namespace coaler::embedder {
         // ConformerEmbedder(const RDKit::ROMol& core,
         //                   unsigned numCoreConfigs);
 
-        explicit ConformerEmbedder(RDKit::ROMOL_SPTR& query, CoreAtomMapping& coords, int threads = 1);
+        explicit ConformerEmbedder(coaler::core::Matcher& coreMatcher, CoreAtomMapping& coords, int threads = 1);
 
         void embedConformersWithFixedCore(RDKit::ROMOL_SPTR mol, unsigned numConfs);
 
       private:
-        RDKit::ROMOL_SPTR m_core;
+        coaler::core::Matcher m_core;
         CoreAtomMapping m_coords;
         int m_threads;
 
