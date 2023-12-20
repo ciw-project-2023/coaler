@@ -14,7 +14,8 @@
 #include "GraphMol/FMCS/FMCS.h"
 
 namespace coaler::core {
-    std::optional<CoreResult> Matcher::calculateCoreMcs(RDKit::MOL_SPTR_VECT mols) {
+    std::optional<CoreResult> Matcher::calculateCoreMcs(RDKit::MOL_SPTR_VECT mols, int numOfThreads) {
+        // Generates all parameters needed for RDKit::findMCS()
         RDKit::MCSParameters mcsParams;
         RDKit::MCSAtomCompareParameters atomCompParams;
         atomCompParams.MatchChiralTag = true;
@@ -51,7 +52,14 @@ namespace coaler::core {
         std::vector<std::pair<int, double>> result;
         RDKit::MMFF::MMFFOptimizeMoleculeConfs(first, result);
 
-        auto structMatches = RDKit::SubstructMatch(first, *mcs.QueryMol);
+        RDKit::SubstructMatchParameters substructMatchParams;
+        substructMatchParams.useChirality = true;
+        substructMatchParams.useEnhancedStereo = true;
+        substructMatchParams.aromaticMatchesConjugated = true;
+        substructMatchParams.numThreads = numOfThreads;
+
+        std::vector<RDKit::MatchVectType> structMatches
+            = RDKit::SubstructMatch(first, *mcs.QueryMol, substructMatchParams);
         assert(!structMatches.empty());
 
         AtomMap moleculeCoreCoords;
@@ -64,8 +72,8 @@ namespace coaler::core {
         return std::make_pair(mcs.QueryMol, moleculeCoreCoords);
     }
 
-    std::optional<CoreResult> Matcher::calculateCoreMurcko(RDKit::MOL_SPTR_VECT mols) {
-        auto mcs = Matcher::calculateCoreMcs(mols);
+    std::optional<CoreResult> Matcher::calculateCoreMurcko(RDKit::MOL_SPTR_VECT mols, int numOfThreads) {
+        auto mcs = Matcher::calculateCoreMcs(mols, numOfThreads);
         if (!mcs.has_value()) {
             return std::nullopt;
         }

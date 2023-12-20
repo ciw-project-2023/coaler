@@ -87,9 +87,17 @@ namespace coaler::multialign {
 
     PairwiseAlignment MultiAligner::calculateAlignmentScores(const LigandVector &ligands) {
         PairwiseAlignment scores;
+
+        // calculate number of combinations. Each pair of ligands A,B has
+        // A.getNumPoses() * B.getNumPoses() many embeddings
         unsigned n = ligands.size();
-        unsigned m = ligands.at(0).getNumPoses();
-        unsigned combinations = 0.5 * n * (n - 1) * m * m;  // TODO how many?
+        unsigned combinations = 0;
+        for (unsigned id_A = 0; id_A < n; id_A++) {
+            for (unsigned id_B = id_A + 1; id_B < n; id_B++) {
+                combinations += ligands.at(id_A).getNumPoses() * ligands.at(id_B).getNumPoses();
+            }
+        }
+
         spdlog::info("Calculating {} combinations. This may take some time", combinations);
 
         for (LigandID firstMolId = 0; firstMolId < ligands.size(); firstMolId++) {
@@ -101,7 +109,7 @@ namespace coaler::multialign {
                 omp_init_lock(&maplock);
 
 #pragma omp parallel for shared(maplock, ligands, scores, nofPosesFirst, nofPosesSecond, firstMolId, \
-                                    secondMolId) default(none)
+                                secondMolId) default(none)
                 for (unsigned firstMolPoseId = 0; firstMolPoseId < nofPosesFirst; firstMolPoseId++) {
                     for (unsigned secondMolPoseId = 0; secondMolPoseId < nofPosesSecond; secondMolPoseId++) {
                         RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
@@ -182,7 +190,7 @@ namespace coaler::multialign {
         omp_init_lock(&bestAssemblyLock);
 
 #pragma omp parallel for shared(bestAssemblyScoreLock, bestAssemblyLock, currentBestAssembly, \
-                                    currentBestAssemblyScore, assembliesList) default(none)
+                                currentBestAssemblyScore, assembliesList) default(none)
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
             auto [currentAssembly, currentAssemblyScore] = assembliesList.at(assemblyID);
             spdlog::debug("Score before opt: {}", currentAssemblyScore);

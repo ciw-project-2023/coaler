@@ -16,7 +16,7 @@ TEST_CASE("Core_constructor", "[core]") {
     mols.emplace_back(mol1);
     mols.emplace_back(mol2);
 
-    auto coreScaffoldMCS = Matcher::calculateCoreMcs(mols);
+    auto coreScaffoldMCS = Matcher::calculateCoreMcs(mols, 1);
     CHECK(RDKit::MolToSmarts(*coreScaffoldMCS.value().first)
           == "[#6]1:&@[#6]:&@[#6](:&@[#6]:&@[#6]:&@[#6]:&@1)-&!@[#7&R]");
 
