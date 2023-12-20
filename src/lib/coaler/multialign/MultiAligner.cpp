@@ -93,7 +93,7 @@ namespace coaler::multialign {
         unsigned n = ligands.size();
         unsigned combinations = 0;
         for (unsigned id_A = 0; id_A < n; id_A++) {
-            for (unsigned id_B = id_A+1; id_B < n; id_B++) {
+            for (unsigned id_B = id_A + 1; id_B < n; id_B++) {
                 combinations += ligands.at(id_A).getNumPoses() * ligands.at(id_B).getNumPoses();
             }
         }
