@@ -16,12 +16,12 @@ namespace coaler::core {
          * calculates the MCS of the molecules
          * @return MCS as ROMol
          */
-        static std::optional<CoreResult> calculateCoreMcs(RDKit::MOL_SPTR_VECT mols);
+        static std::optional<CoreResult> calculateCoreMcs(RDKit::MOL_SPTR_VECT mols, int numOfThreads);
 
         /**
          * calculates the Murcko scaffold of the molecules
          * @return Murcko Scaffold as ROMol
          */
-        static std::optional<CoreResult> calculateCoreMurcko(RDKit::MOL_SPTR_VECT mols);
+        static std::optional<CoreResult> calculateCoreMurcko(RDKit::MOL_SPTR_VECT mols, int numOfThreads);
     };
 }  // namespace coaler::core
