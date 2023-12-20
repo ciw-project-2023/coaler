@@ -87,6 +87,9 @@ namespace coaler::multialign {
 
     PairwiseAlignment MultiAligner::calculateAlignmentScores(const LigandVector &ligands) {
         PairwiseAlignment scores;
+
+        // calculate number of combinations. Each pair of ligands A,B has
+        // A.getNumPoses() * B.getNumPoses() many embeddings
         unsigned n = ligands.size();
         unsigned combinations = 0;
         for (unsigned id_A = 0; id_A < n; id_A++) {
