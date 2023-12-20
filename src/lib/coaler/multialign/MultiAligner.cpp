@@ -88,8 +88,13 @@ namespace coaler::multialign {
     PairwiseAlignment MultiAligner::calculateAlignmentScores(const LigandVector &ligands) {
         PairwiseAlignment scores;
         unsigned n = ligands.size();
-        unsigned m = ligands.at(0).getNumPoses();
-        unsigned combinations = 0.5 * n * (n - 1) * m * m;  // TODO how many?
+        unsigned combinations = 0;
+        for (unsigned id_A = 0; id_A < n; id_A++) {
+            for (unsigned id_B = id_A+1; id_B < n; id_B++) {
+                combinations += ligands.at(id_A).getNumPoses() * ligands.at(id_B).getNumPoses();
+            }
+        }
+
         spdlog::info("Calculating {} combinations. This may take some time", combinations);
 
         for (LigandID firstMolId = 0; firstMolId < ligands.size(); firstMolId++) {

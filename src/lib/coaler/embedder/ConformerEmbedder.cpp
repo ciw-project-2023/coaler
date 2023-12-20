@@ -75,8 +75,6 @@ namespace coaler::embedder {
                 RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
             }
 
-            spdlog::info("Embedded {} conformers.", mol->getNumConformers());
-
             if ((mol->getNumConformers() == numConfs && m_divideConformersByMatches)
                 || (mol->getNumConformers() == numConfs * nofMatches)) {
                 std::vector<std::pair<int, double>> result;
@@ -89,6 +87,7 @@ namespace coaler::embedder {
             matchCounter++;
         }
 
+        spdlog::info("Embedded {} conformers.", mol->getNumConformers());
         if (m_divideConformersByMatches) {
             assert(mol->getNumConformers() == numConfs);
         } else {
