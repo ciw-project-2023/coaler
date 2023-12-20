@@ -106,7 +106,7 @@ int main(int argc, char* argv[]) {
         embedder.embedConformersWithFixedCore(mol, opts.num_conformers);
     }
 
-    multialign::MultiAligner aligner(mols);
+    multialign::MultiAligner aligner(mols, 10, opts.num_threads);
     auto result = aligner.alignMolecules();
 
     io::OutputWriter::writeSDF(opts.out_file, result);
