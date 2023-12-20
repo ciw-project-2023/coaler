@@ -14,7 +14,6 @@ using namespace coaler;
 TEST_CASE("basic_test", "[multialigner_tester]") {
     auto mol1 = MolFromSmiles("Cc1ccccc1");
     auto mol2 = MolFromSmiles("Oc1ccccc1");
-    auto core = MolFromSmiles("c1ccccc1");
 
     RDKit::DGeomHelpers::EmbedParameters params;
     params.randomSeed = 42;
@@ -22,7 +21,7 @@ TEST_CASE("basic_test", "[multialigner_tester]") {
     RDKit::DGeomHelpers::EmbedMultipleConfs(*mol2, 2, params);
 
     RDKit::MOL_SPTR_VECT mols = {mol1, mol2};
-    multialign::MultiAligner aligner(mols, core, 2);
+    multialign::MultiAligner aligner(mols, 2);
     multialign::MultiAlignerResult result = aligner.alignMolecules();
 
     CHECK(result.poseIDsByLigandID.size() == 2);  // ´

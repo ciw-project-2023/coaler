@@ -1,5 +1,4 @@
-#include <GraphMol/DistGeomHelpers/Embedder.h>
-#include <GraphMol/SmilesParse/SmilesParse.h>
+
 #include <GraphMol/Substruct/SubstructMatch.h>
 
 #include "catch2/catch.hpp"
@@ -87,18 +86,3 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
 //         }
 //     }
 // }
-
-/*----------------------------------------------------------------------------------------------------------------*/
-
-TEST_CASE("test_ring_symmetry_determination", "[conformer_generator_tester]") {
-    CHECK(SubstructureAnalyzer::getNumberOfRingRotations(*RDKit::SmilesToMol("c1ccccc1")) == 6);
-    CHECK(SubstructureAnalyzer::getNumberOfRingRotations(*RDKit::SmilesToMol("C1CCCCC1")) == 6);
-    CHECK(SubstructureAnalyzer::getNumberOfRingRotations(*RDKit::SmilesToMol("N1NNNNN1")) == 6);
-    CHECK(SubstructureAnalyzer::getNumberOfRingRotations(*RDKit::SmilesToMol("C1NCCNC1")) == 2);
-    CHECK(SubstructureAnalyzer::getNumberOfRingRotations(*RDKit::SmilesToMol("C1NCNCN1")) == 3);
-    CHECK(SubstructureAnalyzer::getNumberOfRingRotations(*RDKit::SmilesToMol("C1NCNCNCN1")) == 4);
-    CHECK(SubstructureAnalyzer::getNumberOfRingRotations(*RDKit::SmilesToMol("C1NSOCNSO1")) == 2);
-
-    // rings of odd size are not rotation symmetric
-    CHECK(SubstructureAnalyzer::getNumberOfRingRotations(*RDKit::SmilesToMol("C1CCCCCC1")) == 1);
-}

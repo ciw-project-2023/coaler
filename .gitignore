@@ -6,6 +6,7 @@ CMakeFiles/*
 .cmake/*
 
 .idea/*
+.venv/
 TestRDkit
 
 cmake_install.cmake
@@ -43,4 +44,6 @@ CMakeUserPresets.json
 *.out
 *.app
 
+#default outfile
+out.sdf
 build/

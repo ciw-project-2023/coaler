@@ -58,15 +58,11 @@ namespace coaler::embedder {
         }
 
         // embed molecule conformers
-        RDKit::DGeomHelpers::EmbedParameters params;
+        auto params = RDKit::DGeomHelpers::srETKDGv3;
         params.randomSeed = seed;
         params.coordMap = &moleculeCoreCoords;
-        params.useBasicKnowledge = true;
-        params.enforceChirality = true;
-        params.useSymmetryForPruning = true;
-        params.useSmallRingTorsions = true;
-        params.useRandomCoords = true;
         params.numThreads = m_threads;
+        params.useRandomCoords = true;
         RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
     }
 
@@ -95,11 +91,12 @@ namespace coaler::embedder {
             const unsigned nofConformers = iter.get<0>();
             const RDKit::MatchVectType& match = iter.get<1>();
             CoreAtomMapping matchCoords = getAtomMappingFromMatch(match, m_core->getConformer(0));
-            RDKit::DGeomHelpers::EmbedParameters params;
+
+            auto params = RDKit::DGeomHelpers::srETKDGv3;
             params.randomSeed = seed;
             params.coordMap = &matchCoords;
+            params.numThreads = m_threads;
             params.useRandomCoords = true;
-            params.clearConfs = false;
             RDKit::DGeomHelpers::EmbedMultipleConfs(mol, nofConformers, params);
         }
 

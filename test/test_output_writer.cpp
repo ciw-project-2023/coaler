@@ -23,7 +23,7 @@ TEST_CASE("Output Parser", "[io]") {
         const auto lig_b = Ligand(*mol_b, UniquePoseSet{0}, 0);
 
         auto score = 0.55;
-        const MultiAlignerResult result(score, std::unordered_map<LigandID, PoseID>{{0, 0}, {1, 1}},
+        const MultiAlignerResult result(score, std::unordered_map<LigandID, PoseID>{{0, 0}, {1, 0}},
                                         std::vector<Ligand>{lig_a, lig_b});
 
         SECTION("save output in file") {
@@ -32,8 +32,8 @@ TEST_CASE("Output Parser", "[io]") {
 
             auto result = FileParser::parse("/tmp/test_output_write.sdf");
             REQUIRE(result.size() == 2);
-            REQUIRE(RDKit::MolToSmiles(*result[0]) == "CCCN");
-            REQUIRE(RDKit::MolToSmiles(*result[1]) == "CCCO");
+            REQUIRE(RDKit::MolToSmiles(*result[0]) == "CCCO");
+            REQUIRE(RDKit::MolToSmiles(*result[1]) == "CCCN");
         };
     };
 }
