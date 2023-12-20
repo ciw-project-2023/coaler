@@ -48,9 +48,6 @@ namespace coaler::core {
         RDKit::DGeomHelpers::EmbedParameters params;
         RDKit::DGeomHelpers::EmbedMolecule(first, params);
 
-        std::vector<std::pair<int, double>> result;
-        RDKit::MMFF::MMFFOptimizeMoleculeConfs(first, result);
-
         auto structMatches = RDKit::SubstructMatch(first, *mcs.QueryMol);
         assert(!structMatches.empty());
 

@@ -23,6 +23,7 @@ struct ProgrammOptions {
     std::string out_file;
     int num_threads;
     std::string core_type;
+    int num_start_assemblies;
 };
 
 const std::string help
@@ -32,6 +33,7 @@ const std::string help
       "  -f, --files <path>\t\t\tPath to input files\n"
       "  -o, --out <path>\t\t\tPath to output files\n"
       "  -j, --threads <amount>\t\t\tNumber of threads to use (default: 1)\n"
+      "  -a, --assemblies\t\t\t Number of molecule assemblies to start with (default: 100)\n"
       "  --conformers <amount>\t\t\tNumber of conformers to generate for each input molecule (default: 10)\n"
       "  --core <algorithm>\t\t\tAlgorithm to detect core structure (default: mcs, allowed: mcs, murcko)\n";
 
@@ -43,10 +45,9 @@ std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
         "file,f", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
         "out,o", opts::value<std::string>(&parsed_options.out_file)->default_value("out.sdf"), "path to output file")(
         "threads,j", opts::value<int>(&parsed_options.num_threads)->default_value(1), "number of threads to use")(
-        "core", opts::value<std::string>(&parsed_options.core_type)->default_value("mcs"),
-        "algo to detect core structure")("conformers,c",
-                                         opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10),
-                                         "number of conformers to generate");
+        "core", opts::value<std::string>(&parsed_options.core_type)->default_value("mcs"), "algo to detect core structure")(
+        "assemblies,a", opts::value<int>(&parsed_options.num_start_assemblies)->default_value(100), "number of molecule assemblies to start")(
+        "conformers,c", opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10), "number of conformers to generate");
 
     opts::variables_map vm;
     opts::store(opts::parse_command_line(argc, argv, desc), vm);
@@ -73,6 +74,8 @@ int main(int argc, char* argv[]) {
     if (!mOpts.has_value()) {
         return 0;
     }
+
+    spdlog::set_level(spdlog::level::debug);
 
     auto opts = mOpts.value();
     auto mols = io::FileParser::parse(opts.input_file_path);
@@ -103,10 +106,10 @@ int main(int argc, char* argv[]) {
 
     embedder::ConformerEmbedder embedder(coreResult->first, coreResult->second, opts.num_threads);
     for (auto& mol : mols) {
-        embedder.embedForFirstMatch(mol, opts.num_conformers);
+        embedder.embedEvenlyAcrossAllMatches(mol, opts.num_conformers-5, opts.num_conformers);
     }
 
-    multialign::MultiAligner aligner(mols, 10, opts.num_threads);
+    multialign::MultiAligner aligner(mols, opts.num_start_assemblies, opts.num_threads);
     auto result = aligner.alignMolecules();
 
     io::OutputWriter::writeSDF(opts.out_file, result);

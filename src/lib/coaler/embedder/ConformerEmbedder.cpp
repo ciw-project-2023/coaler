@@ -5,16 +5,20 @@
 #include "ConformerEmbedder.hpp"
 
 #include <GraphMol/DistGeomHelpers/Embedder.h>
+#include <GraphMol/ForceFieldHelpers/MMFF/MMFF.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <spdlog/spdlog.h>
 
 #include <boost/range/combine.hpp>
 #include <utility>
+#include <GraphMol/SmilesParse/SmilesWrite.h>
+#include <GraphMol/MolAlign/AlignMolecules.h>
 
 #include "BucketDistributor.hpp"
 #include "CoreSymmetryCalculator.hpp"
 
 const unsigned seed = 42;
+const float forceTol = 0.0135;
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
@@ -67,6 +71,7 @@ namespace coaler::embedder {
                     "Symmetry of core and/or substructure matches in structure too high for given minimum"
                     "number of conformations per substructure match.");
         }
+
         assert(nofConformersForMatch.size() == substructureResults.size());
 
         for (const auto &iter: boost::combine(nofConformersForMatch, substructureResults)) {
@@ -81,7 +86,12 @@ namespace coaler::embedder {
 
             auto params = this->getEmbeddingParameters(matchCoords);
             RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, nofConformers, params);
+
+            spdlog::debug("embedded {} conformers into molecule: {}", nofConformers, RDKit::MolToSmiles(*mol));
         }
+
+//        std::vector<std::pair<int, double>> result;
+//        RDKit::MMFF::MMFFOptimizeMoleculeConfs(*mol, result, m_threads);
 
         return mol->getNumConformers() <= maxNofConfs;
     }
@@ -91,9 +101,7 @@ namespace coaler::embedder {
         params.randomSeed = seed;
         params.coordMap = &coords;
         params.numThreads = m_threads;
-        params.useRandomCoords = true;
+        params.optimizerForceTol = forceTol;
         return params;
     }
-
-
 }  // namespace coaler::embedder
