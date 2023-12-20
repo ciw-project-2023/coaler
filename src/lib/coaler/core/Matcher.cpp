@@ -58,7 +58,8 @@ namespace coaler::core {
         substructMatchParams.aromaticMatchesConjugated = true;
         substructMatchParams.numThreads = numOfThreads;
 
-        std::vector<RDKit::MatchVectType> structMatches = RDKit::SubstructMatch(first, *mcs.QueryMol, substructMatchParams);
+        std::vector<RDKit::MatchVectType> structMatches
+            = RDKit::SubstructMatch(first, *mcs.QueryMol, substructMatchParams);
         assert(!structMatches.empty());
 
         AtomMap moleculeCoreCoords;

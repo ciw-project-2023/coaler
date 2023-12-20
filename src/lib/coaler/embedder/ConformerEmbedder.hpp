@@ -12,7 +12,6 @@ namespace coaler::embedder {
 
     class ConformerEmbedder {
       public:
-
         explicit ConformerEmbedder(RDKit::ROMOL_SPTR& query, CoreAtomMapping& coords, int threads = 1,
                                    bool divideConformersByMatches = false);
 

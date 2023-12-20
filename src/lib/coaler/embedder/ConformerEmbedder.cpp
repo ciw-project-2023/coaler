@@ -36,12 +36,10 @@ namespace coaler::embedder {
         substructMatchParams.numThreads = m_threads;
 
         std::vector<RDKit::MatchVectType> matches;
-        unsigned nofMatches = RDKit::SubstructMatch(*mol, *m_core, matches,
-                                                    substructMatchParams.uniquify,
-                                                    substructMatchParams.useChirality,
-                                                    substructMatchParams.useQueryQueryMatches,
-                                                    substructMatchParams.maxMatches,
-                                                    substructMatchParams.numThreads);
+        unsigned nofMatches
+            = RDKit::SubstructMatch(*mol, *m_core, matches, substructMatchParams.uniquify,
+                                    substructMatchParams.useChirality, substructMatchParams.useQueryQueryMatches,
+                                    substructMatchParams.maxMatches, substructMatchParams.numThreads);
         assert(!matches.empty());
 
         spdlog::info("Number of Core Matches: {}", nofMatches);
@@ -70,18 +68,17 @@ namespace coaler::embedder {
 
             // calculates the number of conformers for each match if m_divideConformersByMatches == true
             if (m_divideConformersByMatches) {
-                unsigned nofConfsForMatch = (matchCounter < numConfs % nofMatches) ? (int(numConfs / nofMatches) + 1) :
-                                                                                   (int(numConfs / nofMatches));
+                unsigned nofConfsForMatch = (matchCounter < numConfs % nofMatches) ? (int(numConfs / nofMatches) + 1)
+                                                                                   : (int(numConfs / nofMatches));
                 RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, nofConfsForMatch, params);
-            }
-            else {
+            } else {
                 RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
             }
 
             spdlog::info("Embedded {} conformers.", mol->getNumConformers());
 
-            if ((mol->getNumConformers() == numConfs && m_divideConformersByMatches) ||
-                (mol->getNumConformers() == numConfs*nofMatches)) {
+            if ((mol->getNumConformers() == numConfs && m_divideConformersByMatches)
+                || (mol->getNumConformers() == numConfs * nofMatches)) {
                 std::vector<std::pair<int, double>> result;
                 RDKit::MMFF::MMFFOptimizeMoleculeConfs(*mol, result, m_threads);
 
@@ -94,10 +91,8 @@ namespace coaler::embedder {
 
         if (m_divideConformersByMatches) {
             assert(mol->getNumConformers() == numConfs);
-        }
-        else {
+        } else {
             assert(mol->getNumConformers() == numConfs * nofMatches);
         }
-
     }
 }  // namespace coaler::embedder

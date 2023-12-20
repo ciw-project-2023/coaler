@@ -34,8 +34,10 @@ const std::string help
       "  -f, --files <path>\t\t\tPath to input files\n"
       "  -o, --out <path>\t\t\tPath to output files\n"
       "  -j, --threads <amount>\t\t\tNumber of threads to use (default: 1)\n"
-      "  --conformers <amount>\t\t\tNumber of conformers per core match to generate for each input molecule (default: 10)\n"
-      "  --divide <bool>\t\t\tDivide the number of conformers by the number of times the core is matched in the input molecule. "
+      "  --conformers <amount>\t\t\tNumber of conformers per core match to generate for each input molecule (default: "
+      "10)\n"
+      "  --divide <bool>\t\t\tDivide the number of conformers by the number of times the core is matched in the input "
+      "molecule. "
       "Helps against combinatorial explosion if core is small or has high symmetry (default: false)\n"
       "  --assemblies <amount>\t\t\tNumber of starting assemblies (default: 10)\n"
       "  --core <algorithm>\t\t\tAlgorithm to detect core structure (default: mcs, allowed: mcs, murcko)\n";
@@ -51,9 +53,9 @@ std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
         "assemblies, a", opts::value<unsigned>(&parsed_options.num_start_assemblies)->default_value(10),
         "number of starting assemblies to use")(
         "core", opts::value<std::string>(&parsed_options.core_type)->default_value("mcs"),
-        "algo to detect core structure")(
-        "conformers,c", opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10),
-        "number of conformers per core match to generate")(
+        "algo to detect core structure")("conformers,c",
+                                         opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10),
+                                         "number of conformers per core match to generate")(
         "divide,d", opts::value<bool>(&parsed_options.divideConformersByMatches)->default_value(false),
         "divides the number of conformers by the number of times the core is matched");
 
@@ -110,11 +112,11 @@ int main(int argc, char* argv[]) {
 
     spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
 
-    embedder::ConformerEmbedder embedder(coreResult->first, coreResult->second, opts.num_threads, opts.divideConformersByMatches);
+    embedder::ConformerEmbedder embedder(coreResult->first, coreResult->second, opts.num_threads,
+                                         opts.divideConformersByMatches);
     for (auto& mol : mols) {
         embedder.embedConformersWithFixedCore(mol, opts.num_conformers);
     }
-
 
     multialign::MultiAligner aligner(mols, opts.num_start_assemblies, opts.num_threads);
     auto result = aligner.alignMolecules();

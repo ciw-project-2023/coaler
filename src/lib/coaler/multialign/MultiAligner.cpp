@@ -101,7 +101,7 @@ namespace coaler::multialign {
                 omp_init_lock(&maplock);
 
 #pragma omp parallel for shared(maplock, ligands, scores, nofPosesFirst, nofPosesSecond, firstMolId, \
-                                    secondMolId) default(none)
+                                secondMolId) default(none)
                 for (unsigned firstMolPoseId = 0; firstMolPoseId < nofPosesFirst; firstMolPoseId++) {
                     for (unsigned secondMolPoseId = 0; secondMolPoseId < nofPosesSecond; secondMolPoseId++) {
                         RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
@@ -182,7 +182,7 @@ namespace coaler::multialign {
         omp_init_lock(&bestAssemblyLock);
 
 #pragma omp parallel for shared(bestAssemblyScoreLock, bestAssemblyLock, currentBestAssembly, \
-                                    currentBestAssemblyScore, assembliesList) default(none)
+                                currentBestAssemblyScore, assembliesList) default(none)
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
             auto [currentAssembly, currentAssemblyScore] = assembliesList.at(assemblyID);
             spdlog::debug("Score before opt: {}", currentAssemblyScore);
