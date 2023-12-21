@@ -16,7 +16,7 @@ set(rdkitlibs "RDKitAbbreviations" "RDKitAlignment" "RDKitCatalogs" "RDKitChemic
         "RDKitTautomerQuery" "RDKitTrajectory")
 
 
-add_library(coaler_lib STATIC ${library_src} coaler/embedder/BucketDistributor.cpp coaler/embedder/BucketDistributor.hpp)
+add_library(coaler_lib STATIC ${library_src})
 
 target_include_directories(coaler_lib PUBLIC ${rdkit_INCLUDE_DIRS})
 target_include_directories(coaler_lib PUBLIC ${Boost_INCLUDE_DIRS})
