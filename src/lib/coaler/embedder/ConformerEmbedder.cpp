@@ -29,8 +29,8 @@ namespace coaler::embedder {
 
     bool ConformerEmbedder::embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol, const ConformerEmbeddingParams& confCountParams) {
         // firstMatch molecule and core
-        const RDKit::SubstructMatchParameters substructMatchParams =
-            coaler::core::Matcher::getSubstructMatchParams(m_threads);
+        const RDKit::SubstructMatchParameters substructMatchParams
+            = coaler::core::Matcher::getSubstructMatchParams(m_threads);
 
 
         auto matches = RDKit::SubstructMatch(*mol, *m_core, substructMatchParams);
@@ -62,14 +62,16 @@ namespace coaler::embedder {
                 molQueryCoords[molId] = m_coords.at(queryId);
             }
 
-            auto params = this->getEmbeddingParameters(molQueryCoords);
+
+            RDKit::DGeomHelpers::EmbedParameters embedParams = this->getEmbeddingParameters(molQueryCoords);
 
             if (m_divideConformersByMatches) {
-                auto numConfsMatch = (matchCounter < numConfs % matches.size()) ? (int(numConfs / matches.size()) + 1)
-                                                                                : (int(numConfs / matches.size()));
-                RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfsMatch, params);
+
+                unsigned numConfsForMatch = (matchCounter < numConfs % numMatches) ? (int(numConfs / numMatches) + 1)
+                                                                                   : (int(numConfs / numMatches));
+                RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfsForMatch, embedParams);
             } else {
-                RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
+                RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, embedParams);
             }
         }
 

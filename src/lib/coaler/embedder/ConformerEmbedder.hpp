@@ -3,6 +3,7 @@
  */
 
 #pragma once
+#include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/ROMol.h>
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include "Forward.hpp"
@@ -29,6 +30,12 @@ namespace coaler::embedder {
          * @return True upon success.
          */
         bool embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol, const ConformerEmbeddingParams& confCountParams);
+
+        /**
+         * returns the EmbedParams for the Embedding
+         * @return RDKit::DGeomHelpers::EmbedParameters
+         */
+        RDKit::DGeomHelpers::EmbedParameters getEmbedParams();
 
       private:
         RDKit::ROMOL_SPTR m_core;
