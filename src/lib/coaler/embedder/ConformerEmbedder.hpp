@@ -3,6 +3,7 @@
  */
 
 #pragma once
+#include "Forward.hpp"
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/ROMol.h>
 #include <GraphMol/DistGeomHelpers/Embedder.h>

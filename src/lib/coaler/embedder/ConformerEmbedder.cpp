@@ -27,7 +27,8 @@ namespace coaler::embedder {
             : m_core(query), m_threads(threads), m_coords(coords),
               m_divideConformersByMatches(divideConformersByMatches) {}
 
-    bool ConformerEmbedder::embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol, const ConformerEmbeddingParams& confCountParams) {
+    bool ConformerEmbedder::embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol,
+                                                        const ConformerEmbeddingParams& confCountParams) {
         // firstMatch molecule and core
         const RDKit::SubstructMatchParameters substructMatchParams
             = coaler::core::Matcher::getSubstructMatchParams(m_threads);
@@ -65,10 +66,10 @@ namespace coaler::embedder {
 
             RDKit::DGeomHelpers::EmbedParameters embedParams = this->getEmbeddingParameters(molQueryCoords);
 
+            unsigned numConfs = confCountParams.maxTotalConfsPerMol;
             if (m_divideConformersByMatches) {
-
-                unsigned numConfsForMatch = (matchCounter < numConfs % numMatches) ? (int(numConfs / numMatches) + 1)
-                                                                                   : (int(numConfs / numMatches));
+                unsigned numConfsForMatch = (matchCounter < numConfs % matches.size()) ? (int(numConfs / matches.size()) + 1)
+                                                                                   : (int(numConfs / matches.size()));
                 RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfsForMatch, embedParams);
             } else {
                 RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, embedParams);
@@ -82,25 +83,10 @@ namespace coaler::embedder {
         }
     }
 
-<<<<<<< HEAD
     RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbeddingParameters(const CoreAtomMapping &coords) {
         auto params = RDKit::DGeomHelpers::srETKDGv3;
         params.randomSeed = seed;
         params.coordMap = &coords;
-=======
-    RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbedParams(CoreAtomMapping& coreAtomMappings) {
-        RDKit::DGeomHelpers::EmbedParameters params;
-        params = RDKit::DGeomHelpers::ETKDGv3;
-        params.optimizerForceTol = forceTol;
-        params.useSmallRingTorsions = true;
-        params.randomSeed = seed;
-        params.coordMap = &coreAtomMappings;
-        params.useBasicKnowledge = false;
-        params.enforceChirality = false;
-        params.useSymmetryForPruning = false;
-        params.useSmallRingTorsions = false;
-        params.useRandomCoords = true;
->>>>>>> 14f0668 (fixed getEmbedParams())
         params.numThreads = m_threads;
         params.optimizerForceTol = forceTol;
         return params;

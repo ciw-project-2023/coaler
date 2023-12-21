@@ -6,6 +6,7 @@
 #include "coaler/core/Forward.hpp"
 #include "coaler/embedder/ConformerEmbedder.hpp"
 #include "test_helper.h"
+#include "coaler/embedder/Forward.hpp"
 
 //adapt this accoring to embedder behavior
 constexpr double AVG_DEVIATION_THRESHOLD = 1;
@@ -15,25 +16,54 @@ using namespace coaler::embedder;
 namespace core = coaler::core;
 
 bool has_shared_core(const core::CoreResult& core, const RDKit::ROMOL_SPTR& mol, int confId){
-        std::vector<RDKit::MatchVectType> substructureResults;
-        auto conformer = mol->getConformer(confId);
-        CHECK(RDKit::SubstructMatch(*mol.get(), *core.first, substructureResults) != 0);
+    std::vector<RDKit::MatchVectType> substructureResults;
+    auto conformer = mol->getConformer(confId);
+    CHECK(RDKit::SubstructMatch(*mol.get(), *core.first, substructureResults) != 0);
 
     RDGeom::Point3D minDiff;
-        for(const auto& match : substructureResults){
-            double diffSum = 0.0;
-            for (const auto& [queryId, molId] : match) {
-                RDGeom::Point3D atomCoords = core.second.at(queryId);
-                RDGeom::Point3D confCoords = conformer.getAtomPos(molId);
-                RDGeom::Point3D diff = atomCoords - confCoords;
-                diffSum += diff.length();
+    for(const auto& match : substructureResults){
+        double diffSum = 0.0;
+        for (const auto& [queryId, molId] : match) {
+            RDGeom::Point3D atomCoords = core.second.at(queryId);
+            RDGeom::Point3D confCoords = conformer.getAtomPos(molId);
+            RDGeom::Point3D diff = atomCoords - confCoords;
+            diffSum += diff.length();
+        }
+        double avgDiff = diffSum / static_cast<double>(match.size());
+        if(avgDiff <= AVG_DEVIATION_THRESHOLD) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void confs_per_match(const RDKit::ROMOL_SPTR& mol, unsigned min, unsigned max, unsigned numMatches) {
+    std::map<std::vector<double>, unsigned> counter;
+    for (unsigned i = 0; i < mol->getNumConformers(); i++) {
+        auto curr_conf = mol->getConformer(i);
+        for (unsigned j = 0; j < curr_conf.getNumAtoms(); j++) {
+            RDGeom::Point3D atomPos = curr_conf.getAtomPos(j);
+            std::vector<double> atomPosVec = {atomPos.x,atomPos.y,atomPos.z};
+            if (counter.find(atomPosVec) == counter.end()) {
+                counter.insert({atomPosVec,1});
             }
-            double avgDiff = diffSum / static_cast<double>(match.size());
-            if(avgDiff <= AVG_DEVIATION_THRESHOLD) {
-                return true;
+            else {
+                counter[atomPosVec]++;
             }
         }
-        return false;
+    }
+    CHECK(counter.size() == numMatches);
+    unsigned map_min = counter.begin()->second;
+    unsigned map_max = 0;
+    for (auto entry : counter) {
+        if (entry.second < map_min) {map_min = entry.second;}
+        if (entry.second > map_max) {map_max = entry.second;}
+    }
+    // checking that max and min below/above threshold
+    CHECK(map_max <= max);
+    CHECK(map_min >= min);
+    // checking that conformers are split equal between matches
+    CHECK((map_max-map_min) <= 1);
 }
 
 
@@ -44,7 +74,7 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
     RDKit::MOL_SPTR_VECT const mols = {mol1, mol2};
     auto coreResult = core::Matcher::calculateCoreMcs(mols).value();
 
-    ConformerEmbedder embedder(coreResult.first, coreResult.second);
+    ConformerEmbedder embedder(coreResult.first, coreResult.second, 1, true);
     embedder.embedEvenlyAcrossAllMatches(mol1, 3);
     embedder.embedEvenlyAcrossAllMatches(mol2, 3);
 
@@ -54,6 +84,36 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
             CHECK(has_shared_core(coreResult, mol, confId));
         }
     }
+}
+
+
+TEST_CASE("test_num_conformers", "[conformer_generator_tester]") {
+    auto mol1 = ROMolFromSmiles("c1ccncc1CCCO");
+    auto mol2 = ROMolFromSmiles("c1c(O)cc(O)cc1O");
+    auto mol3 = ROMolFromSmiles("c2c(CC1CC1)cc1ccccc1c2");
+
+    RDKit::MOL_SPTR_VECT const mols = {mol1, mol2, mol3};
+    auto coreResult = core::Matcher::calculateCoreMcs(mols).value();
+
+    coaler::embedder::ConformerEmbeddingParams params{};
+    params.maxTotalConfsPerMol = 5;
+    params.maxConfsPerMatch = 3;
+    params.minConfsPerMatch = 1;
+
+
+
+    ConformerEmbedder embedder(coreResult.first, coreResult.second, 1, true);
+    for (auto mol : mols) {
+        const RDKit::SubstructMatchParameters substructMatchParams = coaler::core::Matcher::getSubstructMatchParams(1);
+        auto matches = RDKit::SubstructMatch(*mol, *coreResult.first, substructMatchParams);
+        embedder.embedEvenlyAcrossAllMatches(mol, params);
+        CHECK(mol->getNumConformers() == params.maxTotalConfsPerMol);
+        for (unsigned i = 0; i < mol->getNumConformers(); i++) {
+            confs_per_match(mol,params.minConfsPerMatch, params.maxConfsPerMatch, matches.size());
+        }
+    }
+
+    embedder.embedEvenlyAcrossAllMatches(mol2, params);
 }
 
 // TODO the embedder currently failed fot this case, I think it is because the one molecule completely contains
