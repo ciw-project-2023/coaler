@@ -3,24 +3,40 @@
  */
 
 #pragma once
+#include "Forward.hpp"
+#include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/ROMol.h>
-#include <GraphMol/Substruct/SubstructMatch.h>
+#include <GraphMol/DistGeomHelpers/Embedder.h>
+#include "Forward.hpp"
 
 namespace coaler::embedder {
 
     using CoreAtomMapping = std::map<int, RDGeom::Point3D>;
 
+    /**
+     * The ConformerEmbedder class provides functionality for the generation of conformers for
+     * a given molecule with contrained core coordinates.
+     */
     class ConformerEmbedder {
       public:
-        explicit ConformerEmbedder(RDKit::ROMOL_SPTR& query, CoreAtomMapping& coords, int threads = 1,
-                                   bool divideConformersByMatches = false);
+        explicit ConformerEmbedder(RDKit::ROMOL_SPTR& query, CoreAtomMapping& coords, int threads = 1, bool divideConformersByMatches = false);
 
-        /***
-         * embedding of the molecules with their respective number of Conformers
-         * @param mol
-         * @param numConfs
+        /**
+         * Embed an even amount of Conformers at every core match.
+         * @param mol The molecule to embed.
+         *
+         * @note If the core has a too high symmetry, it is possible, that no embedding can be
+         * performed within the given min/max constraints.
+         *
+         * @return True upon success.
          */
-        void embedConformersWithFixedCore(RDKit::ROMOL_SPTR mol, unsigned numConfs);
+        bool embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol, const ConformerEmbeddingParams& confCountParams);
+
+        /**
+         * returns the EmbedParams for the Embedding
+         * @return RDKit::DGeomHelpers::EmbedParameters
+         */
+        RDKit::DGeomHelpers::EmbedParameters getEmbedParams(CoreAtomMapping& coreAtomMappings);
 
       private:
         RDKit::ROMOL_SPTR m_core;
@@ -28,6 +44,7 @@ namespace coaler::embedder {
         int m_threads;
         bool m_divideConformersByMatches;
 
-        std::vector<RDKit::MatchVectType> filterMatches(const std::vector<RDKit::MatchVectType>& matches);
+
+        RDKit::DGeomHelpers::EmbedParameters getEmbeddingParameters(const CoreAtomMapping& coords);
     };
 }  // namespace coaler::embedder

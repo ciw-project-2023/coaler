@@ -193,9 +193,9 @@ namespace coaler::multialign {
                                 currentBestAssemblyScore, assembliesList) default(none)
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
             auto [currentAssembly, currentAssemblyScore] = assembliesList.at(assemblyID);
-            spdlog::debug("Score before opt: {}", currentAssemblyScore);
+            spdlog::debug("score before opt: {}", currentAssemblyScore);
             if (currentAssembly.getMissingLigandsCount() != 0) {
-                spdlog::info("Skip assembly because its missing ligands.");
+                spdlog::warn("skipping assembly because it is missing ligands");
                 continue;
             }
 
@@ -244,6 +244,7 @@ namespace coaler::multialign {
                         break;
                     }
                 }
+
                 if (!swappedLigandPose) {
                     ligandAvailable.at(worstLigand.getID()) = false;
                 }

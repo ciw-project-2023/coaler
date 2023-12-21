@@ -3,6 +3,7 @@
  */
 
 #include "ConformerEmbedder.hpp"
+#include "SubstructureAnalyzer.hpp"
 
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/ForceFieldHelpers/MMFF/MMFF.h>
@@ -15,83 +16,79 @@
 
 #include <utility>
 
+#include "coaler/core/Matcher.hpp"
+
 const unsigned seed = 42;
 const float forceTol = 0.0135;
 
 namespace coaler::embedder {
     ConformerEmbedder::ConformerEmbedder(RDKit::ROMOL_SPTR &query, CoreAtomMapping &coords, const int threads,
                                          const bool divideConformersByMatches)
-        : m_core(query), m_threads(threads), m_coords(coords), m_divideConformersByMatches(divideConformersByMatches) {}
+            : m_core(query), m_threads(threads), m_coords(coords),
+              m_divideConformersByMatches(divideConformersByMatches) {}
 
-    void ConformerEmbedder::embedConformersWithFixedCore(RDKit::ROMOL_SPTR mol, unsigned numConfs) {
-        spdlog::info("Embedding {}", RDKit::MolToSmiles(*mol));
-        spdlog::info("Pattern {}", RDKit::MolToSmarts(*m_core));
-
+    bool ConformerEmbedder::embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol,
+                                                        const ConformerEmbeddingParams& confCountParams) {
         // firstMatch molecule and core
-        RDKit::SubstructMatchParameters substructMatchParams;
-        substructMatchParams.uniquify = false;
-        substructMatchParams.useChirality = true;
-        substructMatchParams.useQueryQueryMatches = false;
-        substructMatchParams.maxMatches = 1000;
-        substructMatchParams.numThreads = m_threads;
+        const RDKit::SubstructMatchParameters substructMatchParams
+            = coaler::core::Matcher::getSubstructMatchParams(m_threads);
 
-        std::vector<RDKit::MatchVectType> matches;
-        unsigned nofMatches
-            = RDKit::SubstructMatch(*mol, *m_core, matches, substructMatchParams.uniquify,
-                                    substructMatchParams.useChirality, substructMatchParams.useQueryQueryMatches,
-                                    substructMatchParams.maxMatches, substructMatchParams.numThreads);
+
+        auto matches = RDKit::SubstructMatch(*mol, *m_core, substructMatchParams);
         assert(!matches.empty());
+        unsigned nofUniqueMatches = matches.size();
+        unsigned nofRotationAxes = SubstructureAnalyzer::getNumberOfRingRotations(*m_core);
+        unsigned nofTotalMatches = nofUniqueMatches * nofRotationAxes;
 
-        spdlog::info("Number of Core Matches: {}", nofMatches);
+        //check if constraints can be upheld
+        if(nofTotalMatches * confCountParams.minConfsPerMatch > confCountParams.maxTotalConfsPerMol) {
+            spdlog::error("Core Symmetry or Number of Core Matches is too high for set parameters.");
+            return false; //TODO throw std::runtime_error
+        }
+
+        spdlog::debug("number of Core Matches: {}", nofTotalMatches);
 
         unsigned matchCounter = 0;
-        for (auto const &match : matches) {
+        //iterate over unique substructure matches
+        for (auto const &match: matches) {
+
+            //iterate over all identity core rotations
+            for(int rotation = 1; rotation < nofRotationAxes; rotation++)
+            {
+
+            }
+
             CoreAtomMapping molQueryCoords;
-            for (const auto &[queryId, molId] : match) {
+            for (const auto &[queryId, molId]: match) {
                 molQueryCoords[molId] = m_coords.at(queryId);
             }
 
-            // embed molecule conformers
-            RDKit::DGeomHelpers::EmbedParameters params;
-            params = RDKit::DGeomHelpers::ETKDGv3;
-            params.optimizerForceTol = forceTol;
-            params.useSmallRingTorsions = true;
-            params.randomSeed = seed;
-            params.coordMap = &molQueryCoords;
-            params.useBasicKnowledge = false;
-            params.enforceChirality = false;
-            params.useSymmetryForPruning = false;
-            params.useSmallRingTorsions = false;
-            params.useRandomCoords = true;
-            params.numThreads = m_threads;
-            params.clearConfs = false;
 
-            // calculates the number of conformers for each match if m_divideConformersByMatches == true
+            RDKit::DGeomHelpers::EmbedParameters embedParams = this->getEmbeddingParameters(molQueryCoords);
+
+            unsigned numConfs = confCountParams.maxTotalConfsPerMol;
             if (m_divideConformersByMatches) {
-                unsigned nofConfsForMatch = (matchCounter < numConfs % nofMatches) ? (int(numConfs / nofMatches) + 1)
-                                                                                   : (int(numConfs / nofMatches));
-                RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, nofConfsForMatch, params);
+                unsigned numConfsForMatch = (matchCounter < numConfs % matches.size()) ? (int(numConfs / matches.size()) + 1)
+                                                                                   : (int(numConfs / matches.size()));
+                RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfsForMatch, embedParams);
             } else {
-                RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
+                RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, embedParams);
             }
-
-            if ((mol->getNumConformers() == numConfs && m_divideConformersByMatches)
-                || (mol->getNumConformers() == numConfs * nofMatches)) {
-                std::vector<std::pair<int, double>> result;
-                RDKit::MMFF::MMFFOptimizeMoleculeConfs(*mol, result, m_threads);
-
-                spdlog::info("Optimized {} conformers.", mol->getNumConformers());
-
-                break;
-            }
-            matchCounter++;
         }
 
-        spdlog::info("Embedded {} conformers.", mol->getNumConformers());
         if (m_divideConformersByMatches) {
             assert(mol->getNumConformers() == numConfs);
         } else {
-            assert(mol->getNumConformers() == numConfs * nofMatches);
+            assert(mol->getNumConformers() == numConfs * matches.size());
         }
+    }
+
+    RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbeddingParameters(const CoreAtomMapping &coords) {
+        auto params = RDKit::DGeomHelpers::srETKDGv3;
+        params.randomSeed = seed;
+        params.coordMap = &coords;
+        params.numThreads = m_threads;
+        params.optimizerForceTol = forceTol;
+        return params;
     }
 }  // namespace coaler::embedder
