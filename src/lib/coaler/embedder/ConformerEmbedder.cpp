@@ -48,7 +48,11 @@ namespace coaler::embedder {
 
         // check if constraints can be upheld
         if (nofTotalMatches * confCountParams.minConfsPerMatch > confCountParams.maxTotalConfsPerMol) {
-            spdlog::error("Core Symmetry or Number of Core Matches is too high for set parameters.");
+            spdlog::error("Core Symmetry or Number of Core Matches is too high for set parameters: \n"
+                "Min #confs per match: " + std::to_string(confCountParams.minConfsPerMatch) + "\n"
+                "Max #confs per match: " + std::to_string(confCountParams.maxConfsPerMatch) + "\n"
+                "Min #confs per mol: " + std::to_string(confCountParams.maxTotalConfsPerMol) + "\n"
+                "while there are a total of " + std::to_string(nofTotalMatches) + " matches");
             return false;  // TODO throw std::runtime_error
         }
 

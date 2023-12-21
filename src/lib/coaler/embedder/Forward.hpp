@@ -10,9 +10,9 @@
 namespace coaler::embedder {
 
     struct ConformerEmbeddingParams {
-        unsigned maxTotalConfsPerMol;
         unsigned minConfsPerMatch;
         unsigned maxConfsPerMatch;
+        unsigned maxTotalConfsPerMol;
     };
 
     using CoreAtomMapping = std::map<int, RDGeom::Point3D>;

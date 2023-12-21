@@ -110,12 +110,19 @@ int main(int argc, char* argv[]) {
 
     // generate random coreResult with coordinates. TODO: get coordinates from input
 
+    unsigned minConfsPerMatch = 5;
+    unsigned maxConfsPerMatch = 25;
+    unsigned maxConfsPerMol = 50;
     spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
 
     embedder::ConformerEmbedder embedder(coreResult->first, coreResult->second, opts.num_threads,
                                          opts.divideConformersByMatches);
+    embedder::ConformerEmbeddingParams embeddingParams{minConfsPerMatch,maxConfsPerMatch,maxConfsPerMol};
+
     for (auto& mol : mols) {
-        embedder.embedEvenlyAcrossAllMatches(mol, {opts.num_conformers, opts.num_conformers, 100});
+        if(!embedder.embedEvenlyAcrossAllMatches(mol, embeddingParams)){
+            return 3;
+        }
     }
 
     multialign::MultiAligner aligner(mols, opts.num_start_assemblies, opts.num_threads);
