@@ -8,9 +8,6 @@
 #include "Forward.hpp"
 
 namespace coaler::embedder {
-
-    using CoreAtomMapping = std::map<int, RDGeom::Point3D>;
-
     /**
      * The ConformerEmbedder class provides functionality for the generation of conformers for
      * a given molecule with contrained core coordinates.

@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
     embedder::ConformerEmbedder embedder(coreResult->first, coreResult->second, opts.num_threads,
                                          opts.divideConformersByMatches);
     for (auto& mol : mols) {
-        embedder.embedEvenlyAcrossAllMatches(mol, opts.num_conformers);
+        embedder.embedEvenlyAcrossAllMatches(mol, {opts.num_conformers, opts.num_conformers, 100});
     }
 
     multialign::MultiAligner aligner(mols, opts.num_start_assemblies, opts.num_threads);

@@ -22,9 +22,9 @@ namespace coaler::embedder {
          * default (1) is returned.
          *
          * @param Molecule the ring molecule to analyze.
-         * @return The number of identity core rotations.
+         * @return The number of identity core rotations and the rotation step size. Format: <rotations, step_size>
          */
-        static unsigned getNumberOfRingRotations(const RDKit::ROMol& molecule);
+        static std::pair<unsigned, unsigned> getNumberOfRingRotations(const RDKit::ROMol& molecule);
 
         static unsigned getNumberOfUniqueSubstructureMatches(const RDKit::ROMol& query, const RDKit::ROMol& molecule);
     };

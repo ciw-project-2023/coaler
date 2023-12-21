@@ -50,16 +50,17 @@ unsigned coaler::embedder::SubstructureAnalyzer::getNumberOfUniqueSubstructureMa
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
-unsigned coaler::embedder::SubstructureAnalyzer::getNumberOfRingRotations(const RDKit::ROMol& molecule) {
+std::pair<unsigned, unsigned> coaler::embedder::SubstructureAnalyzer::getNumberOfRingRotations(const RDKit::ROMol& molecule) {
     // catch mols that have chains
+    auto noRotaionsDefault = std::make_pair(1, 0);
     if (!std::all_of(molecule.atoms().begin(), molecule.atoms().end(), hasDegreeTwo())) {
-        return 1;
+        return noRotaionsDefault;
     }
 
     unsigned nofAtoms = molecule.getNumAtoms();
     // only even sized rings can be rotation symmetric
     if (nofAtoms % 2 != 0) {
-        return 1;
+        return noRotaionsDefault;
     }
 
     std::vector<unsigned> resultCanonIDs;
@@ -88,10 +89,13 @@ unsigned coaler::embedder::SubstructureAnalyzer::getNumberOfRingRotations(const 
             break;
         default:
             if (allElementsEqual(ranksCount)) {
-                return *ranksCount.begin();
+                return std::make_pair(*ranksCount.begin(), ranksCount.size());
             }
             nofRotations = 1;
     }
-
-    return nofRotations;
+    unsigned rotationsStepSize = 0;
+    if(nofRotations > 1){
+        rotationsStepSize = molecule.getNumAtoms() / nofRotations;
+    }
+    return std::make_pair(nofRotations,rotationsStepSize);
 }

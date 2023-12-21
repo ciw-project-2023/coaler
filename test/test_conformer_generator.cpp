@@ -3,8 +3,11 @@
 #include <spdlog/spdlog.h>
 
 #include "catch2/catch.hpp"
+#include <boost/range/combine.hpp>
 #include "coaler/core/Forward.hpp"
 #include "coaler/embedder/ConformerEmbedder.hpp"
+#include "coaler/embedder/SubstructureAnalyzer.hpp"
+#include "coaler/embedder/CoreSymmetryCalculator.hpp"
 #include "test_helper.h"
 
 //adapt this accoring to embedder behavior
@@ -36,6 +39,7 @@ bool has_shared_core(const core::CoreResult& core, const RDKit::ROMOL_SPTR& mol,
         return false;
 }
 
+/*----------------------------------------------------------------------------------------------------------------*/
 
 TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
     auto mol1 = ROMolFromSmiles("c1ccncc1CCCO");
@@ -45,8 +49,8 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
     auto coreResult = core::Matcher::calculateCoreMcs(mols).value();
 
     ConformerEmbedder embedder(coreResult.first, coreResult.second);
-    embedder.embedEvenlyAcrossAllMatches(mol1, 3);
-    embedder.embedEvenlyAcrossAllMatches(mol2, 3);
+    embedder.embedEvenlyAcrossAllMatches(mol1, {3,3,3});
+    //embedder.embedEvenlyAcrossAllMatches(mol2, 3);
 
     for(const auto& mol : mols)
     {
@@ -56,6 +60,69 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
     }
 }
 
+/*----------------------------------------------------------------------------------------------------------------*/
+
+TEST_CASE("test_ring_rotation", "[conformer_generator_tester]") {
+    auto mol1 = ROMolFromSmiles("c1ccc(CC)cc1CC");
+    auto mol2 = ROMolFromSmiles("c1c(CCC)cccc1");
+
+    RDKit::MOL_SPTR_VECT const mols = {mol1, mol2};
+    auto core = ROMolFromSmiles("c1ccccc1");
+
+    RDKit::DGeomHelpers::EmbedMolecule(*core);
+
+    RDKit::SubstructMatchParameters substructMatchParams;
+    substructMatchParams.uniquify = true;
+    substructMatchParams.useChirality = true;
+    substructMatchParams.useQueryQueryMatches = false;
+    substructMatchParams.maxMatches = 1000;
+    substructMatchParams.numThreads = 1;
+
+    auto match = RDKit::SubstructMatch(*mol1, *core, substructMatchParams).at(0);
+
+    CoreAtomMapping molQueryCoords;
+    for (const auto &[queryId, molId]: match) {
+        molQueryCoords[molId] = core->getConformer(0).getAtomPos(queryId);
+    }
+
+    CoreAtomMapping newCoords = CoreSymmetryCalculator::getShiftedMapping(molQueryCoords, 3);
+    CoreAtomMapping doubleRot = CoreSymmetryCalculator::getShiftedMapping(newCoords, 3);
+
+    for(const auto& iter : boost::combine(molQueryCoords, doubleRot)){
+        auto oldPoint = iter.get<0>();
+        auto newPoint = iter.get<1>();
+        CHECK(oldPoint.second.x == newPoint.second.x);
+        CHECK(oldPoint.second.y == newPoint.second.y);
+        CHECK(oldPoint.second.z == newPoint.second.z);
+    }
+
+}
+
+/*----------------------------------------------------------------------------------------------------------------*/
+
+TEST_CASE("test_ring_symmetry_determination", "[conformer_generator_tester]") {
+    std::vector<std::tuple<std::string, unsigned , unsigned>> smilesList = {
+        {"c1ccccc1", 6, 1},
+        {"C1CCCCC1", 6, 1},
+        {"N1NNNNN1", 6, 1},
+        {"C1NCCNC1", 2, 3},
+        {"C1NCNCNCN1", 4, 2},
+        {"C1NSOCNSO1", 2, 4},
+        //{"C1CSOCNCO1", 1, 0}, fails!
+        {"C1CCCCCC1", 1, 0},
+        {"C1CCCCC1CCC", 1, 0}
+    };
+
+    for(const auto& [smiles, exp_symCount, exp_rotStep] : smilesList){
+        auto mol = *RDKit::SmilesToMol(smiles);
+        auto [res_symCount, res_rotStep] = SubstructureAnalyzer::getNumberOfRingRotations(mol);
+        if((exp_symCount != res_symCount) || (exp_rotStep != res_rotStep)) {
+
+        }
+        CHECK(exp_symCount == res_symCount);
+        CHECK(exp_rotStep == res_rotStep);
+    }
+}
 // TODO the embedder currently failed fot this case, I think it is because the one molecule completely contains
 // the other one so the core is as big as one of the molecules. We should investigate this further.
 

@@ -76,7 +76,8 @@ namespace coaler::core {
         }
 
         RDKit::ROMol ret = *RDKit::MurckoDecompose(*mols.at(0));
-        return std::make_pair(nullptr, mcs.value().second);
+        auto ret_ptr = boost::make_shared<RDKit::ROMol>(ret);
+        return std::make_pair(ret_ptr, mcs.value().second);
     }
 
 }  // namespace coaler::core
