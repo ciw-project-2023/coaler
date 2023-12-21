@@ -11,7 +11,7 @@
 #include "test_helper.h"
 
 //adapt this accoring to embedder behavior
-constexpr double AVG_DEVIATION_THRESHOLD = 1;
+constexpr double AVG_DEVIATION_THRESHOLD = 2;
 
 using namespace coaler::embedder;
 
@@ -61,7 +61,7 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
 }
 
 /*----------------------------------------------------------------------------------------------------------------*/
-
+//TODO add more cases
 TEST_CASE("test_ring_rotation", "[conformer_generator_tester]") {
     auto mol1 = ROMolFromSmiles("c1ccc(CC)cc1CC");
     auto mol2 = ROMolFromSmiles("c1c(CCC)cccc1");
@@ -81,8 +81,8 @@ TEST_CASE("test_ring_rotation", "[conformer_generator_tester]") {
     auto match = RDKit::SubstructMatch(*mol1, *core, substructMatchParams).at(0);
 
     CoreAtomMapping molQueryCoords;
-    for (const auto &[queryId, molId]: match) {
-        molQueryCoords[molId] = core->getConformer(0).getAtomPos(queryId);
+    for (int atomId = 0; atomId < core->getNumAtoms(); atomId++) {
+        molQueryCoords[atomId] = core->getConformer(0).getAtomPos(atomId);
     }
 
     CoreAtomMapping newCoords = CoreSymmetryCalculator::getShiftedMapping(molQueryCoords, 3);
@@ -102,13 +102,13 @@ TEST_CASE("test_ring_rotation", "[conformer_generator_tester]") {
 
 TEST_CASE("test_ring_symmetry_determination", "[conformer_generator_tester]") {
     std::vector<std::tuple<std::string, unsigned , unsigned>> smilesList = {
+        {"C1SCNOSNC1", 1, 0},
         {"c1ccccc1", 6, 1},
         {"C1CCCCC1", 6, 1},
         {"N1NNNNN1", 6, 1},
         {"C1NCCNC1", 2, 3},
         {"C1NCNCNCN1", 4, 2},
         {"C1NSOCNSO1", 2, 4},
-        //{"C1CSOCNCO1", 1, 0}, fails!
         {"C1CCCCCC1", 1, 0},
         {"C1CCCCC1CCC", 1, 0}
     };

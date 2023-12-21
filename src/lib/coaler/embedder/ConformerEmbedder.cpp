@@ -4,6 +4,7 @@
 
 #include "ConformerEmbedder.hpp"
 #include "SubstructureAnalyzer.hpp"
+#include "CoreSymmetryCalculator.hpp"
 
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/ForceFieldHelpers/MMFF/MMFF.h>
@@ -18,21 +19,6 @@
 
 const unsigned seed = 42;
 const float forceTol = 0.0135;
-
-namespace{
-    coaler::embedder::CoreAtomMapping getShiftedMapping(const coaler::embedder::CoreAtomMapping& map, unsigned shift) {
-        coaler::embedder::CoreAtomMapping newMap;
-        unsigned idMax = map.size() - 1;
-        for(const auto& entry : map){
-            unsigned newId = entry.first + shift;
-            if(newId > idMax){
-                newId = newId - idMax - 1;
-            }
-            newMap.emplace(newId, entry.second);
-        }
-        return newMap;
-    }
-}
 
 namespace coaler::embedder {
     ConformerEmbedder::ConformerEmbedder(RDKit::ROMOL_SPTR &query, CoreAtomMapping &coords, const int threads,
@@ -49,9 +35,11 @@ namespace coaler::embedder {
         substructMatchParams.maxMatches = 1000;
         substructMatchParams.numThreads = m_threads;
 
-
-        auto matches = RDKit::SubstructMatch(*mol, *m_core, substructMatchParams);
-        assert(!matches.empty());
+        std::vector<RDKit::MatchVectType> matches = RDKit::SubstructMatch(*mol, *m_core, substructMatchParams);
+        if(matches.empty()){
+            spdlog::error("Failed to match core during conformer generation.");
+            return false;
+        }
         unsigned nofUniqueMatches = matches.size();
         auto [nofRotationAxes, rotationStepsize] = SubstructureAnalyzer::getNumberOfRingRotations(*m_core);
         unsigned nofTotalMatches = nofUniqueMatches * nofRotationAxes;
@@ -62,9 +50,16 @@ namespace coaler::embedder {
             return false; //TODO throw std::runtime_error
         }
 
-        spdlog::debug("number of Core Matches: {}", nofTotalMatches);
-        unsigned numConfs = confCountParams.minConfsPerMatch;
-        unsigned matchCounter = 0;
+        std::vector<unsigned> matchDistribution =
+            CoreSymmetryCalculator::distributeApproxEvenly(nofTotalMatches,
+                                                           confCountParams.maxTotalConfsPerMol,
+                                                           confCountParams.maxConfsPerMatch);
+        assert(matchDistribution.back() >= confCountParams.minConfsPerMatch);
+
+        spdlog::debug("number of total core matches: {}", nofTotalMatches);
+
+        unsigned matchPositionCounter = 0;
+
         //iterate over unique substructure matches
         for (auto const &match: matches) {
 
@@ -77,26 +72,30 @@ namespace coaler::embedder {
                     molQueryCoords[molId] = m_coords.at(queryId);
                 }
 
+                //note: for core w/o symmetry, rotationStep becomes zero
+                molQueryCoords = CoreSymmetryCalculator::getShiftedMapping(molQueryCoords, rotationStep);
+
                 auto params = this->getEmbeddingParameters(molQueryCoords);
 
                 if (m_divideConformersByMatches) {
-                    auto numConfsMatch = (matchCounter < numConfs % matches.size()) ? (int(numConfs / matches.size()) + 1)
-                                                                                    : (int(numConfs / matches.size()));
-                    RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfsMatch, params);
+                    unsigned nofConfsForCurrentMatch = matchDistribution.at(matchPositionCounter);
+                    RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, nofConfsForCurrentMatch, params);
                 } else {
-                    RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
+                    RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, confCountParams.maxConfsPerMatch, params);
                 }
             }
 
             if (m_divideConformersByMatches) {
-                assert(mol->getNumConformers() == numConfs);
+                assert(mol->getNumConformers() <= confCountParams.maxConfsPerMatch);
             } else {
-                assert(mol->getNumConformers() == numConfs * matches.size());
+                assert(mol->getNumConformers() == confCountParams.maxConfsPerMatch * matches.size());
             }
         }
 
           return true; //condition?
     }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
 
     RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbeddingParameters(const CoreAtomMapping &coords) {
         auto params = RDKit::DGeomHelpers::srETKDGv3;

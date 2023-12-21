@@ -57,7 +57,7 @@ std::pair<unsigned, unsigned> coaler::embedder::SubstructureAnalyzer::getNumberO
         return noRotaionsDefault;
     }
 
-    unsigned nofAtoms = molecule.getNumAtoms();
+    const unsigned nofAtoms = molecule.getNumAtoms();
     // only even sized rings can be rotation symmetric
     if (nofAtoms % 2 != 0) {
         return noRotaionsDefault;
@@ -79,6 +79,9 @@ std::pair<unsigned, unsigned> coaler::embedder::SubstructureAnalyzer::getNumberO
      *  all the same, e.g. c1ccccc1
      *  repeating patterns, e.g. C1NCNCN1 or structures like C1NOSCNOSCNOS1
      */
+    if(ranksCount.size() == nofAtoms){
+        return noRotaionsDefault;
+    }
     unsigned nofRotations = 0;
     switch (max) {
         case 1:
