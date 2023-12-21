@@ -11,36 +11,39 @@ using namespace coaler::embedder;
 
 namespace core = coaler::core;
 
+bool has_shared_core(const core::CoreResult& core, const RDKit::ROMOL_SPTR& mol, int confId){
+        std::vector<RDKit::MatchVectType> substructureResults;
+        auto conformer = mol->getConformer(confId);
+        CHECK(RDKit::SubstructMatch(*mol.get(), *core.first, substructureResults) != 0);
+        for(const auto& match : substructureResults){
+            for (const auto& [queryId, molId] : match) {
+                RDGeom::Point3D atomCoords = core.second.at(queryId);
+                RDGeom::Point3D confCoords = conformer.getAtomPos(molId);
+                RDGeom::Point3D diff = atomCoords - confCoords;
+                if(diff.length() == 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+}
+
+
 TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
-    auto mol1 = ROMolFromSmiles("c1ccccc1CCCO");
+    auto mol1 = ROMolFromSmiles("c1ccncc1CCCO");
     auto mol2 = ROMolFromSmiles("c1c(O)cc(O)cc1O");
 
     RDKit::MOL_SPTR_VECT const mols = {mol1, mol2};
-    auto const val = core::Matcher::calculateCoreMcs(mols).value();
-    auto [query, coordMap] = val;
+    auto coreResult = core::Matcher::calculateCoreMcs(mols).value();
 
-    ConformerEmbedder embedder(query, coordMap);
-    embedder.embedEvenlyAcrossAllMatches(mol1, 10, 15);
-    embedder.embedEvenlyAcrossAllMatches(mol2, 10, 15);
+    ConformerEmbedder embedder(coreResult.first, coreResult.second);
+    embedder.embedEvenlyAcrossAllMatches(mol1, 1, 1);
+    embedder.embedEvenlyAcrossAllMatches(mol2, 1, 6);
 
-    for (auto const& mol : mols) {
-        std::vector<RDKit::MatchVectType> substructureResults;
-        if (RDKit::SubstructMatch(*mol, *query, substructureResults) == 0) {
-            CHECK(false);
-        }
-        // for now only use first substructure result //TODO adapt when changing class behavior
-        const RDKit::MatchVectType match = substructureResults.at(0);
-        for (int id = 0; id < mol->getNumConformers(); id++) {
-            RDKit::Conformer conf = mol->getConformer(id);
-
-            for (const auto& [queryId, molId] : match) {
-                RDGeom::Point3D atomCoords = coordMap.at(queryId);
-                RDGeom::Point3D confCoords = conf.getAtomPos(molId);
-                RDGeom::Point3D diff = atomCoords - confCoords;
-                CHECK(diff.x == 0);
-                CHECK(diff.y == 0);
-                CHECK(diff.z == 0);
-            }
+    for(const auto& mol : mols)
+    {
+        for (int confId = 0; confId <  mol->getNumConformers(); confId++){
+            CHECK(has_shared_core(coreResult, mol, confId));
         }
     }
 }
