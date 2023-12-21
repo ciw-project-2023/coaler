@@ -5,6 +5,7 @@
 #pragma once
 #include <GraphMol/ROMol.h>
 #include <GraphMol/DistGeomHelpers/Embedder.h>
+#include "Forward.hpp"
 
 namespace coaler::embedder {
 
@@ -27,7 +28,7 @@ namespace coaler::embedder {
          *
          * @return True upon success.
          */
-        void embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol, unsigned numConfs);
+        bool embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol, const ConformerEmbeddingParams& confCountParams);
 
       private:
         RDKit::ROMOL_SPTR m_core;

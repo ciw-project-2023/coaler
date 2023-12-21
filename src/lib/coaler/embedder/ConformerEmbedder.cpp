@@ -3,6 +3,7 @@
  */
 
 #include "ConformerEmbedder.hpp"
+#include "SubstructureAnalyzer.hpp"
 
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/ForceFieldHelpers/MMFF/MMFF.h>
@@ -24,10 +25,10 @@ namespace coaler::embedder {
             : m_core(query), m_threads(threads), m_coords(coords),
               m_divideConformersByMatches(divideConformersByMatches) {}
 
-    void ConformerEmbedder::embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol, unsigned numConfs) {
+    bool ConformerEmbedder::embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol, const ConformerEmbeddingParams& confCountParams) {
         // firstMatch molecule and core
         RDKit::SubstructMatchParameters substructMatchParams;
-        substructMatchParams.uniquify = false;
+        substructMatchParams.uniquify = true;
         substructMatchParams.useChirality = true;
         substructMatchParams.useQueryQueryMatches = false;
         substructMatchParams.maxMatches = 1000;
@@ -36,11 +37,28 @@ namespace coaler::embedder {
 
         auto matches = RDKit::SubstructMatch(*mol, *m_core, substructMatchParams);
         assert(!matches.empty());
+        unsigned nofUniqueMatches = matches.size();
+        unsigned nofRotationAxes = SubstructureAnalyzer::getNumberOfRingRotations(*m_core);
+        unsigned nofTotalMatches = nofUniqueMatches * nofRotationAxes;
 
-        spdlog::debug("number of Core Matches: {}", matches.size());
+        //check if constraints can be upheld
+        if(nofTotalMatches * confCountParams.minConfsPerMatch > confCountParams.maxTotalConfsPerMol) {
+            spdlog::error("Core Symmetry or Number of Core Matches is too high for set parameters.");
+            return false; //TODO throw std::runtime_error
+        }
+
+        spdlog::debug("number of Core Matches: {}", nofTotalMatches);
 
         unsigned matchCounter = 0;
+        //iterate over unique substructure matches
         for (auto const &match: matches) {
+
+            //iterate over all identity core rotations
+            for(int rotation = 1; rotation < nofRotationAxes; rotation++)
+            {
+
+            }
+
             CoreAtomMapping molQueryCoords;
             for (const auto &[queryId, molId]: match) {
                 molQueryCoords[molId] = m_coords.at(queryId);

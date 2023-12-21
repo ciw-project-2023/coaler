@@ -1,29 +1,36 @@
 
 #include <GraphMol/Substruct/SubstructMatch.h>
+#include <spdlog/spdlog.h>
 
 #include "catch2/catch.hpp"
 #include "coaler/core/Forward.hpp"
 #include "coaler/embedder/ConformerEmbedder.hpp"
-#include "coaler/embedder/SubstructureAnalyzer.hpp"
 #include "test_helper.h"
+
+//adapt this accoring to embedder behavior
+constexpr double AVG_DEVIATION_THRESHOLD = 1;
 
 using namespace coaler::embedder;
 
 namespace core = coaler::core;
 
-
 bool has_shared_core(const core::CoreResult& core, const RDKit::ROMOL_SPTR& mol, int confId){
         std::vector<RDKit::MatchVectType> substructureResults;
         auto conformer = mol->getConformer(confId);
         CHECK(RDKit::SubstructMatch(*mol.get(), *core.first, substructureResults) != 0);
+
+    RDGeom::Point3D minDiff;
         for(const auto& match : substructureResults){
+            double diffSum = 0.0;
             for (const auto& [queryId, molId] : match) {
                 RDGeom::Point3D atomCoords = core.second.at(queryId);
                 RDGeom::Point3D confCoords = conformer.getAtomPos(molId);
                 RDGeom::Point3D diff = atomCoords - confCoords;
-                if(diff.length() == 0) {
-                    return true;
-                }
+                diffSum += diff.length();
+            }
+            double avgDiff = diffSum / static_cast<double>(match.size());
+            if(avgDiff <= AVG_DEVIATION_THRESHOLD) {
+                return true;
             }
         }
         return false;
@@ -35,11 +42,11 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
     auto mol2 = ROMolFromSmiles("c1c(O)cc(O)cc1O");
 
     RDKit::MOL_SPTR_VECT const mols = {mol1, mol2};
-    auto coreResult = core::Matcher::calculateCoreMcs(mols, 1).value();
+    auto coreResult = core::Matcher::calculateCoreMcs(mols).value();
 
     ConformerEmbedder embedder(coreResult.first, coreResult.second);
-    embedder.embedEvenlyAcrossAllMatches(mol1, 1);
-    embedder.embedEvenlyAcrossAllMatches(mol2, 6);
+    embedder.embedEvenlyAcrossAllMatches(mol1, 3);
+    embedder.embedEvenlyAcrossAllMatches(mol2, 3);
 
     for(const auto& mol : mols)
     {
