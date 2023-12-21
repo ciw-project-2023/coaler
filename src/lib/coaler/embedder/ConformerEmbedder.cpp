@@ -82,10 +82,25 @@ namespace coaler::embedder {
         }
     }
 
+<<<<<<< HEAD
     RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbeddingParameters(const CoreAtomMapping &coords) {
         auto params = RDKit::DGeomHelpers::srETKDGv3;
         params.randomSeed = seed;
         params.coordMap = &coords;
+=======
+    RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbedParams(CoreAtomMapping& coreAtomMappings) {
+        RDKit::DGeomHelpers::EmbedParameters params;
+        params = RDKit::DGeomHelpers::ETKDGv3;
+        params.optimizerForceTol = forceTol;
+        params.useSmallRingTorsions = true;
+        params.randomSeed = seed;
+        params.coordMap = &coreAtomMappings;
+        params.useBasicKnowledge = false;
+        params.enforceChirality = false;
+        params.useSymmetryForPruning = false;
+        params.useSmallRingTorsions = false;
+        params.useRandomCoords = true;
+>>>>>>> 14f0668 (fixed getEmbedParams())
         params.numThreads = m_threads;
         params.optimizerForceTol = forceTol;
         return params;

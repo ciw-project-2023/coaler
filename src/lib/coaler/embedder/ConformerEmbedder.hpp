@@ -35,7 +35,7 @@ namespace coaler::embedder {
          * returns the EmbedParams for the Embedding
          * @return RDKit::DGeomHelpers::EmbedParameters
          */
-        RDKit::DGeomHelpers::EmbedParameters getEmbedParams();
+        RDKit::DGeomHelpers::EmbedParameters getEmbedParams(CoreAtomMapping& coreAtomMappings);
 
       private:
         RDKit::ROMOL_SPTR m_core;
