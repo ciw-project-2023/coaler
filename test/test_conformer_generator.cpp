@@ -11,6 +11,7 @@ using namespace coaler::embedder;
 
 namespace core = coaler::core;
 
+
 bool has_shared_core(const core::CoreResult& core, const RDKit::ROMOL_SPTR& mol, int confId){
         std::vector<RDKit::MatchVectType> substructureResults;
         auto conformer = mol->getConformer(confId);
@@ -34,11 +35,11 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
     auto mol2 = ROMolFromSmiles("c1c(O)cc(O)cc1O");
 
     RDKit::MOL_SPTR_VECT const mols = {mol1, mol2};
-    auto coreResult = core::Matcher::calculateCoreMcs(mols).value();
+    auto coreResult = core::Matcher::calculateCoreMcs(mols, 1).value();
 
     ConformerEmbedder embedder(coreResult.first, coreResult.second);
-    embedder.embedEvenlyAcrossAllMatches(mol1, 1, 1);
-    embedder.embedEvenlyAcrossAllMatches(mol2, 1, 6);
+    embedder.embedEvenlyAcrossAllMatches(mol1, 1);
+    embedder.embedEvenlyAcrossAllMatches(mol2, 6);
 
     for(const auto& mol : mols)
     {

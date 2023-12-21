@@ -21,9 +21,10 @@ const float forceTol = 0.0135;
 namespace coaler::embedder {
     ConformerEmbedder::ConformerEmbedder(RDKit::ROMOL_SPTR &query, CoreAtomMapping &coords, const int threads,
                                          const bool divideConformersByMatches)
-        : m_core(query), m_threads(threads), m_coords(coords), m_divideConformersByMatches(divideConformersByMatches) {}
+            : m_core(query), m_threads(threads), m_coords(coords),
+              m_divideConformersByMatches(divideConformersByMatches) {}
 
-    void ConformerEmbedder::embedConformersWithFixedCore(RDKit::ROMOL_SPTR mol, unsigned numConfs) {
+    void ConformerEmbedder::embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol, unsigned numConfs) {
         // firstMatch molecule and core
         RDKit::SubstructMatchParameters substructMatchParams;
         substructMatchParams.uniquify = false;
@@ -39,23 +40,31 @@ namespace coaler::embedder {
         spdlog::debug("number of Core Matches: {}", matches.size());
 
         unsigned matchCounter = 0;
-        for (auto const &match : matches) {
+        for (auto const &match: matches) {
             CoreAtomMapping molQueryCoords;
-            for (const auto &[queryId, molId] : match) {
+            for (const auto &[queryId, molId]: match) {
                 molQueryCoords[molId] = m_coords.at(queryId);
             }
 
             auto params = this->getEmbeddingParameters(molQueryCoords);
-            RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
-            if (mol->getNumConformers() == numConfs) {
-                break;
+
+            if (m_divideConformersByMatches) {
+                auto numConfsMatch = (matchCounter < numConfs % matches.size()) ? (int(numConfs / matches.size()) + 1)
+                                                                                : (int(numConfs / matches.size()));
+                RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfsMatch, params);
+            } else {
+                RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
             }
         }
 
-        assert(mol->getNumConformers() == numConfs);
+        if (m_divideConformersByMatches) {
+            assert(mol->getNumConformers() == numConfs);
+        } else {
+            assert(mol->getNumConformers() == numConfs * matches.size());
+        }
     }
 
-    RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbeddingParameters(const CoreAtomMapping& coords) {
+    RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbeddingParameters(const CoreAtomMapping &coords) {
         auto params = RDKit::DGeomHelpers::srETKDGv3;
         params.randomSeed = seed;
         params.coordMap = &coords;

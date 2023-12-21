@@ -18,8 +18,6 @@ namespace coaler::embedder {
       public:
         explicit ConformerEmbedder(RDKit::ROMOL_SPTR& query, CoreAtomMapping& coords, int threads = 1, bool divideConformersByMatches = false);
 
-        void embedForFirstMatch(const RDKit::ROMOL_SPTR& mol, unsigned numConfs);
-
         /**
          * Embed an even amount of Conformers at every core match.
          * @param mol The molecule to embed.
@@ -29,7 +27,7 @@ namespace coaler::embedder {
          *
          * @return True upon success.
          */
-        bool embedEvenlyAcrossAllMatches(RDKit::ROMOL_SPTR& mol, unsigned minNofConfs, unsigned maxNofConfs);
+        void embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol, unsigned numConfs);
 
       private:
         RDKit::ROMOL_SPTR m_core;
