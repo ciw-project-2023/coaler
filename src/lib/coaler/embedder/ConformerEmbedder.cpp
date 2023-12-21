@@ -69,6 +69,7 @@ namespace coaler::embedder {
         params.randomSeed = seed;
         params.coordMap = &coords;
         params.numThreads = m_threads;
+        params.useRandomCoords = true;
         params.optimizerForceTol = forceTol;
         return params;
     }
