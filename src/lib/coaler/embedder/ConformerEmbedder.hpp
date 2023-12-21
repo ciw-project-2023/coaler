@@ -16,7 +16,7 @@ namespace coaler::embedder {
      */
     class ConformerEmbedder {
       public:
-        explicit ConformerEmbedder(RDKit::ROMOL_SPTR& core, CoreAtomMapping  coords, int threads = 1);
+        explicit ConformerEmbedder(RDKit::ROMOL_SPTR& query, CoreAtomMapping& coords, int threads = 1, bool divideConformersByMatches = false);
 
         void embedForFirstMatch(const RDKit::ROMOL_SPTR& mol, unsigned numConfs);
 
@@ -33,8 +33,9 @@ namespace coaler::embedder {
 
       private:
         RDKit::ROMOL_SPTR m_core;
-        int m_threads;
         CoreAtomMapping m_coords;
+        int m_threads;
+        bool m_divideConformersByMatches;
 
 
         RDKit::DGeomHelpers::EmbedParameters getEmbeddingParameters(const CoreAtomMapping& coords);

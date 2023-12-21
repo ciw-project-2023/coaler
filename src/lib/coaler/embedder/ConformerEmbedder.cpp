@@ -6,94 +6,53 @@
 
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/ForceFieldHelpers/MMFF/MMFF.h>
+#include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
+#include <GraphMol/SmilesParse/SmartsWrite.h>
+#include <GraphMol/SmilesParse/SmilesParse.h>
+#include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <spdlog/spdlog.h>
 
-#include <boost/range/combine.hpp>
 #include <utility>
-#include <GraphMol/SmilesParse/SmilesWrite.h>
-#include <GraphMol/MolAlign/AlignMolecules.h>
-
-#include "BucketDistributor.hpp"
-#include "CoreSymmetryCalculator.hpp"
 
 const unsigned seed = 42;
 const float forceTol = 0.0135;
 
-/*----------------------------------------------------------------------------------------------------------------*/
-
 namespace coaler::embedder {
+    ConformerEmbedder::ConformerEmbedder(RDKit::ROMOL_SPTR &query, CoreAtomMapping &coords, const int threads,
+                                         const bool divideConformersByMatches)
+        : m_core(query), m_threads(threads), m_coords(coords), m_divideConformersByMatches(divideConformersByMatches) {}
 
-    ConformerEmbedder::ConformerEmbedder(RDKit::ROMOL_SPTR &core, CoreAtomMapping coords, int threads)
-            : m_core(core), m_coords(std::move(coords)), m_threads(threads) {}
+    void ConformerEmbedder::embedConformersWithFixedCore(RDKit::ROMOL_SPTR mol, unsigned numConfs) {
+        // firstMatch molecule and core
+        RDKit::SubstructMatchParameters substructMatchParams;
+        substructMatchParams.uniquify = false;
+        substructMatchParams.useChirality = true;
+        substructMatchParams.useQueryQueryMatches = false;
+        substructMatchParams.maxMatches = 1000;
+        substructMatchParams.numThreads = m_threads;
 
-    void ConformerEmbedder::embedForFirstMatch(const RDKit::ROMOL_SPTR &mol, unsigned numConfs) {
-        // match molecule and core
-        std::vector<RDKit::MatchVectType> substructureResults;
-        if (RDKit::SubstructMatch(*mol, *m_core, substructureResults) == 0) {
-            throw std::runtime_error("No substructure match found.");
-        }
 
-        // for now only use first substructure result //TODO adapt (maybe mix of different matches)
-        const auto match = substructureResults.at(0);
+        auto matches = RDKit::SubstructMatch(*mol, *m_core, substructMatchParams);
+        assert(!matches.empty());
 
-        // determine coordinates for atoms using core conformer
-        RDKit::Conformer const coreConformer = m_core->getConformer(0);
+        spdlog::debug("number of Core Matches: {}", matches.size());
 
-        coaler::embedder::CoreAtomMapping matchCoords;
-        for (const auto &[queryId, molId]: match) {
-            const RDGeom::Point3D &atomCoords = m_coords.at(queryId);
-            matchCoords.emplace(molId, atomCoords);
-        }
-
-        // embed molecule conformers
-        auto params = this->getEmbeddingParameters(matchCoords);
-        RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
-    }
-
-    /*----------------------------------------------------------------------------------------------------------------*/
-
-    bool
-    ConformerEmbedder::embedEvenlyAcrossAllMatches(RDKit::ROMOL_SPTR &mol, unsigned minNofConfs, unsigned maxNofConfs) {
-        // unsigned nofSymmetryAxes = CoreSymmetryCalculator::getNofSymmetryAxes(mol);
-        std::vector<RDKit::MatchVectType> substructureResults;
-        if (RDKit::SubstructMatch(*mol, *(m_core.get()), substructureResults) == 0) {
-            return false;
-        }
-
-        unsigned nofMatches = substructureResults.size();
-        std::vector<unsigned> nofConformersForMatch
-                = BucketDistributor::distributeApproxEvenly(nofMatches, maxNofConfs);
-
-        if (std::any_of(nofConformersForMatch.begin(), nofConformersForMatch.end(),
-                        [minNofConfs](unsigned confs) { return confs < minNofConfs; })) {
-            spdlog::warn(
-                    "Symmetry of core and/or substructure matches in structure too high for given minimum"
-                    "number of conformations per substructure match.");
-        }
-
-        assert(nofConformersForMatch.size() == substructureResults.size());
-
-        for (const auto &iter: boost::combine(nofConformersForMatch, substructureResults)) {
-            const auto nofConformers = iter.get<0>();
-            const auto match = iter.get<1>();
-
-            coaler::embedder::CoreAtomMapping matchCoords;
-            for (const auto &[queryId, molId]: match) {
-                const RDGeom::Point3D &atomCoords = m_coords.at(queryId);
-                matchCoords.emplace(molId, atomCoords);
+        unsigned matchCounter = 0;
+        for (auto const &match : matches) {
+            CoreAtomMapping molQueryCoords;
+            for (const auto &[queryId, molId] : match) {
+                molQueryCoords[molId] = m_coords.at(queryId);
             }
 
-            auto params = this->getEmbeddingParameters(matchCoords);
-            RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, nofConformers, params);
-
-            spdlog::debug("embedded {} conformers into molecule: {}", nofConformers, RDKit::MolToSmiles(*mol));
+            auto params = this->getEmbeddingParameters(molQueryCoords);
+            RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
+            if (mol->getNumConformers() == numConfs) {
+                break;
+            }
         }
 
-//        std::vector<std::pair<int, double>> result;
-//        RDKit::MMFF::MMFFOptimizeMoleculeConfs(*mol, result, m_threads);
-
-        return mol->getNumConformers() <= maxNofConfs;
+        assert(mol->getNumConformers() == numConfs);
     }
 
     RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbeddingParameters(const CoreAtomMapping& coords) {
