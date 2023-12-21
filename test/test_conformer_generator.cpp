@@ -5,6 +5,7 @@
 #include "catch2/catch.hpp"
 #include "coaler/core/Forward.hpp"
 #include "coaler/embedder/ConformerEmbedder.hpp"
+#include "coaler/embedder/SubstructureAnalyzer.hpp"
 #include "test_helper.h"
 
 //adapt this accoring to embedder behavior
@@ -18,7 +19,6 @@ bool has_shared_core(const core::CoreResult& core, const RDKit::ROMOL_SPTR& mol,
         std::vector<RDKit::MatchVectType> substructureResults;
         auto conformer = mol->getConformer(confId);
         CHECK(RDKit::SubstructMatch(*mol.get(), *core.first, substructureResults) != 0);
-
     RDGeom::Point3D minDiff;
         for(const auto& match : substructureResults){
             double diffSum = 0.0;
