@@ -16,6 +16,8 @@
 
 #include <utility>
 
+#include "coaler/core/Matcher.hpp"
+
 const unsigned seed = 42;
 const float forceTol = 0.0135;
 
@@ -27,12 +29,8 @@ namespace coaler::embedder {
 
     bool ConformerEmbedder::embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol, const ConformerEmbeddingParams& confCountParams) {
         // firstMatch molecule and core
-        RDKit::SubstructMatchParameters substructMatchParams;
-        substructMatchParams.uniquify = true;
-        substructMatchParams.useChirality = true;
-        substructMatchParams.useQueryQueryMatches = false;
-        substructMatchParams.maxMatches = 1000;
-        substructMatchParams.numThreads = m_threads;
+        const RDKit::SubstructMatchParameters substructMatchParams =
+            coaler::core::Matcher::getSubstructMatchParams(m_threads);
 
 
         auto matches = RDKit::SubstructMatch(*mol, *m_core, substructMatchParams);

@@ -6,6 +6,7 @@
 
 #include <GraphMol/RWMol.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
+#include "GraphMol/FMCS/FMCS.h"
 
 #include <cassert>
 #include <string>
@@ -13,3 +14,4 @@
 #include <vector>
 
 #include "Matcher.hpp"
+

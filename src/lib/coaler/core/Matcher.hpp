@@ -22,6 +22,19 @@ namespace coaler::core {
          * calculates the Murcko scaffold of the molecules
          * @return Murcko Scaffold as ROMol
          */
+
         static std::optional<CoreResult> calculateCoreMurcko(RDKit::MOL_SPTR_VECT mols, int numOfThreads = 1);
+
+        /**
+         * returns the MCSParams for the MCS-search
+         * @return RDKit::MCSParameters
+         */
+        static RDKit::MCSParameters getMCSParams();
+
+        /**
+         * returns the SubstructMatchParams for the MCS-search
+         * @return RDKit::SubstructMatchParameters
+         */
+        static RDKit::SubstructMatchParameters getSubstructMatchParams(int numOfThreads);
     };
 }  // namespace coaler::core
