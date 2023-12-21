@@ -2,41 +2,42 @@
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <spdlog/spdlog.h>
 
-#include "catch2/catch.hpp"
 #include <boost/range/combine.hpp>
+
+#include "catch2/catch.hpp"
 #include "coaler/core/Forward.hpp"
 #include "coaler/embedder/ConformerEmbedder.hpp"
-#include "coaler/embedder/SubstructureAnalyzer.hpp"
 #include "coaler/embedder/CoreSymmetryCalculator.hpp"
+#include "coaler/embedder/SubstructureAnalyzer.hpp"
 #include "test_helper.h"
 
-//adapt this accoring to embedder behavior
-constexpr double AVG_DEVIATION_THRESHOLD = 2;
+// adapt this accoring to embedder behavior
+constexpr double AVG_DEVIATION_THRESHOLD = 0;
 
 using namespace coaler::embedder;
 
 namespace core = coaler::core;
 
-bool has_shared_core(const core::CoreResult& core, const RDKit::ROMOL_SPTR& mol, int confId){
-        std::vector<RDKit::MatchVectType> substructureResults;
-        auto conformer = mol->getConformer(confId);
-        CHECK(RDKit::SubstructMatch(*mol.get(), *core.first, substructureResults) != 0);
+bool has_shared_core(const core::CoreResult& core, const RDKit::ROMOL_SPTR& mol, int confId) {
+    std::vector<RDKit::MatchVectType> substructureResults;
+    auto conformer = mol->getConformer(confId);
+    CHECK(RDKit::SubstructMatch(*mol.get(), *core.first, substructureResults) != 0);
 
     RDGeom::Point3D minDiff;
-        for(const auto& match : substructureResults){
-            double diffSum = 0.0;
-            for (const auto& [queryId, molId] : match) {
-                RDGeom::Point3D atomCoords = core.second.at(queryId);
-                RDGeom::Point3D confCoords = conformer.getAtomPos(molId);
-                RDGeom::Point3D diff = atomCoords - confCoords;
-                diffSum += diff.length();
-            }
-            double avgDiff = diffSum / static_cast<double>(match.size());
-            if(avgDiff <= AVG_DEVIATION_THRESHOLD) {
-                return true;
-            }
+    for (const auto& match : substructureResults) {
+        double diffSum = 0.0;
+        for (const auto& [queryId, molId] : match) {
+            RDGeom::Point3D atomCoords = core.second.at(queryId);
+            RDGeom::Point3D confCoords = conformer.getAtomPos(molId);
+            RDGeom::Point3D diff = atomCoords - confCoords;
+            diffSum += diff.length();
         }
-        return false;
+        double avgDiff = diffSum / static_cast<double>(match.size());
+        if (avgDiff <= AVG_DEVIATION_THRESHOLD) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /*----------------------------------------------------------------------------------------------------------------*/
@@ -49,19 +50,18 @@ TEST_CASE("test_shared_core", "[conformer_generator_tester]") {
     auto coreResult = core::Matcher::calculateCoreMcs(mols).value();
 
     ConformerEmbedder embedder(coreResult.first, coreResult.second);
-    embedder.embedEvenlyAcrossAllMatches(mol1, {3,3,3});
-    //embedder.embedEvenlyAcrossAllMatches(mol2, 3);
+    embedder.embedEvenlyAcrossAllMatches(mol1, {3, 3, 3});
+    // embedder.embedEvenlyAcrossAllMatches(mol2, 3);
 
-    for(const auto& mol : mols)
-    {
-        for (int confId = 0; confId <  mol->getNumConformers(); confId++){
+    for (const auto& mol : mols) {
+        for (int confId = 0; confId < mol->getNumConformers(); confId++) {
             CHECK(has_shared_core(coreResult, mol, confId));
         }
     }
 }
 
 /*----------------------------------------------------------------------------------------------------------------*/
-//TODO add more cases
+// TODO add more cases
 TEST_CASE("test_ring_rotation", "[conformer_generator_tester]") {
     auto mol1 = ROMolFromSmiles("c1ccc(CC)cc1CC");
     auto mol2 = ROMolFromSmiles("c1c(CCC)cccc1");
@@ -88,36 +88,26 @@ TEST_CASE("test_ring_rotation", "[conformer_generator_tester]") {
     CoreAtomMapping newCoords = CoreSymmetryCalculator::getShiftedMapping(molQueryCoords, 3);
     CoreAtomMapping doubleRot = CoreSymmetryCalculator::getShiftedMapping(newCoords, 3);
 
-    for(const auto& iter : boost::combine(molQueryCoords, doubleRot)){
+    for (const auto& iter : boost::combine(molQueryCoords, doubleRot)) {
         auto oldPoint = iter.get<0>();
         auto newPoint = iter.get<1>();
         CHECK(oldPoint.second.x == newPoint.second.x);
         CHECK(oldPoint.second.y == newPoint.second.y);
         CHECK(oldPoint.second.z == newPoint.second.z);
     }
-
 }
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
 TEST_CASE("test_ring_symmetry_determination", "[conformer_generator_tester]") {
-    std::vector<std::tuple<std::string, unsigned , unsigned>> smilesList = {
-        {"C1SCNOSNC1", 1, 0},
-        {"c1ccccc1", 6, 1},
-        {"C1CCCCC1", 6, 1},
-        {"N1NNNNN1", 6, 1},
-        {"C1NCCNC1", 2, 3},
-        {"C1NCNCNCN1", 4, 2},
-        {"C1NSOCNSO1", 2, 4},
-        {"C1CCCCCC1", 1, 0},
-        {"C1CCCCC1CCC", 1, 0}
-    };
+    std::vector<std::tuple<std::string, unsigned, unsigned>> smilesList
+        = {{"C1SCNOSNC1", 1, 0}, {"c1ccccc1", 6, 1},   {"C1CCCCC1", 6, 1},  {"N1NNNNN1", 6, 1},   {"C1NCCNC1", 2, 3},
+           {"C1NCNCNCN1", 4, 2}, {"C1NSOCNSO1", 2, 4}, {"C1CCCCCC1", 1, 0}, {"C1CCCCC1CCC", 1, 0}};
 
-    for(const auto& [smiles, exp_symCount, exp_rotStep] : smilesList){
+    for (const auto& [smiles, exp_symCount, exp_rotStep] : smilesList) {
         auto mol = *RDKit::SmilesToMol(smiles);
         auto [res_symCount, res_rotStep] = SubstructureAnalyzer::getNumberOfRingRotations(mol);
-        if((exp_symCount != res_symCount) || (exp_rotStep != res_rotStep)) {
-
+        if ((exp_symCount != res_symCount) || (exp_rotStep != res_rotStep)) {
         }
         CHECK(exp_symCount == res_symCount);
         CHECK(exp_rotStep == res_rotStep);

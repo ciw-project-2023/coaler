@@ -3,8 +3,9 @@
  */
 
 #pragma once
-#include <GraphMol/ROMol.h>
 #include <GraphMol/DistGeomHelpers/Embedder.h>
+#include <GraphMol/ROMol.h>
+
 #include "Forward.hpp"
 
 namespace coaler::embedder {
@@ -14,7 +15,8 @@ namespace coaler::embedder {
      */
     class ConformerEmbedder {
       public:
-        explicit ConformerEmbedder(RDKit::ROMOL_SPTR& query, CoreAtomMapping& coords, int threads = 1, bool divideConformersByMatches = false);
+        explicit ConformerEmbedder(RDKit::ROMOL_SPTR& query, CoreAtomMapping& coords, int threads = 1,
+                                   bool divideConformersByMatches = false);
 
         /**
          * Embed an even amount of Conformers at every core match.
@@ -25,14 +27,13 @@ namespace coaler::embedder {
          *
          * @return True upon success.
          */
-        bool embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol, const ConformerEmbeddingParams& confCountParams);
+        bool embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR& mol, const ConformerEmbeddingParams& confCountParams);
 
       private:
         RDKit::ROMOL_SPTR m_core;
         CoreAtomMapping m_coords;
         int m_threads;
         bool m_divideConformersByMatches;
-
 
         RDKit::DGeomHelpers::EmbedParameters getEmbeddingParameters(const CoreAtomMapping& coords);
     };

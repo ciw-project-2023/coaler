@@ -12,6 +12,7 @@ namespace coaler::embedder {
 
         static CoreAtomMapping getShiftedMapping(const coaler::embedder::CoreAtomMapping& map, unsigned shift);
 
-        static std::vector<unsigned> distributeApproxEvenly(unsigned int nofMatches, unsigned int maxConformers,unsigned int maxPerMatch);
+        static std::vector<unsigned> distributeApproxEvenly(unsigned int nofMatches, unsigned int maxConformers,
+                                                            unsigned int maxPerMatch);
     };
-} // namespace coaler::embedder
+}  // namespace coaler::embedder

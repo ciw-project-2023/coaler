@@ -50,7 +50,8 @@ unsigned coaler::embedder::SubstructureAnalyzer::getNumberOfUniqueSubstructureMa
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
-std::pair<unsigned, unsigned> coaler::embedder::SubstructureAnalyzer::getNumberOfRingRotations(const RDKit::ROMol& molecule) {
+std::pair<unsigned, unsigned> coaler::embedder::SubstructureAnalyzer::getNumberOfRingRotations(
+    const RDKit::ROMol& molecule) {
     // catch mols that have chains
     auto noRotaionsDefault = std::make_pair(1, 0);
     if (!std::all_of(molecule.atoms().begin(), molecule.atoms().end(), hasDegreeTwo())) {
@@ -79,7 +80,7 @@ std::pair<unsigned, unsigned> coaler::embedder::SubstructureAnalyzer::getNumberO
      *  all the same, e.g. c1ccccc1
      *  repeating patterns, e.g. C1NCNCN1 or structures like C1NOSCNOSCNOS1
      */
-    if(ranksCount.size() == nofAtoms){
+    if (ranksCount.size() == nofAtoms) {
         return noRotaionsDefault;
     }
     unsigned nofRotations = 0;
@@ -97,8 +98,8 @@ std::pair<unsigned, unsigned> coaler::embedder::SubstructureAnalyzer::getNumberO
             nofRotations = 1;
     }
     unsigned rotationsStepSize = 0;
-    if(nofRotations > 1){
+    if (nofRotations > 1) {
         rotationsStepSize = molecule.getNumAtoms() / nofRotations;
     }
-    return std::make_pair(nofRotations,rotationsStepSize);
+    return std::make_pair(nofRotations, rotationsStepSize);
 }

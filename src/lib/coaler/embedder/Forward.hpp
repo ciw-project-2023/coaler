@@ -4,9 +4,9 @@
 
 #pragma once
 
-namespace coaler::embedder{
+namespace coaler::embedder {
 
-    struct ConformerEmbeddingParams{
+    struct ConformerEmbeddingParams {
         unsigned maxTotalConfsPerMol;
         unsigned minConfsPerMatch;
         unsigned maxConfsPerMatch;
@@ -14,4 +14,4 @@ namespace coaler::embedder{
 
     using CoreAtomMapping = std::map<int, RDGeom::Point3D>;
 
-}
+}  // namespace coaler::embedder
