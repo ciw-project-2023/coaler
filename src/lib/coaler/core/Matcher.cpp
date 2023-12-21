@@ -30,7 +30,6 @@ namespace coaler::core {
         auto params = RDKit::DGeomHelpers::srETKDGv3;
         RDKit::DGeomHelpers::EmbedMolecule(first, params);
 
-
         std::vector<std::pair<int, double>> result;
         RDKit::MMFF::MMFFOptimizeMoleculeConfs(first, result);
 

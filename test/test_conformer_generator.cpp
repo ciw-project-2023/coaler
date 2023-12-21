@@ -34,7 +34,7 @@ bool has_shared_core(const core::CoreResult& core, const RDKit::ROMOL_SPTR& mol,
             diffSum += diff.length();
         }
         double avgDiff = diffSum / static_cast<double>(match.size());
-        if(avgDiff <= AVG_DEVIATION_THRESHOLD) {
+        if (avgDiff <= AVG_DEVIATION_THRESHOLD) {
             return true;
         }
     }
@@ -49,11 +49,10 @@ void check_confs_per_match(const RDKit::ROMOL_SPTR& mol, unsigned min, unsigned 
         auto curr_conf = mol->getConformer(i);
         for (unsigned j = 0; j < curr_conf.getNumAtoms(); j++) {
             RDGeom::Point3D atomPos = curr_conf.getAtomPos(j);
-            std::vector<double> atomPosVec = {atomPos.x,atomPos.y,atomPos.z};
+            std::vector<double> atomPosVec = {atomPos.x, atomPos.y, atomPos.z};
             if (counter.find(atomPosVec) == counter.end()) {
-                counter.insert({atomPosVec,1});
-            }
-            else {
+                counter.insert({atomPosVec, 1});
+            } else {
                 counter[atomPosVec]++;
             }
         }
@@ -62,14 +61,18 @@ void check_confs_per_match(const RDKit::ROMOL_SPTR& mol, unsigned min, unsigned 
     unsigned map_min = counter.begin()->second;
     unsigned map_max = 0;
     for (auto entry : counter) {
-        if (entry.second < map_min) {map_min = entry.second;}
-        if (entry.second > map_max) {map_max = entry.second;}
+        if (entry.second < map_min) {
+            map_min = entry.second;
+        }
+        if (entry.second > map_max) {
+            map_max = entry.second;
+        }
     }
     // checking that max and min below/above threshold
     CHECK(map_max <= max);
     CHECK(map_min >= min);
     // checking that conformers are split equal between matches
-    CHECK((map_max-map_min) <= 1);
+    CHECK((map_max - map_min) <= 1);
 }
 
 /*----------------------------------------------------------------------------------------------------------------*/
@@ -153,15 +156,13 @@ TEST_CASE("test_num_conformers", "[conformer_generator_tester]") {
     auto mol1 = ROMolFromSmiles("C1CCCCC1CCCO");
     auto mol2 = ROMolFromSmiles("C1CC(C)CCC1C");
 
+    // auto mol2 = ROMolFromSmiles("C1CCCCC1C"); this mol crashed embedder for some reason
+    // auto mol2 = ROMolFromSmiles("C1CCC(C)CC1C"); this too
 
-    //auto mol2 = ROMolFromSmiles("C1CCCCC1C"); this mol crashed embedder for some reason
-    //auto mol2 = ROMolFromSmiles("C1CCC(C)CC1C"); this too
+    // auto mol2 = ROMolFromSmiles("c1c(O)cc(O)cc1O");
+    // auto mol3 = ROMolFromSmiles("c2c(CC1CC1)cc1ccccc1c2");
 
-    //auto mol2 = ROMolFromSmiles("c1c(O)cc(O)cc1O");
-    //auto mol3 = ROMolFromSmiles("c2c(CC1CC1)cc1ccccc1c2");
-
-
-    //NOTE symmetric rings can only appear with murco cores (unless entire mol is just ring)
+    // NOTE symmetric rings can only appear with murco cores (unless entire mol is just ring)
     RDKit::MOL_SPTR_VECT const mols = {mol1, mol2};
     auto coreResult = core::Matcher::calculateCoreMcs(mols).value();
     REQUIRE(coreResult.first->getNumAtoms() == 7U);
@@ -177,7 +178,7 @@ TEST_CASE("test_num_conformers", "[conformer_generator_tester]") {
         REQUIRE(embedder.embedEvenlyAcrossAllMatches(mol, params));
         CHECK(mol->getNumConformers() == params.maxConfsPerMatch);
         for (unsigned i = 0; i < mol->getNumConformers(); i++) {
-            //check_confs_per_match(mol,params.minConfsPerMatch, params.maxConfsPerMatch, matches.size());
+            // check_confs_per_match(mol,params.minConfsPerMatch, params.maxConfsPerMatch, matches.size());
         }
     }
 

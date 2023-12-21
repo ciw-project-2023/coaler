@@ -26,15 +26,13 @@ namespace coaler::embedder {
     ConformerEmbedder::ConformerEmbedder(RDKit::ROMOL_SPTR &query, CoreAtomMapping &coords, const int threads,
                                          const bool divideConformersByMatches)
         : m_core(query), m_threads(threads), m_coords(coords), m_divideConformersByMatches(divideConformersByMatches) {
-        for(const auto& atom : m_core->atoms())
-        {
+        for (const auto &atom : m_core->atoms()) {
             atom->calcImplicitValence();
         }
     }
 
     bool ConformerEmbedder::embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol,
                                                         const ConformerEmbeddingParams &confCountParams) {
-
         // firstMatch molecule and core
         RDKit::SubstructMatchParameters substructMatchParams
             = coaler::core::Matcher::getSubstructMatchParams(m_threads);
@@ -86,7 +84,6 @@ namespace coaler::embedder {
                 }
                 RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, nofConfsForCurrentMatch, params);
             }
-
         }
         return true;
     }
