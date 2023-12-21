@@ -35,14 +35,15 @@ namespace coaler {
 
         // Point Cloud Matrix |rows| == |R_groups + Core|
         std::vector<std::vector<open3d::t::geometry::PointCloud>> point_clouds(
-            decomposer_.getRGroupsAsColumns().size());
+            decomposer_.getRGroupsAsColumns().size(),
+            std::vector<open3d::t::geometry::PointCloud>(decomposer_.getRGroupsAsRows().size()));
 
         size_t group_idx = 0;
         for (auto col : decomposer_.getRGroupsAsColumns()) {
             spdlog::info("R Group {}", col.first);
 
             // Point Cloud Matrix  |columns| = |mols|
-            std::vector<open3d::t::geometry::PointCloud> point_clouds_r_group(mol_vec_.size());
+            // std::vector<open3d::t::geometry::PointCloud> point_clouds_r_group(mol_vec_.size());
 
             size_t mol_idx = 0;
             for (auto mol : col.second) {
@@ -68,11 +69,11 @@ namespace coaler {
                 }
 
                 open3d::t::geometry::PointCloud cur_cloud(points);
-                point_clouds_r_group.at(mol_idx) = cur_cloud;
-                mol_idx++;
+                point_clouds.at(group_idx).at(mol_idx) = cur_cloud;
+                mol_idx = mol_idx + 1;
             }
-            point_clouds.at(group_idx) = point_clouds_r_group;
-            group_idx++;
+            // point_clouds.at(group_idx) = point_clouds_r_group;
+            group_idx = group_idx + 1;
         }
 
         spdlog::info("Molecule Point Clouds Created");
@@ -126,35 +127,32 @@ namespace coaler {
         std::vector<std::vector<open3d::t::geometry::PointCloud>>& point_clouds) {
         spdlog::info("Start Setting");
 
-//        std::vector<std::vector<RDKit::ROMOL_SPTR>> decomposed;
-//        for (int i = 0; i < mol_vec_.size(); i++) {
-//            std::vector<RDKit::ROMOL_SPTR> decomposed_mol;
-//            decomposed.emplace_back(decomposed_mol);
-//        }
+        // rows are molecules and columns are the rgroups
+        std::vector<std::vector<RDKit::ROMOL_SPTR>> decomposed(
+            decomposer_.getRGroupsAsRows().size(),
+            std::vector<RDKit::ROMOL_SPTR>(decomposer_.getRGroupsAsColumns().size()));
 
-//        std::vector<std::vector<std::string>> string_vec(mol_vec_.size());
-//        for (int i = 0; i < mol_vec_.size(); i++) {
-//            std::vector<std::string> one_str;
-//            string_vec.emplace_back(one_str);
-//        }
+        size_t group_idx = 0;
+        for (auto col : decomposer_.getRGroupsAsColumns()) {
+            //spdlog::info("Group {}", group_idx + 1);
+            size_t mol_idx = 0;
+            for (auto mol : col.second) {
+                if (RDKit::MolToSmiles(*mol) == "") {
+                    decomposed.at(mol_idx).at(group_idx) = mol;
+                    // spdlog::info("No R-group for mol {} at rgroup {}", mol_idx, group_idx);
+                    mol_idx++;
+                    continue;
+                }
 
-        size_t mol_idx = 0;
-        for (auto row : decomposer_.getRGroupsAsRows()) {
-            spdlog::info("MOL");
+                spdlog::info("Smiles {}", RDKit::MolToSmiles(*mol));
 
-            std::vector<RDKit::ROMOL_SPTR> decomposed;
-
-            size_t group_idx = 0;
-            for(auto groups: row){
-                spdlog::info("{} Smiles {}", groups.first, RDKit::MolToSmiles(*groups.second));
-
-                RDKit::ROMol r_mol = *groups.second;
+                RDKit::ROMol r_mol = *mol;
 
                 int conformer_count = r_mol.getNumConformers();
-                if(conformer_count == 0){
+                if (conformer_count == 0) {
                     spdlog::info("No Conformere <=> No R Group");
-                    decomposed.emplace_back(boost::make_shared<RDKit::ROMol>(r_mol));
-                    group_idx++;
+                    decomposed.at(mol_idx).at(group_idx) = boost::make_shared<RDKit::ROMol>(r_mol);
+                    mol_idx++;
                     continue;
                 }
 
@@ -175,47 +173,50 @@ namespace coaler {
                     h_i++;
                 }
 
-                auto& cur_cloud = point_clouds.at(group_idx).at(mol_idx);
-                auto& cur_tensor = cur_cloud.GetPointPositions();
+                if (!RDKit::MolToSmiles(r_mol).empty() && group_idx != 0) {
+                    // spdlog::info("Point Clouds {} {}", point_clouds.size(), point_clouds.at(group_idx).size());
+                    spdlog::info("group {} mol {}", group_idx, mol_idx);
+                    auto& cur_cloud = point_clouds.at(group_idx).at(mol_idx);
+                    //spdlog::info("current cloud get {}", cur_cloud.ToString());
+                    auto cur_tensor = cur_cloud.GetPointPositions();
+                    // spdlog::info("Current Tensor {} {}", cur_tensor.GetShape(0), cur_tensor.GetShape(1));
+                    // spdlog::info("Mol Atoms {}", r_group_conf.getPositions().size());
 
-                if (!RDKit::MolToSmiles(r_mol).empty()) {
                     int i = 0;
                     for (auto& pos : r_group_conf.getPositions()) {
-                        // spdlog::info("Before {}", pos.x);
+                        // spdlog::info("Idx {}", i);
                         pos.x = std::stod(cur_tensor[i][0].ToString());
-                        // spdlog::info("After {}", pos.x);
                         pos.y = std::stod(cur_tensor[i][1].ToString());
                         pos.z = std::stod(cur_tensor[i][2].ToString());
                         i++;
                     }
                 }
 
-                decomposed.emplace_back(boost::make_shared<RDKit::ROMol>(r_mol));
-                group_idx = group_idx + 1;
+                decomposed.at(mol_idx).at(group_idx) = boost::make_shared<RDKit::ROMol>(r_mol);
+
+                mol_idx = mol_idx + 1;
             }
-
-            auto tmp_mol_ = RDKit::molzip(decomposed);
-            RDKit::RWMol mol = *tmp_mol_;
-            spdlog::info("Molzip {}", RDKit::MolToSmiles(mol));
-            geo_opt_ligands_.emplace_back(mol);
-
-            mol_idx = mol_idx + 1;
+            group_idx = group_idx + 1;
         }
 
+//        size_t mol_idx = 0;
+//        for (auto row : decomposer_.getRGroupsAsRows()) {
 //
-//        size_t group_idx = 0;
-//        for (auto col : decomposer_.getRGroupsAsColumns()) {
-//            spdlog::info("R Group {}", col.first);
+//            spdlog::info("MOL");
 //
-//            size_t mol_idx = 0;
-//            for (auto mol : col.second) {
-//                RDKit::ROMol r_mol = *mol;
+//            std::vector<RDKit::ROMOL_SPTR> decomposed;
+//
+//            size_t group_idx = 0;
+//            for (auto groups : row) {
+//                spdlog::info("{} Smiles {}", groups.first, RDKit::MolToSmiles(*groups.second));
+//
+//                RDKit::ROMol r_mol = *groups.second;
 //
 //                int conformer_count = r_mol.getNumConformers();
-//                if(conformer_count == 0){
+//                if (conformer_count == 0) {
 //                    spdlog::info("No Conformere <=> No R Group");
-//                    decomposed.at(mol_idx).emplace_back(boost::make_shared<RDKit::ROMol>(r_mol));
-//                    mol_idx++;
+//                    decomposed.emplace_back(boost::make_shared<RDKit::ROMol>(r_mol));
+//                    group_idx++;
 //                    continue;
 //                }
 //
@@ -236,38 +237,100 @@ namespace coaler {
 //                    h_i++;
 //                }
 //
-//                auto& cur_cloud = point_clouds.at(group_idx).at(mol_idx);
-//                auto& cur_tensor = cur_cloud.GetPointPositions();
-//
 //                if (!RDKit::MolToSmiles(r_mol).empty()) {
+//                    // spdlog::info("Point Clouds {} {}", point_clouds.size(), point_clouds.at(group_idx).size());
+//                    // spdlog::info("group {} mol {}", group_idx, mol_idx);
+//                    auto& cur_cloud = point_clouds.at(group_idx).at(mol_idx);
+//                    // spdlog::info("current cloud get {}", cur_cloud.ToString());
+//                    auto cur_tensor = cur_cloud.GetPointPositions();
+//                    // spdlog::info("Current Tensor {} {}", cur_tensor.GetShape(0), cur_tensor.GetShape(1));
+//                    // spdlog::info("Mol Atoms {}", r_group_conf.getPositions().size());
+//
 //                    int i = 0;
 //                    for (auto& pos : r_group_conf.getPositions()) {
-//                        // spdlog::info("Before {}", pos.x);
+//                        // spdlog::info("Idx {}", i);
 //                        pos.x = std::stod(cur_tensor[i][0].ToString());
-//                        // spdlog::info("After {}", pos.x);
 //                        pos.y = std::stod(cur_tensor[i][1].ToString());
 //                        pos.z = std::stod(cur_tensor[i][2].ToString());
 //                        i++;
 //                    }
 //                }
 //
-//                decomposed.at(mol_idx).emplace_back(boost::make_shared<RDKit::ROMol>(r_mol));
-//                mol_idx = mol_idx + 1;
-//            }
-//            group_idx = group_idx + 1;
-//        }
-
-//        for (auto decomposed_mol : decomposed) {
-//            for(auto r_group: decomposed_mol){
-//                spdlog::info("RGroup {}", RDKit::MolToSmiles(*r_group));
+//                decomposed.emplace_back(boost::make_shared<RDKit::ROMol>(r_mol));
+//                group_idx = group_idx + 1;
 //            }
 //
-//            auto tmp_mol_ = RDKit::molzip(decomposed_mol);
+//            auto tmp_mol_ = RDKit::molzip(decomposed);
 //            RDKit::RWMol mol = *tmp_mol_;
 //            spdlog::info("Molzip {}", RDKit::MolToSmiles(mol));
-//
 //            geo_opt_ligands_.emplace_back(mol);
+//
+//            mol_idx = mol_idx + 1;
 //        }
+
+        //
+        //        size_t group_idx = 0;
+        //        for (auto col : decomposer_.getRGroupsAsColumns()) {
+        //            spdlog::info("R Group {}", col.first);
+        //
+        //            size_t mol_idx = 0;
+        //            for (auto mol : col.second) {
+        //                RDKit::ROMol r_mol = *mol;
+        //
+        //                int conformer_count = r_mol.getNumConformers();
+        //                if(conformer_count == 0){
+        //                    spdlog::info("No Conformere <=> No R Group");
+        //                    decomposed.at(mol_idx).emplace_back(boost::make_shared<RDKit::ROMol>(r_mol));
+        //                    mol_idx++;
+        //                    continue;
+        //                }
+        //
+        //                // Delete old conformers except one
+        //                auto helper_conf = r_mol.getConformer(pos_id_vec_.at(mol_idx));
+        //                for (int j = 0; j < conformer_count - 1; j++) {
+        //                    auto one_conf = r_mol.getConformer();
+        //                    r_mol.removeConformer(one_conf.getId());
+        //                }
+        //                auto& r_group_conf = r_mol.getConformer();
+        //
+        //                // Set to target conformere
+        //                int h_i = 0;
+        //                for (auto& pos : r_group_conf.getPositions()) {
+        //                    pos.x = helper_conf.getPositions()[h_i].x;
+        //                    pos.y = helper_conf.getPositions()[h_i].y;
+        //                    pos.z = helper_conf.getPositions()[h_i].z;
+        //                    h_i++;
+        //                }
+        //
+        //                auto& cur_cloud = point_clouds.at(group_idx).at(mol_idx);
+        //                auto& cur_tensor = cur_cloud.GetPointPositions();
+        //
+        //                if (!RDKit::MolToSmiles(r_mol).empty()) {
+        //                    int i = 0;
+        //                    for (auto& pos : r_group_conf.getPositions()) {
+        //                        // spdlog::info("Before {}", pos.x);
+        //                        pos.x = std::stod(cur_tensor[i][0].ToString());
+        //                        // spdlog::info("After {}", pos.x);
+        //                        pos.y = std::stod(cur_tensor[i][1].ToString());
+        //                        pos.z = std::stod(cur_tensor[i][2].ToString());
+        //                        i++;
+        //                    }
+        //                }
+        //
+        //                decomposed.at(mol_idx).emplace_back(boost::make_shared<RDKit::ROMol>(r_mol));
+        //                mol_idx = mol_idx + 1;
+        //            }
+        //            group_idx = group_idx + 1;
+        //        }
+
+
+        for(int i = 0; i < decomposed.size(); i++){
+            auto tmp_mol_ = RDKit::molzip(decomposed.at(i));
+            RDKit::RWMol mol = *tmp_mol_;
+            spdlog::info("Molzip {}", RDKit::MolToSmiles(mol));
+
+            geo_opt_ligands_.emplace_back(mol);
+        }
 
         spdlog::info("Positions Set");
     }
