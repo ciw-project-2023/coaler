@@ -12,4 +12,5 @@
 #include <utility>
 #include <vector>
 
+#include "GraphMol/FMCS/FMCS.h"
 #include "Matcher.hpp"

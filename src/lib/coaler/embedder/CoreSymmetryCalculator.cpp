@@ -33,7 +33,6 @@ namespace coaler::embedder {
                 newId = newId - idMax - 1;
             }
             newMap.emplace(newId, entry.second);
-            spdlog::info(newId);
         }
         return newMap;
     }

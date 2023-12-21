@@ -21,6 +21,7 @@ add_library(coaler_lib STATIC ${library_src} coaler/embedder/Forward.hpp)
 target_include_directories(coaler_lib PUBLIC ${rdkit_INCLUDE_DIRS})
 target_include_directories(coaler_lib PUBLIC ${Boost_INCLUDE_DIRS})
 target_include_directories(coaler_lib PUBLIC ${spdlog_INCLUDE_DIRS})
+target_include_directories(coaler_lib PUBLIC .)
 
 foreach(lib IN LISTS rdkitlibs)
     target_link_libraries(coaler_lib PUBLIC rdkit::${lib})

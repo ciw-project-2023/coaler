@@ -17,6 +17,7 @@
 
 #include "CoreSymmetryCalculator.hpp"
 #include "SubstructureAnalyzer.hpp"
+#include "coaler/core/Matcher.hpp"
 
 const unsigned seed = 42;
 const float forceTol = 0.0135;
@@ -24,17 +25,19 @@ const float forceTol = 0.0135;
 namespace coaler::embedder {
     ConformerEmbedder::ConformerEmbedder(RDKit::ROMOL_SPTR &query, CoreAtomMapping &coords, const int threads,
                                          const bool divideConformersByMatches)
-        : m_core(query), m_threads(threads), m_coords(coords), m_divideConformersByMatches(divideConformersByMatches) {}
+        : m_core(query), m_threads(threads), m_coords(coords), m_divideConformersByMatches(divideConformersByMatches) {
+        for(const auto& atom : m_core->atoms())
+        {
+            atom->calcImplicitValence();
+        }
+    }
 
     bool ConformerEmbedder::embedEvenlyAcrossAllMatches(const RDKit::ROMOL_SPTR &mol,
                                                         const ConformerEmbeddingParams &confCountParams) {
+
         // firstMatch molecule and core
-        RDKit::SubstructMatchParameters substructMatchParams;
-        substructMatchParams.uniquify = true;
-        substructMatchParams.useChirality = true;
-        substructMatchParams.useQueryQueryMatches = false;
-        substructMatchParams.maxMatches = 1000;
-        substructMatchParams.numThreads = m_threads;
+        RDKit::SubstructMatchParameters substructMatchParams
+            = coaler::core::Matcher::getSubstructMatchParams(m_threads);
 
         std::vector<RDKit::MatchVectType> matches = RDKit::SubstructMatch(*mol, *m_core, substructMatchParams);
         if (matches.empty()) {
@@ -73,23 +76,19 @@ namespace coaler::embedder {
                 molQueryCoords = CoreSymmetryCalculator::getShiftedMapping(molQueryCoords, rotationStep);
 
                 auto params = this->getEmbeddingParameters(molQueryCoords);
+                params.clearConfs = false;
 
+                unsigned nofConfsForCurrentMatch = 0;
                 if (m_divideConformersByMatches) {
-                    unsigned nofConfsForCurrentMatch = matchDistribution.at(matchPositionCounter);
-                    RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, nofConfsForCurrentMatch, params);
+                    nofConfsForCurrentMatch = matchDistribution.at(matchPositionCounter);
                 } else {
-                    RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, confCountParams.maxConfsPerMatch, params);
+                    nofConfsForCurrentMatch = confCountParams.maxConfsPerMatch;
                 }
+                RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, nofConfsForCurrentMatch, params);
             }
 
-            if (m_divideConformersByMatches) {
-                assert(mol->getNumConformers() <= confCountParams.maxConfsPerMatch);
-            } else {
-                assert(mol->getNumConformers() == confCountParams.maxConfsPerMatch * matches.size());
-            }
         }
-
-        return true;  // condition?
+        return true;
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/

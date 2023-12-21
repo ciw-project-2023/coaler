@@ -3,6 +3,8 @@
 //
 
 #pragma once
+#include <map>
+#include <GraphMol/DistGeomHelpers/Embedder.h>
 
 namespace coaler::embedder {
 
