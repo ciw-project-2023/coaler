@@ -60,9 +60,7 @@ namespace coaler::core {
         return std::make_pair(nullptr, mcs.value().second);
     }
 
-
     RDKit::MCSParameters Matcher::getMCSParams() {
-
         RDKit::MCSParameters mcsParams;
         RDKit::MCSAtomCompareParameters atomCompParams;
         atomCompParams.MatchChiralTag = true;
@@ -86,9 +84,7 @@ namespace coaler::core {
         return mcsParams;
     }
 
-
     RDKit::SubstructMatchParameters Matcher::getSubstructMatchParams(int numOfThreads) {
-
         RDKit::SubstructMatchParameters substructMatchParams;
         substructMatchParams.uniquify = false;
         substructMatchParams.useChirality = true;
