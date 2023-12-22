@@ -21,15 +21,16 @@
 namespace coaler::core {
 
     void Matcher::murckoPruningRecursive(RDKit::RWMOL_SPTR mol, int atomID, int parentID, std::vector<bool>& visit,
-                                         std::vector<int>& delAtoms, std::vector<std::pair<int, int>>& delBonds) {
+                                         std::vector<int>& delAtoms, std::vector<std::pair<int, int>>& delBonds,
+                                         std::vector<int>& ringAtoms) {
         // mark atom as visited and find all neighbor atoms of atom with atomID
         visit.at(atomID) = true;
         for (const auto& nbri : boost::make_iterator_range(mol->getAtomNeighbors(mol->getAtomWithIdx(atomID)))) {
-            // only visit atoms not yet visited
-            if (nbri == parentID || visit.at(nbri)) {
+            // only visit atoms not the parent, not yet visited and which are not part of any ring
+            if (nbri == parentID || visit.at(nbri) || std::find(ringAtoms.begin(), ringAtoms.end(), nbri) != ringAtoms.end()) {
                 continue;
             }
-            murckoPruningRecursive(mol, nbri, atomID, visit, delAtoms, delBonds);
+            murckoPruningRecursive(mol, nbri, atomID, visit, delAtoms, delBonds, ringAtoms);
 
             // find neighbors that are not on the to-be-deleted-list and count them
             int numNbrs = 0;
@@ -47,6 +48,26 @@ namespace coaler::core {
                 delAtoms.push_back(nbri);
             }
         }
+    }
+
+    void Matcher::murckoCheckDelAtoms(RDKit::RWMOL_SPTR mol, int atomID, int parentID, std::vector<bool>& visit,
+                                      std::vector<int>& ringAtoms, std::vector<int>& foundRingAtoms) {
+        // mark atom as visited and check if they are part of any ring. If yes save and return to
+        // recursive call before
+        visit.at(atomID) = true;
+        if (std::find(ringAtoms.begin(), ringAtoms.end(), atomID) != ringAtoms.end()) {
+            foundRingAtoms.push_back(atomID);
+            return;
+        }
+        // visit all neighbors if they are not the parent and are not yet visited
+        for (const auto& nbri : boost::make_iterator_range(mol->getAtomNeighbors(mol->getAtomWithIdx(atomID)))) {
+            //const auto& nbr = (mcsRWMol)[nbri];
+            if (nbri == parentID || visit.at(nbri)) {
+                continue;
+            }
+            murckoCheckDelAtoms(mol, nbri, atomID, visit, ringAtoms, foundRingAtoms);
+        }
+
     }
 
     std::optional<CoreResult> Matcher::calculateCoreMcs(RDKit::MOL_SPTR_VECT mols, int numOfThreads) {
@@ -108,6 +129,7 @@ namespace coaler::core {
     }
 
     std::optional<CoreResult> Matcher::calculateCoreMurcko(RDKit::MOL_SPTR_VECT mols, int numOfThreads) {
+        // calculate MCS first and sanitize molecule
         auto mcs = Matcher::calculateCoreMcs(mols, numOfThreads);
         if (!mcs.has_value()) {
             return std::nullopt;
@@ -119,40 +141,73 @@ namespace coaler::core {
             return std::nullopt;
         }
 
+        // initialize vars for DFS and find all atoms that are part of any ring
         std::vector<bool> visit(mcsRWMol.getNumAtoms(), false);
-        std::vector<int> atomQueue;
 
+        std::vector<int> ringAtoms;
         std::vector<std::vector<int>> ringVec = mcsRWMol.getRingInfo()->atomRings();
         for (auto ring : ringVec) {
             for (int atomID : ring) {
                 if (visit.at(atomID)) {
                     continue;
                 }
-                atomQueue.push_back(atomID);
+                ringAtoms.push_back(atomID);
             }
         }
 
-        std::vector<int> delAtoms;
+        // start pruning of mcs, save to be deleted atoms and bonds
+        std::vector<int> delAtomsMaybe;
         std::vector<std::pair<int, int>> delBonds;
-        RDKit::RWMOL_SPTR mcsRWPtr = boost::make_shared<RDKit::RWMol>(mcsRWMol);
-        for (auto atom : atomQueue) {
-            for (const auto& nbri :
-                 boost::make_iterator_range(mcsRWMol.getAtomNeighbors(mcsRWMol.getAtomWithIdx(atom)))) {
-                const auto& nbr = (mcsRWMol)[nbri];
-                murckoPruningRecursive(mcsRWPtr, nbri, atom, visit, delAtoms, delBonds);
+        RDKit::RWMOL_SPTR murckoPtr = boost::make_shared<RDKit::RWMol>(mcsRWMol);
+
+        //start from each ring atom
+        for (int atomID : ringAtoms) {
+            for (int i = 0; i < murckoPtr->getNumAtoms(); i++) {visit.at(i) = false;}
+            murckoPruningRecursive(murckoPtr, atomID, -1, visit, delAtomsMaybe,
+                                   delBonds, ringAtoms);
+        }
+
+        // delete duplicates from deletetion lists
+        sort(delAtomsMaybe.begin(), delAtomsMaybe.end());
+        delAtomsMaybe.erase(unique( delAtomsMaybe.begin(), delAtomsMaybe.end() ),
+                            delAtomsMaybe.end());
+        sort(delBonds.begin(), delBonds.end());
+        delBonds.erase(unique( delBonds.begin(), delBonds.end() ), delBonds.end());
+
+        // check atoms in delAtomMaybe if they are part of the substructure between rings. If not
+        // they are added to a delAtomsDefinitely.
+        // An atom is part of the substructure between at least two rings if the DFS finds two or more
+        // ring atoms.
+        std::vector<int> foundRingAtoms;
+        std::vector<int> delAtomsDefinitely;
+        for (int delAtomsID : delAtomsMaybe) {
+            for (int i = 0; i < murckoPtr->getNumAtoms(); i++) {visit.at(i) = false;}
+            foundRingAtoms.clear();
+
+            murckoCheckDelAtoms(murckoPtr, delAtomsID, -1, visit, ringAtoms,
+                                foundRingAtoms);
+            if (foundRingAtoms.size() < 2) {
+                delAtomsDefinitely.push_back(delAtomsID);
             }
         }
 
-        std::sort(delAtoms.begin(), delAtoms.end(), std::greater<int>());
+        // remove all bonds and atoms that are not part of  the murcko scaffold.
+        // Deletion of atoms needs to be in order of atomIdx (high to low) to avoid
+        // deletion errors.
+        std::sort(delAtomsDefinitely.begin(), delAtomsDefinitely.end(), std::greater<int>());
         for (auto [atom1, atom2] : delBonds) {
-            mcsRWPtr->removeBond(atom1, atom2);
+            if (std::find(delAtomsDefinitely.begin(), delAtomsDefinitely.end(), atom1) != delAtomsDefinitely.end() &&
+                std::find(delAtomsDefinitely.begin(), delAtomsDefinitely.end(), atom2) != delAtomsDefinitely.end()) {
+                murckoPtr->removeBond(atom1, atom2);
+            }
         }
-        for (auto atom : delAtoms) {
-            mcsRWPtr->removeAtom(atom);
+        for (auto atom : delAtomsDefinitely) {
+            murckoPtr->removeAtom(atom);
         }
 
-        spdlog::info("Murco: {}", RDKit::MolToSmarts(*mcsRWPtr));
+        spdlog::info("Murco: {}", RDKit::MolToSmarts(*murckoPtr));
 
+        // Embedding of core and calculation of atomCoords
         RDKit::RWMol first = *mols.at(0);
 
         RDKit::DGeomHelpers::EmbedParameters params;
@@ -167,7 +222,7 @@ namespace coaler::core {
         substructMatchParams.aromaticMatchesConjugated = true;
         substructMatchParams.numThreads = numOfThreads;
 
-        std::vector<RDKit::MatchVectType> structMatches = RDKit::SubstructMatch(first, *mcsRWPtr, substructMatchParams);
+        std::vector<RDKit::MatchVectType> structMatches = RDKit::SubstructMatch(first, *murckoPtr, substructMatchParams);
         assert(!structMatches.empty());
 
         AtomMap moleculeCoreCoords;
@@ -177,7 +232,7 @@ namespace coaler::core {
             moleculeCoreCoords.emplace(queryId, atomCoords);
         }
 
-        return std::make_pair(mcsRWPtr, moleculeCoreCoords);
+        return std::make_pair(murckoPtr, moleculeCoreCoords);
     }
 
 }  // namespace coaler::core

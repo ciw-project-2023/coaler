@@ -36,6 +36,21 @@ namespace coaler::core {
          * @param delBonds vector to save bonds to be deleted
          */
         static void murckoPruningRecursive(RDKit::RWMOL_SPTR mol, int atomID, int parentID, std::vector<bool>& visit,
-                                           std::vector<int>& delAtoms, std::vector<std::pair<int, int>>& delBonds);
+                                           std::vector<int>& delAtoms, std::vector<std::pair<int, int>>& delBonds,
+                                           std::vector<int>& ringAtoms);
+
+        /**
+         * recursive implementation to find atoms in delAtoms which are sidechains in the murcko structure and therefore
+         * need to stay in the molecule.
+         * @param mol molecule to be pruned
+         * @param atomID current atomID of atom looked at
+         * @param parentID parent atomID of parent of atom
+         * @param visit vector to save visited atoms
+         * @param ringAtoms atoms which are inside a ring of the molecule  @param mol
+         * @param foundRingAtoms atoms found during DFS which are ringatoms of @param mol
+         */
+        static void murckoCheckDelAtoms(RDKit::RWMOL_SPTR mol, int atomID, int parentID, std::vector<bool>& visit,
+                                        std::vector<int>& ringAtoms, std::vector<int>& foundRingAtoms);
+
     };
 }  // namespace coaler::core
