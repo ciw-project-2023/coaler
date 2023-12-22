@@ -23,5 +23,19 @@ namespace coaler::core {
          * @return Murcko Scaffold as ROMol
          */
         static std::optional<CoreResult> calculateCoreMurcko(RDKit::MOL_SPTR_VECT mols, int numOfThreads);
+
+      private:
+        /**
+         * recursive implementation of a murcko pruning of the mcs structure. The function does not delete atoms or
+         * bonds from mol but saves them in delAtoms and delBonds to be deleted after function call.
+         * @param mol molecule to be pruned
+         * @param atomID current atomID of atom looked at
+         * @param parentID parent atomID of parent of atom
+         * @param visit vector to save visited atoms
+         * @param delAtoms vector to save atoms to be deleted
+         * @param delBonds vector to save bonds to be deleted
+         */
+        static void murckoPruningRecursive(RDKit::RWMOL_SPTR mol, int atomID, int parentID, std::vector<bool>& visit,
+                                           std::vector<int>& delAtoms, std::vector<std::pair<int, int>>& delBonds);
     };
 }  // namespace coaler::core
