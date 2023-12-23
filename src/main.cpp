@@ -89,9 +89,15 @@ int main(int argc, char* argv[]) {
     }
 
     auto opts = mOpts.value();
+    std::ofstream output_file(opts.out_file);
+    if (!output_file.is_open()) {
+        spdlog::error("Cannot open output file: {}", opts.out_file);
+        return 1;
+    }
     auto mols = io::FileParser::parse(opts.input_file_path);
 
     std::optional<coaler::core::CoreResult> coreResult;
+    spdlog::info("starting core calculation");
     if (opts.core_type == "mcs") {
         coreResult = core::Matcher::calculateCoreMcs(mols, opts.num_threads);
     } else if (opts.core_type == "murcko") {
