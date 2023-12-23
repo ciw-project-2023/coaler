@@ -16,7 +16,11 @@ namespace coaler::multialign {
     namespace Constants {
         constexpr unsigned DEFAULT_NOF_STARTING_ASSEMBLIES = 50;
         constexpr unsigned DEFAULT_NOF_THREADS = 1;
+        constexpr double POSE_REGISTER_SIZE_FACTOR = 0.5;
     }  // namespace Constants
+
+    static_assert(Constants::POSE_REGISTER_SIZE_FACTOR < 1);
+    static_assert(Constants::POSE_REGISTER_SIZE_FACTOR > 0);
 
     class PoseRegister;
     using PoseRegisterPtr = std::shared_ptr<PoseRegister>;
