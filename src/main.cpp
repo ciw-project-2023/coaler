@@ -32,7 +32,7 @@ const std::string help
     = "Usage: aligner [options]\n"
       "Options:\n"
       "  -h, --help\t\t\t\tPrint this help message\n"
-      "  -f, --files <path>\t\t\tPath to input files\n"
+      "  -i, --input_file <path>\t\t\tPath to input files\n"
       "  -o, --out <path>\t\t\tPath to output files\n"
       "  -j, --threads <amount>\t\t\tNumber of threads to use (default: 1)\n"
       "  --conformers <amount>\t\t\tNumber of conformers per core match to generate for each input molecule (default: "
@@ -49,7 +49,7 @@ std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
 
     opts::options_description desc("Allowed options");
     desc.add_options()("help,h", "print help message")(
-        "file,i", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
+        "input_file,i", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
         "out,o", opts::value<std::string>(&parsed_options.out_file)->default_value("out.sdf"), "path to output file")(
         "threads,j", opts::value<int>(&parsed_options.num_threads)->default_value(1), "number of threads to use")(
         "assemblies, a", opts::value<unsigned>(&parsed_options.num_start_assemblies)->default_value(10),
