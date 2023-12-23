@@ -10,10 +10,9 @@
 #include <spdlog/spdlog.h>
 
 namespace coaler::io {
-
     void OutputWriter::writeSDF(const std::string &file_path, const coaler::multialign::MultiAlignerResult &result) {
         if (result.inputLigands.size() != result.poseIDsByLigandID.size())
-            throw std::runtime_error(fmt::format("received less output molecules than there was in input: {}/{}", result.poseIDsByLigandID.size(), result.inputLigands.size()));
+            spdlog::warn(fmt::format("received less output molecules than there was in input: {}/{}", result.poseIDsByLigandID.size(), result.inputLigands.size()));
 
         std::ofstream output_file(file_path);
 

@@ -7,8 +7,10 @@
 #include "Forward.hpp"
 
 namespace coaler::core {
-    using AtomMap = std::map<int, RDGeom::Point3D>;
-    using CoreResult = std::pair<RDKit::ROMOL_SPTR, AtomMap>;
+    struct CoreResult {
+        RDKit::ROMOL_SPTR core;
+        RDKit::ROMOL_SPTR ref;
+    };
 
     class Matcher {
       public:

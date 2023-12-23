@@ -37,9 +37,18 @@ namespace coaler::io {
             }
         } else if (file_extension == ".smi") {
             // Parse as smi file
+            int line = 0;
             RDKit::SmilesMolSupplier supplier(file_path, "\t", 0, -1, false, true);
             while (!supplier.atEnd()) {
-                auto mol = boost::make_shared<RDKit::RWMol>(*supplier.next());
+                line++;
+
+                auto *const next = supplier.next();
+                if (next == nullptr) {
+                    spdlog::warn("Could not parse line {} in smi file", line);
+                    continue;
+                }
+
+                auto mol = boost::make_shared<RDKit::RWMol>(*next);
                 result.emplace_back(mol);
             }
         } else {

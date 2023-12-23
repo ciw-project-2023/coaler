@@ -25,6 +25,7 @@ struct ProgrammOptions {
     unsigned num_start_assemblies;
     std::string core_type;
     bool divideConformersByMatches;
+    bool verbose;
 };
 
 const std::string help
@@ -34,6 +35,7 @@ const std::string help
       "  -f, --files <path>\t\t\tPath to input files\n"
       "  -o, --out <path>\t\t\tPath to output files\n"
       "  -j, --threads <amount>\t\t\tNumber of threads to use (default: 1)\n"
+      "  -v, --verbose\t\t\tActivate verbose logging\n"
       "  --conformers <amount>\t\t\tNumber of conformers per core match to generate for each input molecule (default: "
       "10)\n"
       "  --divide <bool>\t\t\tDivide the number of conformers by the number of times the core is matched in the input "
@@ -45,6 +47,7 @@ const std::string help
 std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
     ProgrammOptions parsed_options;
 
+
     opts::options_description desc("Allowed options");
     desc.add_options()("help,h", "print help message")(
         "file,f", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
@@ -52,6 +55,7 @@ std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
         "threads,j", opts::value<int>(&parsed_options.num_threads)->default_value(1), "number of threads to use")(
         "assemblies, a", opts::value<unsigned>(&parsed_options.num_start_assemblies)->default_value(10),
         "number of starting assemblies to use")(
+        "verbose,v", opts::value<bool>(&parsed_options.verbose)->default_value(false), "enable debug logging")(
         "core", opts::value<std::string>(&parsed_options.core_type)->default_value("mcs"),
         "algo to detect core structure")("conformers,c",
                                          opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10),
@@ -86,6 +90,11 @@ int main(int argc, char* argv[]) {
     }
 
     auto opts = mOpts.value();
+
+    if (opts.verbose) {
+        spdlog::set_level(spdlog::level::debug);
+    }
+
     auto mols = io::FileParser::parse(opts.input_file_path);
 
     std::optional<coaler::core::CoreResult> coreResult;
@@ -106,13 +115,13 @@ int main(int argc, char* argv[]) {
 
     auto core = coreResult.value();
 
-    spdlog::info("core structure: {}", RDKit::MolToSmarts(*core.first));
+    spdlog::info("core structure: {}", RDKit::MolToSmarts(*core.core));
 
     // generate random coreResult with coordinates. TODO: get coordinates from input
 
     spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
 
-    embedder::ConformerEmbedder embedder(coreResult->first, coreResult->second, opts.num_threads,
+    embedder::ConformerEmbedder embedder(coreResult->core, coreResult->ref, opts.num_threads,
                                          opts.divideConformersByMatches);
     for (auto& mol : mols) {
         embedder.embedEvenlyAcrossAllMatches(mol, opts.num_conformers);

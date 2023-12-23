@@ -9,9 +9,11 @@
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <spdlog/spdlog.h>
 
+#include "GraphMol/MolOps.h"
 #include "GraphMol/ChemTransforms/ChemTransforms.h"
 #include "GraphMol/DistGeomHelpers/Embedder.h"
 #include "GraphMol/FMCS/FMCS.h"
+#include "unordered_set"
 
 namespace coaler::core {
     std::optional<CoreResult> Matcher::calculateCoreMcs(RDKit::MOL_SPTR_VECT mols, int numOfThreads) {
@@ -46,27 +48,46 @@ namespace coaler::core {
 
         RDKit::RWMol first = *mols.at(0);
 
-        auto params = RDKit::DGeomHelpers::srETKDGv3;
-        RDKit::DGeomHelpers::EmbedMolecule(first, params);
 
         RDKit::SubstructMatchParameters substructMatchParams;
-        substructMatchParams.useChirality = true;
+        // setting this to true breaks SIENA 2w0v
+        substructMatchParams.useChirality = false;
         substructMatchParams.useEnhancedStereo = true;
         substructMatchParams.aromaticMatchesConjugated = true;
         substructMatchParams.numThreads = numOfThreads;
 
         std::vector<RDKit::MatchVectType> structMatches
             = RDKit::SubstructMatch(first, *mcs.QueryMol, substructMatchParams);
+
+
         assert(!structMatches.empty());
 
-        AtomMap moleculeCoreCoords;
-        RDKit::Conformer conformer = first.getConformer(0);
-        for (const auto& [queryId, molId] : structMatches.at(0)) {
-            const RDGeom::Point3D atomCoords = conformer.getAtomPos(molId);
-            moleculeCoreCoords.emplace(queryId, atomCoords);
+        std::unordered_set<uint> matchedAtoms;
+        for (auto const &match: structMatches) {
+            for (auto const &[queryId, molId]: match) {
+                matchedAtoms.insert(molId);
+            }
         }
 
-        return std::make_pair(mcs.QueryMol, moleculeCoreCoords);
+        std::vector<uint> atomsForRemoval;
+        for (auto i = first.getNumAtoms()-1; i == 0; i--) {
+            if (!matchedAtoms.count(i)) {
+                atomsForRemoval.push_back(i);
+            }
+        }
+
+        for (auto const &atomId: atomsForRemoval) {
+            first.removeAtom(atomId);
+        }
+
+        auto params = RDKit::DGeomHelpers::srETKDGv3;
+        params.numThreads = numOfThreads;
+        RDKit::DGeomHelpers::EmbedMolecule(first, params);
+
+        std::vector<std::pair<int, double>> result;
+        RDKit::MMFF::MMFFOptimizeMoleculeConfs(first,result,numOfThreads);
+
+        return CoreResult{mcs.QueryMol, boost::make_shared<RDKit::ROMol>(first)};
     }
 
     std::optional<CoreResult> Matcher::calculateCoreMurcko(RDKit::MOL_SPTR_VECT mols, int numOfThreads) {
@@ -76,7 +97,7 @@ namespace coaler::core {
         }
 
         RDKit::ROMol ret = *RDKit::MurckoDecompose(*mols.at(0));
-        return std::make_pair(nullptr, mcs.value().second);
+        return CoreResult{};
     }
 
 }  // namespace coaler::core
