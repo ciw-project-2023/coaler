@@ -25,13 +25,14 @@ struct ProgrammOptions {
     unsigned num_start_assemblies;
     std::string core_type;
     bool divideConformersByMatches;
+    std::string conformerLogPath;
 };
 
 const std::string help
     = "Usage: aligner [options]\n"
       "Options:\n"
       "  -h, --help\t\t\t\tPrint this help message\n"
-      "  -f, --files <path>\t\t\tPath to input files\n"
+      "  -i, --input_file <path>\t\t\tPath to input files\n"
       "  -o, --out <path>\t\t\tPath to output files\n"
       "  -j, --threads <amount>\t\t\tNumber of threads to use (default: 1)\n"
       "  --conformers <amount>\t\t\tNumber of conformers per core match to generate for each input molecule (default: "
@@ -40,14 +41,15 @@ const std::string help
       "molecule. "
       "Helps against combinatorial explosion if core is small or has high symmetry (default: false)\n"
       "  --assemblies <amount>\t\t\tNumber of starting assemblies (default: 10)\n"
-      "  --core <algorithm>\t\t\tAlgorithm to detect core structure (default: mcs, allowed: mcs, murcko)\n";
+      "  --core <algorithm>\t\t\tAlgorithm to detect core structure (default: mcs, allowed: mcs, murcko)\n"
+      "  --confsLog <path>\t\t\tOptional path to folder to store the generated conformers\n";
 
 std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
     ProgrammOptions parsed_options;
 
     opts::options_description desc("Allowed options");
     desc.add_options()("help,h", "print help message")(
-        "file,f", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
+        "input_file,i", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
         "out,o", opts::value<std::string>(&parsed_options.out_file)->default_value("out.sdf"), "path to output file")(
         "threads,j", opts::value<int>(&parsed_options.num_threads)->default_value(1), "number of threads to use")(
         "assemblies, a", opts::value<unsigned>(&parsed_options.num_start_assemblies)->default_value(200),
@@ -57,7 +59,8 @@ std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
                                          opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10),
                                          "number of conformers per core match to generate")(
         "divide,d", opts::value<bool>(&parsed_options.divideConformersByMatches)->default_value(false),
-        "divides the number of conformers by the number of times the core is matched");
+        "divides the number of conformers by the number of times the core is matched")(
+        "confsLog", opts::value<std::string>(&parsed_options.conformerLogPath)->default_value("none"));
 
     opts::variables_map vm;
     opts::store(opts::parse_command_line(argc, argv, desc), vm);
@@ -114,8 +117,12 @@ int main(int argc, char* argv[]) {
 
     embedder::ConformerEmbedder embedder(coreResult->first, coreResult->second, opts.num_threads,
                                          opts.divideConformersByMatches);
+
     for (auto& mol : mols) {
         embedder.embedConformersWithFixedCore(mol, opts.num_conformers);
+    }
+    if (opts.conformerLogPath != "none") {
+        coaler::io::OutputWriter::writeConformersToSDF(opts.conformerLogPath, mols);
     }
 
     multialign::MultiAligner aligner(mols, opts.num_start_assemblies, opts.num_threads);
