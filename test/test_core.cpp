@@ -29,9 +29,19 @@ TEST_CASE("Core_MCS", "[core]") {
 }
 
 TEST_CASE("Core_Murcko", "[core]") {
-    RDKit::MOL_SPTR_VECT molPtr = FileParser::parse("test/data/testMurcko.smi");
-    auto coreMurcko = Matcher::calculateCoreMurcko(molPtr, 1);
-    CHECK(RDKit::MolToSmarts(*coreMurcko.value().first)
+    RDKit::MOL_SPTR_VECT smallMolPtr = coaler::io::FileParser::parse("test/data/testMurckoSmall.smi");
+    auto smallCoreMurcko = Matcher::calculateCoreMurcko(smallMolPtr, 1);
+    CHECK(RDKit::MolToSmarts(*smallCoreMurcko.value().first)
           == "[#6]1:&@[#6]:&@[#6]:&@[#6]:&@[#6](:&@[#6]:&@1)-&!@[#6&!R]-&!@[#6&!R](-&!@[#6&!R])-&!@[#6&!R]-&!@[#6]1:&@[#6]:&@[#6]:&@[#6]:&@[#6]:&@[#6]:&@1");
+
+    RDKit::MOL_SPTR_VECT mediumMolPtr = coaler::io::FileParser::parse("test/data/testMurckoMedium.smi");
+    auto mediumCoreMurcko = Matcher::calculateCoreMurcko(mediumMolPtr, 1);
+    CHECK(RDKit::MolToSmarts(*mediumCoreMurcko.value().first)
+          == "[#6]1:&@[#7,#6]:&@[#6]:&@[#6]:&@[#6]2:&@[#6]:&@1:&@[#6]:&@[#6](:&@[#6]:&@[#6]:&@2)-&!@[#6]1:&@[#7,#6]:&@[#6]:&@[#7,#6]:&@[#6]:&@[#6]:&@1");
+
+    RDKit::MOL_SPTR_VECT largeMolPtr = coaler::io::FileParser::parse("test/data/testMurckoLarge.smi");
+    auto largeCoreMurcko = Matcher::calculateCoreMurcko(largeMolPtr, 1);
+    CHECK(RDKit::MolToSmarts(*largeCoreMurcko.value().first)
+          == "[#6&!R]-&!@[#6&!R](-&!@[#17,#6,#9;!R])-&!@[#8&!R]-&!@[#6&!R](-&!@[#7,#6;!R]-,=;!@[#8&!R])-&!@[#6&!R](-&!@[#6]1:&@[#6]:&@[#7,#6]:&@[#6]:&@[#7,#6]:&@[#6]:&@1)-&!@[#6&!R]-&!@[#6]1:&@[#7,#6]:&@[#6]:&@[#6]:&@[#6]2:&@[#6]:&@1:&@[#6]:&@[#6]:&@[#6]:&@[#6]:&@2");
 
 }
