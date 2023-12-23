@@ -16,13 +16,13 @@ namespace coaler::core {
          * calculates the MCS of the molecules
          * @return MCS as ROMol
          */
-        static std::optional<CoreResult> calculateCoreMcs(RDKit::MOL_SPTR_VECT mols, int numOfThreads);
+        static std::optional<CoreResult> calculateCoreMcs(RDKit::MOL_SPTR_VECT& mols, int numOfThreads);
 
         /**
          * calculates the Murcko scaffold of the molecules
          * @return Murcko Scaffold as ROMol
          */
-        static std::optional<CoreResult> calculateCoreMurcko(RDKit::MOL_SPTR_VECT mols, int numOfThreads);
+        static std::optional<CoreResult> calculateCoreMurcko(RDKit::MOL_SPTR_VECT& mols, int numOfThreads);
 
       private:
         /**
@@ -35,7 +35,7 @@ namespace coaler::core {
          * @param delAtoms vector to save atoms to be deleted
          * @param delBonds vector to save bonds to be deleted
          */
-        static void murckoPruningRecursive(RDKit::RWMOL_SPTR mol, int atomID, int parentID, std::vector<bool>& visit,
+        static void murckoPruningRecursive(RDKit::RWMOL_SPTR& mol, int atomID, int parentID, std::vector<bool>& visit,
                                            std::vector<int>& delAtoms, std::vector<std::pair<int, int>>& delBonds,
                                            std::vector<int>& ringAtoms);
 
@@ -49,7 +49,7 @@ namespace coaler::core {
          * @param ringAtoms atoms which are inside a ring of the molecule  @param mol
          * @param foundRingAtoms atoms found during DFS which are ringatoms of @param mol
          */
-        static void murckoCheckDelAtoms(RDKit::RWMOL_SPTR mol, int atomID, int parentID, std::vector<bool>& visit,
+        static void murckoCheckDelAtoms(RDKit::RWMOL_SPTR& mol, int atomID, int parentID, std::vector<bool>& visit,
                                         std::vector<int>& ringAtoms, std::vector<int>& foundRingAtoms);
     };
 }  // namespace coaler::core

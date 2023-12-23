@@ -1,6 +1,6 @@
 #include <GraphMol/RDKitBase.h>
-#include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/ROMol.h>
+#include <GraphMol/SmilesParse/SmartsWrite.h>
 
 #include <catch2/catch.hpp>
 #include <string>
@@ -21,27 +21,27 @@ TEST_CASE("Core_MCS", "[core]") {
     auto coreScaffoldMCS = Matcher::calculateCoreMcs(mols, 1);
     CHECK(RDKit::MolToSmarts(*coreScaffoldMCS.value().first)
           == "[#6]1:&@[#6]:&@[#6](:&@[#6]:&@[#6]:&@[#6]:&@1)-&!@[#7&R]");
-
-    // TODO test murcko
-    //
-    //     auto coreScaffoldMurcko = Matcher::calculateCoreMurcko(mols);
-    //     CHECK(RDKit::MolToSmarts(*coreScaffoldMurcko.value().first) == "[#6]1:[#6]:[#6]:[#6]:[#6]:[#6]:1");
 }
 
 TEST_CASE("Core_Murcko", "[core]") {
-    RDKit::MOL_SPTR_VECT smallMolPtr = coaler::io::FileParser::parse("test/data/testMurckoSmall.smi");
-    auto smallCoreMurcko = Matcher::calculateCoreMurcko(smallMolPtr, 1);
-    CHECK(RDKit::MolToSmarts(*smallCoreMurcko.value().first)
+    SECTION("test for a small core") {
+        RDKit::MOL_SPTR_VECT smallMolPtr = coaler::io::FileParser::parse("test/data/testMurckoSmall.smi");
+        auto smallCoreMurcko = Matcher::calculateCoreMurcko(smallMolPtr, 1);
+        CHECK(RDKit::MolToSmarts(*smallCoreMurcko.value().first)
           == "[#6]1:&@[#6]:&@[#6]:&@[#6]:&@[#6](:&@[#6]:&@1)-&!@[#6&!R]-&!@[#6&!R](-&!@[#6&!R])-&!@[#6&!R]-&!@[#6]1:&@[#6]:&@[#6]:&@[#6]:&@[#6]:&@[#6]:&@1");
+    };
 
-    RDKit::MOL_SPTR_VECT mediumMolPtr = coaler::io::FileParser::parse("test/data/testMurckoMedium.smi");
-    auto mediumCoreMurcko = Matcher::calculateCoreMurcko(mediumMolPtr, 1);
-    CHECK(RDKit::MolToSmarts(*mediumCoreMurcko.value().first)
+    SECTION("test for a medium sized core") {
+        RDKit::MOL_SPTR_VECT mediumMolPtr = coaler::io::FileParser::parse("test/data/testMurckoMedium.smi");
+        auto mediumCoreMurcko = Matcher::calculateCoreMurcko(mediumMolPtr, 1);
+        CHECK(RDKit::MolToSmarts(*mediumCoreMurcko.value().first)
           == "[#6]1:&@[#7,#6]:&@[#6]:&@[#6]:&@[#6]2:&@[#6]:&@1:&@[#6]:&@[#6](:&@[#6]:&@[#6]:&@2)-&!@[#6]1:&@[#7,#6]:&@[#6]:&@[#7,#6]:&@[#6]:&@[#6]:&@1");
+    }
 
-    RDKit::MOL_SPTR_VECT largeMolPtr = coaler::io::FileParser::parse("test/data/testMurckoLarge.smi");
-    auto largeCoreMurcko = Matcher::calculateCoreMurcko(largeMolPtr, 1);
-    CHECK(RDKit::MolToSmarts(*largeCoreMurcko.value().first)
+    SECTION("test for a large core") {
+        RDKit::MOL_SPTR_VECT largeMolPtr = coaler::io::FileParser::parse("test/data/testMurckoLarge.smi");
+        auto largeCoreMurcko = Matcher::calculateCoreMurcko(largeMolPtr, 1);
+        CHECK(RDKit::MolToSmarts(*largeCoreMurcko.value().first)
           == "[#6&!R]-&!@[#6&!R](-&!@[#17,#6,#9;!R])-&!@[#8&!R]-&!@[#6&!R](-&!@[#7,#6;!R]-,=;!@[#8&!R])-&!@[#6&!R](-&!@[#6]1:&@[#6]:&@[#7,#6]:&@[#6]:&@[#7,#6]:&@[#6]:&@1)-&!@[#6&!R]-&!@[#6]1:&@[#7,#6]:&@[#6]:&@[#6]:&@[#6]2:&@[#6]:&@1:&@[#6]:&@[#6]:&@[#6]:&@[#6]:&@2");
-
+    }
 }
