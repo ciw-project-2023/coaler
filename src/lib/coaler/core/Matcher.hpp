@@ -51,6 +51,5 @@ namespace coaler::core {
          */
         static void murckoCheckDelAtoms(RDKit::RWMOL_SPTR mol, int atomID, int parentID, std::vector<bool>& visit,
                                         std::vector<int>& ringAtoms, std::vector<int>& foundRingAtoms);
-
     };
 }  // namespace coaler::core
