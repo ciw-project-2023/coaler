@@ -91,6 +91,7 @@ namespace coaler::embedder {
         if (m_divideConformersByMatches) {
             assert(mol->getNumConformers() == numConfs);
         } else {
+            spdlog::info("mol {} numConfs {} nofMatches {}.", mol->getNumConformers(), numConfs, nofMatches);
             assert(mol->getNumConformers() == numConfs * nofMatches);
         }
     }
