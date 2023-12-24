@@ -143,8 +143,10 @@ namespace coaler::multialign {
 
         // build starting ensembles from registers
         // AssemblyCollection assemblies;
+        spdlog::info("building starting assemblies for ligands");
         std::priority_queue<AssemblyWithScore, std::vector<AssemblyWithScore>, AssemblyWithScoreGreater> assemblies;
         for (const Ligand &ligand : m_ligands) {
+            spdlog::debug("building starting assemblies for ligand {}", ligand.getID());
             for (const UniquePoseID &pose : ligand.getPoses()) {
                 LigandAlignmentAssembly assembly
                     = StartingAssemblyGenerator::generateStartingAssembly(pose, m_poseRegisters, m_ligands);
@@ -153,7 +155,6 @@ namespace coaler::multialign {
                 AssemblyWithScore newAssembly = std::make_pair(assembly, score);
 
                 // insert if queue no full or new assembly is larger that worst assembly in queue
-
                 // TODO ensure this is called correctly
                 if (assemblies.size() < m_maxStartingAssemblies) {
                     assemblies.push(newAssembly);
@@ -181,15 +182,14 @@ namespace coaler::multialign {
             assembliesList.push_back(assemblies.top());
             assemblies.pop();
         }
+
         spdlog::info("start optimization of {} alignment assemblies.", assembliesList.size());
 
         // locks for shared variables
-        omp_lock_t bestAssemblyScoreLock;
-        omp_init_lock(&bestAssemblyScoreLock);
         omp_lock_t bestAssemblyLock;
         omp_init_lock(&bestAssemblyLock);
 
-#pragma omp parallel for shared(bestAssemblyScoreLock, bestAssemblyLock, currentBestAssembly, \
+#pragma omp parallel for shared(bestAssemblyLock, currentBestAssembly, \
                                     currentBestAssemblyScore, assembliesList) default(none)
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
             auto [currentAssembly, currentAssemblyScore] = assembliesList.at(assemblyID);
@@ -254,8 +254,10 @@ namespace coaler::multialign {
                 = AssemblyScorer::calculateAssemblyScore(currentAssembly, m_pairwiseAlignments, m_ligands);
             spdlog::debug("Score after opt: {}", assemblyScore);
             if (assemblyScore > currentBestAssemblyScore) {
+                omp_set_lock(&bestAssemblyLock);
                 currentBestAssembly = currentAssembly;
                 currentBestAssemblyScore = assemblyScore;
+                omp_unset_lock(&bestAssemblyLock);
             }
         }
         spdlog::info("finished alignment optimization.");

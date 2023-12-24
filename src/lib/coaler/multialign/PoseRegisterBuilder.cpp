@@ -5,7 +5,7 @@
 
 #include <spdlog/spdlog.h>
 
-#include <iostream>
+#include <omp.h>
 
 #include "PoseRegister.hpp"
 #include "models/Ligand.hpp"
@@ -14,9 +14,15 @@ namespace coaler::multialign {
 
     PoseRegisterCollection PoseRegisterBuilder::buildPoseRegisters(const PairwiseAlignment &alignmentScores,
                                                                    const std::vector<Ligand> &ligands) noexcept {
+        spdlog::info("Building pose registers");
+        omp_lock_t poseRegisterLock;
+        omp_init_lock(&poseRegisterLock);
         PairwisePoseRegisters poseRegisters;
-        for (LigandID firstLigand = 0; firstLigand < ligands.size(); firstLigand++) {
-            for (LigandID secondLigand = 0; secondLigand < firstLigand; secondLigand++) {
+
+#pragma omp parallel for shared(ligands, poseRegisterLock, poseRegisters, alignmentScores) default(none)
+        for (unsigned firstLigand = 0; firstLigand < ligands.size(); firstLigand++) {
+            omp_set_num_threads(20);
+            for (unsigned secondLigand = 0; secondLigand < firstLigand; secondLigand++) {
                 if (firstLigand == secondLigand) {
                     continue;
                 }
@@ -27,17 +33,23 @@ namespace coaler::multialign {
                 std::shared_ptr<PoseRegister> registerPtr
                     = std::make_shared<PoseRegister>(PoseRegister(firstLigand, secondLigand, size));
 
+                omp_set_lock(&poseRegisterLock);
                 poseRegisters.emplace(currentLigandPair, registerPtr);
+                omp_unset_lock(&poseRegisterLock);
 
                 for (const UniquePoseID firstLigandPose : ligands.at(firstLigand).getPoses()) {
                     for (const UniquePoseID secondLigandPose : ligands.at(secondLigand).getPoses()) {
                         PosePair pair(firstLigandPose, secondLigandPose);
+
+                        omp_set_lock(&poseRegisterLock);
                         poseRegisters.at(currentLigandPair)->addPoses(pair, alignmentScores.at(pair));
+                        omp_unset_lock(&poseRegisterLock);
                     }
                 }
             }
         }
 
+        spdlog::info("Finished building pose registers");
         PoseRegisterCollection collection;
         for (const auto &reg : poseRegisters) {
             collection.addRegister(reg.second);

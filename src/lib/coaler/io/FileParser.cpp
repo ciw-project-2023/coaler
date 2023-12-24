@@ -38,7 +38,7 @@ namespace coaler::io {
         } else if (file_extension == ".smi") {
             // Parse as smi file
             int line = 0;
-            RDKit::SmilesMolSupplier supplier(file_path, "\t", 0, -1, false, true);
+            RDKit::SmilesMolSupplier supplier(file_path, "\t", 0, 1, false, true);
             while (!supplier.atEnd()) {
                 line++;
 
