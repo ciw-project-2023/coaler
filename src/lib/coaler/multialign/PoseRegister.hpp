@@ -61,7 +61,6 @@ namespace coaler::multialign {
         bool containsPose(const UniquePoseID& pose);
 
       private:
-
         void updateLowest();
         void removeAndUpdateLowest();
         void updateHighest(const PosePairAndScore& insertedPair);

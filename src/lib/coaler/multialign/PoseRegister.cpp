@@ -16,10 +16,11 @@ namespace {
 namespace coaler::multialign {
 
     PoseRegister::PoseRegister(LigandID firstLigand, LigandID secondLigand, unsigned maxSize)
-        : m_maxSize(maxSize), m_first(firstLigand), m_second(secondLigand),
-          m_lowest(std::make_pair(PosePair({0,1},{0,0}), std::numeric_limits<double>::max())),
-          m_highest(std::make_pair(PosePair({0,1},{0,0}), std::numeric_limits<double>::min()))
-    {
+        : m_maxSize(maxSize),
+          m_first(firstLigand),
+          m_second(secondLigand),
+          m_lowest(std::make_pair(PosePair({0, 1}, {0, 0}), std::numeric_limits<double>::max())),
+          m_highest(std::make_pair(PosePair({0, 1}, {0, 0}), std::numeric_limits<double>::min())) {
         assert(m_first != m_second);
     }
 
@@ -82,7 +83,7 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    void PoseRegister::updateHighest(const PosePairAndScore& insertedPair) {
+    void PoseRegister::updateHighest(const PosePairAndScore &insertedPair) {
         if (insertedPair.second > m_highest.second) {
             m_highest = insertedPair;
         }
@@ -94,19 +95,17 @@ namespace coaler::multialign {
         assert(m_register.size() == m_maxSize + 1);
         auto itemToRemove = m_register.begin();
         auto newLowest = m_register.begin();
-        for(auto iter = m_register.begin(); iter != m_register.end(); iter++) {
-            if(iter->second < itemToRemove->second){
+        for (auto iter = m_register.begin(); iter != m_register.end(); iter++) {
+            if (iter->second < itemToRemove->second) {
                 newLowest = itemToRemove;
                 itemToRemove = iter;
-            }
-            else if(iter->second < newLowest->second) {
+            } else if (iter->second < newLowest->second) {
                 newLowest = iter;
             }
         }
         m_register.erase(itemToRemove);
         m_lowest = *newLowest;
         assert(m_register.size() == m_maxSize);
-
     }
 
 }  // namespace coaler::multialign
