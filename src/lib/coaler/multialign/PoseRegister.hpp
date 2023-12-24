@@ -61,10 +61,17 @@ namespace coaler::multialign {
         bool containsPose(const UniquePoseID& pose);
 
       private:
+
+        void updateLowest();
+        void removeAndUpdateLowest();
+        void updateHighest(const PosePairAndScore& insertedPair);
+
         LigandID m_first;
         LigandID m_second;
         unsigned m_maxSize;
         std::vector<PosePairAndScore> m_register;
+        PosePairAndScore m_lowest;
+        PosePairAndScore m_highest;
     };
 
 }  // namespace coaler::multialign
