@@ -14,6 +14,8 @@
 #include "GraphMol/FMCS/FMCS.h"
 
 namespace coaler::core {
+    Matcher::Matcher(int threads) : m_threads(threads) {}
+
     void Matcher::murckoPruningRecursive(RDKit::RWMOL_SPTR& mol, int atomID, int parentID, std::vector<bool>& visit,
                                          std::vector<int>& delAtoms, std::vector<std::pair<int, int>>& delBonds,
                                          std::vector<int>& ringAtoms) {
@@ -63,7 +65,7 @@ namespace coaler::core {
         }
     }
 
-    std::optional<CoreResult> Matcher::calculateCoreMcs(RDKit::MOL_SPTR_VECT& mols, int numOfThreads) {
+    std::optional<CoreResult> Matcher::calculateCoreMcs(RDKit::MOL_SPTR_VECT& mols) {
         // Generates all parameters needed for RDKit::findMCS()
         RDKit::MCSParameters mcsParams;
         RDKit::MCSAtomCompareParameters atomCompParams;
@@ -95,54 +97,49 @@ namespace coaler::core {
 
         RDKit::RWMol first = *mols.at(0);
 
-        RDKit::SubstructMatchParameters substructMatchParams;
-        // setting this to true breaks SIENA 2w0v
-        substructMatchParams.useChirality = false;
-        substructMatchParams.useEnhancedStereo = true;
-        substructMatchParams.aromaticMatchesConjugated = true;
-        substructMatchParams.numThreads = numOfThreads;
+        RDKit::SubstructMatchParameters const substructMatchParams;
 
-        std::vector<RDKit::MatchVectType> structMatches
+        std::vector<RDKit::MatchVectType> const structMatches
             = RDKit::SubstructMatch(first, *mcs.QueryMol, substructMatchParams);
 
         assert(!structMatches.empty());
 
         std::unordered_set<uint> matchedAtoms;
-        for (auto const &match: structMatches) {
-            for (auto const &[queryId, molId]: match) {
+        for (auto const& match : structMatches) {
+            for (auto const& [queryId, molId] : match) {
                 matchedAtoms.insert(molId);
             }
         }
 
         std::vector<uint> atomsForRemoval;
-        for (auto i = first.getNumAtoms()-1; i == 0; i--) {
+        for (auto i = first.getNumAtoms() - 1; i == 0; i--) {
             if (!matchedAtoms.count(i)) {
                 atomsForRemoval.push_back(i);
             }
         }
 
-        for (auto const &atomId: atomsForRemoval) {
+        for (auto const& atomId : atomsForRemoval) {
             first.removeAtom(atomId);
         }
 
         auto params = RDKit::DGeomHelpers::srETKDGv3;
-        params.numThreads = numOfThreads;
+        params.numThreads = m_threads;
         RDKit::DGeomHelpers::EmbedMolecule(first, params);
 
         std::vector<std::pair<int, double>> result;
-        RDKit::MMFF::MMFFOptimizeMoleculeConfs(first,result,numOfThreads);
+        RDKit::MMFF::MMFFOptimizeMoleculeConfs(first, result, m_threads);
 
         return CoreResult{mcs.QueryMol, boost::make_shared<RDKit::ROMol>(first)};
     }
 
-    std::optional<CoreResult> Matcher::calculateCoreMurcko(RDKit::MOL_SPTR_VECT& mols, int numOfThreads) {
+    std::optional<CoreResult> Matcher::calculateCoreMurcko(RDKit::MOL_SPTR_VECT& mols) {
         // calculate MCS first and sanitize molecule
-        auto mcs = Matcher::calculateCoreMcs(mols, numOfThreads);
+        auto mcs = Matcher::calculateCoreMcs(mols);
         if (!mcs.has_value()) {
             return std::nullopt;
         }
 
-        RDKit::RWMol mcsRWMol = *mcs.value().first;
+        RDKit::RWMol mcsRWMol = *mcs.value().core;
         RDKit::MolOps::sanitizeMol(mcsRWMol);
         if (mcsRWMol.getRingInfo()->numRings() == 0) {
             return std::nullopt;
@@ -153,11 +150,12 @@ namespace coaler::core {
 
         std::vector<int> ringAtoms;
         std::vector<std::vector<int>> ringVec = mcsRWMol.getRingInfo()->atomRings();
-        for (auto ring : ringVec) {
-            for (int atomID : ring) {
+        for (const auto ring : ringVec) {
+            for (const auto atomID : ring) {
                 if (visit.at(atomID)) {
                     continue;
                 }
+
                 ringAtoms.push_back(atomID);
             }
         }
@@ -168,7 +166,7 @@ namespace coaler::core {
         RDKit::RWMOL_SPTR murckoPtr = boost::make_shared<RDKit::RWMol>(mcsRWMol);
 
         // start from each ring atom
-        for (int atomID : ringAtoms) {
+        for (const auto atomID : ringAtoms) {
             for (int i = 0; i < murckoPtr->getNumAtoms(); i++) {
                 visit.at(i) = false;
             }
@@ -187,7 +185,7 @@ namespace coaler::core {
         // ring atoms.
         std::vector<int> foundRingAtoms;
         std::vector<int> delAtomsDefinitely;
-        for (int delAtomsID : delAtomsMaybe) {
+        for (const auto delAtomsID : delAtomsMaybe) {
             for (int i = 0; i < murckoPtr->getNumAtoms(); i++) {
                 visit.at(i) = false;
             }
@@ -202,7 +200,7 @@ namespace coaler::core {
         // remove all bonds and atoms that are not part of  the murcko scaffold.
         // Deletion of atoms needs to be in order of atomIdx (high to low) to avoid
         // deletion errors.
-        std::sort(delAtomsDefinitely.begin(), delAtomsDefinitely.end(), std::greater<int>());
+        std::sort(delAtomsDefinitely.begin(), delAtomsDefinitely.end(), std::greater<>());
         for (auto [atom1, atom2] : delBonds) {
             if (std::find(delAtomsDefinitely.begin(), delAtomsDefinitely.end(), atom1) != delAtomsDefinitely.end()
                 && std::find(delAtomsDefinitely.begin(), delAtomsDefinitely.end(), atom2) != delAtomsDefinitely.end()) {
@@ -224,24 +222,21 @@ namespace coaler::core {
         std::vector<std::pair<int, double>> result;
         RDKit::MMFF::MMFFOptimizeMoleculeConfs(first, result);
 
-        RDKit::SubstructMatchParameters substructMatchParams;
-        substructMatchParams.useChirality = true;
-        substructMatchParams.useEnhancedStereo = true;
-        substructMatchParams.aromaticMatchesConjugated = true;
-        substructMatchParams.numThreads = numOfThreads;
-
-        std::vector<RDKit::MatchVectType> structMatches
-            = RDKit::SubstructMatch(first, *murckoPtr, substructMatchParams);
+        std::vector<RDKit::MatchVectType> const structMatches
+            = RDKit::SubstructMatch(first, *murckoPtr, this->getMatchParams());
         assert(!structMatches.empty());
 
-        AtomMap moleculeCoreCoords;
-        RDKit::Conformer conformer = first.getConformer(0);
-        for (const auto& [queryId, molId] : structMatches.at(0)) {
-            const RDGeom::Point3D atomCoords = conformer.getAtomPos(molId);
-            moleculeCoreCoords.emplace(queryId, atomCoords);
-        }
+        return CoreResult{murckoPtr, boost::make_shared<RDKit::ROMol>(first)};
+    }
 
-        return std::make_pair(murckoPtr, moleculeCoreCoords);
+    RDKit::SubstructMatchParameters Matcher::getMatchParams() const {
+        RDKit::SubstructMatchParameters substructMatchParams;
+        substructMatchParams.useChirality = false;
+        substructMatchParams.useEnhancedStereo = true;
+        substructMatchParams.aromaticMatchesConjugated = true;
+        substructMatchParams.numThreads = m_threads;
+
+        return substructMatchParams;
     }
 
 }  // namespace coaler::core

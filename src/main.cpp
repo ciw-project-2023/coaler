@@ -105,11 +105,12 @@ int main(int argc, char* argv[]) {
     auto mols = io::FileParser::parse(opts.input_file_path);
 
     std::optional<coaler::core::CoreResult> coreResult;
+    core::Matcher matcher(opts.num_threads);
     spdlog::info("starting core calculation");
     if (opts.core_type == "mcs") {
-        coreResult = core::Matcher::calculateCoreMcs(mols, opts.num_threads);
+        coreResult = matcher.calculateCoreMcs(mols);
     } else if (opts.core_type == "murcko") {
-        coreResult = core::Matcher::calculateCoreMurcko(mols, opts.num_threads);
+        coreResult = matcher.calculateCoreMurcko(mols);
     } else {
         spdlog::error("unknown coreResult calculation algorithm '{}' (allowed values are 'mcs' and 'murcko')",
                       opts.core_type);

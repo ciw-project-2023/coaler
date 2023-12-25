@@ -3,9 +3,8 @@
  */
 #include "PoseRegisterBuilder.hpp"
 
-#include <spdlog/spdlog.h>
-
 #include <omp.h>
+#include <spdlog/spdlog.h>
 
 #include "PoseRegister.hpp"
 #include "models/Ligand.hpp"

@@ -18,30 +18,34 @@ TEST_CASE("Core_MCS", "[core]") {
     mols.emplace_back(mol1);
     mols.emplace_back(mol2);
 
-    auto coreScaffoldMCS = Matcher::calculateCoreMcs(mols, 1);
-    CHECK(RDKit::MolToSmarts(*coreScaffoldMCS.value().first)
+    Matcher matcher(1);
+    auto coreScaffoldMCS = matcher.calculateCoreMcs(mols);
+    CHECK(RDKit::MolToSmarts(*coreScaffoldMCS.value().core)
           == "[#6]1:&@[#6]:&@[#6](:&@[#6]:&@[#6]:&@[#6]:&@1)-&!@[#7&R]");
 }
 
 TEST_CASE("Core_Murcko", "[core]") {
     SECTION("test for a small core") {
+        Matcher matcher(1);
         RDKit::MOL_SPTR_VECT smallMolPtr = coaler::io::FileParser::parse("test/data/testMurckoSmall.smi");
-        auto smallCoreMurcko = Matcher::calculateCoreMurcko(smallMolPtr, 1);
-        CHECK(RDKit::MolToSmarts(*smallCoreMurcko.value().first)
+        auto smallCoreMurcko = matcher.calculateCoreMurcko(smallMolPtr);
+        CHECK(RDKit::MolToSmarts(*smallCoreMurcko.value().core)
           == "[#6]1:&@[#6]:&@[#6]:&@[#6]:&@[#6](:&@[#6]:&@1)-&!@[#6&!R]-&!@[#6&!R](-&!@[#6&!R])-&!@[#6&!R]-&!@[#6]1:&@[#6]:&@[#6]:&@[#6]:&@[#6]:&@[#6]:&@1");
     };
 
     SECTION("test for a medium sized core") {
+        Matcher matcher(1);
         RDKit::MOL_SPTR_VECT mediumMolPtr = coaler::io::FileParser::parse("test/data/testMurckoMedium.smi");
-        auto mediumCoreMurcko = Matcher::calculateCoreMurcko(mediumMolPtr, 1);
-        CHECK(RDKit::MolToSmarts(*mediumCoreMurcko.value().first)
+        auto mediumCoreMurcko = matcher.calculateCoreMurcko(mediumMolPtr);
+        CHECK(RDKit::MolToSmarts(*mediumCoreMurcko.value().core)
           == "[#6]1:&@[#7,#6]:&@[#6]:&@[#6]:&@[#6]2:&@[#6]:&@1:&@[#6]:&@[#6](:&@[#6]:&@[#6]:&@2)-&!@[#6]1:&@[#7,#6]:&@[#6]:&@[#7,#6]:&@[#6]:&@[#6]:&@1");
     }
 
     SECTION("test for a large core") {
+        Matcher matcher(1);
         RDKit::MOL_SPTR_VECT largeMolPtr = coaler::io::FileParser::parse("test/data/testMurckoLarge.smi");
-        auto largeCoreMurcko = Matcher::calculateCoreMurcko(largeMolPtr, 1);
-        CHECK(RDKit::MolToSmarts(*largeCoreMurcko.value().first)
+        auto largeCoreMurcko = matcher.calculateCoreMurcko(largeMolPtr);
+        CHECK(RDKit::MolToSmarts(*largeCoreMurcko.value().core)
           == "[#6&!R]-&!@[#6&!R](-&!@[#17,#6,#9;!R])-&!@[#8&!R]-&!@[#6&!R](-&!@[#7,#6;!R]-,=;!@[#8&!R])-&!@[#6&!R](-&!@[#6]1:&@[#6]:&@[#7,#6]:&@[#6]:&@[#7,#6]:&@[#6]:&@1)-&!@[#6&!R]-&!@[#6]1:&@[#7,#6]:&@[#6]:&@[#6]:&@[#6]2:&@[#6]:&@1:&@[#6]:&@[#6]:&@[#6]:&@[#6]:&@2");
     }
 }
