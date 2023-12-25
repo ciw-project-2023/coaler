@@ -25,6 +25,7 @@ struct ProgrammOptions {
     unsigned num_start_assemblies;
     std::string core_type;
     bool divideConformersByMatches;
+    std::string conformerLogPath;
     bool verbose;
 };
 
@@ -32,7 +33,7 @@ const std::string help
     = "Usage: aligner [options]\n"
       "Options:\n"
       "  -h, --help\t\t\t\tPrint this help message\n"
-      "  -f, --files <path>\t\t\tPath to input files\n"
+      "  -i, --input_file <path>\t\t\tPath to input files\n"
       "  -o, --out <path>\t\t\tPath to output files\n"
       "  -j, --threads <amount>\t\t\tNumber of threads to use (default: 1)\n"
       "  -v, --verbose\t\t\tActivate verbose logging\n"
@@ -42,18 +43,18 @@ const std::string help
       "molecule. "
       "Helps against combinatorial explosion if core is small or has high symmetry (default: false)\n"
       "  --assemblies <amount>\t\t\tNumber of starting assemblies (default: 10)\n"
-      "  --core <algorithm>\t\t\tAlgorithm to detect core structure (default: mcs, allowed: mcs, murcko)\n";
+      "  --core <algorithm>\t\t\tAlgorithm to detect core structure (default: mcs, allowed: mcs, murcko)\n"
+      "  --confsLog <path>\t\t\tOptional path to folder to store the generated conformers\n";
 
 std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
     ProgrammOptions parsed_options;
 
-
     opts::options_description desc("Allowed options");
     desc.add_options()("help,h", "print help message")(
-        "file,f", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
+        "input_file,i", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
         "out,o", opts::value<std::string>(&parsed_options.out_file)->default_value("out.sdf"), "path to output file")(
         "threads,j", opts::value<int>(&parsed_options.num_threads)->default_value(1), "number of threads to use")(
-        "assemblies, a", opts::value<unsigned>(&parsed_options.num_start_assemblies)->default_value(10),
+        "assemblies, a", opts::value<unsigned>(&parsed_options.num_start_assemblies)->default_value(200),
         "number of starting assemblies to use")(
         "verbose,v", opts::value<bool>(&parsed_options.verbose)->default_value(false), "enable debug logging")(
         "core", opts::value<std::string>(&parsed_options.core_type)->default_value("mcs"),
@@ -61,7 +62,8 @@ std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
                                          opts::value<unsigned>(&parsed_options.num_conformers)->default_value(10),
                                          "number of conformers per core match to generate")(
         "divide,d", opts::value<bool>(&parsed_options.divideConformersByMatches)->default_value(false),
-        "divides the number of conformers by the number of times the core is matched");
+        "divides the number of conformers by the number of times the core is matched")(
+        "confsLog", opts::value<std::string>(&parsed_options.conformerLogPath)->default_value("none"));
 
     opts::variables_map vm;
     opts::store(opts::parse_command_line(argc, argv, desc), vm);
@@ -90,14 +92,20 @@ int main(int argc, char* argv[]) {
     }
 
     auto opts = mOpts.value();
-
     if (opts.verbose) {
         spdlog::set_level(spdlog::level::debug);
+    }
+
+    std::ofstream output_file(opts.out_file);
+    if (!output_file.is_open()) {
+        spdlog::error("Cannot open output file: {}", opts.out_file);
+        return 1;
     }
 
     auto mols = io::FileParser::parse(opts.input_file_path);
 
     std::optional<coaler::core::CoreResult> coreResult;
+    spdlog::info("starting core calculation");
     if (opts.core_type == "mcs") {
         coreResult = core::Matcher::calculateCoreMcs(mols, opts.num_threads);
     } else if (opts.core_type == "murcko") {
@@ -123,8 +131,12 @@ int main(int argc, char* argv[]) {
 
     embedder::ConformerEmbedder embedder(coreResult->core, coreResult->ref, opts.num_threads,
                                          opts.divideConformersByMatches);
+
     for (auto& mol : mols) {
         embedder.embedEvenlyAcrossAllMatches(mol, opts.num_conformers);
+    }
+    if (opts.conformerLogPath != "none") {
+        coaler::io::OutputWriter::writeConformersToSDF(opts.conformerLogPath, mols);
     }
 
     multialign::MultiAligner aligner(mols, opts.num_start_assemblies, opts.num_threads);

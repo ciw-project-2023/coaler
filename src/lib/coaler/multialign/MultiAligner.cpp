@@ -253,12 +253,16 @@ namespace coaler::multialign {
             double const assemblyScore
                 = AssemblyScorer::calculateAssemblyScore(currentAssembly, m_pairwiseAlignments, m_ligands);
             spdlog::debug("Score after opt: {}", assemblyScore);
+            omp_set_lock(&bestAssemblyLock);
+            omp_set_lock(&bestAssemblyScoreLock);
             if (assemblyScore > currentBestAssemblyScore) {
                 omp_set_lock(&bestAssemblyLock);
                 currentBestAssembly = currentAssembly;
                 currentBestAssemblyScore = assemblyScore;
                 omp_unset_lock(&bestAssemblyLock);
             }
+            omp_unset_lock(&bestAssemblyLock);
+            omp_unset_lock(&bestAssemblyScoreLock);
         }
         spdlog::info("finished alignment optimization.");
 
