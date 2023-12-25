@@ -23,9 +23,9 @@ namespace coaler::embedder {
                                          const bool divideConformersByMatches)
         : m_core(query), m_threads(threads), m_coords(coords), m_divideConformersByMatches(divideConformersByMatches) {}
 
-    void ConformerEmbedder::embedConformersWithFixedCore(RDKit::ROMOL_SPTR mol, unsigned numConfs) {
-        spdlog::info("Embedding {}", RDKit::MolToSmiles(*mol));
-        spdlog::info("Pattern {}", RDKit::MolToSmarts(*m_core));
+    void ConformerEmbedder::embedConformersWithFixedCore(const RDKit::ROMOL_SPTR& mol, unsigned numConfs) {
+        spdlog::debug("Embedding {}", RDKit::MolToSmiles(*mol));
+        spdlog::debug("Pattern {}", RDKit::MolToSmarts(*m_core));
 
         // firstMatch molecule and core
         RDKit::SubstructMatchParameters substructMatchParams;
@@ -42,7 +42,7 @@ namespace coaler::embedder {
                                     substructMatchParams.maxMatches, substructMatchParams.numThreads);
         assert(!matches.empty());
 
-        spdlog::info("Number of Core Matches: {}", nofMatches);
+        spdlog::debug("Number of Core Matches: {}", nofMatches);
 
         unsigned matchCounter = 0;
         for (auto const &match : matches) {
@@ -80,18 +80,18 @@ namespace coaler::embedder {
                 std::vector<std::pair<int, double>> result;
                 RDKit::MMFF::MMFFOptimizeMoleculeConfs(*mol, result, m_threads);
 
-                spdlog::info("Optimized {} conformers.", mol->getNumConformers());
+                spdlog::debug("Optimized {} conformers.", mol->getNumConformers());
 
                 break;
             }
             matchCounter++;
         }
 
-        spdlog::info("Embedded {} conformers.", mol->getNumConformers());
+        spdlog::debug("Embedded {} conformers.", mol->getNumConformers());
         if (m_divideConformersByMatches) {
             assert(mol->getNumConformers() == numConfs);
         } else {
-            spdlog::info("mol {} numConfs {} nofMatches {}.", mol->getNumConformers(), numConfs, nofMatches);
+            spdlog::debug("mol {} numConfs {} nofMatches {}.", mol->getNumConformers(), numConfs, nofMatches);
             assert(mol->getNumConformers() == numConfs * nofMatches);
         }
     }
