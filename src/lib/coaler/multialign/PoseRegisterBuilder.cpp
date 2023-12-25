@@ -4,6 +4,7 @@
 #include "PoseRegisterBuilder.hpp"
 
 #include <spdlog/spdlog.h>
+#include <omp.h>
 
 #include <iostream>
 
@@ -13,28 +14,34 @@
 namespace coaler::multialign {
 
     PoseRegisterCollection PoseRegisterBuilder::buildPoseRegisters(const PairwiseAlignment &alignmentScores,
-                                                                   const std::vector<Ligand> &ligands) noexcept {
+                                                                   const std::vector<Ligand> &ligands, unsigned nofThreads) noexcept {
         PairwisePoseRegisters poseRegisters;
+        omp_lock_t poseRegistersLock;
+        omp_init_lock(&poseRegistersLock);
+
+#pragma omp parallel for default(none) shared(poseRegisters, ligands, alignmentScores, poseRegistersLock) num_threads(nofThreads)
         for (LigandID firstLigand = 0; firstLigand < ligands.size(); firstLigand++) {
             for (LigandID secondLigand = 0; secondLigand < firstLigand; secondLigand++) {
                 if (firstLigand == secondLigand) {
                     continue;
                 }
 
-                unsigned size = calculateRegisterSizeForLigand(ligands.at(firstLigand), ligands.at(secondLigand));
-                LigandPair currentLigandPair(firstLigand, secondLigand);
+                const unsigned size = calculateRegisterSizeForLigand(ligands.at(firstLigand), ligands.at(secondLigand));
+                const LigandPair currentLigandPair(firstLigand, secondLigand);
 
-                std::shared_ptr<PoseRegister> registerPtr
+                const std::shared_ptr<PoseRegister> registerPtr
                     = std::make_shared<PoseRegister>(PoseRegister(firstLigand, secondLigand, size));
-
-                poseRegisters.emplace(currentLigandPair, registerPtr);
 
                 for (const UniquePoseID firstLigandPose : ligands.at(firstLigand).getPoses()) {
                     for (const UniquePoseID secondLigandPose : ligands.at(secondLigand).getPoses()) {
-                        PosePair pair(firstLigandPose, secondLigandPose);
-                        poseRegisters.at(currentLigandPair)->addPoses(pair, alignmentScores.at(pair));
+                        const PosePair pair(firstLigandPose, secondLigandPose);
+                        const double score = alignmentScores.at(pair);
+                        registerPtr->addPoses(pair, score);
                     }
                 }
+                omp_set_lock(&poseRegistersLock);
+                poseRegisters.emplace(currentLigandPair, registerPtr);
+                omp_unset_lock(&poseRegistersLock);
             }
         }
 
