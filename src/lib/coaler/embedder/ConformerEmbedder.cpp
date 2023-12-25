@@ -23,7 +23,7 @@ namespace coaler::embedder {
                                          const bool divideConformersByMatches)
         : m_core(query), m_threads(threads), m_coords(coords), m_divideConformersByMatches(divideConformersByMatches) {}
 
-    void ConformerEmbedder::embedConformersWithFixedCore(const RDKit::ROMOL_SPTR& mol, unsigned numConfs) {
+    void ConformerEmbedder::embedConformersWithFixedCore(const RDKit::ROMOL_SPTR &mol, unsigned numConfs) {
         spdlog::debug("Embedding {}", RDKit::MolToSmiles(*mol));
         spdlog::debug("Pattern {}", RDKit::MolToSmarts(*m_core));
 

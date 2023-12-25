@@ -195,9 +195,9 @@ namespace coaler::multialign {
         omp_lock_t skippedAssembliesCountLock;
         omp_init_lock(&skippedAssembliesCountLock);
 
-
-#pragma omp parallel for shared(bestAssemblyScoreLock, bestAssemblyLock, skippedAssembliesCountLock, currentBestAssembly, \
-                                    currentBestAssemblyScore, assembliesList, skippedAssembliesCount) default(none)
+#pragma omp parallel for shared(bestAssemblyScoreLock, bestAssemblyLock, skippedAssembliesCountLock, \
+                                    currentBestAssembly, currentBestAssemblyScore, assembliesList,   \
+                                    skippedAssembliesCount) default(none)
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
             auto [currentAssembly, currentAssemblyScore] = assembliesList.at(assemblyID);
             spdlog::debug("Score before opt: {}", currentAssemblyScore);
@@ -272,7 +272,7 @@ namespace coaler::multialign {
             omp_unset_lock(&bestAssemblyScoreLock);
         }
         spdlog::info("finished alignment optimization.");
-        if(skippedAssembliesCount > 0) {
+        if (skippedAssembliesCount > 0) {
             spdlog::info("Skipped a total of {} incomplete assemblies.", skippedAssembliesCount);
         }
 

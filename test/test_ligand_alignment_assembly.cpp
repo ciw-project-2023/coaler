@@ -26,7 +26,7 @@ TEST_CASE("test_ligand_alignment_assembly", "[multialign]") {
     pairwiseScores.emplace(m0p0m1p1, 0.1);
     pairwiseScores.emplace(m0p1m1p1, 0.3);
 
-    PoseRegisterCollection registerCollection = PoseRegisterBuilder::buildPoseRegisters(pairwiseScores, {l1, l2},1);
+    PoseRegisterCollection registerCollection = PoseRegisterBuilder::buildPoseRegisters(pairwiseScores, {l1, l2}, 1);
 
     LigandAlignmentAssembly assembly
         = StartingAssemblyGenerator::generateStartingAssembly(m0p0, registerCollection, {l1, l2});

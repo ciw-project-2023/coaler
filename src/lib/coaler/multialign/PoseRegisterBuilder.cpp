@@ -3,8 +3,8 @@
  */
 #include "PoseRegisterBuilder.hpp"
 
-#include <spdlog/spdlog.h>
 #include <omp.h>
+#include <spdlog/spdlog.h>
 
 #include <iostream>
 
@@ -14,12 +14,14 @@
 namespace coaler::multialign {
 
     PoseRegisterCollection PoseRegisterBuilder::buildPoseRegisters(const PairwiseAlignment &alignmentScores,
-                                                                   const std::vector<Ligand> &ligands, unsigned nofThreads) noexcept {
+                                                                   const std::vector<Ligand> &ligands,
+                                                                   unsigned nofThreads) noexcept {
         PairwisePoseRegisters poseRegisters;
         omp_lock_t poseRegistersLock;
         omp_init_lock(&poseRegistersLock);
 
-#pragma omp parallel for default(none) shared(poseRegisters, ligands, alignmentScores, poseRegistersLock) num_threads(nofThreads)
+#pragma omp parallel for default(none) shared(poseRegisters, ligands, alignmentScores, poseRegistersLock) \
+    num_threads(nofThreads)
         for (LigandID firstLigand = 0; firstLigand < ligands.size(); firstLigand++) {
             for (LigandID secondLigand = 0; secondLigand < firstLigand; secondLigand++) {
                 if (firstLigand == secondLigand) {
