@@ -58,5 +58,7 @@ namespace coaler::core {
         int m_threads;
 
         [[nodiscard]] RDKit::SubstructMatchParameters getMatchParams() const;
+
+        [[nodiscard]] RDKit::ROMOL_SPTR buildMolConformerForQuery(RDKit::RWMol first, RDKit::ROMol query);
     };
 }  // namespace coaler::core
