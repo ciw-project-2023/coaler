@@ -69,7 +69,7 @@ namespace coaler::multialign {
 
     MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, unsigned maxStartingAssemblies, unsigned nofThreads)
 
-        : m_maxStartingAssemblies(maxStartingAssemblies) {
+        : m_maxStartingAssemblies(maxStartingAssemblies), m_nofThreads(nofThreads) {
         assert(m_maxStartingAssemblies > 0);
         for (LigandID id = 0; id < molecules.size(); id++) {
             UniquePoseSet poses;
@@ -80,7 +80,7 @@ namespace coaler::multialign {
 
             m_ligands.emplace_back(*molecules.at(id), poses, id);
         }
-        omp_set_num_threads(nofThreads);  // this sets the number of threads used for ALL subsequent parallel regions.
+        omp_set_num_threads(m_nofThreads);  // this sets the number of threads used for ALL subsequent parallel regions.
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
@@ -139,27 +139,29 @@ namespace coaler::multialign {
         spdlog::info("Mols: {} | Confs/Mol: {} | total pairwise scores: {}", m_ligands.size(),
                      m_ligands.begin()->getNumPoses(), m_pairwiseAlignments.size());
         // build pose registers
-        m_poseRegisters = PoseRegisterBuilder::buildPoseRegisters(m_pairwiseAlignments, m_ligands);
+        spdlog::info("Start building pose registers.");
+        m_poseRegisters = PoseRegisterBuilder::buildPoseRegisters(m_pairwiseAlignments, m_ligands, m_nofThreads);
+        spdlog::info("Finish building pose registers.");
 
         // build starting ensembles from registers
         // AssemblyCollection assemblies;
         std::priority_queue<AssemblyWithScore, std::vector<AssemblyWithScore>, AssemblyWithScoreGreater> assemblies;
         for (const Ligand &ligand : m_ligands) {
             for (const UniquePoseID &pose : ligand.getPoses()) {
-                LigandAlignmentAssembly assembly
+                const LigandAlignmentAssembly assembly
                     = StartingAssemblyGenerator::generateStartingAssembly(pose, m_poseRegisters, m_ligands);
 
                 double const score = AssemblyScorer::calculateAssemblyScore(assembly, m_pairwiseAlignments, m_ligands);
-                AssemblyWithScore newAssembly = std::make_pair(assembly, score);
+                const AssemblyWithScore newAssembly = std::make_pair(assembly, score);
 
-                // insert if queue no full or new assembly is larger that worst assembly in queue
+                // insert if queue not full or new assembly is larger that worst assembly in queue
 
                 // TODO ensure this is called correctly
                 if (assemblies.size() < m_maxStartingAssemblies) {
                     assemblies.push(newAssembly);
                     continue;
                 }
-                AssemblyWithScore topAssembly = assemblies.top();
+                const AssemblyWithScore topAssembly = assemblies.top();
                 if (AssemblyWithScoreGreater()(newAssembly, topAssembly)) {
                     assemblies.pop();
                     assemblies.push(newAssembly);
@@ -183,19 +185,27 @@ namespace coaler::multialign {
         }
         spdlog::info("start optimization of {} alignment assemblies.", assembliesList.size());
 
+        unsigned skippedAssembliesCount = 0;
+
         // locks for shared variables
         omp_lock_t bestAssemblyScoreLock;
         omp_init_lock(&bestAssemblyScoreLock);
         omp_lock_t bestAssemblyLock;
         omp_init_lock(&bestAssemblyLock);
+        omp_lock_t skippedAssembliesCountLock;
+        omp_init_lock(&skippedAssembliesCountLock);
 
-#pragma omp parallel for shared(bestAssemblyScoreLock, bestAssemblyLock, currentBestAssembly, \
-                                    currentBestAssemblyScore, assembliesList) default(none)
+
+#pragma omp parallel for shared(bestAssemblyScoreLock, bestAssemblyLock, skippedAssembliesCountLock, currentBestAssembly, \
+                                    currentBestAssemblyScore, assembliesList, skippedAssembliesCount) default(none)
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
             auto [currentAssembly, currentAssemblyScore] = assembliesList.at(assemblyID);
             spdlog::debug("Score before opt: {}", currentAssemblyScore);
             if (currentAssembly.getMissingLigandsCount() != 0) {
-                spdlog::info("Skip assembly because its missing ligands.");
+                spdlog::debug("Skip assembly because its missing ligands.");
+                omp_set_lock(&skippedAssembliesCountLock);
+                skippedAssembliesCount++;
+                omp_unset_lock(&skippedAssembliesCountLock);
                 continue;
             }
 
@@ -262,6 +272,9 @@ namespace coaler::multialign {
             omp_unset_lock(&bestAssemblyScoreLock);
         }
         spdlog::info("finished alignment optimization.");
+        if(skippedAssembliesCount > 0) {
+            spdlog::info("Skipped a total of {} incomplete assemblies.", skippedAssembliesCount);
+        }
 
         return {currentBestAssemblyScore, currentBestAssembly.getAssemblyMapping(), m_ligands};
     }
