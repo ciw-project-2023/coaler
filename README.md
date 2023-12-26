@@ -90,7 +90,7 @@ conan remote add coaler http://server.conan.corealigner.de
 conan remote login coaler
 ```
 
-You can then proceed to the conan install step and it should pull rdkit from the server
+ou can then proceed to the conan install step and it should pull rdkit from the server
 
 ### Clone the client Repo
 
