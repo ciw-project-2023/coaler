@@ -83,11 +83,11 @@ password: VZKhzh2v5nCnijAS3A8R
 ```
 
 ```bash
-conan remote add doc https://monkfish-app-qfnky.ondigitalocean.app
+conan remote add coaler http://server.conan.corealigner.de
 ```
 
 ```
-conan remote login doc
+conan remote login coaler
 ```
 
 You can then proceed to the conan install step and it should pull rdkit from the server
