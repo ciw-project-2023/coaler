@@ -20,7 +20,6 @@ namespace coaler::multialign {
 
 #pragma omp parallel for shared(ligands, poseRegisterLock, poseRegisters, alignmentScores) default(none)
         for (unsigned firstLigand = 0; firstLigand < ligands.size(); firstLigand++) {
-            omp_set_num_threads(20);
             for (unsigned secondLigand = 0; secondLigand < firstLigand; secondLigand++) {
                 if (firstLigand == secondLigand) {
                     continue;

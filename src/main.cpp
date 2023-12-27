@@ -10,6 +10,7 @@
 #include <coaler/multialign/MultiAligner.hpp>
 #include <coaler/multialign/MultiAlignerResult.hpp>
 #include <sstream>
+#include <omp.h>
 
 #include "coaler/core/Matcher.hpp"
 
@@ -96,6 +97,8 @@ int main(int argc, char* argv[]) {
         spdlog::set_level(spdlog::level::debug);
     }
 
+    omp_set_num_threads(opts.num_threads);
+
     std::ofstream output_file(opts.out_file);
     if (!output_file.is_open()) {
         spdlog::error("Cannot open output file: {}", opts.out_file);
@@ -133,9 +136,11 @@ int main(int argc, char* argv[]) {
     embedder::ConformerEmbedder embedder(coreResult->core, coreResult->ref, opts.num_threads,
                                          opts.divideConformersByMatches);
 
-    for (auto& mol : mols) {
-        embedder.embedEvenlyAcrossAllMatches(mol, opts.num_conformers);
+    #pragma omp parallel for shared(mols, embedder, opts) default(none)
+    for (unsigned i = 0; i < mols.size(); i++) {
+        embedder.embedEvenlyAcrossAllMatches(mols.at(i), opts.num_conformers);
     }
+
     if (opts.conformerLogPath != "none") {
         coaler::io::OutputWriter::writeConformersToSDF(opts.conformerLogPath, mols);
     }

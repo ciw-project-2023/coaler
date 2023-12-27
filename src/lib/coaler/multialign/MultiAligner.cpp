@@ -80,7 +80,6 @@ namespace coaler::multialign {
 
             m_ligands.emplace_back(*molecules.at(id), poses, id);
         }
-        omp_set_num_threads(nofThreads);  // this sets the number of threads used for ALL subsequent parallel regions.
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
@@ -266,6 +265,7 @@ namespace coaler::multialign {
             omp_unset_lock(&bestAssemblyLock);
             omp_unset_lock(&bestAssemblyScoreLock);
         }
+
         spdlog::info("finished alignment optimization.");
 
         return {currentBestAssemblyScore, currentBestAssembly.getAssemblyMapping(), m_ligands};
