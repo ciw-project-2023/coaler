@@ -67,7 +67,7 @@ namespace coaler::embedder {
         }
 
         if (m_divideConformersByMatches) {
-            // assert(mol->getNumConformers() == numConfs);
+            assert(mol->getNumConformers() == numConfs);
         } else {
             assert(mol->getNumConformers() == numConfs * matches.size());
         }
