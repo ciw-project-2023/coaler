@@ -1,5 +1,9 @@
 .DEFAULT_GOAL := release
 
+test: debug
+	@echo "Testing..."
+	@./build/Debug/test/Test
+
 release:
 	@echo "Building in release mode..."
 	@conan build . -s build_type=Release --build missing
@@ -15,4 +19,3 @@ clean:
 
 install:
 	@echo "Installing..."
-	@install -m 755 ./build/Release/src/coaler /usr/local/bin/coaler
