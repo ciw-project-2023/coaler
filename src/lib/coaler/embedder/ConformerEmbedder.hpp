@@ -20,7 +20,7 @@ namespace coaler::embedder {
          * @param mol
          * @param numConfs
          */
-        void embedConformersWithFixedCore(RDKit::ROMOL_SPTR mol, unsigned numConfs);
+        void embedConformersWithFixedCore(const RDKit::ROMOL_SPTR& mol, unsigned numConfs);
 
       private:
         RDKit::ROMOL_SPTR m_core;

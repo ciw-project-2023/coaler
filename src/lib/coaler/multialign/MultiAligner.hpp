@@ -26,6 +26,7 @@ namespace coaler::multialign {
         std::vector<Ligand> m_ligands;
         PoseRegisterCollection m_poseRegisters;
         PairwiseAlignment m_pairwiseAlignments;
+        unsigned m_nofThreads;
     };
 
 }  // namespace coaler::multialign
