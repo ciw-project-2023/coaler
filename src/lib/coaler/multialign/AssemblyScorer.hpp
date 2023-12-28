@@ -17,7 +17,22 @@ namespace coaler::multialign {
         static double calculateScoreDeficitForLigand(LigandID ligandId, LigandID maxLigandId,
                                                      const LigandAlignmentAssembly& assembly,
                                                      const PoseRegisterCollection& registers,
-                                                     const PairwiseAlignment& scores);
+                                                     const PairwiseAlignment& scores, const LigandVector& ligands);
+
+      private:
+        /**
+         * reads the score from the pairwise alignments or calculates it if missing
+         * @param firstLigandID
+         * @param secondLigandID
+         * @param firstPoseID
+         * @param secondPoseID
+         * @param scores
+         * @param ligands
+         * @return
+         */
+        static double getScoreInAssembly(LigandID firstLigandID, LigandID secondLigandID, PoseID firstPoseID,
+                                         PoseID secondPoseID, const PairwiseAlignment& scores,
+                                         const LigandVector& ligands);
     };
 
 }  // namespace coaler::multialign

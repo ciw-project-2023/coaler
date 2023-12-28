@@ -6,6 +6,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include "Scorer.hpp"
+
 namespace coaler::multialign {
     double AssemblyScorer::calculateAssemblyScore(const LigandAlignmentAssembly& assembly,
                                                   const PairwiseAlignment& scores, const LigandVector& ligands) {
@@ -25,9 +27,8 @@ namespace coaler::multialign {
                     continue;
                 }
 
-                UniquePoseID const firstLigandPose{firstLigand.getID(), firstLigandPoseID};
-                UniquePoseID const secondLigandPose{secondLigand.getID(), secondLigandPoseID};
-                assemblyScore += scores.at(PosePair{firstLigandPose, secondLigandPose});
+                assemblyScore += getScoreInAssembly(firstLigand.getID(), secondLigand.getID(), firstLigandPoseID,
+                                                    secondLigandPoseID, scores, ligands);
             }
         }
         // spdlog::info(assemblyScore);
@@ -39,7 +40,8 @@ namespace coaler::multialign {
     double AssemblyScorer::calculateScoreDeficitForLigand(const LigandID ligandId, const LigandID maxLigandId,
                                                           const LigandAlignmentAssembly& assembly,
                                                           const PoseRegisterCollection& registers,
-                                                          const PairwiseAlignment& scores) {
+                                                          const PairwiseAlignment& scores,
+                                                          const LigandVector& ligands) {
         PairwisePoseRegisters poseRegisters = registers.getAllRegisters();
         double scoreDeficit = 0.0;
 
@@ -47,14 +49,32 @@ namespace coaler::multialign {
             if (id == ligandId) {
                 continue;
             }
-            UniquePoseID ligandPose(ligandId, assembly.getPoseOfLigand(ligandId));
-            UniquePoseID otherPose(id, assembly.getPoseOfLigand(id));
-            double const scoreInAssembly = scores.at(PosePair(ligandPose, otherPose));
+            double const scoreInAssembly = getScoreInAssembly(ligandId, id, assembly.getPoseOfLigand(ligandId),
+                                                              assembly.getPoseOfLigand(id), scores, ligands);
             double const optimalScore = scores.at(poseRegisters.at(LigandPair(id, ligandId))->getHighestScoringPair());
-
+            //TODO change this, its only a heuristic
+            if(optimalScore < scoreInAssembly) {
+                continue;
+            }
             scoreDeficit += std::abs(optimalScore - scoreInAssembly);
         }
         return scoreDeficit;
+    }
+
+    double AssemblyScorer::getScoreInAssembly(LigandID firstLigandID, LigandID secondLigandID, PoseID firstPoseID,
+                                              PoseID secondPoseID, const PairwiseAlignment& scores,
+                                              const LigandVector& ligands) {
+        double score = 0.0;
+        UniquePoseID const firstLigandPose{firstLigandID, firstPoseID};
+        UniquePoseID const secondLigandPose{secondLigandID, secondPoseID};
+        const PosePair pair{firstLigandPose, secondLigandPose};
+        if (scores.count(pair) == 1) {
+            score = scores.at(PosePair{firstLigandPose, secondLigandPose});
+        } else {
+            score = Scorer::getOverlapScore(ligands.at(firstLigandID), ligands.at(secondLigandID), firstPoseID,
+                                            secondPoseID);
+        }
+        return score;
     }
 
 }  // namespace coaler::multialign

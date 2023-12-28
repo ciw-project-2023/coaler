@@ -6,10 +6,9 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/ROMol.h>
 
-#include "coaler/core/Forward.hpp"
-
-#include "Forward.hpp"
 #include "../multialign/Forward.hpp"
+#include "Forward.hpp"
+#include "coaler/core/Forward.hpp"
 
 namespace coaler::embedder {
 
@@ -21,7 +20,7 @@ namespace coaler::embedder {
      */
     class ConformerEmbedder {
       public:
-        ConformerEmbedder(const core::CoreResult &result, const int threads, const bool divideConformersByMatches);
+        ConformerEmbedder(const core::CoreResult& result, const int threads, const bool divideConformersByMatches);
 
         /**
          * Embed an even amount of Conformers at every core match.
@@ -32,17 +31,17 @@ namespace coaler::embedder {
          *
          * @return True upon success.
          */
-        void embedConformers(const RDKit::ROMOL_SPTR &mol, unsigned numConfs);
+        void embedConformers(const RDKit::ROMOL_SPTR& mol, unsigned numConfs);
 
-        //std::vector<RDKit::MatchVectType> filterMatches(const std::vector<RDKit::MatchVectType>& matches);
+        // std::vector<RDKit::MatchVectType> filterMatches(const std::vector<RDKit::MatchVectType>& matches);
 
-        static std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(const multialign::LigandPtr& ligand,
-                                                           const multialign::LigandVector& targets,
-                                                           const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs);
+        static std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(
+            RDKit::ROMol* worstLigandMol, const multialign::LigandVector& targets,
+            const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs);
 
         static CoreAtomMapping getLigandMcsAtomCoordsFromTargetMatch(const RDGeom::POINT3D_VECT& targetCoords,
-                                                              const RDKit::MatchVectType& ligandMcsMatch,
-                                                              const RDKit::MatchVectType& targetMcsMatch);
+                                                                     const RDKit::MatchVectType& ligandMcsMatch,
+                                                                     const RDKit::MatchVectType& targetMcsMatch);
 
       private:
         core::CoreResult m_core;
@@ -50,6 +49,5 @@ namespace coaler::embedder {
         bool m_divideConformersByMatches;
 
         RDKit::DGeomHelpers::EmbedParameters getEmbeddingParameters() const;
-
     };
 }  // namespace coaler::embedder

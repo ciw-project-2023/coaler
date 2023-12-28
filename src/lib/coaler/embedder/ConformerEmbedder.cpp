@@ -20,9 +20,39 @@
 #include "../multialign/Forward.hpp"
 #include "../multialign/models/Forward.hpp"
 #include "Forward.hpp"
+#include "GraphMol/FMCS/FMCS.h"
 
 const unsigned seed = 42;
 const float forceTol = 0.0135;
+
+namespace {
+    auto get_mcs(const RDKit::MOL_SPTR_VECT &mols) {
+        RDKit::MCSParameters mcsParams;
+        RDKit::MCSAtomCompareParameters atomCompParams;
+        atomCompParams.MatchChiralTag = true;
+        atomCompParams.MatchFormalCharge = true;
+        atomCompParams.MatchIsotope = false;
+        atomCompParams.MatchValences = true;
+        atomCompParams.RingMatchesRingOnly = true;
+        atomCompParams.CompleteRingsOnly = true;
+        mcsParams.AtomCompareParameters = atomCompParams;
+
+        RDKit::MCSBondCompareParameters bondCompParams;
+        bondCompParams.MatchStereo = true;
+        bondCompParams.RingMatchesRingOnly = false;
+        bondCompParams.CompleteRingsOnly = true;
+        bondCompParams.MatchFusedRings = true;
+        bondCompParams.MatchFusedRingsStrict = false;
+        mcsParams.BondCompareParameters = bondCompParams;
+        mcsParams.Timeout = 1;
+
+        mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareElements);
+        mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareOrderExact);
+
+        RDKit::MCSResult const mcs = RDKit::findMCS(mols, &mcsParams);
+        return mcs;
+    }
+}  // namespace
 
 namespace coaler::embedder {
     ConformerEmbedder::ConformerEmbedder(const core::CoreResult &result, const int threads,
@@ -101,28 +131,31 @@ namespace coaler::embedder {
         return params;
     }
 
-    std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(const multialign::LigandPtr &ligand,
-        const multialign::LigandVector &targets, const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs) {
+    std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
+        RDKit::ROMol *worstLigandMol, const multialign::LigandVector &targets,
+        const std::unordered_map<multialign::LigandID, multialign::PoseID> &conformerIDs) {
         std::vector<unsigned> newIds;
         for (const multialign::Ligand &target : targets) {
             // find mcs
             const multialign::LigandID targetID = target.getID();
             const multialign::PoseID targetConformerID = conformerIDs.at(targetID);
             const RDKit::ROMol targetMol = target.getMolecule();
-            const RDKit::Conformer& targetConformer = targetMol.getConformer(targetConformerID);
+            const RDKit::Conformer &targetConformer = targetMol.getConformer(targetConformerID);
 
             std::vector<RDKit::ROMOL_SPTR> mols = {
-                //boost::make_shared<RDKit::ROMol>(*RDKit::SmilesToMol(targetSmiles)),
-                //boost::make_shared<RDKit::ROMol>(*RDKit::SmilesToMol(ligandSmiles))
-                boost::make_shared<RDKit::ROMol>(ligand->getMolecule()),
+                // boost::make_shared<RDKit::ROMol>(*RDKit::SmilesToMol(targetSmiles)),
+                // boost::make_shared<RDKit::ROMol>(*RDKit::SmilesToMol(ligandSmiles))
+                boost::make_shared<RDKit::ROMol>(*worstLigandMol),
                 boost::make_shared<RDKit::ROMol>(target.getMolecule()),
             };
 
-            coaler::core::Matcher matcher(1);
-            const core::CoreResult mcsResult = matcher.coaler::core::Matcher::calculateCoreMcs(mols).value();
+            // const core::CoreResult mcsResult = matcher.coaler::core::Matcher::calculateCoreMcs(mols).value();
 
-            spdlog::info("ligand: {}",RDKit::MolToSmiles(ligand->getMolecule()));
-            spdlog::info("target: {}",RDKit::MolToSmiles(target.getMolecule()));
+            auto mcsResult = get_mcs(mols);
+
+            //spdlog::info("ligand: {}", RDKit::MolToSmiles(*worstLigandMol));
+            //spdlog::info("target: {}", RDKit::MolToSmiles(target.getMolecule()));
+            //spdlog::info("mcs smarts: {}", mcsResult.SmartsString);
 
             RDKit::SubstructMatchParameters substructMatchParams;
             substructMatchParams.uniquify = true;
@@ -132,34 +165,39 @@ namespace coaler::embedder {
             substructMatchParams.numThreads = 1;
 
             std::vector<RDKit::MatchVectType> ligandMatches;
-            RDKit::SubstructMatch(targetMol, *mcsResult.core, ligandMatches, substructMatchParams.uniquify, false,
+            RDKit::SubstructMatch(targetMol, *mcsResult.QueryMol, ligandMatches, substructMatchParams.uniquify, false,
                                   substructMatchParams.useChirality, substructMatchParams.useQueryQueryMatches,
                                   substructMatchParams.maxMatches, substructMatchParams.numThreads);
 
             std::vector<RDKit::MatchVectType> targetMatches;
-            RDKit::SubstructMatch(targetMol, *mcsResult.core, targetMatches, substructMatchParams.uniquify, false,
-                                        substructMatchParams.useChirality, substructMatchParams.useQueryQueryMatches,
-                                        substructMatchParams.maxMatches, substructMatchParams.numThreads);
+            RDKit::SubstructMatch(targetMol, *mcsResult.QueryMol, targetMatches, substructMatchParams.uniquify, false,
+                                  substructMatchParams.useChirality, substructMatchParams.useQueryQueryMatches,
+                                  substructMatchParams.maxMatches, substructMatchParams.numThreads);
 
             assert(!targetMatches.empty() && !ligandMatches.empty());
             const RDKit::MatchVectType ligandMatch = ligandMatches.at(0);
             const RDKit::MatchVectType targetMatch = targetMatches.at(0);
 
-            const CoreAtomMapping ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
-                                                                                    ligandMatch,
-                                                                                    targetMatch);
-            // embed molecule conformers
+            const CoreAtomMapping ligandMcsCoords
+                = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(), ligandMatch, targetMatch);
+
             RDKit::DGeomHelpers::EmbedParameters params;
-            //params = RDKit::DGeomHelpers::srETKDGv3;
+            // params = RDKit::DGeomHelpers::srETKDGv3;
             params.optimizerForceTol = forceTol;
             params.randomSeed = seed;
             params.coordMap = &ligandMcsCoords;
             params.useRandomCoords = true;
             params.numThreads = 1;
             params.clearConfs = false;
-            const int addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligand->getMoleculePtr(), params);
-            if(addedID < 0) {
-                spdlog::info("unable to generate pose");
+            int addedID = 0;
+            try {
+                addedID = RDKit::DGeomHelpers::EmbedMolecule(*worstLigandMol, params);
+            } catch (const std::runtime_error& e) {
+                spdlog::warn(e.what());
+                addedID = -1;
+            }
+            if (addedID < 0) {
+                //spdlog::info("unable to generate pose");
                 continue;
             } else {
                 spdlog::info("successfully generated new pose.");
@@ -170,9 +208,9 @@ namespace coaler::embedder {
         return newIds;
     }
 
-    CoreAtomMapping ConformerEmbedder::getLigandMcsAtomCoordsFromTargetMatch(const RDGeom::POINT3D_VECT& targetCoords,
-                                                          const RDKit::MatchVectType& ligandMcsMatch,
-                                                          const RDKit::MatchVectType& targetMcsMatch) {
+    CoreAtomMapping ConformerEmbedder::getLigandMcsAtomCoordsFromTargetMatch(
+        const RDGeom::POINT3D_VECT &targetCoords, const RDKit::MatchVectType &ligandMcsMatch,
+        const RDKit::MatchVectType &targetMcsMatch) {
         CoreAtomMapping mcsCoords;
         for (const auto &[mcsAtomID, targetAtomID] : targetMcsMatch) {
             mcsCoords[mcsAtomID] = targetCoords.at(targetAtomID);

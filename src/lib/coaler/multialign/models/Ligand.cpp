@@ -6,8 +6,8 @@
 
 namespace coaler::multialign {
 
-    Ligand::Ligand(const RDKit::RWMol& mol, const UniquePoseSet& poses, LigandID id)
-        : m_molecule(mol), m_poses(poses), m_id(id) {}
+    Ligand::Ligand(const RDKit::ROMol& mol, const UniquePoseSet& poses, LigandID id)
+        : m_molecule(boost::make_shared<RDKit::ROMol>(mol)), m_poses(poses), m_id(id) {}
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
@@ -19,7 +19,7 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    unsigned Ligand::getNumHeavyAtoms() const noexcept { return m_molecule.getNumHeavyAtoms(); }
+    unsigned Ligand::getNumHeavyAtoms() const noexcept { return m_molecule->getNumHeavyAtoms(); }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
@@ -27,10 +27,10 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    RDKit::RWMol Ligand::getMolecule() const noexcept { return m_molecule; }
+    RDKit::ROMol Ligand::getMolecule() const noexcept { return *m_molecule; }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    RDKit::RWMOL_SPTR Ligand::getMoleculePtr() const noexcept { return boost::make_shared<RDKit::RWMol>(m_molecule); }
+    RDKit::ROMOL_SPTR Ligand::getMoleculePtr() const noexcept { return m_molecule; }
 
 }  // namespace coaler::multialign

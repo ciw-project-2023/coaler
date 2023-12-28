@@ -40,7 +40,7 @@ namespace coaler::core {
 
         mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareAnyHeavyAtom);
         mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareAny);
-        for(auto mol : mols) {
+        for (auto mol : mols) {
             spdlog::info(RDKit::MolToSmiles(*mol));
         }
         RDKit::MCSResult const mcs = RDKit::findMCS(mols, &mcsParams);

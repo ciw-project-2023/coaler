@@ -8,6 +8,7 @@
 
 namespace coaler::multialign {
     class Scorer {
+      public:
         static inline double getOverlapScore(const Ligand &ligand1, const Ligand &ligand2, unsigned int pose1,
                                              unsigned int pose2) {
             const double distance
@@ -17,4 +18,4 @@ namespace coaler::multialign {
         }
     };
 
-}
+}  // namespace coaler::multialign

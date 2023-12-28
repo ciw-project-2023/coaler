@@ -17,7 +17,7 @@ namespace coaler::multialign {
      */
     class Ligand {
       public:
-        Ligand(const RDKit::RWMol& mol, const UniquePoseSet& poses, LigandID id);
+        Ligand(const RDKit::ROMol& mol, const UniquePoseSet& poses, LigandID id);
 
         /**
          * get idenitifers of all poses embedded in ligand.
@@ -47,13 +47,13 @@ namespace coaler::multialign {
          *
          * @return The molecule represented by the ligand.
          */
-        RDKit::RWMol getMolecule() const noexcept;
+        RDKit::ROMol getMolecule() const noexcept;
 
-        RDKit::RWMOL_SPTR getMoleculePtr() const noexcept;
+        RDKit::ROMOL_SPTR getMoleculePtr() const noexcept;
 
       private:
         LigandID m_id;
-        RDKit::RWMol m_molecule;
+        boost::shared_ptr<RDKit::ROMol> m_molecule;
         UniquePoseSet m_poses;
     };
 

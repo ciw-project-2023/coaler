@@ -5,10 +5,10 @@
 #pragma once
 #include "Forward.hpp"
 #include "GraphMol/FMCS/FMCS.h"
+#include "LigandAlignmentAssembly.hpp"
 #include "MultiAlignerResult.hpp"
 #include "PoseRegister.hpp"
 #include "PoseRegisterBuilder.hpp"
-#include "LigandAlignmentAssembly.hpp"
 
 namespace coaler::multialign {
 
@@ -23,7 +23,6 @@ namespace coaler::multialign {
         [[maybe_unused]] LigandAlignmentAssembly optimizeAssembly(LigandAlignmentAssembly& assembly);
 
       private:
-
         void ensurePairwiseAlignmentsForAssembly(const std::unordered_map<LigandID, PoseID>& assemblyIDs);
 
         static PairwiseAlignment calculateAlignmentScores(const LigandVector& ligands);
@@ -31,7 +30,7 @@ namespace coaler::multialign {
         static double getScore(const Ligand& ligand1, const Ligand& ligand2, unsigned pose1, unsigned pose2);
 
         [[maybe_unused]] void addPoseToPairwiseAlignments(LigandID ligandId, PoseID poseId,
-                                         const std::unordered_map<LigandID, PoseID>& assemblyIDs);
+                                                          const std::unordered_map<LigandID, PoseID>& assemblyIDs);
 
         unsigned m_maxStartingAssemblies;
         std::vector<Ligand> m_ligands;
