@@ -4,12 +4,14 @@
 
 #include "ConformerEmbedder.hpp"
 
+#include <GraphMol/FMCS/FMCS.h>
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
 #include <GraphMol/MolAlign/AlignMolecules.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <spdlog/spdlog.h>
+#include <GraphMol/SmilesParse/SmilesWrite.h>
 
 const unsigned seed = 42;
 const float forceTol = 0.0135;
@@ -17,7 +19,7 @@ const float forceTol = 0.0135;
 namespace coaler::embedder {
     ConformerEmbedder::ConformerEmbedder(const core::CoreResult &result, const int threads,
                                          const bool divideConformersByMatches)
-        : m_core(result), m_threads(threads), m_divideConformersByMatches(divideConformersByMatches) {}
+            : m_core(result), m_threads(threads), m_divideConformersByMatches(divideConformersByMatches) {}
 
     void ConformerEmbedder::embedConformers(const RDKit::ROMOL_SPTR &mol, unsigned numConfs) {
         // firstMatch molecule and core
@@ -28,13 +30,28 @@ namespace coaler::embedder {
         substructMatchParams.maxMatches = 1000;
         substructMatchParams.numThreads = m_threads;
 
-        auto matches = RDKit::SubstructMatch(*mol, *m_core.core, substructMatchParams);
+        const RDKit::MOL_SPTR_VECT molAndRef = {mol, m_core.ref};
+        auto mcsParams = core::Matcher::getMCSParams();
+        auto mcs = RDKit::findMCS(molAndRef, &mcsParams);
+
+        if (mol->hasProp("_Name")) {
+            spdlog::info("found {} mcs for ligand {} {}: {}", mcs.NumAtoms, mol->getProp<std::string>("_Name"), RDKit::MolToSmiles(*mol), mcs.SmartsString);
+        } else {
+
+            spdlog::info("found {} mcs for ligand {}: {}", mcs.NumAtoms, RDKit::MolToSmiles(*mol), mcs.SmartsString);
+        }
+
+        auto matches = RDKit::SubstructMatch(*mol, *mcs.QueryMol, substructMatchParams);
         assert(!matches.empty());
+
+        auto refSubs = RDKit::SubstructMatch(*m_core.ref, *mcs.QueryMol, substructMatchParams);
+        assert(!refSubs.empty());
+        std::unordered_map<int, int> const refMatches(refSubs.at(0).begin(), refSubs.at(0).end());
 
         spdlog::debug("number of Core Matches: {}", matches.size());
 
         unsigned matchCounter = 0;
-        for (auto const &match : matches) {
+        for (auto const &match: matches) {
             auto params = this->getEmbeddingParameters();
 
             std::vector<int> confs;
@@ -49,7 +66,7 @@ namespace coaler::embedder {
             }
 
             std::vector<unsigned> confIds;
-            for (auto const confId : confs) {
+            for (auto const confId: confs) {
                 confIds.emplace_back(confId);
             }
 
@@ -63,12 +80,13 @@ namespace coaler::embedder {
             // a list for the alignment of [(id_in_mol, id_in_ref)] because the alignment wants the atom mapping in the
             // opposite order than we get from the substruct matching (i.e. we get (queryId, molId) from substruct
             // and have to provide (molId, queryId) to the alignment.
+
             RDKit::MatchVectType matchReverse;
-            for (const auto &[queryId, molId] : match) {
-                matchReverse.emplace_back(std::make_pair(molId, m_core.coreToRef.at(queryId)));
+            for (const auto &[queryId, molId]: match) {
+                matchReverse.emplace_back(std::make_pair(molId, refMatches.at(queryId)));
             }
 
-            for (auto const confId : confs) {
+            for (auto const confId: confs) {
                 auto score = RDKit::MolAlign::alignMol(*mol, *m_core.ref, confId, 0, &matchReverse);
                 spdlog::debug("aligned conformer {} with score {}", confId, score);
             }

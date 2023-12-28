@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <GraphMol/FMCS/FMCS.h>
 #include "Forward.hpp"
 
 namespace coaler::core {
@@ -28,7 +29,33 @@ namespace coaler::core {
          */
         std::optional<CoreResult> calculateCoreMurcko(RDKit::MOL_SPTR_VECT& mols);
 
-      private:
+        static RDKit::MCSParameters getMCSParams() {
+            RDKit::MCSParameters mcsParams;
+            RDKit::MCSAtomCompareParameters atomCompParams;
+            atomCompParams.MatchChiralTag = false;
+            atomCompParams.MatchFormalCharge = true;
+            atomCompParams.MatchIsotope = false;
+            atomCompParams.MatchValences = false;
+            atomCompParams.RingMatchesRingOnly = true;
+            atomCompParams.CompleteRingsOnly = true;
+            mcsParams.AtomCompareParameters = atomCompParams;
+
+            RDKit::MCSBondCompareParameters bondCompParams;
+            bondCompParams.MatchStereo = false;
+            bondCompParams.RingMatchesRingOnly = true;
+            bondCompParams.CompleteRingsOnly = true;
+            bondCompParams.MatchFusedRings = true;
+            bondCompParams.MatchFusedRingsStrict = true;
+            mcsParams.BondCompareParameters = bondCompParams;
+
+            mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareAnyHeavyAtom);
+            //mcsParams.setMCSBondTyperFromEnum(RDKit::Bond);
+            mcsParams.Timeout = 10;
+
+            return mcsParams;
+        }
+
+    private:
         /**
          * recursive implementation of a murcko pruning of the mcs structure. The function does not delete atoms or
          * bonds from mol but saves them in delAtoms and delBonds to be deleted after function call.
