@@ -3,6 +3,7 @@
  */
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
+#include <omp.h>
 
 #include <boost/program_options.hpp>
 #include <coaler/embedder/ConformerEmbedder.hpp>
@@ -10,7 +11,6 @@
 #include <coaler/multialign/MultiAligner.hpp>
 #include <coaler/multialign/MultiAlignerResult.hpp>
 #include <sstream>
-#include <omp.h>
 
 #include "coaler/core/Matcher.hpp"
 
@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
 
     embedder::ConformerEmbedder embedder(core, opts.num_threads, opts.divideConformersByMatches);
 
-    #pragma omp parallel for shared(mols, embedder, opts) default(none)
+#pragma omp parallel for shared(mols, embedder, opts) default(none)
     for (unsigned i = 0; i < mols.size(); i++) {
         embedder.embedConformers(mols.at(i), opts.num_conformers);
     }

@@ -20,7 +20,7 @@ namespace coaler::embedder {
       public:
         ConformerEmbedder(const core::CoreResult &result, const int threads, const bool divideConformersByMatches);
 
-/**
+        /**
          * Embed an even amount of Conformers at every core match.
          * @param mol The molecule to embed.
          *

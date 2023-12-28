@@ -194,8 +194,8 @@ namespace coaler::multialign {
         omp_lock_t bestAssemblyScoreLock;
         omp_init_lock(&bestAssemblyScoreLock);
 
-#pragma omp parallel for shared(bestAssemblyLock, bestAssemblyScoreLock, currentBestAssembly, currentBestAssemblyScore, \
-                                    assembliesList) default(none)
+#pragma omp parallel for shared(bestAssemblyLock, bestAssemblyScoreLock, currentBestAssembly, \
+                                    currentBestAssemblyScore, assembliesList) default(none)
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
             auto [currentAssembly, currentAssemblyScore] = assembliesList.at(assemblyID);
             spdlog::debug("score before opt: {}", currentAssemblyScore);

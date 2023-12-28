@@ -1,8 +1,8 @@
 
-#include <GraphMol/Substruct/SubstructMatch.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
-#include "GraphMol/SmilesParse/SmilesWrite.h"
+#include <GraphMol/Substruct/SubstructMatch.h>
 
+#include "GraphMol/SmilesParse/SmilesWrite.h"
 #include "catch2/catch.hpp"
 #include "coaler/core/Forward.hpp"
 #include "coaler/embedder/ConformerEmbedder.hpp"
@@ -41,7 +41,8 @@ TEST_CASE("test_mcs", "[conformer_generator_tester]") {
         ConformerEmbedder embedder(core, 1, true);
         embedder.embedConformers(mol1, 10);
 
-        CHECK(RDKit::MolToSmarts(*core.core) == "[#6]12-,:;@[#6]-,:;@[#6]=,:;@[#6]-,:;@[#6]-,:;@[#6]:&@1:&@[#6]:&@[#6]:&@[#6]:&@[#6]:&@2");
+        CHECK(RDKit::MolToSmarts(*core.core)
+              == "[#6]12-,:;@[#6]-,:;@[#6]=,:;@[#6]-,:;@[#6]-,:;@[#6]:&@1:&@[#6]:&@[#6]:&@[#6]:&@[#6]:&@2");
         CHECK(mol1->getNumConformers() == 10);
     }
 }

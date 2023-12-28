@@ -4,16 +4,16 @@
 
 #include "Matcher.hpp"
 
-#include <spdlog/spdlog.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
+#include <spdlog/spdlog.h>
 
+#include "GraphMol/ChemTransforms/ChemTransforms.h"
+#include "GraphMol/DistGeomHelpers/Embedder.h"
+#include "GraphMol/FMCS/FMCS.h"
 #include "GraphMol/ForceFieldHelpers/UFF/UFF.h"
 #include "GraphMol/RWMol.h"
 #include "GraphMol/SmilesParse/SmartsWrite.h"
 #include "GraphMol/SmilesParse/SmilesParse.h"
-#include "GraphMol/ChemTransforms/ChemTransforms.h"
-#include "GraphMol/DistGeomHelpers/Embedder.h"
-#include "GraphMol/FMCS/FMCS.h"
 
 namespace coaler::core {
     Matcher::Matcher(int threads) : m_threads(threads) {}
@@ -80,8 +80,8 @@ namespace coaler::core {
 
         std::vector<int> ringAtoms;
         std::vector<std::vector<int>> ringVec = mcsRWMol.getRingInfo()->atomRings();
-        for (const auto ring: ringVec) {
-            for (const auto atomID: ring) {
+        for (const auto ring : ringVec) {
+            for (const auto atomID : ring) {
                 if (visit.at(atomID)) {
                     continue;
                 }
@@ -96,7 +96,7 @@ namespace coaler::core {
         RDKit::RWMOL_SPTR murckoPtr = boost::make_shared<RDKit::RWMol>(mcsRWMol);
 
         // start from each ring atom
-        for (const auto atomID: ringAtoms) {
+        for (const auto atomID : ringAtoms) {
             for (int i = 0; i < murckoPtr->getNumAtoms(); i++) {
                 visit.at(i) = false;
             }
@@ -115,7 +115,7 @@ namespace coaler::core {
         // ring atoms.
         std::vector<int> foundRingAtoms;
         std::vector<int> delAtomsDefinitely;
-        for (const auto delAtomsID: delAtomsMaybe) {
+        for (const auto delAtomsID : delAtomsMaybe) {
             for (int i = 0; i < murckoPtr->getNumAtoms(); i++) {
                 visit.at(i) = false;
             }
@@ -131,13 +131,13 @@ namespace coaler::core {
         // Deletion of atoms needs to be in order of atomIdx (high to low) to avoid
         // deletion errors.
         std::sort(delAtomsDefinitely.begin(), delAtomsDefinitely.end(), std::greater<>());
-        for (auto [atom1, atom2]: delBonds) {
+        for (auto [atom1, atom2] : delBonds) {
             if (std::find(delAtomsDefinitely.begin(), delAtomsDefinitely.end(), atom1) != delAtomsDefinitely.end()
                 && std::find(delAtomsDefinitely.begin(), delAtomsDefinitely.end(), atom2) != delAtomsDefinitely.end()) {
                 murckoPtr->removeBond(atom1, atom2);
             }
         }
-        for (auto atom: delAtomsDefinitely) {
+        for (auto atom : delAtomsDefinitely) {
             murckoPtr->removeAtom(atom);
         }
 
@@ -146,7 +146,6 @@ namespace coaler::core {
         // Embedding of core and calculation of atomCoords
         RDKit::RWMol first = *mols.at(0);
         auto ref = this->buildMolConformerForQuery(first, *murckoPtr);
-
 
         auto matches = RDKit::SubstructMatch(*ref, *murckoPtr, this->getMatchParams());
         auto match = matches.at(0);
@@ -180,7 +179,7 @@ namespace coaler::core {
                                          std::vector<int> &ringAtoms) {
         // mark atom as visited and find all neighbor atoms of atom with atomID
         visit.at(atomID) = true;
-        for (const auto &neighborID: boost::make_iterator_range(mol->getAtomNeighbors(mol->getAtomWithIdx(atomID)))) {
+        for (const auto &neighborID : boost::make_iterator_range(mol->getAtomNeighbors(mol->getAtomWithIdx(atomID)))) {
             // only visit atoms not the parent, not yet visited and which are not part of any ring
             if (neighborID == parentID || visit.at(neighborID)
                 || std::find(ringAtoms.begin(), ringAtoms.end(), neighborID) != ringAtoms.end()) {
@@ -190,8 +189,8 @@ namespace coaler::core {
 
             // find neighbors that are not on the to-be-deleted-list and count them
             int numNbrs = 0;
-            for (const auto &nextNeighborID:
-                    boost::make_iterator_range(mol->getAtomNeighbors(mol->getAtomWithIdx(neighborID)))) {
+            for (const auto &nextNeighborID :
+                 boost::make_iterator_range(mol->getAtomNeighbors(mol->getAtomWithIdx(neighborID)))) {
                 if (std::find(delAtoms.begin(), delAtoms.end(), nextNeighborID) == delAtoms.end()) {
                     numNbrs++;
                 }
@@ -216,7 +215,7 @@ namespace coaler::core {
             return;
         }
         // visit all neighbors if they are not the parent and are not yet visited
-        for (const auto &neighborID: boost::make_iterator_range(mol->getAtomNeighbors(mol->getAtomWithIdx(atomID)))) {
+        for (const auto &neighborID : boost::make_iterator_range(mol->getAtomNeighbors(mol->getAtomWithIdx(atomID)))) {
             if (neighborID == parentID || visit.at(neighborID)) {
                 continue;
             }
@@ -230,7 +229,6 @@ namespace coaler::core {
         substructMatchParams.useEnhancedStereo = true;
         substructMatchParams.aromaticMatchesConjugated = true;
         substructMatchParams.numThreads = m_threads;
-
 
         return substructMatchParams;
     }
