@@ -8,6 +8,9 @@
 
 #include "coaler/core/Forward.hpp"
 
+#include "Forward.hpp"
+#include "../multialign/Forward.hpp"
+
 namespace coaler::embedder {
 
     using CoreAtomMapping = std::map<int, RDGeom::Point3D>;
@@ -31,11 +34,17 @@ namespace coaler::embedder {
          */
         void embedConformers(const RDKit::ROMOL_SPTR &mol, unsigned numConfs);
 
+        //std::vector<RDKit::MatchVectType> filterMatches(const std::vector<RDKit::MatchVectType>& matches);
+
+        static std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(const multialign::LigandPtr& ligand,
+                                                           const multialign::LigandVector& targets,
+                                                           const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs);
       private:
         core::CoreResult m_core;
         int m_threads;
         bool m_divideConformersByMatches;
 
         RDKit::DGeomHelpers::EmbedParameters getEmbeddingParameters() const;
+
     };
 }  // namespace coaler::embedder

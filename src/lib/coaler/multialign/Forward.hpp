@@ -28,6 +28,7 @@ namespace coaler::multialign {
     using PairwiseAlignment = std::unordered_map<PosePair, double, PosePairHash>;
     using PairwisePoseRegisters = std::unordered_map<LigandPair, PoseRegisterPtr, LigandPairHash>;
 
+    using LigandPtr = boost::shared_ptr<Ligand>;
     using LigandVector = std::vector<Ligand>;
 
 }  // namespace coaler::multialign

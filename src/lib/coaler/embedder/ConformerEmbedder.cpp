@@ -5,13 +5,21 @@
 #include "ConformerEmbedder.hpp"
 
 #include <GraphMol/DistGeomHelpers/Embedder.h>
+#include <GraphMol/FMCS/FMCS.h>
+#include <GraphMol/ForceFieldHelpers/MMFF/MMFF.h>
 #include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
 #include <GraphMol/MolAlign/AlignMolecules.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <spdlog/spdlog.h>
+#include <utility>
 
-const unsigned seed = 42;
+#include "../core/Matcher.hpp"
+#include "../multialign/Forward.hpp"
+#include "../multialign/models/Forward.hpp"
+#include "Forward.hpp"
+
+    const unsigned seed = 42;
 const float forceTol = 0.0135;
 
 namespace coaler::embedder {
@@ -88,5 +96,44 @@ namespace coaler::embedder {
         params.optimizerForceTol = forceTol;
         params.clearConfs = false;
         return params;
+    }
+
+    std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(const multialign::LigandPtr &ligand,
+        const multialign::LigandVector &targets, const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs) {
+        std::vector<unsigned> newIds;
+        for (const multialign::Ligand &target : targets) {
+            // find mcs
+            const unsigned targetConfId = conformerIDs.at(target.getID());
+            auto targetConf = target.getMolecule().getConformer(targetConfId);
+
+            std::vector<RDKit::ROMOL_SPTR> mols = {
+                boost::make_shared<RDKit::ROMol>(target.getMolecule()),
+                boost::make_shared<RDKit::ROMol>(ligand->getMolecule())
+            };
+            coaler::core::Matcher matcher(1);
+            const core::CoreResult mcsResult = matcher.coaler::core::Matcher::calculateCoreMcs(mols).value();
+            // embed molecule conformers
+            RDKit::DGeomHelpers::EmbedParameters params;
+            params = RDKit::DGeomHelpers::ETKDGv3;
+            params.optimizerForceTol = forceTol;
+            params.useSmallRingTorsions = true;
+            params.randomSeed = seed;
+            params.coordMap = &mcsResult->second;
+            params.useBasicKnowledge = false;
+            params.enforceChirality = false;
+            params.useSymmetryForPruning = false;
+            params.useSmallRingTorsions = false;
+            params.useRandomCoords = true;
+            params.numThreads = 1;
+            params.clearConfs = false;
+            const int addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligand->getMoleculePtr(), params);
+            if(addedID >= 0) {
+                spdlog::info("unable to generate pose");
+                continue;
+            }
+            const unsigned addedIDUnsigned = static_cast<unsigned>(addedID);
+            newIds.push_back(addedIDUnsigned);
+        }
+        return newIds;
     }
 }  // namespace coaler::embedder
