@@ -34,7 +34,7 @@ const std::string help
     = "Usage: aligner [options]\n"
       "Options:\n"
       "  -h, --help\t\t\t\tPrint this help message\n"
-      "  -i, --input_file <path>\t\t\tPath to input files\n"
+      "  -i, --input-file <path>\t\t\tPath to input files\n"
       "  -o, --out <path>\t\t\tPath to output files\n"
       "  -j, --threads <amount>\t\t\tNumber of threads to use (default: 1)\n"
       "  -v, --verbose\t\t\tActivate verbose logging\n"
@@ -45,14 +45,14 @@ const std::string help
       "Helps against combinatorial explosion if core is small or has high symmetry (default: false)\n"
       "  --assemblies <amount>\t\t\tNumber of starting assemblies (default: 10)\n"
       "  --core <algorithm>\t\t\tAlgorithm to detect core structure (default: mcs, allowed: mcs, murcko)\n"
-      "  --confsLog <path>\t\t\tOptional path to folder to store the generated conformers\n";
+      "  --confs-log <path>\t\t\tOptional path to folder to store the generated conformers\n";
 
 std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
     ProgrammOptions parsed_options;
 
     opts::options_description desc("Allowed options");
     desc.add_options()("help,h", "print help message")(
-        "input_file,i", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
+        "input-file,i", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
         "out,o", opts::value<std::string>(&parsed_options.out_file)->default_value("out.sdf"), "path to output file")(
         "threads,j", opts::value<int>(&parsed_options.num_threads)->default_value(1), "number of threads to use")(
         "assemblies, a", opts::value<unsigned>(&parsed_options.num_start_assemblies)->default_value(200),
@@ -64,7 +64,7 @@ std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
                                          "number of conformers per core match to generate")(
         "divide,d", opts::value<bool>(&parsed_options.divideConformersByMatches)->default_value(false),
         "divides the number of conformers by the number of times the core is matched")(
-        "confsLog", opts::value<std::string>(&parsed_options.conformerLogPath)->default_value("none"));
+        "confs-log", opts::value<std::string>(&parsed_options.conformerLogPath)->default_value("none"));
 
     opts::variables_map vm;
     opts::store(opts::parse_command_line(argc, argv, desc), vm);
@@ -133,12 +133,11 @@ int main(int argc, char* argv[]) {
 
     spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
 
-    embedder::ConformerEmbedder embedder(coreResult->core, coreResult->ref, opts.num_threads,
-                                         opts.divideConformersByMatches);
+    embedder::ConformerEmbedder embedder(core, opts.num_threads, opts.divideConformersByMatches);
 
     #pragma omp parallel for shared(mols, embedder, opts) default(none)
     for (unsigned i = 0; i < mols.size(); i++) {
-        embedder.embedEvenlyAcrossAllMatches(mols.at(i), opts.num_conformers);
+        embedder.embedConformers(mols.at(i), opts.num_conformers);
     }
 
     if (opts.conformerLogPath != "none") {

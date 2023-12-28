@@ -5,6 +5,7 @@
 #include "Matcher.hpp"
 
 #include <spdlog/spdlog.h>
+#include <GraphMol/SmilesParse/SmilesWrite.h>
 
 #include "GraphMol/ForceFieldHelpers/MMFF/MMFF.h"
 #include "GraphMol/RWMol.h"
@@ -47,8 +48,14 @@ namespace coaler::core {
         spdlog::info("MCS: {}", mcs.SmartsString);
 
         auto ref = this->buildMolConformerForQuery(*mols.at(0), *mcs.QueryMol);
+        auto matches = RDKit::SubstructMatch(*ref, *mcs.QueryMol, this->getMatchParams());
+        auto match = matches.at(0);
+        std::unordered_map<int, int> coreToRef;
+        for (auto const &[queryId, molId] : match) {
+            coreToRef[queryId] = molId;
+        }
 
-        return CoreResult{mcs.QueryMol, ref};
+        return CoreResult{mcs.QueryMol, ref, coreToRef};
     }
 
     std::optional<CoreResult> Matcher::calculateCoreMurcko(RDKit::MOL_SPTR_VECT &mols) {
@@ -136,7 +143,14 @@ namespace coaler::core {
         RDKit::RWMol first = *mols.at(0);
         auto ref = this->buildMolConformerForQuery(first, *murckoPtr);
 
-        return CoreResult{murckoPtr, ref};
+        auto matches = RDKit::SubstructMatch(*ref, *murckoPtr, this->getMatchParams());
+        auto match = matches.at(0);
+        std::unordered_map<int, int> coreToRef;
+        for (auto const &[queryId, molId] : match) {
+            coreToRef[queryId] = molId;
+        }
+
+        return CoreResult{murckoPtr, ref, coreToRef};
     }
 
     // TODO this only creates a conformer for one specific reference point. A query can contain wildcards
@@ -144,31 +158,6 @@ namespace coaler::core {
     // differnet geometries). We should take that into account and try to create a diverse set of conformers
     // thta models the output of the query more closely. For now, this is a pretty good reference though.
     RDKit::ROMOL_SPTR Matcher::buildMolConformerForQuery(RDKit::RWMol first, RDKit::ROMol query) {
-        auto const matches = RDKit::SubstructMatch(first, query, this->getMatchParams());
-
-        assert(!matches.empty());
-
-        std::unordered_set<uint> matchedAtoms;
-        for (auto const &match: matches) {
-            for (auto const &[queryId, molId]: match) {
-                matchedAtoms.insert(molId);
-            }
-        }
-
-        // atomsForRemoval contains all atoms that are not part of the query descending order. We have to
-        // use this order, because removing Atoms from a molecule changes the internal atom IDs. Removing them
-        // in descending order ensures that the internal IDs that are removed are always correct.
-        std::vector<uint> atomsForRemoval;
-        for (auto i = first.getNumAtoms() - 1; i == 0; i--) {
-            if (!matchedAtoms.count(i)) {
-                atomsForRemoval.push_back(i);
-            }
-        }
-
-        for (auto const &atomId: atomsForRemoval) {
-            first.removeAtom(atomId);
-        }
-
         auto params = RDKit::DGeomHelpers::srETKDGv3;
         params.numThreads = m_threads;
         RDKit::DGeomHelpers::EmbedMolecule(first, params);
@@ -230,11 +219,11 @@ namespace coaler::core {
 
     RDKit::SubstructMatchParameters Matcher::getMatchParams() const {
         RDKit::SubstructMatchParameters substructMatchParams;
-        // using chirality breaks some SIENA input data sets
-        substructMatchParams.useChirality = false;
+        substructMatchParams.useChirality = true;
         substructMatchParams.useEnhancedStereo = true;
-        substructMatchParams.aromaticMatchesConjugated = true;
+        substructMatchParams.aromaticMatchesConjugated = false;
         substructMatchParams.numThreads = m_threads;
+
 
         return substructMatchParams;
     }

@@ -10,6 +10,7 @@ namespace coaler::core {
     struct CoreResult {
         RDKit::ROMOL_SPTR core;
         RDKit::ROMOL_SPTR ref;
+        std::unordered_map<int, int> coreToRef;
     };
 
     class Matcher {
