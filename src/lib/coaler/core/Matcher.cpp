@@ -7,9 +7,10 @@
 #include <spdlog/spdlog.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 
-#include "GraphMol/ForceFieldHelpers/MMFF/MMFF.h"
+#include "GraphMol/ForceFieldHelpers/UFF/UFF.h"
 #include "GraphMol/RWMol.h"
 #include "GraphMol/SmilesParse/SmartsWrite.h"
+#include "GraphMol/SmilesParse/SmilesParse.h"
 #include "GraphMol/ChemTransforms/ChemTransforms.h"
 #include "GraphMol/DistGeomHelpers/Embedder.h"
 #include "GraphMol/FMCS/FMCS.h"
@@ -48,7 +49,10 @@ namespace coaler::core {
         spdlog::info("MCS: {}", mcs.SmartsString);
 
         auto ref = this->buildMolConformerForQuery(*mols.at(0), *mcs.QueryMol);
+
         auto matches = RDKit::SubstructMatch(*ref, *mcs.QueryMol, this->getMatchParams());
+        assert(!matches.empty());
+
         auto match = matches.at(0);
         std::unordered_map<int, int> coreToRef;
         for (auto const &[queryId, molId] : match) {
@@ -143,6 +147,7 @@ namespace coaler::core {
         RDKit::RWMol first = *mols.at(0);
         auto ref = this->buildMolConformerForQuery(first, *murckoPtr);
 
+
         auto matches = RDKit::SubstructMatch(*ref, *murckoPtr, this->getMatchParams());
         auto match = matches.at(0);
         std::unordered_map<int, int> coreToRef;
@@ -160,10 +165,12 @@ namespace coaler::core {
     RDKit::ROMOL_SPTR Matcher::buildMolConformerForQuery(RDKit::RWMol first, RDKit::ROMol query) {
         auto params = RDKit::DGeomHelpers::srETKDGv3;
         params.numThreads = m_threads;
+        params.randomSeed = 42;
+        params.useRandomCoords = true;
         RDKit::DGeomHelpers::EmbedMolecule(first, params);
 
         std::vector<std::pair<int, double>> result;
-        RDKit::MMFF::MMFFOptimizeMoleculeConfs(first, result, m_threads);
+        RDKit::UFF::UFFOptimizeMoleculeConfs(first, result, m_threads);
 
         return boost::make_shared<RDKit::ROMol>(first);
     }
@@ -221,7 +228,7 @@ namespace coaler::core {
         RDKit::SubstructMatchParameters substructMatchParams;
         substructMatchParams.useChirality = true;
         substructMatchParams.useEnhancedStereo = true;
-        substructMatchParams.aromaticMatchesConjugated = false;
+        substructMatchParams.aromaticMatchesConjugated = true;
         substructMatchParams.numThreads = m_threads;
 
 

@@ -5,7 +5,7 @@
 #include "ConformerEmbedder.hpp"
 
 #include <GraphMol/DistGeomHelpers/Embedder.h>
-#include <GraphMol/ForceFieldHelpers/MMFF/MMFF.h>
+#include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
 #include <GraphMol/MolAlign/AlignMolecules.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
@@ -54,7 +54,7 @@ namespace coaler::embedder {
             }
 
             std::vector<std::pair<int, double>> result;
-            RDKit::MMFF::MMFFOptimizeMoleculeConfs(*mol, result, m_threads);
+            RDKit::UFF::UFFOptimizeMoleculeConfs(*mol, result, m_threads);
 
             // This is somewhat unintuitive:
             // We use a reference molecule (m_core.ref) to have a "real" conformer, as we cannot generate
