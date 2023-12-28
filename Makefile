@@ -16,6 +16,6 @@ clean:
 	@echo "Cleaning..."
 	@rm -r ./build/
 
-
 install:
 	@echo "Installing..."
+	@install -m755 ./build/Release/src/coaler /usr/local/bin/coaler
