@@ -253,7 +253,7 @@ namespace coaler::multialign {
                     }
                 }
 
-                if (!swappedLigandPose && maxScoreDeficit > 0.4) {
+                if (!swappedLigandPose && maxScoreDeficit > 0.01) {
                     spdlog::info("generating new conformer");
                     LigandVector alignmentTargets = {m_ligands.begin(), m_ligands.end()};
                     //remove worst ligand from targets, we only want to use all other ligands as target

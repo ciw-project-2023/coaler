@@ -28,6 +28,13 @@ namespace coaler::core {
          */
         std::optional<CoreResult> calculateCoreMurcko(RDKit::MOL_SPTR_VECT& mols);
 
+        /**
+         *
+         * @param mols
+         * @return
+         */
+        static RDKit::ROMOL_SPTR calculateAssemblyLigandsMcs(RDKit::MOL_SPTR_VECT& mols);
+
       private:
         /**
          * recursive implementation of a murcko pruning of the mcs structure. The function does not delete atoms or
