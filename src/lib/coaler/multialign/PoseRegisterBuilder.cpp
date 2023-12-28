@@ -6,8 +6,6 @@
 #include <omp.h>
 #include <spdlog/spdlog.h>
 
-#include <iostream>
-
 #include "PoseRegister.hpp"
 #include "models/Ligand.hpp"
 
@@ -47,6 +45,7 @@ namespace coaler::multialign {
             }
         }
 
+        spdlog::info("Finished building pose registers");
         PoseRegisterCollection collection;
         for (const auto &reg : poseRegisters) {
             collection.addRegister(reg.second);

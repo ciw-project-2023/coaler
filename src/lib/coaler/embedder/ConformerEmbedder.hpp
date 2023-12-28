@@ -3,31 +3,39 @@
  */
 
 #pragma once
+#include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/ROMol.h>
-#include <GraphMol/Substruct/SubstructMatch.h>
+
+#include "coaler/core/Forward.hpp"
 
 namespace coaler::embedder {
 
     using CoreAtomMapping = std::map<int, RDGeom::Point3D>;
 
+    /**
+     * The ConformerEmbedder class provides functionality for the generation of conformers for
+     * a given molecule with contrained core coordinates.
+     */
     class ConformerEmbedder {
       public:
-        explicit ConformerEmbedder(RDKit::ROMOL_SPTR& query, CoreAtomMapping& coords, int threads = 1,
-                                   bool divideConformersByMatches = false);
+        ConformerEmbedder(const core::CoreResult &result, const int threads, const bool divideConformersByMatches);
 
-        /***
-         * embedding of the molecules with their respective number of Conformers
-         * @param mol
-         * @param numConfs
+        /**
+         * Embed an even amount of Conformers at every core match.
+         * @param mol The molecule to embed.
+         *
+         * @note If the core has a too high symmetry, it is possible, that no embedding can be
+         * performed within the given min/max constraints.
+         *
+         * @return True upon success.
          */
-        void embedConformersWithFixedCore(const RDKit::ROMOL_SPTR& mol, unsigned numConfs);
+        void embedConformers(const RDKit::ROMOL_SPTR &mol, unsigned numConfs);
 
       private:
-        RDKit::ROMOL_SPTR m_core;
-        CoreAtomMapping m_coords;
+        core::CoreResult m_core;
         int m_threads;
         bool m_divideConformersByMatches;
 
-        std::vector<RDKit::MatchVectType> filterMatches(const std::vector<RDKit::MatchVectType>& matches);
+        RDKit::DGeomHelpers::EmbedParameters getEmbeddingParameters() const;
     };
 }  // namespace coaler::embedder
