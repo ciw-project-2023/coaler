@@ -69,7 +69,7 @@ namespace coaler::multialign {
 
     MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, unsigned maxStartingAssemblies, unsigned nofThreads)
 
-        : m_maxStartingAssemblies(maxStartingAssemblies) {
+        : m_maxStartingAssemblies(maxStartingAssemblies), m_nofThreads(nofThreads) {
         assert(m_maxStartingAssemblies > 0);
         for (LigandID id = 0; id < molecules.size(); id++) {
             UniquePoseSet poses;
@@ -138,7 +138,9 @@ namespace coaler::multialign {
         spdlog::info("Mols: {} | Confs/Mol: {} | total pairwise scores: {}", m_ligands.size(),
                      m_ligands.begin()->getNumPoses(), m_pairwiseAlignments.size());
         // build pose registers
-        m_poseRegisters = PoseRegisterBuilder::buildPoseRegisters(m_pairwiseAlignments, m_ligands);
+        spdlog::info("Start building pose registers.");
+        m_poseRegisters = PoseRegisterBuilder::buildPoseRegisters(m_pairwiseAlignments, m_ligands, m_nofThreads);
+        spdlog::info("Finish building pose registers.");
 
         // build starting ensembles from registers
         // AssemblyCollection assemblies;
@@ -147,11 +149,11 @@ namespace coaler::multialign {
         for (const Ligand &ligand : m_ligands) {
             spdlog::debug("building starting assemblies for ligand {}", ligand.getID());
             for (const UniquePoseID &pose : ligand.getPoses()) {
-                LigandAlignmentAssembly assembly
+                const LigandAlignmentAssembly assembly
                     = StartingAssemblyGenerator::generateStartingAssembly(pose, m_poseRegisters, m_ligands);
 
                 double const score = AssemblyScorer::calculateAssemblyScore(assembly, m_pairwiseAlignments, m_ligands);
-                AssemblyWithScore newAssembly = std::make_pair(assembly, score);
+                const AssemblyWithScore newAssembly = std::make_pair(assembly, score);
 
                 // insert if queue no full or new assembly is larger that worst assembly in queue
                 // TODO ensure this is called correctly
@@ -159,7 +161,7 @@ namespace coaler::multialign {
                     assemblies.push(newAssembly);
                     continue;
                 }
-                AssemblyWithScore topAssembly = assemblies.top();
+                const AssemblyWithScore topAssembly = assemblies.top();
                 if (AssemblyWithScoreGreater()(newAssembly, topAssembly)) {
                     assemblies.pop();
                     assemblies.push(newAssembly);
@@ -183,6 +185,8 @@ namespace coaler::multialign {
         }
 
         spdlog::info("start optimization of {} alignment assemblies.", assembliesList.size());
+
+        unsigned skippedAssembliesCount = 0;
 
         // locks for shared variables
         omp_lock_t bestAssemblyLock;
@@ -265,6 +269,9 @@ namespace coaler::multialign {
         }
 
         spdlog::info("finished alignment optimization.");
+        if (skippedAssembliesCount > 0) {
+            spdlog::info("Skipped a total of {} incomplete assemblies.", skippedAssembliesCount);
+        }
 
         return {currentBestAssemblyScore, currentBestAssembly.getAssemblyMapping(), m_ligands};
     }

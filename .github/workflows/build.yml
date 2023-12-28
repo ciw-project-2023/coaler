@@ -59,7 +59,7 @@ jobs:
         run: conan remote login coaler $CONAN_SERVER_USER --password $CONAN_SERVER_PASSWORD
 
       - name: Build
-        run: conan build . --update
+        run: conan build .
 
       - name: Run Tests
         run: ./build/Release/test/Test

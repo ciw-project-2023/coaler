@@ -12,7 +12,8 @@ namespace coaler::multialign {
     class PoseRegisterBuilder {
       public:
         static PoseRegisterCollection buildPoseRegisters(const PairwiseAlignment& alignmentScores,
-                                                         const std::vector<Ligand>& ligands) noexcept;
+                                                         const std::vector<Ligand>& ligands,
+                                                         unsigned nofThreads) noexcept;
 
       private:
         static unsigned calculateRegisterSizeForLigand(const Ligand& firstLigand, const Ligand& secondLigand);

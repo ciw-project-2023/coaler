@@ -26,11 +26,24 @@ TEST_CASE("test_pose_register_builder", "[multialign]") {
     pairwiseScores.emplace(m0p0m1p1, 0.1);
     pairwiseScores.emplace(m0p1m1p1, 0.3);
 
-    const PoseRegisterCollection collection = PoseRegisterBuilder::buildPoseRegisters(pairwiseScores, {l1, l2});
+    SECTION("sequential") {
+        const PoseRegisterCollection collection = PoseRegisterBuilder::buildPoseRegisters(pairwiseScores, {l1, l2}, 1);
 
-    PairwisePoseRegisters reg = collection.getAllRegisters();
+        PairwisePoseRegisters reg = collection.getAllRegisters();
 
-    CHECK(reg.size() == 1);
-    CHECK(reg.at(ligandPair)->getSize() == Constants::POSE_REGISTER_SIZE_FACTOR * l1.getNumPoses() * l2.getNumPoses());
-    CHECK(reg.at(ligandPair)->getHighestScoringPair() == m0p0m1p0);
+        CHECK(reg.size() == 1);
+        CHECK(reg.at(ligandPair)->getSize()
+              == Constants::POSE_REGISTER_SIZE_FACTOR * l1.getNumPoses() * l2.getNumPoses());
+        CHECK(reg.at(ligandPair)->getHighestScoringPair() == m0p0m1p0);
+    }
+    SECTION("parallel") {
+        const PoseRegisterCollection collection = PoseRegisterBuilder::buildPoseRegisters(pairwiseScores, {l1, l2}, 2);
+
+        PairwisePoseRegisters reg = collection.getAllRegisters();
+
+        CHECK(reg.size() == 1);
+        CHECK(reg.at(ligandPair)->getSize()
+              == Constants::POSE_REGISTER_SIZE_FACTOR * l1.getNumPoses() * l2.getNumPoses());
+        CHECK(reg.at(ligandPair)->getHighestScoringPair() == m0p0m1p0);
+    }
 }
