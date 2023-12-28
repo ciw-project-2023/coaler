@@ -80,6 +80,7 @@ namespace coaler::multialign {
 
             m_ligands.emplace_back(*molecules.at(id), poses, id);
         }
+        omp_set_num_threads(m_nofThreads);  // this sets the number of threads used for ALL subsequent parallel regions.
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
@@ -144,10 +145,8 @@ namespace coaler::multialign {
 
         // build starting ensembles from registers
         // AssemblyCollection assemblies;
-        spdlog::info("building starting assemblies for ligands");
         std::priority_queue<AssemblyWithScore, std::vector<AssemblyWithScore>, AssemblyWithScoreGreater> assemblies;
         for (const Ligand &ligand : m_ligands) {
-            spdlog::debug("building starting assemblies for ligand {}", ligand.getID());
             for (const UniquePoseID &pose : ligand.getPoses()) {
                 const LigandAlignmentAssembly assembly
                     = StartingAssemblyGenerator::generateStartingAssembly(pose, m_poseRegisters, m_ligands);
@@ -155,7 +154,8 @@ namespace coaler::multialign {
                 double const score = AssemblyScorer::calculateAssemblyScore(assembly, m_pairwiseAlignments, m_ligands);
                 const AssemblyWithScore newAssembly = std::make_pair(assembly, score);
 
-                // insert if queue no full or new assembly is larger that worst assembly in queue
+                // insert if queue not full or new assembly is larger that worst assembly in queue
+
                 // TODO ensure this is called correctly
                 if (assemblies.size() < m_maxStartingAssemblies) {
                     assemblies.push(newAssembly);
@@ -183,24 +183,29 @@ namespace coaler::multialign {
             assembliesList.push_back(assemblies.top());
             assemblies.pop();
         }
-
         spdlog::info("start optimization of {} alignment assemblies.", assembliesList.size());
 
         unsigned skippedAssembliesCount = 0;
 
         // locks for shared variables
-        omp_lock_t bestAssemblyLock;
-        omp_init_lock(&bestAssemblyLock);
         omp_lock_t bestAssemblyScoreLock;
         omp_init_lock(&bestAssemblyScoreLock);
+        omp_lock_t bestAssemblyLock;
+        omp_init_lock(&bestAssemblyLock);
+        omp_lock_t skippedAssembliesCountLock;
+        omp_init_lock(&skippedAssembliesCountLock);
 
-#pragma omp parallel for shared(bestAssemblyLock, bestAssemblyScoreLock, currentBestAssembly, \
-                                    currentBestAssemblyScore, assembliesList) default(none)
+#pragma omp parallel for shared(bestAssemblyScoreLock, bestAssemblyLock, skippedAssembliesCountLock, \
+                                    currentBestAssembly, currentBestAssemblyScore, assembliesList,   \
+                                    skippedAssembliesCount) default(none)
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
             auto [currentAssembly, currentAssemblyScore] = assembliesList.at(assemblyID);
-            spdlog::debug("score before opt: {}", currentAssemblyScore);
+            spdlog::debug("Score before opt: {}", currentAssemblyScore);
             if (currentAssembly.getMissingLigandsCount() != 0) {
-                spdlog::warn("skipping assembly because it is missing ligands");
+                spdlog::debug("Skip assembly because its missing ligands.");
+                omp_set_lock(&skippedAssembliesCountLock);
+                skippedAssembliesCount++;
+                omp_unset_lock(&skippedAssembliesCountLock);
                 continue;
             }
 
@@ -249,7 +254,6 @@ namespace coaler::multialign {
                         break;
                     }
                 }
-
                 if (!swappedLigandPose) {
                     ligandAvailable.at(worstLigand.getID()) = false;
                 }
@@ -267,7 +271,6 @@ namespace coaler::multialign {
             omp_unset_lock(&bestAssemblyLock);
             omp_unset_lock(&bestAssemblyScoreLock);
         }
-
         spdlog::info("finished alignment optimization.");
         if (skippedAssembliesCount > 0) {
             spdlog::info("Skipped a total of {} incomplete assemblies.", skippedAssembliesCount);
