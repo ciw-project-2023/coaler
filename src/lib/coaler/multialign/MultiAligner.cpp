@@ -11,9 +11,10 @@
 #include <queue>
 #include <utility>
 
-#include "AssemblyScorer.hpp"
 #include "LigandAlignmentAssembly.hpp"
 #include "StartingAssemblyGenerator.hpp"
+#include "scorer/AlignmentScorer.hpp"
+#include "scorer/AssemblyScorer.hpp"
 
 namespace coaler::multialign {
     using AssemblyWithScore = std::pair<LigandAlignmentAssembly, double>;
@@ -115,9 +116,9 @@ namespace coaler::multialign {
                         RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
                         RDKit::RWMol const secondMol = ligands.at(secondMolId).getMolecule();
 
-                        double score = 1
-                                       - RDKit::MolShapes::tanimotoDistance(firstMol, secondMol, firstMolPoseId,
-                                                                            secondMolPoseId);
+                        double score = AlignmentScorer::calc_tanimoto_shape_similarity(firstMol, secondMol,
+                                                                                      firstMolPoseId, secondMolPoseId);
+
                         UniquePoseID firstPose(firstMolId, firstMolPoseId);
                         UniquePoseID secondPose(secondMolId, secondMolPoseId);
                         omp_set_lock(&maplock);
