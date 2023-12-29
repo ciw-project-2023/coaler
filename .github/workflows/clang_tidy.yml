@@ -23,8 +23,8 @@ jobs:
           sudo apt install python3-pip
           pip3 install conan
           conan profile detect
-          conan remote add doc https://monkfish-app-qfnky.ondigitalocean.app
-          conan remote login doc ciw -p VZKhzh2v5nCnijAS3A8R
+          conan remote add coaler http://server.conan.corealigner.de
+          conan remote login coaler ciw -p VZKhzh2v5nCnijAS3A8R
           conan install . --build missing
           conan build .
           cd build
