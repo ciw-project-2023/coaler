@@ -1,7 +1,6 @@
 name: Clang-Tidy
 
-on:
-  pull_request:
+on: push
 
 env:
   CONAN_SERVER_USER: ciw
