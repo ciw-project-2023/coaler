@@ -25,6 +25,7 @@ struct ProgrammOptions {
     std::string core_type;
 };
 
+
 const std::string help
     = "Usage: aligner [options]\n"
       "Options:\n"
