@@ -20,7 +20,7 @@ jobs:
           check-path: 'src'
           fallback-style: 'Google' #
 
-  test:
+  clang-tidy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
