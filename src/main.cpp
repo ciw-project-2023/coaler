@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
     multialign::MultiAligner aligner(mols);
     auto result = aligner.alignMolecules();
 
-    coaler::GeometryOptimizer optimizer(4, core.first);
+    coaler::GeometryOptimizer optimizer(0.05, core.first);
     optimizer.optimize_alignment_w_icp(result);
     // coaler::multialign::MultiAlignerResult optimized_result = optimizer.get_optimized_alignment();
 
