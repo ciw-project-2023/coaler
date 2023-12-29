@@ -215,7 +215,9 @@ namespace coaler::multialign {
             ligandAvailable.init(ligands);
 
             // assembly optimization step
+            unsigned stepCount = 0;
             while (std::any_of(ligandAvailable.begin(), ligandAvailable.end(), LigandIsAvailable())) {
+                stepCount++;
                 // determine ligand with highest score deficit TODO move to own func
                 double maxScoreDeficit = 0;
                 Ligand worstLigand = *ligands.begin();  // dummy init --> better idea?
@@ -230,8 +232,7 @@ namespace coaler::multialign {
                         maxScoreDeficit = ligandScoreDeficit;
                     }
                 }
-                spdlog::info("max scorediff: {}", maxScoreDeficit);
-                spdlog::info("worst ligand: {}", worstLigand.getID());
+                spdlog::info("worst ligand: {} has score deficit {}", worstLigand.getID(), maxScoreDeficit);
                 if (maxScoreDeficit == 0) {
                     // all pairwise alignments are optimal
                     // TODO can we return this assembly and be sure its the optimum?
@@ -260,7 +261,7 @@ namespace coaler::multialign {
                     }
                 }
 
-                if (!swappedLigandPose && maxScoreDeficit > 1.5) {
+                if (!swappedLigandPose && maxScoreDeficit > 0.2) {
                     spdlog::debug("generating new conformer");
                     LigandVector alignmentTargets = {ligands.begin(), ligands.end()};
                     // remove the worst ligand from targets, we only want to use all other ligands as target
@@ -296,7 +297,8 @@ namespace coaler::multialign {
                         }
                     }
 
-                    if(bestNewAssemblyScore <= currentAssemblyScore) {
+                    if(bestNewAssemblyScore > currentAssemblyScore) {
+                        currentAssemblyScore = bestNewAssemblyScore;
                         spdlog::info("swapped to new pose. assembly score: {}", currentAssemblyScore);
                         // remove all (except best) new poses from ligand
                         for (auto iter = newConfIDs.begin(); iter != newConfIDs.end(); iter++) {
@@ -328,7 +330,7 @@ namespace coaler::multialign {
             //this->ensurePairwiseAlignmentsForAssembly(currentAssembly.getAssemblyMapping());
             double const assemblyScore
                 = AssemblyScorer::calculateAssemblyScore(currentAssembly, pairwiseAlignments, ligands);
-            spdlog::info("Score after opt: {}", assemblyScore);
+            spdlog::info("Terminated. Score after {} steps: {}", stepCount, assemblyScore);
             omp_set_lock(&bestAssemblyLock);
             omp_set_lock(&bestAssemblyScoreLock);
             if (assemblyScore > currentBestAssemblyScore) {
