@@ -62,7 +62,7 @@ jobs:
         run: conan build .
 
       - name: Clang-Tidy
-        run: clang-tidy -p=build ./src/**/*.cpp
+        run: clang-tidy -p=build src/**/*.cpp
 
   test:
     runs-on: ubuntu-latest
