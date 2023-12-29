@@ -63,6 +63,14 @@ jobs:
 
       - run: pwd
 
+      - run: ls
+
+      - run: cd ..
+
+      - run: pwd
+
+      - run: ls
+
       - name: Clang-Tidy
         run: clang-tidy -p=build src/**/*.cpp
 
