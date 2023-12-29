@@ -1,4 +1,5 @@
 #include "Matcher.hpp"
+
 #include <spdlog/spdlog.h>
 
 #include "GraphMol/ChemTransforms/ChemTransforms.h"
@@ -22,8 +23,8 @@ namespace coaler::core {
          * @param foundRingAtoms atoms found during DFS which are ringatoms of @param mol
          */
         // NOLINTBEGIN(misc-unused-parameters) : I think clang-tidy does not recognize RDKit functions?
-        void murckoCheckDelAtoms(RDKit::RWMOL_SPTR& mol, int atomID, int parentID, std::vector<bool>& visit,
-                                 std::vector<int>& ringAtoms, std::vector<int>& foundRingAtoms) {
+        void murckoCheckDelAtoms(RDKit::RWMOL_SPTR &mol, int atomID, int parentID, std::vector<bool> &visit,
+                                 std::vector<int> &ringAtoms, std::vector<int> &foundRingAtoms) {
             // NOLINTEND(misc-unused-parameters)
             // mark atom as visited and check if they are part of any ring. If yes save and return to
             // recursive call before
@@ -33,14 +34,15 @@ namespace coaler::core {
                 return;
             }
             // visit all neighbors if they are not the parent and are not yet visited
-            for (const auto &neighborID : boost::make_iterator_range(mol->getAtomNeighbors(mol->getAtomWithIdx(atomID)))) {
+            for (const auto &neighborID :
+                 boost::make_iterator_range(mol->getAtomNeighbors(mol->getAtomWithIdx(atomID)))) {
                 if (neighborID == parentID || visit.at(neighborID)) {
                     continue;
                 }
                 murckoCheckDelAtoms(mol, neighborID, atomID, visit, ringAtoms, foundRingAtoms);
             }
         }
-    }
+    }  // namespace
 
     Matcher::Matcher(int threads) : m_threads(threads) {}
 
