@@ -13,8 +13,8 @@
 
 #include "LigandAlignmentAssembly.hpp"
 #include "StartingAssemblyGenerator.hpp"
+#include "coaler/multialign/scorer/AssemblyScorer.hpp"
 #include "scorer/AlignmentScorer.hpp"
-#include "scorer/AssemblyScorer.hpp"
 
 namespace coaler::multialign {
     using AssemblyWithScore = std::pair<LigandAlignmentAssembly, double>;
