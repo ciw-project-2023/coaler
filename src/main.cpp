@@ -17,7 +17,9 @@ namespace opts = boost::program_options;
 using namespace coaler;
 
 struct ProgrammOptions {
-    std::string input_file_path;
+
+
+std::string input_file_path;
     std::string input_file_type;
     unsigned num_conformers;
     std::string out_file;
