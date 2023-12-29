@@ -23,6 +23,7 @@ namespace coaler::multialign {
 
         static double calc_alignment_transformation(const RDKit::ROMol& mol_a, const RDKit::ROMol& mol_b,
                                                     unsigned int pos_id_a, unsigned int pos_id_b);
+        static double calc_rmsd(RDKit::ROMol mol_a, RDKit::ROMol mol_b, int pos_id_a, int pos_id_b);
     };
 
 }  // namespace coaler::multialign
