@@ -260,7 +260,7 @@ namespace coaler::multialign {
                     }
                 }
 
-                if (!swappedLigandPose && maxScoreDeficit > 0.1) {
+                if (!swappedLigandPose && maxScoreDeficit > 1.5) {
                     spdlog::debug("generating new conformer");
                     LigandVector alignmentTargets = {ligands.begin(), ligands.end()};
                     // remove the worst ligand from targets, we only want to use all other ligands as target
@@ -275,6 +275,7 @@ namespace coaler::multialign {
                         worstLigand.getMoleculePtr().get(), alignmentTargets, currentAssembly.getAssemblyMapping());
 
                     if (newConfIDs.empty()) {
+                        spdlog::info("no confs generated. skipping ligand.");
                         ligandAvailable.at(worstLigand.getID()) = false;
                         continue;
                     }
