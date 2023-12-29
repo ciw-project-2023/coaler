@@ -72,7 +72,7 @@ jobs:
       - run: ls
 
       - name: Clang-Tidy
-        run: clang-tidy -p=build src/**/*.cpp
+        run: clang-tidy -p=build --quiet $(find . -name '*.cpp' -or -name '*.h' -or -name '*.hpp')
 
   test:
     runs-on: ubuntu-latest
