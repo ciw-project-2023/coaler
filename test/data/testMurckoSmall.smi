@@ -1,0 +1,5 @@
+c1cc(CC(=O)O)cc(c1)CC(C)Cc2ccc(CN)cc2
+c1c(CC(=O)O)cc(CC(C(=O)O)C)c(c1)CC(CCOC)Cc2ccc(CCO)cc2
+c1c(CCOC)cc(CC(C(=O)O)C)c(c1)CC(C(=O)O)Cc2c(C)cc(CN)cc2
+c1cc(CCOC)c(CC(C)C)c(c1)CC(CCN)Cc2cc(CC)c(CN)cc2
+c1c(CCOC)cc(CCC)c(c1)CC(CCN(O)O)Cc2c(C)c(C)ccc2

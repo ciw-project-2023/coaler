@@ -13,18 +13,20 @@ namespace coaler::multialign {
 
     class MultiAligner {
       public:
-        MultiAligner(RDKit::MOL_SPTR_VECT molecules, unsigned maxStartingAssemblies = 250);
+        explicit MultiAligner(RDKit::MOL_SPTR_VECT molecules,
+                              unsigned maxStartingAssemblies = Constants::DEFAULT_NOF_STARTING_ASSEMBLIES,
+                              unsigned nofThreads = Constants::DEFAULT_NOF_THREADS);
 
         MultiAlignerResult alignMolecules();
 
       private:
-        PairwiseAlignment calculateAlignmentScores(const LigandVector& ligands);
+        static PairwiseAlignment calculateAlignmentScores(const LigandVector& ligands);
 
         unsigned m_maxStartingAssemblies;
-        RDKit::ROMOL_SPTR m_core;
         std::vector<Ligand> m_ligands;
         PoseRegisterCollection m_poseRegisters;
         PairwiseAlignment m_pairwiseAlignments;
+        unsigned m_nofThreads;
     };
 
 }  // namespace coaler::multialign
