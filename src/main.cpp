@@ -153,7 +153,7 @@ int main(int argc, char* argv[]) {
     multialign::MultiAligner aligner(mols, opts.num_start_assemblies, opts.num_threads);
     auto result = aligner.alignMolecules();
 
-    coaler::GeometryOptimizer optimizer(0.05, core.first);
+    coaler::GeometryOptimizer optimizer(0.05, core.core);
     optimizer.optimize_alignment_w_icp(result);
     // coaler::multialign::MultiAlignerResult optimized_result = optimizer.get_optimized_alignment();
 
@@ -164,13 +164,13 @@ int main(int argc, char* argv[]) {
 
     const std::string file_path = "./optimized_geo_AID3414.sdf";
 
-    std::ofstream output_file(file_path);
-    if (!output_file.is_open()) {
+    std::ofstream output_file3(file_path);
+    if (!output_file3.is_open()) {
         spdlog::error("Cannot open file: {}", file_path);
         return 1;
     }
 
-    boost::shared_ptr<RDKit::SDWriter> const sdf_writer(new RDKit::SDWriter(&output_file, false));
+    boost::shared_ptr<RDKit::SDWriter> const sdf_writer(new RDKit::SDWriter(&output_file3, false));
     int i = 0;
     for (const auto& entry : ligands) {
         auto conf = entry.getConformer();
