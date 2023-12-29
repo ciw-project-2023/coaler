@@ -1,7 +1,3 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
-
 #pragma once
 #include <cassert>
 #include <unordered_map>
@@ -13,14 +9,14 @@
 
 namespace coaler::multialign {
 
-    namespace Constants {
-        constexpr unsigned DEFAULT_NOF_STARTING_ASSEMBLIES = 50;
-        constexpr unsigned DEFAULT_NOF_THREADS = 1;
-        constexpr double POSE_REGISTER_SIZE_FACTOR = 0.5;
-    }  // namespace Constants
+    namespace constants {
+        constexpr unsigned DefaultNofStartingAssemblies = 50;
+        constexpr unsigned DefaultNofThreads = 1;
+        constexpr double PoseRegisterSizeFactor = 0.5;
+    }  // namespace constants
 
-    static_assert(Constants::POSE_REGISTER_SIZE_FACTOR < 1);
-    static_assert(Constants::POSE_REGISTER_SIZE_FACTOR > 0);
+    static_assert(constants::PoseRegisterSizeFactor < 1);
+    static_assert(constants::PoseRegisterSizeFactor > 0);
 
     class PoseRegister;
     using PoseRegisterPtr = std::shared_ptr<PoseRegister>;

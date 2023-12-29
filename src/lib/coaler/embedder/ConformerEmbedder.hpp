@@ -18,7 +18,7 @@ namespace coaler::embedder {
      */
     class ConformerEmbedder {
       public:
-        ConformerEmbedder(const core::CoreResult &result, const int threads, const bool divideConformersByMatches);
+        ConformerEmbedder(const core::CoreResult &result, int threads, bool divideConformersByMatches);
 
         /**
          * Embed an even amount of Conformers at every core match.
@@ -29,7 +29,7 @@ namespace coaler::embedder {
          *
          * @return True upon success.
          */
-        void embedConformers(const RDKit::ROMOL_SPTR &mol, unsigned numConfs);
+        void embedConformers(const RDKit::ROMOL_SPTR &mol, unsigned numConfs) const;
 
       private:
         core::CoreResult m_core;

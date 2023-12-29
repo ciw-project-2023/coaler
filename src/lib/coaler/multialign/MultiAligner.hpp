@@ -14,8 +14,8 @@ namespace coaler::multialign {
     class MultiAligner {
       public:
         explicit MultiAligner(RDKit::MOL_SPTR_VECT molecules,
-                              unsigned maxStartingAssemblies = Constants::DEFAULT_NOF_STARTING_ASSEMBLIES,
-                              unsigned nofThreads = Constants::DEFAULT_NOF_THREADS);
+                              unsigned maxStartingAssemblies = constants::DefaultNofStartingAssemblies,
+                              unsigned nofThreads = constants::DefaultNofThreads);
 
         MultiAlignerResult alignMolecules();
 

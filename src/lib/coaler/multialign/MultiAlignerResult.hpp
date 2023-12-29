@@ -1,7 +1,3 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
-
 #pragma once
 #include <unordered_map>
 
@@ -11,13 +7,9 @@ namespace coaler {
     namespace multialign {
 
         struct MultiAlignerResult {
-          public:
-            MultiAlignerResult(double score, const std::unordered_map<LigandID, PoseID>& mapping,
-                               const LigandVector& ligands)
-                : alignmentScore(score), poseIDsByLigandID(mapping), inputLigands(ligands) {}
-            double alignmentScore;
-            const std::unordered_map<LigandID, PoseID> poseIDsByLigandID;
-            const std::vector<Ligand> inputLigands;
+            double alignment_score{};
+            const std::unordered_map<LigandID, PoseID> pose_ids_by_ligand_id{};
+            const std::vector<Ligand> input_ligands{};
         };
 
     }  // namespace multialign

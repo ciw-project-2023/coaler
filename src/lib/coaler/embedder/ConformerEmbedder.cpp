@@ -11,15 +11,17 @@
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <spdlog/spdlog.h>
 
-const unsigned seed = 42;
-const float forceTol = 0.0135;
+constexpr unsigned Seed = 42;
+constexpr float ForceTol = 0.0135;
 
 namespace coaler::embedder {
-    ConformerEmbedder::ConformerEmbedder(const core::CoreResult &result, const int threads,
-                                         const bool divideConformersByMatches)
+    // NOLINTBEGIN(cppcoreguidelines-pro-type-member-init, misc-unused-parameters): clang-tidy does not found build
+    ConformerEmbedder::ConformerEmbedder(const core::CoreResult &result, int threads, bool divideConformersByMatches)
         : m_core(result), m_threads(threads), m_divideConformersByMatches(divideConformersByMatches) {}
+    // NOLINTEND(cppcoreguidelines-pro-type-member-init, misc-unused-parameters)
 
-    void ConformerEmbedder::embedConformers(const RDKit::ROMOL_SPTR &mol, unsigned numConfs) {
+    // NOLINTNEXTLINE(misc-unused-parameters) : I think clang-tidy does not recognize RDKit functions?
+    void ConformerEmbedder::embedConformers(const RDKit::ROMOL_SPTR &mol, unsigned numConfs) const {
         // firstMatch molecule and core
         RDKit::SubstructMatchParameters substructMatchParams;
         substructMatchParams.uniquify = false;
@@ -65,7 +67,7 @@ namespace coaler::embedder {
             // and have to provide (molId, queryId) to the alignment.
             RDKit::MatchVectType matchReverse;
             for (const auto &[queryId, molId] : match) {
-                matchReverse.emplace_back(std::make_pair(molId, m_core.coreToRef.at(queryId)));
+                matchReverse.emplace_back(std::make_pair(molId, m_core.core_to_ref.at(queryId)));
             }
 
             for (auto const confId : confs) {
@@ -74,18 +76,20 @@ namespace coaler::embedder {
             }
         }
 
+        // NOLINTBEGIN(bugprone-branch-clone): clang-tidy does not found build
         if (m_divideConformersByMatches) {
             assert(mol->getNumConformers() == numConfs);
         } else {
             assert(mol->getNumConformers() == numConfs * matches.size());
         }
+        // NOLINTEND(bugprone-branch-clone)
     }
 
     RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbeddingParameters() const {
         auto params = RDKit::DGeomHelpers::srETKDGv3;
-        params.randomSeed = seed;
+        params.randomSeed = Seed;
         params.numThreads = m_threads;
-        params.optimizerForceTol = forceTol;
+        params.optimizerForceTol = ForceTol;
         params.clearConfs = false;
         return params;
     }

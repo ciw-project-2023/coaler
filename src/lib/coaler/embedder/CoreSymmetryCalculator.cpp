@@ -1,7 +1,3 @@
-//
-// Created by chris on 12/6/23.
-//
-
 #include "CoreSymmetryCalculator.hpp"
 
 #include <GraphMol/SmilesParse/SmartsWrite.h>
@@ -9,7 +5,8 @@
 #include <GraphMol/Substruct/SubstructMatch.h>
 namespace coaler::embedder {
 
-    unsigned CoreSymmetryCalculator::getNofSymmetryAxes(const RDKit::ROMol& mol) {
+    // NOLINTNEXTLINE(readability-convert-member-functions-to-static, misc-unused-parameters) : not our style yet
+    [[maybe_unused]] unsigned CoreSymmetryCalculator::getNofSymmetryAxes(const RDKit::ROMol& mol) {
         std::string patternString = RDKit::MolToSmarts(mol);
         RDKit::ROMol patternMol = *RDKit::SmartsToMol(patternString);
         RDKit::SubstructMatchParameters params;
