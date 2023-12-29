@@ -147,8 +147,6 @@ namespace coaler::embedder {
             const RDKit::Conformer &targetConformer = targetMol.getConformer(targetConformerID);
 
             std::vector<RDKit::ROMOL_SPTR> mols = {
-                // boost::make_shared<RDKit::ROMol>(*RDKit::SmilesToMol(targetSmiles)),
-                // boost::make_shared<RDKit::ROMol>(*RDKit::SmilesToMol(ligandSmiles))
                 boost::make_shared<RDKit::ROMol>(*worstLigandMol),
                 boost::make_shared<RDKit::ROMol>(target.getMolecule()),
             };
@@ -156,10 +154,6 @@ namespace coaler::embedder {
             // const core::CoreResult mcsResult = matcher.coaler::core::Matcher::calculateCoreMcs(mols).value();
 
             auto mcsResult = get_mcs(mols);
-
-            //spdlog::info("ligand: {}", RDKit::MolToSmiles(*worstLigandMol));
-            //spdlog::info("target: {}", RDKit::MolToSmiles(target.getMolecule()));
-            //spdlog::info("mcs smarts: {}", mcsResult.SmartsString);
 
             RDKit::SubstructMatchParameters substructMatchParams;
             substructMatchParams.uniquify = true;
@@ -169,7 +163,7 @@ namespace coaler::embedder {
             substructMatchParams.numThreads = 1;
 
             std::vector<RDKit::MatchVectType> ligandMatches;
-            RDKit::SubstructMatch(targetMol, *mcsResult.QueryMol, ligandMatches, substructMatchParams.uniquify, false,
+            RDKit::SubstructMatch(*worstLigandMol, *mcsResult.QueryMol, ligandMatches, substructMatchParams.uniquify, false,
                                   substructMatchParams.useChirality, substructMatchParams.useQueryQueryMatches,
                                   substructMatchParams.maxMatches, substructMatchParams.numThreads);
 
@@ -186,7 +180,7 @@ namespace coaler::embedder {
                 = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(), ligandMatch, targetMatch);
 
             RDKit::DGeomHelpers::EmbedParameters params;
-            // params = RDKit::DGeomHelpers::srETKDGv3;
+            params = RDKit::DGeomHelpers::srETKDGv3;
             params.optimizerForceTol = forceTol;
             params.randomSeed = seed;
             params.coordMap = &ligandMcsCoords;
@@ -197,14 +191,15 @@ namespace coaler::embedder {
             try {
                 addedID = RDKit::DGeomHelpers::EmbedMolecule(*worstLigandMol, params);
             } catch (const std::runtime_error& e) {
-                //spdlog::warn(e.what());
+                spdlog::warn(e.what());
                 addedID = -1;
             }
             if (addedID < 0) {
-                //spdlog::info("unable to generate pose");
+                spdlog::warn("unable to generate pose");
+                spdlog::warn("ligand: {}", RDKit::MolToSmiles(*worstLigandMol));
+                spdlog::warn("target: {}", RDKit::MolToSmiles(target.getMolecule()));
+                spdlog::warn("mcs smarts: {}", mcsResult.SmartsString);
                 continue;
-            } else {
-                //spdlog::info("successfully generated new pose.");
             }
             const unsigned addedIDUnsigned = static_cast<unsigned>(addedID);
             newIds.push_back(addedIDUnsigned);
@@ -224,6 +219,9 @@ namespace coaler::embedder {
 
         CoreAtomMapping ligandCoords;
         for (const auto &[mcsAtomID, ligandAtomID] : ligandMcsMatch) {
+            if(ligandAtomID == 24) {
+                spdlog::debug("24");
+            }
             ligandCoords[ligandAtomID] = mcsCoords[mcsAtomID];
         }
 

@@ -251,7 +251,7 @@ namespace coaler::multialign {
                         = AssemblyScorer::calculateAssemblyScore(assemblyCopy, pairwiseAlignments, ligands);
 
                     if (newAssemblyScore > currentAssemblyScore) {
-                        spdlog::info("swapped for existing pose.");
+                        spdlog::debug("swapped for existing pose.");
                         currentAssembly = assemblyCopy;
                         currentAssemblyScore = newAssemblyScore;
                         ligandAvailable.setAllAvailable();
@@ -312,7 +312,7 @@ namespace coaler::multialign {
                         worstLigand.addPose({worstLigand.getID(), bestNewPoseID});
                         ligandAvailable.setAllAvailable();
                     } else {
-                        spdlog::info("discarded pose. assembly score: {}", currentAssemblyScore);
+                        spdlog::debug("discarded pose. assembly score: {}", currentAssemblyScore);
 
                         // remove all new poses from ligand
                         for (auto iter = newConfIDs.begin(); iter != newConfIDs.end(); iter++) {
