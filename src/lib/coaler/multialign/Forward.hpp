@@ -23,9 +23,9 @@ namespace coaler::multialign {
     static_assert(Constants::POSE_REGISTER_SIZE_FACTOR > 0);
 
     class PoseRegister;
-    using PoseRegisterPtr = std::shared_ptr<PoseRegister>;
+    using PoseRegisterPtr = boost::shared_ptr<PoseRegister>;
 
-    using PairwiseAlignment = std::unordered_map<PosePair, double, PosePairHash>;
+    //using PairwiseAlignment = std::unordered_map<PosePair, double, PosePairHash>;
     using PairwisePoseRegisters = std::unordered_map<LigandPair, PoseRegisterPtr, LigandPairHash>;
 
     using LigandPtr = boost::shared_ptr<Ligand>;

@@ -26,6 +26,12 @@ namespace coaler::multialign {
         [[nodiscard]] UniquePoseSet getPoses() const noexcept;
 
         /**
+         * Add a new pose to the map
+         * @param poseId The ids of the ligands molecule conformer.
+         */
+        void addPose(const UniquePoseID& poseId) noexcept;
+
+        /**
          *
          * @return
          */

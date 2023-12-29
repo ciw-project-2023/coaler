@@ -86,8 +86,8 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    PairwiseAlignment MultiAligner::calculateAlignmentScores(const LigandVector &ligands) {
-        PairwiseAlignment scores;
+    PairwiseAlignments MultiAligner::calculateAlignmentScores(const LigandVector &ligands) {
+        PairwiseAlignments scores;
 
         // calculate number of combinations. Each pair of ligands A,B has
         // A.getNumPoses() * B.getNumPoses() many embeddings
@@ -129,6 +129,7 @@ namespace coaler::multialign {
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
+
     MultiAlignerResult MultiAligner::alignMolecules() {
         // calculate pairwise alignments
         m_pairwiseAlignments = this->calculateAlignmentScores(m_ligands);
@@ -152,8 +153,6 @@ namespace coaler::multialign {
                 const AssemblyWithScore newAssembly = std::make_pair(assembly, score);
 
                 // insert if queue not full or new assembly is larger that worst assembly in queue
-
-                // TODO ensure this is called correctly
                 if (assemblies.size() < m_maxStartingAssemblies) {
                     assemblies.push(newAssembly);
                     continue;
@@ -208,28 +207,31 @@ namespace coaler::multialign {
             }
 
             // create a copy and uptdate it for new poses
-            PairwiseAlignment pairwiseAlignments = m_pairwiseAlignments;
+            PairwiseAlignments pairwiseAlignments = m_pairwiseAlignments;
+            PoseRegisterCollection poseRegisters = m_poseRegisters;
+            LigandVector ligands = m_ligands;
 
             LigandAvailabilityMapping ligandAvailable;
-            ligandAvailable.init(m_ligands);
+            ligandAvailable.init(ligands);
 
             // assembly optimization step
             while (std::any_of(ligandAvailable.begin(), ligandAvailable.end(), LigandIsAvailable())) {
                 // determine ligand with highest score deficit TODO move to own func
                 double maxScoreDeficit = 0;
-                Ligand worstLigand = *m_ligands.begin();  // dummy init --> better idea?
-                for (const Ligand &ligand : m_ligands) {
+                Ligand worstLigand = *ligands.begin();  // dummy init --> better idea?
+                for (const Ligand &ligand : ligands) {
                     if (!ligandAvailable.at(ligand.getID())) {
                         continue;
                     }
                     const double ligandScoreDeficit = AssemblyScorer::calculateScoreDeficitForLigand(
-                        ligand.getID(), m_ligands.size() - 1, currentAssembly, m_poseRegisters, pairwiseAlignments, m_ligands);
+                        ligand.getID(), ligands.size() - 1, currentAssembly, poseRegisters, pairwiseAlignments, ligands);
                     if (maxScoreDeficit < ligandScoreDeficit) {
                         worstLigand = ligand;
                         maxScoreDeficit = ligandScoreDeficit;
                     }
                 }
                 spdlog::info("max scorediff: {}", maxScoreDeficit);
+                spdlog::info("worst ligand: {}", worstLigand.getID());
                 if (maxScoreDeficit == 0) {
                     // all pairwise alignments are optimal
                     // TODO can we return this assembly and be sure its the optimum?
@@ -246,9 +248,10 @@ namespace coaler::multialign {
                     assemblyCopy.swapPoseForLigand(worstLigand.getID(), pose.getLigandInternalPoseId());
                     // avoid identity swap
                     double const newAssemblyScore
-                        = AssemblyScorer::calculateAssemblyScore(assemblyCopy, pairwiseAlignments, m_ligands);
+                        = AssemblyScorer::calculateAssemblyScore(assemblyCopy, pairwiseAlignments, ligands);
 
                     if (newAssemblyScore > currentAssemblyScore) {
+                        spdlog::info("swapped for existing pose.");
                         currentAssembly = assemblyCopy;
                         currentAssemblyScore = newAssemblyScore;
                         ligandAvailable.setAllAvailable();
@@ -258,8 +261,8 @@ namespace coaler::multialign {
                 }
 
                 if (!swappedLigandPose && maxScoreDeficit > 0.1) {
-                    spdlog::info("generating new conformer");
-                    LigandVector alignmentTargets = {m_ligands.begin(), m_ligands.end()};
+                    spdlog::debug("generating new conformer");
+                    LigandVector alignmentTargets = {ligands.begin(), ligands.end()};
                     // remove the worst ligand from targets, we only want to use all other ligands as target
                     for (auto target = alignmentTargets.begin(); target != alignmentTargets.end(); target++) {
                         if (target->getID() == worstLigand.getID()) {
@@ -283,53 +286,54 @@ namespace coaler::multialign {
                         auto assemblyCopy = currentAssembly;
                         assemblyCopy.swapPoseForLigand(worstLigand.getID(), newPoseID);
 
-                        // insert pairwise scores for new pose
-
-                        // TODO maybe use func for this? less eff but more readable
-                        /*
-                        for (const auto &ids : currentAssembly.getAssemblyMapping()) {
-                            const LigandID otherLigandID = ids.first;
-                            const PoseID otherLigandPoseID = ids.second;
-                            const double score
-                                = getScore(worstLigand, m_ligands.at(otherLigandID), newPoseID, otherLigandPoseID);
-                            pairwiseAlignmentsCopy.emplace(
-                                PosePair{{worstLigand.getID(), newPoseID}, {otherLigandID, otherLigandPoseID}}, score);
-                        }*/
                         // evaluate assembly
                         double const newAssemblyScore
-                            = AssemblyScorer::calculateAssemblyScore(currentAssembly, pairwiseAlignments, m_ligands);
+                            = AssemblyScorer::calculateAssemblyScore(assemblyCopy, pairwiseAlignments, ligands);
                         if (newAssemblyScore > bestNewAssemblyScore) {
                             bestNewAssemblyScore = newAssemblyScore;
                             bestNewPoseID = newPoseID;
                         }
                     }
-                    // remove all other new poses from ligand
-                    for (auto iter = newConfIDs.begin(); iter != newConfIDs.end(); iter++) {
-                        if (*iter == bestNewPoseID) {
-                            continue;
+
+                    if(bestNewAssemblyScore <= currentAssemblyScore) {
+                        spdlog::info("swapped to new pose. assembly score: {}", currentAssemblyScore);
+                        // remove all (except best) new poses from ligand
+                        for (auto iter = newConfIDs.begin(); iter != newConfIDs.end(); iter++) {
+                            if (*iter == bestNewPoseID) {
+                                continue;
+                            }
+                            ligands.at(worstLigand.getID()).getMolecule().removeConformer(*iter);
                         }
-                        m_ligands.at(worstLigand.getID()).getMolecule().removeConformer(*iter);
+
+                        //from here on we keep the new pose and adapt all data accordingly
+                        updatePoseRegisters(worstLigand.getID(), bestNewPoseID, poseRegisters, pairwiseAlignments, ligands);
+                        currentAssembly.swapPoseForLigand(worstLigand.getID(), bestNewPoseID);
+                        worstLigand.addPose({worstLigand.getID(), bestNewPoseID});
+                        ligandAvailable.setAllAvailable();
+                    } else {
+                        spdlog::info("discarded pose. assembly score: {}", currentAssemblyScore);
+
+                        // remove all new poses from ligand
+                        for (auto iter = newConfIDs.begin(); iter != newConfIDs.end(); iter++) {
+                            ligands.at(worstLigand.getID()).getMolecule().removeConformer(*iter);
+                        }
                     }
-                    currentAssembly.swapPoseForLigand(worstLigand.getID(), bestNewPoseID);
-                    // TODO add to ligand´s pose map
-                    swappedLigandPose = true;
-                    ligandAvailable.setAllAvailable();
                 }
-                if (!swappedLigandPose) {
-                    ligandAvailable.at(worstLigand.getID()) = false;
-                }
+                //set this to false in order to not immediately change this ligand again
+                ligandAvailable.at(worstLigand.getID()) = false;
             }
 
             // check if new optimized assembly is better than current best and swap if so.
-            this->ensurePairwiseAlignmentsForAssembly(currentAssembly.getAssemblyMapping());
+            //this->ensurePairwiseAlignmentsForAssembly(currentAssembly.getAssemblyMapping());
             double const assemblyScore
-                = AssemblyScorer::calculateAssemblyScore(currentAssembly, m_pairwiseAlignments, m_ligands);
+                = AssemblyScorer::calculateAssemblyScore(currentAssembly, pairwiseAlignments, ligands);
             spdlog::info("Score after opt: {}", assemblyScore);
             omp_set_lock(&bestAssemblyLock);
             omp_set_lock(&bestAssemblyScoreLock);
             if (assemblyScore > currentBestAssemblyScore) {
                 currentBestAssembly = currentAssembly;
                 currentBestAssemblyScore = assemblyScore;
+                m_ligands = ligands; //TODO add mutex
             }
             omp_unset_lock(&bestAssemblyLock);
             omp_unset_lock(&bestAssemblyScoreLock);
@@ -339,10 +343,11 @@ namespace coaler::multialign {
             spdlog::info("Skipped a total of {} incomplete assemblies.", skippedAssembliesCount);
         }
 
+        //TODO keep track ob best assemblies ligand vector to get new poses
         return {currentBestAssemblyScore, currentBestAssembly.getAssemblyMapping(), m_ligands};
     }
 
-    [[maybe_unused]] LigandAlignmentAssembly MultiAligner::optimizeAssembly(LigandAlignmentAssembly &assembly) {}
+    /*----------------------------------------------------------------------------------------------------------------*/
 
     double MultiAligner::getScore(const Ligand &ligand1, const Ligand &ligand2, unsigned int pose1,
                                   unsigned int pose2) {
@@ -351,6 +356,8 @@ namespace coaler::multialign {
         const double similarity = 1 - distance;
         return similarity;
     }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
 
     void MultiAligner::ensurePairwiseAlignmentsForAssembly(const std::unordered_map<LigandID, PoseID> &assemblyIDs) {
         for (LigandID ligandId = 0; ligandId < m_ligands.size(); ligandId++) {
@@ -369,17 +376,23 @@ namespace coaler::multialign {
         }
     }
 
-    [[maybe_unused]] void MultiAligner::addPoseToPairwiseAlignments(
-        LigandID ligandId, PoseID poseId, const std::unordered_map<LigandID, PoseID> &assemblyIDs) {
-        for (const auto &ids : assemblyIDs) {
-            const LigandID otherLigandID = ids.first;
-            if (otherLigandID == ligandId) {
-                continue;
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    void MultiAligner::updatePoseRegisters(const LigandID ligandId, const PoseID newPose,
+                                           const PoseRegisterCollection &registers, PairwiseAlignments &scores,
+                                           const LigandVector &ligands) {
+        for(const Ligand& otherLigand : ligands) {
+            if(otherLigand.getID() == ligandId) {continue;}
+            const LigandPair pair(ligandId, otherLigand.getID());
+            PoseRegisterPtr registerPtr = registers.getRegisterPtr(pair);
+            for(const UniquePoseID& otherPose : otherLigand.getPoses()) {
+                PosePair poses({ligandId, newPose}, otherPose);
+                const double score = scores.at(poses, ligands, true);
+                registerPtr->addPoses(poses, score);
             }
-            const PoseID otherPoseID = ids.second;
-            const double score = getScore(m_ligands.at(ligandId), m_ligands.at(otherLigandID), poseId, otherPoseID);
-            m_pairwiseAlignments.emplace(PosePair({ligandId, poseId}, {otherLigandID, otherPoseID}), score);
         }
     }
+
+
 
 }  // namespace coaler::multialign

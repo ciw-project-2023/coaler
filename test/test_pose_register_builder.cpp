@@ -9,7 +9,7 @@
 using namespace coaler::multialign;
 
 TEST_CASE("test_pose_register_builder", "[multialign]") {
-    PairwiseAlignment pairwiseScores;
+    PairwiseAlignments pairwiseScores;
     const UniquePoseID m0p0(0, 0);
     const UniquePoseID m0p1(0, 1);
     const UniquePoseID m1p0(1, 0);

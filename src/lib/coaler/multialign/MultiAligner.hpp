@@ -3,6 +3,8 @@
  */
 
 #pragma once
+#include <coaler/multialign/models/PairwiseAlignments.hpp>
+
 #include "Forward.hpp"
 #include "GraphMol/FMCS/FMCS.h"
 #include "LigandAlignmentAssembly.hpp"
@@ -25,17 +27,20 @@ namespace coaler::multialign {
       private:
         void ensurePairwiseAlignmentsForAssembly(const std::unordered_map<LigandID, PoseID>& assemblyIDs);
 
-        static PairwiseAlignment calculateAlignmentScores(const LigandVector& ligands);
+        static PairwiseAlignments calculateAlignmentScores(const LigandVector& ligands);
 
         static double getScore(const Ligand& ligand1, const Ligand& ligand2, unsigned pose1, unsigned pose2);
 
-        [[maybe_unused]] void addPoseToPairwiseAlignments(LigandID ligandId, PoseID poseId,
-                                                          const std::unordered_map<LigandID, PoseID>& assemblyIDs);
+        static void updatePoseRegisters(LigandID ligand,
+                                        PoseID newPose,
+                                        const PoseRegisterCollection& registers,
+                                        PairwiseAlignments& scores,
+                                        const LigandVector& ligands);
 
         unsigned m_maxStartingAssemblies;
         std::vector<Ligand> m_ligands;
         PoseRegisterCollection m_poseRegisters;
-        PairwiseAlignment m_pairwiseAlignments;
+        PairwiseAlignments m_pairwiseAlignments;
         unsigned m_nofThreads;
     };
 

@@ -25,6 +25,8 @@ namespace coaler::multialign {
          */
         PairwisePoseRegisters getAllRegistersForPose(const UniquePoseID& pose) const noexcept;
 
+        PoseRegisterPtr getRegisterPtr(const LigandPair& key) const noexcept;
+
         PairwisePoseRegisters getAllRegisters() const noexcept;
 
       private:

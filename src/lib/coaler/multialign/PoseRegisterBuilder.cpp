@@ -8,10 +8,11 @@
 
 #include "PoseRegister.hpp"
 #include "models/Ligand.hpp"
+#include "models/PairwiseAlignments.hpp"
 
 namespace coaler::multialign {
 
-    PoseRegisterCollection PoseRegisterBuilder::buildPoseRegisters(const PairwiseAlignment &alignmentScores,
+    PoseRegisterCollection PoseRegisterBuilder::buildPoseRegisters(PairwiseAlignments &alignmentScores,
                                                                    const std::vector<Ligand> &ligands,
                                                                    unsigned nofThreads) noexcept {
         PairwisePoseRegisters poseRegisters;
@@ -29,8 +30,8 @@ namespace coaler::multialign {
                 const unsigned size = calculateRegisterSizeForLigand(ligands.at(firstLigand), ligands.at(secondLigand));
                 const LigandPair currentLigandPair(firstLigand, secondLigand);
 
-                const std::shared_ptr<PoseRegister> registerPtr
-                    = std::make_shared<PoseRegister>(PoseRegister(firstLigand, secondLigand, size));
+                const boost::shared_ptr<PoseRegister> registerPtr
+                    = boost::make_shared<PoseRegister>(PoseRegister(firstLigand, secondLigand, size));
 
                 for (const UniquePoseID firstLigandPose : ligands.at(firstLigand).getPoses()) {
                     for (const UniquePoseID secondLigandPose : ligands.at(secondLigand).getPoses()) {

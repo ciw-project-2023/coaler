@@ -7,10 +7,11 @@
 #include <spdlog/spdlog.h>
 
 #include "Scorer.hpp"
+#include "models/PairwiseAlignments.hpp"
 
 namespace coaler::multialign {
     double AssemblyScorer::calculateAssemblyScore(const LigandAlignmentAssembly& assembly,
-                                                  const PairwiseAlignment& scores, const LigandVector& ligands) {
+                                                  PairwiseAlignments& scores, const LigandVector& ligands) {
         double assemblyScore = 0.0;
         for (const Ligand& firstLigand : ligands) {
             for (const Ligand& secondLigand : ligands) {
@@ -40,7 +41,7 @@ namespace coaler::multialign {
     double AssemblyScorer::calculateScoreDeficitForLigand(const LigandID ligandId, const LigandID maxLigandId,
                                                           const LigandAlignmentAssembly& assembly,
                                                           const PoseRegisterCollection& registers,
-                                                          const PairwiseAlignment& scores,
+                                                          PairwiseAlignments& scores,
                                                           const LigandVector& ligands) {
         PairwisePoseRegisters poseRegisters = registers.getAllRegisters();
         double scoreDeficit = 0.0;
@@ -62,19 +63,12 @@ namespace coaler::multialign {
     }
 
     double AssemblyScorer::getScoreInAssembly(LigandID firstLigandID, LigandID secondLigandID, PoseID firstPoseID,
-                                              PoseID secondPoseID, const PairwiseAlignment& scores,
+                                              PoseID secondPoseID, PairwiseAlignments& scores,
                                               const LigandVector& ligands) {
-        double score = 0.0;
         UniquePoseID const firstLigandPose{firstLigandID, firstPoseID};
         UniquePoseID const secondLigandPose{secondLigandID, secondPoseID};
         const PosePair pair{firstLigandPose, secondLigandPose};
-        if (scores.count(pair) == 1) {
-            score = scores.at(PosePair{firstLigandPose, secondLigandPose});
-        } else {
-            score = Scorer::getOverlapScore(ligands.at(firstLigandID), ligands.at(secondLigandID), firstPoseID,
-                                            secondPoseID);
-        }
-        return score;
+        return scores.at(pair, ligands);
     }
 
 }  // namespace coaler::multialign

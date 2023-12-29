@@ -122,6 +122,8 @@ namespace coaler::embedder {
         }
     }
 
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbeddingParameters() const {
         auto params = RDKit::DGeomHelpers::srETKDGv3;
         params.randomSeed = seed;
@@ -130,6 +132,8 @@ namespace coaler::embedder {
         params.clearConfs = false;
         return params;
     }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
 
     std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
         RDKit::ROMol *worstLigandMol, const multialign::LigandVector &targets,
@@ -193,20 +197,22 @@ namespace coaler::embedder {
             try {
                 addedID = RDKit::DGeomHelpers::EmbedMolecule(*worstLigandMol, params);
             } catch (const std::runtime_error& e) {
-                spdlog::warn(e.what());
+                //spdlog::warn(e.what());
                 addedID = -1;
             }
             if (addedID < 0) {
                 //spdlog::info("unable to generate pose");
                 continue;
             } else {
-                spdlog::info("successfully generated new pose.");
+                //spdlog::info("successfully generated new pose.");
             }
             const unsigned addedIDUnsigned = static_cast<unsigned>(addedID);
             newIds.push_back(addedIDUnsigned);
         }
         return newIds;
     }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
 
     CoreAtomMapping ConformerEmbedder::getLigandMcsAtomCoordsFromTargetMatch(
         const RDGeom::POINT3D_VECT &targetCoords, const RDKit::MatchVectType &ligandMcsMatch,

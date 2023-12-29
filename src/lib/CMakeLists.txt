@@ -18,7 +18,7 @@ set(rdkitlibs "RDKitAbbreviations" "RDKitAlignment" "RDKitCatalogs" "RDKitChemic
 
 add_library(coaler_lib STATIC ${library_src}
         coaler/embedder/Forward.hpp
-)
+        coaler/multialign/models/PairwiseAlignments.cpp coaler/multialign/models/PairwiseAlignments.hpp)
 
 target_include_directories(coaler_lib PUBLIC ${rdkit_INCLUDE_DIRS})
 target_include_directories(coaler_lib PUBLIC ${Boost_INCLUDE_DIRS})

@@ -33,4 +33,10 @@ namespace coaler::multialign {
 
     RDKit::ROMOL_SPTR Ligand::getMoleculePtr() const noexcept { return m_molecule; }
 
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    void Ligand::addPose(const UniquePoseID& poseId) noexcept {
+        m_poses.insert(poseId);
+    }
+
 }  // namespace coaler::multialign

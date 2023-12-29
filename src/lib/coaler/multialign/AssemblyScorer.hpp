@@ -3,6 +3,8 @@
  */
 
 #pragma once
+#include <coaler/multialign/models/PairwiseAlignments.hpp>
+
 #include "Forward.hpp"
 #include "LigandAlignmentAssembly.hpp"
 #include "PoseRegisterCollection.hpp"
@@ -11,13 +13,13 @@ namespace coaler::multialign {
     class AssemblyScorer {
       public:
         static double calculateAssemblyScore(const coaler::multialign::LigandAlignmentAssembly& assembly,
-                                             const coaler::multialign::PairwiseAlignment& scores,
+                                             coaler::multialign::PairwiseAlignments& scores,
                                              const coaler::multialign::LigandVector& ligands);
 
         static double calculateScoreDeficitForLigand(LigandID ligandId, LigandID maxLigandId,
                                                      const LigandAlignmentAssembly& assembly,
                                                      const PoseRegisterCollection& registers,
-                                                     const PairwiseAlignment& scores, const LigandVector& ligands);
+                                                     PairwiseAlignments& scores, const LigandVector& ligands);
 
       private:
         /**
@@ -31,7 +33,7 @@ namespace coaler::multialign {
          * @return
          */
         static double getScoreInAssembly(LigandID firstLigandID, LigandID secondLigandID, PoseID firstPoseID,
-                                         PoseID secondPoseID, const PairwiseAlignment& scores,
+                                         PoseID secondPoseID, PairwiseAlignments& scores,
                                          const LigandVector& ligands);
     };
 

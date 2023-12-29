@@ -30,4 +30,10 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
+    PoseRegisterPtr PoseRegisterCollection::getRegisterPtr(const LigandPair& key) const noexcept {
+        return m_registers.at(key);
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
 }  // namespace coaler::multialign
