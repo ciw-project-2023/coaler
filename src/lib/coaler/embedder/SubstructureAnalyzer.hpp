@@ -1,7 +1,3 @@
-//
-// Created by chris on 12/7/23.
-//
-
 #pragma once
 
 #include <GraphMol/ROMol.h>
@@ -11,7 +7,7 @@ namespace coaler::embedder {
     /**
      * Helper class to identify potential core matches for conformer embedding
      */
-    class SubstructureAnalyzer {
+    class [[maybe_unused]] SubstructureAnalyzer {
       public:
         /**
          * Calculate the number of identity core rotations.
@@ -24,8 +20,9 @@ namespace coaler::embedder {
          * @param Molecule the ring molecule to analyze.
          * @return The number of identity core rotations.
          */
-        static unsigned getNumberOfRingRotations(const RDKit::ROMol& molecule);
+        [[maybe_unused]] static unsigned getNumberOfRingRotations(const RDKit::ROMol& molecule);
 
-        static unsigned getNumberOfUniqueSubstructureMatches(const RDKit::ROMol& query, const RDKit::ROMol& molecule);
+        [[maybe_unused]] static unsigned getNumberOfUniqueSubstructureMatches(const RDKit::ROMol& query,
+                                                                              const RDKit::ROMol& molecule);
     };
 }  // namespace coaler::embedder

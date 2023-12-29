@@ -4,9 +4,9 @@
 
 namespace coaler::embedder {
 
-    class CoreSymmetryCalculator {
+    class [[maybe_unused]] CoreSymmetryCalculator {
       public:
-        static unsigned getNofSymmetryAxes(const RDKit::ROMol& mol);
+        [[maybe_unused]] static unsigned getNofSymmetryAxes(const RDKit::ROMol& mol);
     };
 
 }  // namespace coaler::embedder
