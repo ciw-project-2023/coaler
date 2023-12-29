@@ -61,6 +61,8 @@ jobs:
       - name: Build
         run: conan build .
 
+      - run: pwd
+
       - name: Clang-Tidy
         run: clang-tidy -p=build src/**/*.cpp
 
