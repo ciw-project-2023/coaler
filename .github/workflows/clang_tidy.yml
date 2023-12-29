@@ -20,6 +20,9 @@ jobs:
 
     - name: Run clang-tidy
       run: |
+        sudo apt install python3-pip
+        pip3 install conan
+        conan --profile detect
         conan remote add doc https://monkfish-app-qfnky.ondigitalocean.app
         conan user ciw -r doc -p VZKhzh2v5nCnijAS3A8R
         conan install . --build missing
