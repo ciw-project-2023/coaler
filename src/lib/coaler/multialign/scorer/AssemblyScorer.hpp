@@ -3,9 +3,9 @@
  */
 
 #pragma once
-#include "Forward.hpp"
-#include "LigandAlignmentAssembly.hpp"
-#include "PoseRegisterCollection.hpp"
+#include "coaler/multialign/Forward.hpp"
+#include "coaler/multialign/LigandAlignmentAssembly.hpp"
+#include "coaler/multialign/PoseRegisterCollection.hpp"
 
 namespace coaler::multialign {
     class AssemblyScorer {
