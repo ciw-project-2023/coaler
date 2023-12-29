@@ -72,7 +72,7 @@ jobs:
       - run: ls
 
       - name: Clang-Tidy
-        run: clang-tidy -p=build --quiet $(find . -not \( -path "./test/*" -or -path "./build/*" \) \( -name '*.cpp' -or -name '*.h' -or -name '*.hpp' \)
+        run: clang-tidy -p=build --quiet $(find . -not \( -path "./test/*" -or -path "./build/*" \) \( -name '*.cpp' -or -name '*.h' -or -name '*.hpp' \))
   )
 
   test:
