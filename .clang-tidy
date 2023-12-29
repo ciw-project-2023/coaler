@@ -30,7 +30,8 @@ Checks: >
   -cppcoreguidelines-avoid-const-or-ref-data-members,
   -bugprone-unchecked-optional-access,
   -cppcoreguidelines-avoid-do-while,
-  -misc-include-cleaner
+  -misc-include-cleaner,
+  -cppcoreguidelines-init-variables, # TODO: this should be included!, But Clang-tidy does not recognize RDKit yet 
 
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*.h(pp|xx)'
@@ -46,20 +47,20 @@ CheckOptions:
   - { key: readability-identifier-naming.ClassMemberPrefix,                            value: 'm_' } # POLARIS
   - { key: readability-identifier-naming.ConstantMemberCase,                           value: lower_case } # const in classes
   - { key: readability-identifier-naming.ConstantMemberSuffix,                         value: '_' } # const in classes
-  - { key: readability-identifier-naming.ConstantParameterCase,                        value: camelCase }
+  - { key: readability-identifier-naming.ConstantParameterCase,                        value: camelBack }
   - { key: readability-identifier-naming.ConstexprVariableCase,                        value: CamelCase }
   - { key: readability-identifier-naming.EnumCase,                                     value: CamelCase }
   - { key: readability-identifier-naming.EnumConstantCase,                             value: CamelCase }
   - { key: readability-identifier-naming.GlobalConstantCase,                           value: UPPER_CASE }
   - { key: readability-identifier-naming.GlobalFunctionCase,                           value: lower_case }
   - { key: readability-identifier-naming.GlobalVariableCase,                           value: lower_case }
-  - { key: readability-identifier-naming.LocalConstantCase,                            value: camelCase } # does not include const type* and const type&
+  - { key: readability-identifier-naming.LocalConstantCase,                            value: camelBack } # does not include const type* and const type&
   - { key: readability-identifier-naming.LocalConstantPointerCase,                     value: lower_case } # POLARIS: means type const*, not const type*
-  - { key: readability-identifier-naming.LocalVariableCase,                            value: camelCase }
+  - { key: readability-identifier-naming.LocalVariableCase,                            value: camelBack }
   - { key: readability-identifier-naming.MemberCase,                                   value: lower_case }
-  - { key: readability-identifier-naming.MethodCase,                                   value: camelCase }
+  - { key: readability-identifier-naming.MethodCase,                                   value: camelBack }
   - { key: readability-identifier-naming.NamespaceCase,                                value: lower_case }
-  - { key: readability-identifier-naming.ParameterCase,                                value: camelCase }
+  - { key: readability-identifier-naming.ParameterCase,                                value: camelBack }
   - { key: readability-identifier-naming.PrivateMemberPrefix,                          value: 'm_' }
   - { key: readability-identifier-naming.ProtectedMemberPrefix,                        value: 'm_' }
   - { key: readability-identifier-naming.StaticConstantCase,                           value: CamelCase }

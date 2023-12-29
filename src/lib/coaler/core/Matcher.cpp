@@ -1,10 +1,4 @@
-//
-// Created by malte on 12/4/23.
-//
-
 #include "Matcher.hpp"
-
-#include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <spdlog/spdlog.h>
 
 #include "GraphMol/ChemTransforms/ChemTransforms.h"
@@ -13,35 +7,55 @@
 #include "GraphMol/ForceFieldHelpers/UFF/UFF.h"
 #include "GraphMol/RWMol.h"
 #include "GraphMol/SmilesParse/SmartsWrite.h"
-#include "GraphMol/SmilesParse/SmilesParse.h"
 
 namespace coaler::core {
+
+    namespace {
+        /**
+         * recursive implementation to find atoms in delAtoms which are sidechains in the murcko structure and therefore
+         * need to stay in the molecule.
+         * @param mol molecule to be pruned
+         * @param atomID current atomID of atom looked at
+         * @param parentID parent atomID of parent of atom
+         * @param visit vector to save visited atoms
+         * @param ringAtoms atoms which are inside a ring of the molecule  @param mol
+         * @param foundRingAtoms atoms found during DFS which are ringatoms of @param mol
+         */
+        // NOLINTBEGIN(misc-unused-parameters) : I think clang-tidy does not recognize RDKit functions?
+        void murckoCheckDelAtoms(RDKit::RWMOL_SPTR& mol, int atomID, int parentID, std::vector<bool>& visit,
+                                 std::vector<int>& ringAtoms, std::vector<int>& foundRingAtoms) {
+            // NOLINTEND(misc-unused-parameters)
+            // mark atom as visited and check if they are part of any ring. If yes save and return to
+            // recursive call before
+            visit.at(atomID) = true;
+            if (std::find(ringAtoms.begin(), ringAtoms.end(), atomID) != ringAtoms.end()) {
+                foundRingAtoms.push_back(atomID);
+                return;
+            }
+            // visit all neighbors if they are not the parent and are not yet visited
+            for (const auto &neighborID : boost::make_iterator_range(mol->getAtomNeighbors(mol->getAtomWithIdx(atomID)))) {
+                if (neighborID == parentID || visit.at(neighborID)) {
+                    continue;
+                }
+                murckoCheckDelAtoms(mol, neighborID, atomID, visit, ringAtoms, foundRingAtoms);
+            }
+        }
+    }
+
     Matcher::Matcher(int threads) : m_threads(threads) {}
 
-    std::optional<CoreResult> Matcher::calculateCoreMcs(RDKit::MOL_SPTR_VECT &mols) {
+    // NOLINTNEXTLINE(misc-unused-parameters) : I think clang-tidy does not recognize RDKit functions?
+    std::optional<CoreResult> Matcher::calculateCoreMcs(const RDKit::MOL_SPTR_VECT &mols) {
         // Generates all parameters needed for RDKit::findMCS()
-        RDKit::MCSParameters mcsParams;
-        RDKit::MCSAtomCompareParameters atomCompParams;
-        atomCompParams.MatchChiralTag = true;
-        atomCompParams.MatchFormalCharge = true;
-        atomCompParams.MatchIsotope = false;
-        atomCompParams.MatchValences = true;
-        atomCompParams.RingMatchesRingOnly = true;
-        atomCompParams.CompleteRingsOnly = false;
-        mcsParams.AtomCompareParameters = atomCompParams;
-
-        RDKit::MCSBondCompareParameters bondCompParams;
-        bondCompParams.MatchStereo = true;
-        bondCompParams.RingMatchesRingOnly = false;
-        bondCompParams.CompleteRingsOnly = true;
-        bondCompParams.MatchFusedRings = true;
-        bondCompParams.MatchFusedRingsStrict = false;
-        mcsParams.BondCompareParameters = bondCompParams;
+        RDKit::MCSParameters mcsParams;  // NOLINT(cppcoreguidelines-init-variables) : best way to initialize this.
+        mcsParams.AtomCompareParameters = RDKit::MCSAtomCompareParameters{true, true, true, true, false, false};
+        mcsParams.BondCompareParameters = RDKit::MCSBondCompareParameters{false, true, true, false, true};
 
         mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareAnyHeavyAtom);
         mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareAny);
 
-        RDKit::MCSResult const mcs = RDKit::findMCS(mols, &mcsParams);
+        // NOLINTNEXTLINE(cppcoreguidelines-init-variables) : I think clang-tidy does not recognize RDKit?
+        const RDKit::MCSResult mcs = RDKit::findMCS(mols, &mcsParams);
         if (mcs.QueryMol == nullptr) {
             return std::nullopt;
         }
@@ -62,7 +76,8 @@ namespace coaler::core {
         return CoreResult{mcs.QueryMol, ref, coreToRef};
     }
 
-    std::optional<CoreResult> Matcher::calculateCoreMurcko(RDKit::MOL_SPTR_VECT &mols) {
+    // NOLINTNEXTLINE(misc-unused-parameters) : I think clang-tidy does not recognize RDKit functions?
+    std::optional<CoreResult> Matcher::calculateCoreMurcko(const RDKit::MOL_SPTR_VECT &mols) {
         // calculate MCS first and sanitize molecule
         auto mcs = Matcher::calculateCoreMcs(mols);
         if (!mcs.has_value()) {
@@ -161,7 +176,8 @@ namespace coaler::core {
     // for atoms (i.e. [#6,#7] = C or N and this can have an impact on conformers (swapping Atoms can lead
     // differnet geometries). We should take that into account and try to create a diverse set of conformers
     // thta models the output of the query more closely. For now, this is a pretty good reference though.
-    RDKit::ROMOL_SPTR Matcher::buildMolConformerForQuery(RDKit::RWMol first, RDKit::ROMol query) {
+    // NOLINTNEXTLINE(misc-unused-parameters) : I think clang-tidy does not recognize RDKit functions?
+    RDKit::ROMOL_SPTR Matcher::buildMolConformerForQuery(RDKit::RWMol first, RDKit::ROMol /*query*/) {
         auto params = RDKit::DGeomHelpers::srETKDGv3;
         params.numThreads = m_threads;
         params.randomSeed = 42;
@@ -202,24 +218,6 @@ namespace coaler::core {
                 delBonds.push_back(std::make_pair(neighborID, atomID));
                 delAtoms.push_back(neighborID);
             }
-        }
-    }
-
-    void Matcher::murckoCheckDelAtoms(RDKit::RWMOL_SPTR &mol, int atomID, int parentID, std::vector<bool> &visit,
-                                      std::vector<int> &ringAtoms, std::vector<int> &foundRingAtoms) {
-        // mark atom as visited and check if they are part of any ring. If yes save and return to
-        // recursive call before
-        visit.at(atomID) = true;
-        if (std::find(ringAtoms.begin(), ringAtoms.end(), atomID) != ringAtoms.end()) {
-            foundRingAtoms.push_back(atomID);
-            return;
-        }
-        // visit all neighbors if they are not the parent and are not yet visited
-        for (const auto &neighborID : boost::make_iterator_range(mol->getAtomNeighbors(mol->getAtomWithIdx(atomID)))) {
-            if (neighborID == parentID || visit.at(neighborID)) {
-                continue;
-            }
-            murckoCheckDelAtoms(mol, neighborID, atomID, visit, ringAtoms, foundRingAtoms);
         }
     }
 
