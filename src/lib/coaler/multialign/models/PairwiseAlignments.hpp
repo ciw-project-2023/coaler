@@ -17,6 +17,8 @@ class PairwiseAlignments : public std::unordered_map<PosePair, double, PosePairH
 
     PairwiseAlignments() = default;
     PairwiseAlignments(PairwiseAlignments& p);
+    PairwiseAlignments(const PairwiseAlignments& p);
+
 
     double at(const PosePair& key, const std::vector<Ligand>& ligands = {}, bool store = false);
 

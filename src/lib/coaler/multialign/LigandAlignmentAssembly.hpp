@@ -52,6 +52,7 @@ namespace coaler::multialign {
         unsigned m_missingLigandsCount{0};
 
         friend class StartingAssemblyGenerator;
+        friend class MultiAligner;
     };
 
 }  // namespace coaler::multialign

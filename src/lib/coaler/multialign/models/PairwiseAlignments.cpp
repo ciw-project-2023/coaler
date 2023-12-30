@@ -55,6 +55,15 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
+    PairwiseAlignments::PairwiseAlignments(const PairwiseAlignments& p)  : unordered_map(p) {
+        for(const auto& elem : p){
+            this->insert(elem);
+        }
+    }
+
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     PairwiseAlignments& PairwiseAlignments::operator=(const PairwiseAlignments& p) {
         this->clear();
         for(const auto& elem : p){

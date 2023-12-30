@@ -6,8 +6,8 @@
 
 namespace coaler::multialign {
 
-    void PoseRegisterCollection::addRegister(const PoseRegisterPtr &poseRegister) {
-        LigandPair const pair(poseRegister->getFirstLigandID(), poseRegister->getSecondLigandID());
+    void PoseRegisterCollection::addRegister(const PoseRegister& poseRegister) {
+        LigandPair const pair(poseRegister.getFirstLigandID(), poseRegister.getSecondLigandID());
 
         m_registers.emplace(pair, poseRegister);
     }
@@ -18,7 +18,7 @@ namespace coaler::multialign {
         PairwisePoseRegisters registersContainingPose;
 
         for (const auto &[ligandPair, poseRegister] : m_registers) {
-            if (poseRegister->containsPose(pose)) {
+            if (poseRegister.containsPose(pose)) {
                 registersContainingPose.emplace(ligandPair, poseRegister);
             }
         }
@@ -31,7 +31,7 @@ namespace coaler::multialign {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     PoseRegisterPtr PoseRegisterCollection::getRegisterPtr(const LigandPair& key) const noexcept {
-        return m_registers.at(key);
+        return boost::make_shared<PoseRegister>(m_registers.at(key));
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/

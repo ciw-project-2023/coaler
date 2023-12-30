@@ -195,10 +195,10 @@ namespace coaler::embedder {
                 addedID = -1;
             }
             if (addedID < 0) {
-                spdlog::warn("unable to generate pose");
-                spdlog::warn("ligand: {}", RDKit::MolToSmiles(*worstLigandMol));
-                spdlog::warn("target: {}", RDKit::MolToSmiles(target.getMolecule()));
-                spdlog::warn("mcs smarts: {}", mcsResult.SmartsString);
+                spdlog::warn("unable to generate pose for: ligand: {}, target: {}, mcs smarts: {}",
+                             RDKit::MolToSmiles(*worstLigandMol),
+                             RDKit::MolToSmiles(target.getMolecule()),
+                             mcsResult.SmartsString);
                 continue;
             }
             const unsigned addedIDUnsigned = static_cast<unsigned>(addedID);
@@ -219,9 +219,6 @@ namespace coaler::embedder {
 
         CoreAtomMapping ligandCoords;
         for (const auto &[mcsAtomID, ligandAtomID] : ligandMcsMatch) {
-            if(ligandAtomID == 24) {
-                spdlog::debug("24");
-            }
             ligandCoords[ligandAtomID] = mcsCoords[mcsAtomID];
         }
 

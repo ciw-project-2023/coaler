@@ -58,7 +58,7 @@ namespace coaler::multialign {
          * @param pose The pose to check for.
          * @return True if the register contains the @p pose.
          */
-        bool containsPose(const UniquePoseID& pose);
+        bool containsPose(const UniquePoseID& pose) const;
 
       private:
         void updateLowest();

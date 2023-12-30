@@ -52,7 +52,7 @@ namespace coaler::multialign {
             }
             double const scoreInAssembly = getScoreInAssembly(ligandId, id, assembly.getPoseOfLigand(ligandId),
                                                               assembly.getPoseOfLigand(id), scores, ligands);
-            double const optimalScore = scores.at(poseRegisters.at(LigandPair(id, ligandId))->getHighestScoringPair());
+            double const optimalScore = scores.at(poseRegisters.at(LigandPair(id, ligandId)).getHighestScoringPair());
             //TODO change this, its only a heuristic
             if(optimalScore < scoreInAssembly) {
                 continue;

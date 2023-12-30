@@ -53,7 +53,7 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    bool PoseRegister::containsPose(const UniquePoseID &pose) {
+    bool PoseRegister::containsPose(const UniquePoseID &pose) const {
         return std::any_of(m_register.begin(), m_register.end(), [pose](const auto entry) {
             return entry.first.getFirst() == pose || entry.first.getSecond() == pose;
         });
