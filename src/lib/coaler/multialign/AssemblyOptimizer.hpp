@@ -11,15 +11,14 @@
 #include "OptimizerState.hpp"
 #include "PoseRegisterCollection.hpp"
 
-namespace coaler::multialign{
+namespace coaler::multialign {
 
     class AssemblyOptimizer {
       public:
         static OptimizerState optimizeAssembly(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
-                                            LigandVector ligands, const PoseRegisterCollection& registers,
-                                            double scoreDeficitThreshold);
-
-        static OptimizerState optimizeAssembly(const OptimizerState& state,
+                                               LigandVector ligands, const PoseRegisterCollection& registers,
                                                double scoreDeficitThreshold);
+
+        static OptimizerState optimizeAssembly(const OptimizerState& state, double scoreDeficitThreshold);
     };
-}
+}  // namespace coaler::multialign

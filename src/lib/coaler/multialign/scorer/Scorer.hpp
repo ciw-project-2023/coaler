@@ -3,7 +3,7 @@
 //
 #include <GraphMol/ShapeHelpers/ShapeUtils.h>
 
-#include "Forward.hpp"
+#include "coaler/multialign/Forward.hpp"
 #include "coaler/multialign/models/Ligand.hpp"
 
 namespace coaler::multialign {

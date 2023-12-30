@@ -23,14 +23,7 @@ namespace coaler::multialign {
         MultiAlignerResult alignMolecules();
 
       private:
-
         static PairwiseAlignments calculateAlignmentScores(const LigandVector& ligands);
-
-        static void updatePoseRegisters(LigandID ligand,
-                                        PoseID newPose,
-                                        const PoseRegisterCollection& registers,
-                                        PairwiseAlignments& scores,
-                                        const LigandVector& ligands);
 
         unsigned m_maxStartingAssemblies;
         std::vector<Ligand> m_ligands;

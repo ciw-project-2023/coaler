@@ -18,7 +18,7 @@ namespace coaler {
 
             /*--------------------------------------------------------------------------------------------------------*/
 
-            MultiAlignerResult& operator= (const MultiAlignerResult& result) {
+            MultiAlignerResult& operator=(const MultiAlignerResult& result) {
                 this->alignmentScore = result.alignmentScore;
                 this->poseIDsByLigandID = result.poseIDsByLigandID;
                 this->inputLigands = result.inputLigands;

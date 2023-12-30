@@ -7,11 +7,11 @@
 #include <spdlog/spdlog.h>
 
 #include "Scorer.hpp"
-#include "models/PairwiseAlignments.hpp"
+#include "coaler/multialign/models/PairwiseAlignments.hpp"
 
 namespace coaler::multialign {
-    double AssemblyScorer::calculateAssemblyScore(const LigandAlignmentAssembly& assembly,
-                                                  PairwiseAlignments& scores, const LigandVector& ligands) {
+    double AssemblyScorer::calculateAssemblyScore(const LigandAlignmentAssembly& assembly, PairwiseAlignments& scores,
+                                                  const LigandVector& ligands) {
         double assemblyScore = 0.0;
         for (const Ligand& firstLigand : ligands) {
             for (const Ligand& secondLigand : ligands) {
@@ -41,8 +41,7 @@ namespace coaler::multialign {
     double AssemblyScorer::calculateScoreDeficitForLigand(const LigandID ligandId, const LigandID maxLigandId,
                                                           const LigandAlignmentAssembly& assembly,
                                                           const PoseRegisterCollection& registers,
-                                                          PairwiseAlignments& scores,
-                                                          const LigandVector& ligands) {
+                                                          PairwiseAlignments& scores, const LigandVector& ligands) {
         PairwisePoseRegisters poseRegisters = registers.getAllRegisters();
         double scoreDeficit = 0.0;
 
@@ -53,8 +52,8 @@ namespace coaler::multialign {
             double const scoreInAssembly = getScoreInAssembly(ligandId, id, assembly.getPoseOfLigand(ligandId),
                                                               assembly.getPoseOfLigand(id), scores, ligands);
             double const optimalScore = scores.at(poseRegisters.at(LigandPair(id, ligandId)).getHighestScoringPair());
-            //TODO change this, its only a heuristic
-            if(optimalScore < scoreInAssembly) {
+            // TODO change this, its only a heuristic
+            if (optimalScore < scoreInAssembly) {
                 continue;
             }
             scoreDeficit += std::abs(optimalScore - scoreInAssembly);

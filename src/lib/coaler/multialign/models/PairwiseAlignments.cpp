@@ -3,25 +3,21 @@
 //
 
 #include "PairwiseAlignments.hpp"
-#include "Ligand.hpp"
 
 #include <GraphMol/ShapeHelpers/ShapeUtils.h>
 
-namespace{
+#include "Ligand.hpp"
 
-    double calc_score(const coaler::multialign::PosePair& key,
-                      const std::vector<coaler::multialign::Ligand>& ligands) {
+namespace {
 
+    double calc_score(const coaler::multialign::PosePair& key, const std::vector<coaler::multialign::Ligand>& ligands) {
         auto pose1 = key.getFirst();
         auto pose2 = key.getSecond();
-        const double distance
-            = RDKit::MolShapes::tanimotoDistance(ligands.at(pose1.getLigandId()).getMolecule(),
-                                                 ligands.at(pose2.getLigandId()).getMolecule(),
-                                                 pose1.getLigandInternalPoseId(),
-                                                 pose2.getLigandInternalPoseId());
+        const double distance = RDKit::MolShapes::tanimotoDistance(
+            ligands.at(pose1.getLigandId()).getMolecule(), ligands.at(pose2.getLigandId()).getMolecule(),
+            pose1.getLigandInternalPoseId(), pose2.getLigandInternalPoseId());
         const double similarity = 1 - distance;
         return similarity;
-
     }
 }  // namespace
 
@@ -29,15 +25,14 @@ namespace{
 
 namespace coaler::multialign {
 
-    double PairwiseAlignments::at(const coaler::multialign::PosePair& key,
-                                  const std::vector<Ligand>& ligands,
+    double PairwiseAlignments::at(const coaler::multialign::PosePair& key, const std::vector<Ligand>& ligands,
                                   bool store) {
         if (this->count(key) == 1) {
             return this->std::unordered_map<PosePair, double, PosePairHash>::at(key);
         }
         if (!ligands.empty()) {
             double score = calc_score(key, ligands);
-            if(store) {
+            if (store) {
                 this->emplace(key, score);
             }
             return score;
@@ -47,26 +42,25 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    PairwiseAlignments::PairwiseAlignments(PairwiseAlignments& p)  : unordered_map(p) {
-        for(const auto& elem : p){
+    PairwiseAlignments::PairwiseAlignments(PairwiseAlignments& p) : unordered_map(p) {
+        for (const auto& elem : p) {
             this->insert(elem);
         }
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    PairwiseAlignments::PairwiseAlignments(const PairwiseAlignments& p)  : unordered_map(p) {
-        for(const auto& elem : p){
+    PairwiseAlignments::PairwiseAlignments(const PairwiseAlignments& p) : unordered_map(p) {
+        for (const auto& elem : p) {
             this->insert(elem);
         }
     }
-
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
     PairwiseAlignments& PairwiseAlignments::operator=(const PairwiseAlignments& p) {
         this->clear();
-        for(const auto& elem : p){
+        for (const auto& elem : p) {
             this->insert(elem);
         }
         return *this;
@@ -76,7 +70,7 @@ namespace coaler::multialign {
 
     PairwiseAlignments& PairwiseAlignments::operator=(const std::unordered_map<PosePair, double, PosePairHash>& p) {
         this->clear();
-        for(const auto& elem : p){
+        for (const auto& elem : p) {
             this->insert(elem);
         }
         return *this;
@@ -84,5 +78,4 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-
-}
+}  // namespace coaler::multialign

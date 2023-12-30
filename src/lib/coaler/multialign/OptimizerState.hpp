@@ -5,15 +5,14 @@
 
 #include "PoseRegisterCollection.hpp"
 
-namespace coaler::multialign{
-    struct OptimizerState{
+namespace coaler::multialign {
+    struct OptimizerState {
         double score;
         LigandAlignmentAssembly assembly;
         PairwiseAlignments scores;
         LigandVector ligands;
         PoseRegisterCollection registers;
 
-        OptimizerState& operator= (const OptimizerState& s) = default;
-
+        OptimizerState& operator=(const OptimizerState& s) = default;
     };
-}
+}  // namespace coaler::multialign

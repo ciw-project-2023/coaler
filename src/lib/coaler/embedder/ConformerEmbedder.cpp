@@ -154,6 +154,10 @@ namespace coaler::embedder {
             // const core::CoreResult mcsResult = matcher.coaler::core::Matcher::calculateCoreMcs(mols).value();
 
             auto mcsResult = get_mcs(mols);
+            if (mcsResult.QueryMol == nullptr) {
+                spdlog::warn("no mcs found");
+                continue;
+            }
 
             RDKit::SubstructMatchParameters substructMatchParams;
             substructMatchParams.uniquify = true;
@@ -163,8 +167,8 @@ namespace coaler::embedder {
             substructMatchParams.numThreads = 1;
 
             std::vector<RDKit::MatchVectType> ligandMatches;
-            RDKit::SubstructMatch(*worstLigandMol, *mcsResult.QueryMol, ligandMatches, substructMatchParams.uniquify, false,
-                                  substructMatchParams.useChirality, substructMatchParams.useQueryQueryMatches,
+            RDKit::SubstructMatch(*worstLigandMol, *mcsResult.QueryMol, ligandMatches, substructMatchParams.uniquify,
+                                  false, substructMatchParams.useChirality, substructMatchParams.useQueryQueryMatches,
                                   substructMatchParams.maxMatches, substructMatchParams.numThreads);
 
             std::vector<RDKit::MatchVectType> targetMatches;
@@ -190,14 +194,13 @@ namespace coaler::embedder {
             int addedID = 0;
             try {
                 addedID = RDKit::DGeomHelpers::EmbedMolecule(*worstLigandMol, params);
-            } catch (const std::runtime_error& e) {
+            } catch (const std::runtime_error &e) {
                 spdlog::warn(e.what());
                 addedID = -1;
             }
             if (addedID < 0) {
                 spdlog::warn("unable to generate pose for: ligand: {}, target: {}, mcs smarts: {}",
-                             RDKit::MolToSmiles(*worstLigandMol),
-                             RDKit::MolToSmiles(target.getMolecule()),
+                             RDKit::MolToSmiles(*worstLigandMol), RDKit::MolToSmiles(target.getMolecule()),
                              mcsResult.SmartsString);
                 continue;
             }

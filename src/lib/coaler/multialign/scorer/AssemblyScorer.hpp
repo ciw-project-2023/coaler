@@ -5,9 +5,9 @@
 #pragma once
 #include <coaler/multialign/models/PairwiseAlignments.hpp>
 
-#include "Forward.hpp"
-#include "LigandAlignmentAssembly.hpp"
-#include "PoseRegisterCollection.hpp"
+#include "coaler/multialign/Forward.hpp"
+#include "coaler/multialign/LigandAlignmentAssembly.hpp"
+#include "coaler/multialign/PoseRegisterCollection.hpp"
 
 namespace coaler::multialign {
     class AssemblyScorer {
@@ -33,8 +33,7 @@ namespace coaler::multialign {
          * @return
          */
         static double getScoreInAssembly(LigandID firstLigandID, LigandID secondLigandID, PoseID firstPoseID,
-                                         PoseID secondPoseID, PairwiseAlignments& scores,
-                                         const LigandVector& ligands);
+                                         PoseID secondPoseID, PairwiseAlignments& scores, const LigandVector& ligands);
     };
 
 }  // namespace coaler::multialign

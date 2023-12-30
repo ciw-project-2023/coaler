@@ -14,10 +14,10 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    PairwisePoseRegisters PoseRegisterCollection::getAllRegistersForPose(const UniquePoseID &pose) const noexcept {
+    PairwisePoseRegisters PoseRegisterCollection::getAllRegistersForPose(const UniquePoseID& pose) const noexcept {
         PairwisePoseRegisters registersContainingPose;
 
-        for (const auto &[ligandPair, poseRegister] : m_registers) {
+        for (const auto& [ligandPair, poseRegister] : m_registers) {
             if (poseRegister.containsPose(pose)) {
                 registersContainingPose.emplace(ligandPair, poseRegister);
             }

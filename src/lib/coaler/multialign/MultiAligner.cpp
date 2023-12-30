@@ -10,11 +10,11 @@
 #include <queue>
 #include <utility>
 
-#include "AssemblyScorer.hpp"
 #include "AssemblyOptimizer.hpp"
 #include "LigandAlignmentAssembly.hpp"
-#include "Scorer.hpp"
 #include "StartingAssemblyGenerator.hpp"
+#include "coaler/multialign/scorer/AssemblyScorer.hpp"
+#include "coaler/multialign/scorer/Scorer.hpp"
 
 namespace coaler::multialign {
     using AssemblyWithScore = std::pair<LigandAlignmentAssembly, double>;
@@ -113,8 +113,8 @@ namespace coaler::multialign {
                                     secondMolId) default(none)
                 for (unsigned firstMolPoseId = 0; firstMolPoseId < nofPosesFirst; firstMolPoseId++) {
                     for (unsigned secondMolPoseId = 0; secondMolPoseId < nofPosesSecond; secondMolPoseId++) {
-                        const double score = Scorer::getOverlapScore(ligands.at(firstMolId), ligands.at(secondMolId), firstMolPoseId,
-                                                      secondMolPoseId);
+                        const double score = Scorer::getOverlapScore(ligands.at(firstMolId), ligands.at(secondMolId),
+                                                                     firstMolPoseId, secondMolPoseId);
                         const UniquePoseID firstPose(firstMolId, firstMolPoseId);
                         const UniquePoseID secondPose(secondMolId, secondMolPoseId);
                         omp_set_lock(&maplock);
@@ -184,13 +184,15 @@ namespace coaler::multialign {
 
         OptimizerState bestAssembly{-1, {}, {}, {}, {}};
 
-#pragma omp parallel for shared(bestAssembly, bestAssemblyLock, skippedAssembliesCount, skippedAssembliesCountLock, assembliesList) default(none)
+#pragma omp parallel for shared(bestAssembly, bestAssemblyLock, skippedAssembliesCount, skippedAssembliesCountLock, \
+                                    assembliesList) default(none)
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
-            OptimizerState optimizedAssembly = AssemblyOptimizer::optimizeAssembly(
-                assembliesList.at(0).first, m_pairwiseAlignments, m_ligands, m_poseRegisters, Constants::COARSE_OPTIMIZATION_THRESHOLD);
+            OptimizerState optimizedAssembly
+                = AssemblyOptimizer::optimizeAssembly(assembliesList.at(0).first, m_pairwiseAlignments, m_ligands,
+                                                      m_poseRegisters, Constants::COARSE_OPTIMIZATION_THRESHOLD);
 
             spdlog::info("optimized assembly {}, score: {}", assemblyID, optimizedAssembly.score);
-            if(optimizedAssembly.score == -1) {
+            if (optimizedAssembly.score == -1) {
                 omp_set_lock(&skippedAssembliesCountLock);
                 skippedAssembliesCount++;
                 omp_unset_lock(&skippedAssembliesCountLock);
@@ -198,13 +200,13 @@ namespace coaler::multialign {
             }
 
             omp_set_lock(&bestAssemblyLock);
-            if(bestAssembly.score < optimizedAssembly.score) {
+            if (bestAssembly.score < optimizedAssembly.score) {
                 bestAssembly = optimizedAssembly;
             }
             omp_unset_lock(&bestAssemblyLock);
         }
 
-        //fine-tuning
+        // fine-tuning
         spdlog::info("Fine-tuning best assembly");
         bestAssembly = AssemblyOptimizer::optimizeAssembly(bestAssembly, Constants::FINE_OPTIMIZATION_THRESHOLD);
         spdlog::info("finished alignment optimization.");
@@ -214,24 +216,5 @@ namespace coaler::multialign {
         MultiAlignerResult result(bestAssembly.score, bestAssembly.assembly.getAssemblyMapping(), bestAssembly.ligands);
         return result;
     }
-
-    /*----------------------------------------------------------------------------------------------------------------*/
-
-    void MultiAligner::updatePoseRegisters(const LigandID ligandId, const PoseID newPose,
-                                           const PoseRegisterCollection &registers, PairwiseAlignments &scores,
-                                           const LigandVector &ligands) {
-        for(const Ligand& otherLigand : ligands) {
-            if(otherLigand.getID() == ligandId) {continue;}
-            const LigandPair pair(ligandId, otherLigand.getID());
-            PoseRegisterPtr registerPtr = registers.getRegisterPtr(pair);
-            for(const UniquePoseID& otherPose : otherLigand.getPoses()) {
-                PosePair poses({ligandId, newPose}, otherPose);
-                const double score = scores.at(poses, ligands, true);
-                registerPtr->addPoses(poses, score);
-            }
-        }
-    }
-
-
 
 }  // namespace coaler::multialign
