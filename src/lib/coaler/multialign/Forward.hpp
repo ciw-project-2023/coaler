@@ -19,6 +19,7 @@ namespace coaler::multialign {
         constexpr double POSE_REGISTER_SIZE_FACTOR = 0.5;
         constexpr double COARSE_OPTIMIZATION_THRESHOLD = 1.0;
         constexpr double FINE_OPTIMIZATION_THRESHOLD = 0.2;
+        constexpr unsigned OPTIMIZER_STEP_LIMIT = 1000;
     }  // namespace Constants
 
     static_assert(Constants::POSE_REGISTER_SIZE_FACTOR < 1);

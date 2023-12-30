@@ -7,14 +7,14 @@
 #include <omp.h>
 #include <spdlog/spdlog.h>
 
+#include <coaler/multialign/scorer/AssemblyScorer.hpp>
 #include <queue>
 #include <utility>
 
 #include "AssemblyOptimizer.hpp"
 #include "LigandAlignmentAssembly.hpp"
 #include "StartingAssemblyGenerator.hpp"
-#include "coaler/multialign/scorer/AssemblyScorer.hpp"
-#include "coaler/multialign/scorer/Scorer.hpp"
+#include "scorer/AlignmentScorer.hpp"
 
 namespace coaler::multialign {
     using AssemblyWithScore = std::pair<LigandAlignmentAssembly, double>;
@@ -113,10 +113,13 @@ namespace coaler::multialign {
                                     secondMolId) default(none)
                 for (unsigned firstMolPoseId = 0; firstMolPoseId < nofPosesFirst; firstMolPoseId++) {
                     for (unsigned secondMolPoseId = 0; secondMolPoseId < nofPosesSecond; secondMolPoseId++) {
-                        const double score = Scorer::getOverlapScore(ligands.at(firstMolId), ligands.at(secondMolId),
-                                                                     firstMolPoseId, secondMolPoseId);
-                        const UniquePoseID firstPose(firstMolId, firstMolPoseId);
-                        const UniquePoseID secondPose(secondMolId, secondMolPoseId);
+                        RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
+                        RDKit::RWMol const secondMol = ligands.at(secondMolId).getMolecule();
+                        const double score = AlignmentScorer::calc_tanimoto_shape_similarity(
+                            firstMol, secondMol, firstMolPoseId, secondMolPoseId);
+
+                        UniquePoseID firstPose(firstMolId, firstMolPoseId);
+                        UniquePoseID secondPose(secondMolId, secondMolPoseId);
                         omp_set_lock(&maplock);
                         scores.emplace(PosePair(firstPose, secondPose), score);
                         omp_unset_lock(&maplock);

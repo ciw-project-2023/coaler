@@ -26,7 +26,7 @@ const unsigned seed = 42;
 const float forceTol = 0.0135;
 
 namespace {
-    auto get_mcs(const RDKit::MOL_SPTR_VECT &mols) {
+    auto get_mcs(const RDKit::MOL_SPTR_VECT &mols, bool strict = true) {
         RDKit::MCSParameters mcsParams;
         RDKit::MCSAtomCompareParameters atomCompParams;
         atomCompParams.MatchChiralTag = true;
@@ -46,8 +46,13 @@ namespace {
         mcsParams.BondCompareParameters = bondCompParams;
         mcsParams.Timeout = 1;
 
-        mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareElements);
-        mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareOrderExact);
+        if (strict) {
+            mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareElements);
+            mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareOrderExact);
+        } else {
+            mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareAny);
+            mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareAny);
+        }
 
         RDKit::MCSResult const mcs = RDKit::findMCS(mols, &mcsParams);
         return mcs;
@@ -151,9 +156,7 @@ namespace coaler::embedder {
                 boost::make_shared<RDKit::ROMol>(target.getMolecule()),
             };
 
-            // const core::CoreResult mcsResult = matcher.coaler::core::Matcher::calculateCoreMcs(mols).value();
-
-            auto mcsResult = get_mcs(mols);
+            auto mcsResult = get_mcs(mols, false);
             if (mcsResult.QueryMol == nullptr) {
                 spdlog::warn("no mcs found");
                 continue;
@@ -161,7 +164,7 @@ namespace coaler::embedder {
 
             RDKit::SubstructMatchParameters substructMatchParams;
             substructMatchParams.uniquify = true;
-            substructMatchParams.useChirality = true;
+            substructMatchParams.useChirality = false;
             substructMatchParams.useQueryQueryMatches = false;
             substructMatchParams.maxMatches = 1;
             substructMatchParams.numThreads = 1;
@@ -176,7 +179,29 @@ namespace coaler::embedder {
                                   substructMatchParams.useChirality, substructMatchParams.useQueryQueryMatches,
                                   substructMatchParams.maxMatches, substructMatchParams.numThreads);
 
-            assert(!targetMatches.empty() && !ligandMatches.empty());
+            if (targetMatches.empty() || ligandMatches.empty()) {
+                spdlog::warn("unable to match mcs to target or ligand");
+                spdlog::warn("ligand: {}", RDKit::MolToSmiles(*worstLigandMol));
+                spdlog::warn("target: {}", RDKit::MolToSmiles(target.getMolecule()));
+                spdlog::warn("mcs: {}", mcsResult.SmartsString);
+                // continue;
+
+                // try again with strict mcs rules
+                mcsResult = get_mcs(mols, true);
+                RDKit::SubstructMatch(targetMol, *mcsResult.QueryMol, targetMatches, substructMatchParams.uniquify,
+                                      false, substructMatchParams.useChirality,
+                                      substructMatchParams.useQueryQueryMatches, substructMatchParams.maxMatches,
+                                      substructMatchParams.numThreads);
+                RDKit::SubstructMatch(*worstLigandMol, *mcsResult.QueryMol, ligandMatches,
+                                      substructMatchParams.uniquify, false, substructMatchParams.useChirality,
+                                      substructMatchParams.useQueryQueryMatches, substructMatchParams.maxMatches,
+                                      substructMatchParams.numThreads);
+            }
+
+            // if still no match in both, skip target
+            if (targetMatches.empty() || ligandMatches.empty()) {
+                continue;
+            }
             const RDKit::MatchVectType ligandMatch = ligandMatches.at(0);
             const RDKit::MatchVectType targetMatch = targetMatches.at(0);
 
@@ -219,12 +244,10 @@ namespace coaler::embedder {
         for (const auto &[mcsAtomID, targetAtomID] : targetMcsMatch) {
             mcsCoords[mcsAtomID] = targetCoords.at(targetAtomID);
         }
-
         CoreAtomMapping ligandCoords;
         for (const auto &[mcsAtomID, ligandAtomID] : ligandMcsMatch) {
             ligandCoords[ligandAtomID] = mcsCoords[mcsAtomID];
         }
-
         return ligandCoords;
     }
 

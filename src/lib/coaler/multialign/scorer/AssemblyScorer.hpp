@@ -21,17 +21,6 @@ namespace coaler::multialign {
                                                      const PoseRegisterCollection& registers,
                                                      PairwiseAlignments& scores, const LigandVector& ligands);
 
-      private:
-        /**
-         * reads the score from the pairwise alignments or calculates it if missing
-         * @param firstLigandID
-         * @param secondLigandID
-         * @param firstPoseID
-         * @param secondPoseID
-         * @param scores
-         * @param ligands
-         * @return
-         */
         static double getScoreInAssembly(LigandID firstLigandID, LigandID secondLigandID, PoseID firstPoseID,
                                          PoseID secondPoseID, PairwiseAlignments& scores, const LigandVector& ligands);
     };

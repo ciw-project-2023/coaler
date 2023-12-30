@@ -70,7 +70,8 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 
     // assembly optimization step
     unsigned stepCount = 0;
-    while (std::any_of(ligandAvailable.begin(), ligandAvailable.end(), LigandIsAvailable())) {
+    while (std::any_of(ligandAvailable.begin(), ligandAvailable.end(), LigandIsAvailable())
+           && stepCount < Constants::OPTIMIZER_STEP_LIMIT) {
         stepCount++;
         double maxScoreDeficit = 0;
         Ligand worstLigand = *ligands.begin();
@@ -180,6 +181,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
         // set this to false in order to not immediately change this ligand again
         ligandAvailable.at(worstLigand.getID()) = false;
     }
+    spdlog::info("optimization took {} steps.", stepCount);
     OptimizerState result{currentAssemblyScore, assembly, scores, ligands, registers};
     return result;
 }

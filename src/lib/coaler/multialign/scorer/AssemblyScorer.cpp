@@ -6,7 +6,6 @@
 
 #include <spdlog/spdlog.h>
 
-#include "Scorer.hpp"
 #include "coaler/multialign/models/PairwiseAlignments.hpp"
 
 namespace coaler::multialign {
@@ -60,6 +59,8 @@ namespace coaler::multialign {
         }
         return scoreDeficit;
     }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
 
     double AssemblyScorer::getScoreInAssembly(LigandID firstLigandID, LigandID secondLigandID, PoseID firstPoseID,
                                               PoseID secondPoseID, PairwiseAlignments& scores,
