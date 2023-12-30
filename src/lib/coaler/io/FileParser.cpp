@@ -7,6 +7,7 @@
 #include <GraphMol/FileParsers/MolSupplier.h>
 #include <GraphMol/RWMol.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
+#include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
@@ -56,6 +57,28 @@ namespace coaler::io {
             throw std::runtime_error("Unsupported file extension: " + file_extension);
         }
 
-        return result;
+        return checkInputMolecules(result);
+    }
+    RDKit::MOL_SPTR_VECT FileParser::checkInputMolecules(const RDKit::MOL_SPTR_VECT mols) {
+
+        RDKit::MOL_SPTR_VECT retMols;
+        std::vector<std::string> smilesVec;
+        unsigned duplicates;
+        for (auto mol : mols) {
+            std::string smiles = RDKit::MolToSmiles(*mol);
+            if (std::find(smilesVec.begin(), smilesVec.end(), smiles) == smilesVec.end()) {
+                smilesVec.emplace_back(smiles);
+                retMols.emplace_back(mol);
+            }
+            else {
+                duplicates++;
+            }
+        }
+        if (duplicates > 0) {
+            spdlog::warn("input file contains {} duplicates. All duplicates will be removed", duplicates);
+        }
+
+        return retMols;
+
     }
 }  // namespace coaler::io
