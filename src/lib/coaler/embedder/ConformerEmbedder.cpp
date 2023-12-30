@@ -147,6 +147,9 @@ namespace coaler::embedder {
         for (const multialign::Ligand &target : targets) {
             // find mcs
             const multialign::LigandID targetID = target.getID();
+            if(conformerIDs.count(targetID) == 0) {
+                continue;
+            }
             const multialign::PoseID targetConformerID = conformerIDs.at(targetID);
             const RDKit::ROMol targetMol = target.getMolecule();
             const RDKit::Conformer &targetConformer = targetMol.getConformer(targetConformerID);

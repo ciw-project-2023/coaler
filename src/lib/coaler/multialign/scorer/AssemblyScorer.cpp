@@ -12,6 +12,7 @@ namespace coaler::multialign {
     double AssemblyScorer::calculateAssemblyScore(const LigandAlignmentAssembly& assembly, PairwiseAlignments& scores,
                                                   const LigandVector& ligands) {
         double assemblyScore = 0.0;
+        unsigned paircount = 0;
         for (const Ligand& firstLigand : ligands) {
             for (const Ligand& secondLigand : ligands) {
                 if (firstLigand.getID() >= secondLigand.getID()) {
@@ -26,49 +27,41 @@ namespace coaler::multialign {
                     || secondLigandPoseID == std::numeric_limits<PoseID>::max()) {
                     continue;
                 }
-
-                assemblyScore += getScoreInAssembly(firstLigand.getID(), secondLigand.getID(), firstLigandPoseID,
-                                                    secondLigandPoseID, scores, ligands);
+                UniquePoseID first(firstLigand.getID(), firstLigandPoseID);
+                UniquePoseID second(secondLigand.getID(), secondLigandPoseID);
+                assemblyScore += scores.at(PosePair{first, second}, ligands);
+                paircount++;
             }
         }
-        // spdlog::info(assemblyScore);
-        return assemblyScore;
+        return assemblyScore / paircount;
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    double AssemblyScorer::calculateScoreDeficitForLigand(const LigandID ligandId, const LigandID maxLigandId,
+    double AssemblyScorer::calculateScoreDeficitForLigand(const LigandID ligandId,
                                                           const LigandAlignmentAssembly& assembly,
                                                           const PoseRegisterCollection& registers,
                                                           PairwiseAlignments& scores, const LigandVector& ligands) {
         PairwisePoseRegisters poseRegisters = registers.getAllRegisters();
         double scoreDeficit = 0.0;
 
-        for (LigandID id = 0; id <= maxLigandId; id++) {
-            if (id == ligandId) {
+        for (LigandID otherLigandId = 0; otherLigandId < ligands.size(); otherLigandId++) {
+            if (otherLigandId == ligandId) {
                 continue;
             }
-            double const scoreInAssembly = getScoreInAssembly(ligandId, id, assembly.getPoseOfLigand(ligandId),
-                                                              assembly.getPoseOfLigand(id), scores, ligands);
-            double const optimalScore = scores.at(poseRegisters.at(LigandPair(id, ligandId)).getHighestScoringPair());
-            // TODO change this, its only a heuristic
-            if (optimalScore < scoreInAssembly) {
-                continue;
+            PoseID firstLigandPoseId = assembly.getPoseOfLigand(ligandId);
+            PoseID secondLigandPoseId = assembly.getPoseOfLigand(otherLigandId);
+
+            UniquePoseID first(ligandId, firstLigandPoseId);
+            UniquePoseID second(otherLigandId, secondLigandPoseId);
+            double const scoreInAssembly = scores.at(PosePair{first, second}, ligands);
+            double const optimalScore = scores.at(poseRegisters.at(LigandPair(otherLigandId, ligandId)).getHighestScoringPair());
+            if(optimalScore < scoreInAssembly){
+                assert(false);
             }
             scoreDeficit += std::abs(optimalScore - scoreInAssembly);
         }
         return scoreDeficit;
-    }
-
-    /*----------------------------------------------------------------------------------------------------------------*/
-
-    double AssemblyScorer::getScoreInAssembly(LigandID firstLigandID, LigandID secondLigandID, PoseID firstPoseID,
-                                              PoseID secondPoseID, PairwiseAlignments& scores,
-                                              const LigandVector& ligands) {
-        UniquePoseID const firstLigandPose{firstLigandID, firstPoseID};
-        UniquePoseID const secondLigandPose{secondLigandID, secondPoseID};
-        const PosePair pair{firstLigandPose, secondLigandPose};
-        return scores.at(pair, ligands);
     }
 
 }  // namespace coaler::multialign

@@ -12,7 +12,9 @@ namespace coaler::multialign {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     void LigandAlignmentAssembly::swapPoseForLigand(const LigandID ligandId, const PoseID newPoseId) {
-        assert(m_assembly.count(ligandId) != 0);
+        if(m_assembly.count(ligandId) == 0) {
+            m_assembly.emplace(ligandId, newPoseId);
+        }
         m_assembly.at(ligandId) = newPoseId;
     }
 
@@ -41,7 +43,7 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    std::unordered_map<LigandID, PoseID> LigandAlignmentAssembly::getAssemblyMapping() { return m_assembly; }
+    std::unordered_map<LigandID, PoseID> LigandAlignmentAssembly::getAssemblyMapping() const noexcept { return m_assembly; }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 

@@ -55,13 +55,22 @@ struct LigandIsAvailable {
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
+LigandID get_next_missing_ligand(const LigandAlignmentAssembly& assembly,
+                                 const LigandAvailabilityMapping& availability,
+                                 unsigned maxLigandID) {
+    auto assemblyMapping = assembly.getAssemblyMapping();
+    for(LigandID id = 0; id <= maxLigandID; id++) {
+        if(assemblyMapping.count(id) == 0 && availability.at(id)) {
+            return id;
+        }
+    }
+    return maxLigandID + 1;
+}
+/*----------------------------------------------------------------------------------------------------------------*/
+
 OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
                                                    LigandVector ligands, const PoseRegisterCollection &registers,
                                                    double scoreDeficitThreshold) {
-    if (assembly.getMissingLigandsCount() != 0) {
-        spdlog::warn("Skip assembly because its missing ligands.");
-        return {-1, assembly, scores, ligands, registers};
-    }
 
     double currentAssemblyScore = AssemblyScorer::calculateAssemblyScore(assembly, scores, ligands);
 
@@ -73,23 +82,34 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
     while (std::any_of(ligandAvailable.begin(), ligandAvailable.end(), LigandIsAvailable())
            && stepCount < Constants::OPTIMIZER_STEP_LIMIT) {
         stepCount++;
-        double maxScoreDeficit = 0;
+        double maxScoreDeficit = -1;
         Ligand worstLigand = *ligands.begin();
-        for (const Ligand &ligand : ligands) {
-            if (!ligandAvailable.at(ligand.getID())) {
-                continue;
+        if(assembly.getMissingLigandsCount() != 0) {
+            LigandID worstLigandId = get_next_missing_ligand(assembly, ligandAvailable, ligands.size() - 1);
+            if(worstLigandId == ligands.size()) {
+                spdlog::error("invalid ligand id encountered in worst ligand search.");
+                break;
             }
-            const double ligandScoreDeficit = AssemblyScorer::calculateScoreDeficitForLigand(
-                ligand.getID(), ligands.size() - 1, assembly, registers, scores, ligands);
-            if (maxScoreDeficit < ligandScoreDeficit) {
-                worstLigand = ligand;
-                maxScoreDeficit = ligandScoreDeficit;
+            worstLigand = ligands.at(worstLigandId);
+        } else {
+            //no missing ligands
+            for (const Ligand &ligand : ligands) {
+                if (!ligandAvailable.at(ligand.getID())) {
+                    continue;
+                }
+                const double ligandScoreDeficit = AssemblyScorer::calculateScoreDeficitForLigand(
+                    ligand.getID(), assembly, registers, scores, ligands);
+                if (maxScoreDeficit < ligandScoreDeficit) {
+                    worstLigand = ligand;
+                    maxScoreDeficit = ligandScoreDeficit;
+                }
             }
         }
-        spdlog::debug("worst ligand: {} has score deficit {}", worstLigand.getID(), maxScoreDeficit);
+        spdlog::debug("worst ligand: {} has score deficit {} (-1 if missing)", worstLigand.getID(), maxScoreDeficit);
         if (maxScoreDeficit == 0) {
             // all pairwise alignments are optimal
             // TODO can we return this assembly and be sure its the optimum?
+            //maybe once finetuning isnt score diff dependant
             break;
         }
 
@@ -113,8 +133,9 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             }
         }
 
+        bool ligandIsMissing = maxScoreDeficit == -1;
         // if no improving pose can be found among existing poses, generate new ones
-        if (!swappedLigandPose && maxScoreDeficit > scoreDeficitThreshold) {
+        if (ligandIsMissing || (!swappedLigandPose && maxScoreDeficit > scoreDeficitThreshold)) {
             spdlog::debug("generating new conformer");
             LigandVector alignmentTargets = {ligands.begin(), ligands.end()};
 

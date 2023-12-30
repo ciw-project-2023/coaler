@@ -6,6 +6,10 @@
 #include "PoseRegisterCollection.hpp"
 
 namespace coaler::multialign {
+
+    /**
+     * The OptimizerState struct represents an assembly along with everything required for the optimization.
+     */
     struct OptimizerState {
         double score;
         LigandAlignmentAssembly assembly;

@@ -19,6 +19,8 @@ namespace coaler::multialign {
          * Exchange the associated pose for a given Ligand
          * @param ligandId The ligand whose pose is to be swapped.
          * @param newPoseId The new pose.
+         *
+         * @note if the ligand isnt present in the assembly its added with the pose assigned to it
          */
         void swapPoseForLigand(LigandID ligandId, PoseID newPoseId);
 
@@ -38,7 +40,7 @@ namespace coaler::multialign {
          */
         unsigned getMissingLigandsCount() const noexcept;
 
-        std::unordered_map<LigandID, PoseID> getAssemblyMapping();
+        std::unordered_map<LigandID, PoseID> getAssemblyMapping() const noexcept;
 
       private:
         void setMissingLigandsCount(unsigned count);
@@ -48,7 +50,6 @@ namespace coaler::multialign {
         bool insertLigandPose(LigandID ligand, PoseID pose);
 
         std::unordered_map<LigandID, PoseID> m_assembly;
-
         unsigned m_missingLigandsCount{0};
 
         friend class StartingAssemblyGenerator;
