@@ -18,6 +18,32 @@
 const unsigned seed = 42;
 const float forceTol = 0.0135;
 
+namespace{
+    RDKit::SubstructMatchParameters get_substructure_match_params_for_optimizer_generation() {
+        RDKit::SubstructMatchParameters substructMatchParams;
+        substructMatchParams.uniquify = true;
+        substructMatchParams.useChirality = false;
+        substructMatchParams.useQueryQueryMatches = false;
+        substructMatchParams.maxMatches = 1;
+        substructMatchParams.numThreads = 1;
+        substructMatchParams.useEnhancedStereo = false;
+        return substructMatchParams;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    RDKit::DGeomHelpers::EmbedParameters get_embed_params_for_optimizer_generation() {
+        RDKit::DGeomHelpers::EmbedParameters params;
+        params = RDKit::DGeomHelpers::srETKDGv3;
+        params.optimizerForceTol = forceTol;
+        params.randomSeed = seed;
+        params.useRandomCoords = true;
+        params.numThreads = 1;
+        params.clearConfs = false;
+        return params;
+    }
+}
+
 namespace coaler::embedder {
     ConformerEmbedder::ConformerEmbedder(const core::CoreResult &result, const int threads,
                                          const bool divideConformersByMatches)
@@ -110,82 +136,81 @@ namespace coaler::embedder {
             if(conformerIDs.count(targetID) == 0) {
                 continue;
             }
+
             const multialign::PoseID targetConformerID = conformerIDs.at(targetID);
             const RDKit::ROMol targetMol = target.getMolecule();
-            const RDKit::Conformer &targetConformer = targetMol.getConformer(targetConformerID);
+            const RDKit::Conformer targetConformer = targetMol.getConformer(targetConformerID);
 
-            std::vector<RDKit::ROMOL_SPTR> mols = {
-                boost::make_shared<RDKit::ROMol>(*worstLigandMol),
-                boost::make_shared<RDKit::ROMol>(target.getMolecule()),
-            };
+            RDKit::MatchVectType ligandMatch, targetMatch;
+            std::tie(ligandMatch, targetMatch) = getMcsMatches(worstLigandMol, &targetMol, false);
+            if(ligandMatch.empty() || targetMatch.empty()) {
+                //reattempt with strict matching, i.e. chirality etc
+                std::tie(ligandMatch, targetMatch) = getMcsMatches(worstLigandMol, &targetMol, true);
+            }
 
-            auto mcsParams = core::Matcher::getRelaxedMCSParams();
-            auto mcsResult = RDKit::findMCS(mols, &mcsParams);
-
-            if (mcsResult.QueryMol == nullptr) { //TODO catch
-                throw std::runtime_error(fmt::format("No MCS found between {} and {}.",
+            if(ligandMatch.empty() || targetMatch.empty()) {
+                throw std::runtime_error(fmt::format("Unable to match MCS to mols {} and {}.",
                                                      RDKit::MolToSmiles(*worstLigandMol),
-                                                     RDKit::MolToSmiles(target.getMolecule())));
+                                                     RDKit::MolToSmiles(targetMol)));
             }
-
-            RDKit::SubstructMatchParameters substructMatchParams;
-            substructMatchParams.uniquify = true;
-            substructMatchParams.useChirality = false;
-            substructMatchParams.useQueryQueryMatches = false;
-            substructMatchParams.maxMatches = 1;
-            substructMatchParams.numThreads = 1;
-            substructMatchParams.useEnhancedStereo = false;
-
-            auto ligandMatches = RDKit::SubstructMatch(*worstLigandMol, *mcsResult.QueryMol, substructMatchParams);
-            auto targetMatches = RDKit::SubstructMatch(targetMol, *mcsResult.QueryMol, substructMatchParams);
-
-            if (targetMatches.empty() || ligandMatches.empty()) {
-                // try again with strict mcs rules
-                mcsParams = core::Matcher::getStrictMCSParams();
-                mcsResult = RDKit::findMCS(mols, &mcsParams);
-
-                ligandMatches = RDKit::SubstructMatch(*worstLigandMol, *mcsResult.QueryMol, substructMatchParams);
-                targetMatches = RDKit::SubstructMatch(targetMol, *mcsResult.QueryMol, substructMatchParams);
-            }
-
-            // if still no match in both, skip target
-            if (targetMatches.empty() || ligandMatches.empty()) {
-                throw std::runtime_error(fmt::format("Unable to match MCS {} to mols {} and {}.",
-                                                     mcsResult.SmartsString,
-                                                     RDKit::MolToSmiles(*worstLigandMol),
-                                                     RDKit::MolToSmiles(target.getMolecule())));
-            }
-            const RDKit::MatchVectType ligandMatch = ligandMatches.at(0);
-            const RDKit::MatchVectType targetMatch = targetMatches.at(0);
 
             const CoreAtomMapping ligandMcsCoords
                 = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(), ligandMatch, targetMatch);
 
-            RDKit::DGeomHelpers::EmbedParameters params;
-            params = RDKit::DGeomHelpers::srETKDGv3;
-            params.optimizerForceTol = forceTol;
-            params.randomSeed = seed;
+            RDKit::DGeomHelpers::EmbedParameters params = get_embed_params_for_optimizer_generation();
             params.coordMap = &ligandMcsCoords;
-            params.useRandomCoords = true;
-            params.numThreads = 1;
-            params.clearConfs = false;
+
             int addedID = 0;
             try {
                 addedID = RDKit::DGeomHelpers::EmbedMolecule(*worstLigandMol, params);
             } catch (const std::runtime_error &e) {
-                spdlog::warn(e.what());
+                spdlog::debug(e.what());
                 addedID = -1;
             }
             if (addedID < 0) {
-                spdlog::warn("unable to generate pose for: ligand: {}, target: {}, mcs smarts: {}",
-                             RDKit::MolToSmiles(*worstLigandMol), RDKit::MolToSmiles(target.getMolecule()),
-                             mcsResult.SmartsString);
+                spdlog::debug("target conformer {}/{}: no viable pose generated.", targetID, targets.size());
                 continue;
             }
+            spdlog::debug("target conformer {}/{}: generated valid pose.", targetID, targets.size());
             const unsigned addedIDUnsigned = static_cast<unsigned>(addedID);
             newIds.push_back(addedIDUnsigned);
         }
         return newIds;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    std::pair<RDKit::MatchVectType,RDKit::MatchVectType> ConformerEmbedder::getMcsMatches(const RDKit::ROMol *worstLigandMol,
+                                                                                          const RDKit::ROMol *targetMol,
+                                                                                           bool strict) {
+        std::vector<RDKit::ROMOL_SPTR> mols = {
+            boost::make_shared<RDKit::ROMol>(*worstLigandMol),
+            boost::make_shared<RDKit::ROMol>(*targetMol),
+        };
+
+        RDKit::MCSParameters mcsParams;
+        if(strict) {
+            mcsParams = core::Matcher::getStrictMCSParams();
+        } else {
+            mcsParams = core::Matcher::getRelaxedMCSParams();
+        }
+
+        auto mcsResult = RDKit::findMCS(mols, &mcsParams);
+        if (mcsResult.QueryMol == nullptr) {
+            return {};
+        }
+
+        RDKit::SubstructMatchParameters substructMatchParams =
+            get_substructure_match_params_for_optimizer_generation();
+
+        auto ligandMatches = RDKit::SubstructMatch(*worstLigandMol, *mcsResult.QueryMol, substructMatchParams);
+        auto targetMatches = RDKit::SubstructMatch(*targetMol, *mcsResult.QueryMol, substructMatchParams);
+        if (targetMatches.empty() || ligandMatches.empty()) {
+            return {};
+        }
+        const RDKit::MatchVectType ligandMatch = ligandMatches.at(0);
+        const RDKit::MatchVectType targetMatch = targetMatches.at(0);
+        return std::make_pair(ligandMatch, targetMatch);
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
