@@ -57,13 +57,14 @@ namespace coaler::io {
             throw std::runtime_error("Unsupported file extension: " + file_extension);
         }
 
-        return checkInputMolecules(result);
+        return checkInputMolecules(result, file_path);
     }
-    RDKit::MOL_SPTR_VECT FileParser::checkInputMolecules(const RDKit::MOL_SPTR_VECT mols) {
+
+    RDKit::MOL_SPTR_VECT FileParser::checkInputMolecules(const RDKit::MOL_SPTR_VECT mols, const std::string file_path) {
 
         RDKit::MOL_SPTR_VECT retMols;
         std::vector<std::string> smilesVec;
-        unsigned duplicates;
+        unsigned duplicates = 0;
         for (auto mol : mols) {
             std::string smiles = RDKit::MolToSmiles(*mol);
             if (std::find(smilesVec.begin(), smilesVec.end(), smiles) == smilesVec.end()) {
@@ -75,7 +76,7 @@ namespace coaler::io {
             }
         }
         if (duplicates > 0) {
-            spdlog::warn("input file contains {} duplicates. All duplicates will be removed", duplicates);
+            spdlog::warn("input file {} contains {} duplicates. All duplicates will be removed", file_path, duplicates);
         }
 
         return retMols;
