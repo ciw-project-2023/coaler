@@ -13,6 +13,7 @@ namespace coaler::io {
     class FileParser {
       public:
         static RDKit::MOL_SPTR_VECT parse(const std::string &file_path);
+
       private:
         /***
          * checks the input molecules for duplicates and deletes them

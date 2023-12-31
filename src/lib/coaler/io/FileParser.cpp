@@ -61,7 +61,6 @@ namespace coaler::io {
     }
 
     RDKit::MOL_SPTR_VECT FileParser::checkInputMolecules(const RDKit::MOL_SPTR_VECT mols, const std::string file_path) {
-
         RDKit::MOL_SPTR_VECT retMols;
         std::vector<std::string> smilesVec;
         unsigned duplicates = 0;
@@ -70,8 +69,7 @@ namespace coaler::io {
             if (std::find(smilesVec.begin(), smilesVec.end(), smiles) == smilesVec.end()) {
                 smilesVec.emplace_back(smiles);
                 retMols.emplace_back(mol);
-            }
-            else {
+            } else {
                 duplicates++;
             }
         }
@@ -80,6 +78,5 @@ namespace coaler::io {
         }
 
         return retMols;
-
     }
 }  // namespace coaler::io
