@@ -17,7 +17,17 @@ namespace coaler::multialign {
         constexpr unsigned DEFAULT_NOF_STARTING_ASSEMBLIES = 50;
         constexpr unsigned DEFAULT_NOF_THREADS = 1;
         constexpr double POSE_REGISTER_SIZE_FACTOR = 0.5;
+
+        /**
+         * This treshold determines the score deficit above which new conformers are attempted to be generated
+         * during assembly optimization.
+         */
         constexpr double COARSE_OPTIMIZATION_THRESHOLD = 1.0;
+
+        /**
+         * This treshold determines the score deficit above which new conformers are attempted to be generated
+         * during the fine tuning of the best alignment assembly.
+         */
         constexpr double FINE_OPTIMIZATION_THRESHOLD = 0.2;
         constexpr unsigned OPTIMIZER_STEP_LIMIT = 1000;
     }  // namespace Constants

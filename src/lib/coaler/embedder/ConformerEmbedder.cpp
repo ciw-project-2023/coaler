@@ -6,58 +6,17 @@
 
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/FMCS/FMCS.h>
-#include <GraphMol/ForceFieldHelpers/MMFF/MMFF.h>
 #include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
 #include <GraphMol/MolAlign/AlignMolecules.h>
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <spdlog/spdlog.h>
-
 #include <utility>
-
-#include "../core/Matcher.hpp"
-#include "../multialign/Forward.hpp"
-#include "../multialign/models/Forward.hpp"
 #include "Forward.hpp"
-#include "GraphMol/FMCS/FMCS.h"
 
 const unsigned seed = 42;
 const float forceTol = 0.0135;
-
-namespace {
-    auto get_mcs(const RDKit::MOL_SPTR_VECT &mols, bool strict = true) {
-        RDKit::MCSParameters mcsParams;
-        RDKit::MCSAtomCompareParameters atomCompParams;
-        atomCompParams.MatchChiralTag = strict;
-        atomCompParams.MatchFormalCharge = true;
-        atomCompParams.MatchIsotope = false;
-        atomCompParams.MatchValences = true;
-        atomCompParams.RingMatchesRingOnly = strict;
-        atomCompParams.CompleteRingsOnly = strict;
-        mcsParams.AtomCompareParameters = atomCompParams;
-
-        RDKit::MCSBondCompareParameters bondCompParams;
-        bondCompParams.MatchStereo = strict;
-        bondCompParams.RingMatchesRingOnly = false;
-        bondCompParams.CompleteRingsOnly = true;
-        bondCompParams.MatchFusedRings = true;
-        bondCompParams.MatchFusedRingsStrict = false;
-        mcsParams.BondCompareParameters = bondCompParams;
-        mcsParams.Timeout = 1;
-
-        if (strict) {
-            mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareElements);
-            mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareOrderExact);
-        } else {
-            mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareAny);
-            mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareAny);
-        }
-
-        RDKit::MCSResult const mcs = RDKit::findMCS(mols, &mcsParams);
-        return mcs;
-    }
-}  // namespace
 
 namespace coaler::embedder {
     ConformerEmbedder::ConformerEmbedder(const core::CoreResult &result, const int threads,
@@ -143,6 +102,7 @@ namespace coaler::embedder {
     std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
         RDKit::ROMol *worstLigandMol, const multialign::LigandVector &targets,
         const std::unordered_map<multialign::LigandID, multialign::PoseID> &conformerIDs) {
+        //TODO maybe sanitize mols?
         std::vector<unsigned> newIds;
         for (const multialign::Ligand &target : targets) {
             // find mcs
@@ -159,10 +119,13 @@ namespace coaler::embedder {
                 boost::make_shared<RDKit::ROMol>(target.getMolecule()),
             };
 
-            auto mcsResult = get_mcs(mols, false);
-            if (mcsResult.QueryMol == nullptr) {
-                spdlog::warn("no mcs found");
-                continue;
+            auto mcsParams = core::Matcher::getRelaxedMCSParams();
+            auto mcsResult = RDKit::findMCS(mols, &mcsParams);
+
+            if (mcsResult.QueryMol == nullptr) { //TODO catch
+                throw std::runtime_error(fmt::format("No MCS found between {} and {}.",
+                                                     RDKit::MolToSmiles(*worstLigandMol),
+                                                     RDKit::MolToSmiles(target.getMolecule())));
             }
 
             RDKit::SubstructMatchParameters substructMatchParams;
@@ -171,39 +134,26 @@ namespace coaler::embedder {
             substructMatchParams.useQueryQueryMatches = false;
             substructMatchParams.maxMatches = 1;
             substructMatchParams.numThreads = 1;
+            substructMatchParams.useEnhancedStereo = false;
 
-            std::vector<RDKit::MatchVectType> ligandMatches;
-            RDKit::SubstructMatch(*worstLigandMol, *mcsResult.QueryMol, ligandMatches, substructMatchParams.uniquify,
-                                  false, substructMatchParams.useChirality, substructMatchParams.useQueryQueryMatches,
-                                  substructMatchParams.maxMatches, substructMatchParams.numThreads);
-
-            std::vector<RDKit::MatchVectType> targetMatches;
-            RDKit::SubstructMatch(targetMol, *mcsResult.QueryMol, targetMatches, substructMatchParams.uniquify, false,
-                                  substructMatchParams.useChirality, substructMatchParams.useQueryQueryMatches,
-                                  substructMatchParams.maxMatches, substructMatchParams.numThreads);
+            auto ligandMatches = RDKit::SubstructMatch(*worstLigandMol, *mcsResult.QueryMol, substructMatchParams);
+            auto targetMatches = RDKit::SubstructMatch(targetMol, *mcsResult.QueryMol, substructMatchParams);
 
             if (targetMatches.empty() || ligandMatches.empty()) {
-                //spdlog::warn("unable to match mcs to target or ligand");
-                //spdlog::warn("ligand: {}", RDKit::MolToSmiles(*worstLigandMol));
-                //spdlog::warn("target: {}", RDKit::MolToSmiles(target.getMolecule()));
-                //spdlog::warn("mcs: {}", mcsResult.SmartsString);
-                // continue;
-
                 // try again with strict mcs rules
-                mcsResult = get_mcs(mols, true);
-                RDKit::SubstructMatch(targetMol, *mcsResult.QueryMol, targetMatches, substructMatchParams.uniquify,
-                                      false, substructMatchParams.useChirality,
-                                      substructMatchParams.useQueryQueryMatches, substructMatchParams.maxMatches,
-                                      substructMatchParams.numThreads);
-                RDKit::SubstructMatch(*worstLigandMol, *mcsResult.QueryMol, ligandMatches,
-                                      substructMatchParams.uniquify, false, substructMatchParams.useChirality,
-                                      substructMatchParams.useQueryQueryMatches, substructMatchParams.maxMatches,
-                                      substructMatchParams.numThreads);
+                mcsParams = core::Matcher::getStrictMCSParams();
+                mcsResult = RDKit::findMCS(mols, &mcsParams);
+
+                ligandMatches = RDKit::SubstructMatch(*worstLigandMol, *mcsResult.QueryMol, substructMatchParams);
+                targetMatches = RDKit::SubstructMatch(targetMol, *mcsResult.QueryMol, substructMatchParams);
             }
 
             // if still no match in both, skip target
             if (targetMatches.empty() || ligandMatches.empty()) {
-                continue;
+                throw std::runtime_error(fmt::format("Unable to match MCS {} to mols {} and {}.",
+                                                     mcsResult.SmartsString,
+                                                     RDKit::MolToSmiles(*worstLigandMol),
+                                                     RDKit::MolToSmiles(target.getMolecule())));
             }
             const RDKit::MatchVectType ligandMatch = ligandMatches.at(0);
             const RDKit::MatchVectType targetMatch = targetMatches.at(0);

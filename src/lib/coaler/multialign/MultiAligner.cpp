@@ -213,7 +213,7 @@ namespace coaler::multialign {
         // fine-tuning
         spdlog::info("Fine-tuning best assembly");
         bestAssembly = AssemblyOptimizer::optimizeAssembly(bestAssembly, Constants::FINE_OPTIMIZATION_THRESHOLD);
-        spdlog::info("finished alignment optimization.");
+        spdlog::info("finished alignment optimization. Final alignment has a score of {}.", bestAssembly.score);
         if (skippedAssembliesCount > 0) {
             spdlog::info("Skipped a total of {} incomplete assemblies.", skippedAssembliesCount);
         }

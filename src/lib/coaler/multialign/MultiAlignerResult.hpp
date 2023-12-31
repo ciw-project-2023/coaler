@@ -18,15 +18,6 @@ namespace coaler {
 
             /*--------------------------------------------------------------------------------------------------------*/
 
-            MultiAlignerResult& operator=(const MultiAlignerResult& result) {
-                this->alignmentScore = result.alignmentScore;
-                this->poseIDsByLigandID = result.poseIDsByLigandID;
-                this->inputLigands = result.inputLigands;
-                return *this;
-            };
-
-            /*--------------------------------------------------------------------------------------------------------*/
-
             double alignmentScore;
             std::unordered_map<LigandID, PoseID> poseIDsByLigandID;
             std::vector<Ligand> inputLigands;

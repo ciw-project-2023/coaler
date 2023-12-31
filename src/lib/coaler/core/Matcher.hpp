@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Forward.hpp"
+#include "GraphMol/FMCS/FMCS.h"
 
 namespace coaler::core {
     struct CoreResult {
@@ -29,11 +30,16 @@ namespace coaler::core {
         std::optional<CoreResult> calculateCoreMurcko(RDKit::MOL_SPTR_VECT& mols);
 
         /**
-         *
-         * @param mols
-         * @return
+         * @return mcs params for very flexibly mcs search
+         * i.e. no atom types, bond types, chirality
          */
-        static RDKit::ROMOL_SPTR calculateAssemblyLigandsMcs(RDKit::MOL_SPTR_VECT& mols);
+        static RDKit::MCSParameters getRelaxedMCSParams();
+
+        /**
+         * @return mcs params fora strict mcs search
+         * i.e. Chirality, Bond order etc.
+         */
+        static RDKit::MCSParameters getStrictMCSParams();
 
       private:
         /**
