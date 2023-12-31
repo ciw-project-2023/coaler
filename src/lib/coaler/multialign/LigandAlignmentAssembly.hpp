@@ -36,6 +36,11 @@ namespace coaler::multialign {
         void incrementMissingLigandsCount();
 
         /**
+         * decrease missing ligands count by one
+         */
+        void decrementMissingLigandsCount();
+
+        /**
          * @return The missing ligand count for the assembly.
          */
         unsigned getMissingLigandsCount() const noexcept;

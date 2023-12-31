@@ -12,7 +12,7 @@
 
 using namespace coaler::multialign;
 
-void updatePoseRegisters(const LigandID ligandId, const PoseID newPose, const PoseRegisterCollection &registers,
+void updatePoseRegisters(const LigandID ligandId, const PoseID newPose, PoseRegisterCollection& registers,
                          PairwiseAlignments &scores, const LigandVector &ligands) {
     for (const Ligand &otherLigand : ligands) {
         if (otherLigand.getID() == ligandId) {
@@ -23,7 +23,7 @@ void updatePoseRegisters(const LigandID ligandId, const PoseID newPose, const Po
         for (const UniquePoseID &otherPose : otherLigand.getPoses()) {
             PosePair poses({ligandId, newPose}, otherPose);
             const double score = scores.at(poses, ligands, true);
-            registerPtr->addPoses(poses, score);
+            registers.addPoseToRegister(pair, poses, score);
         }
     }
 }
@@ -69,7 +69,7 @@ LigandID get_next_missing_ligand(const LigandAlignmentAssembly& assembly,
 /*----------------------------------------------------------------------------------------------------------------*/
 
 OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
-                                                   LigandVector ligands, const PoseRegisterCollection &registers,
+                                                   LigandVector ligands, PoseRegisterCollection& registers,
                                                    double scoreDeficitThreshold) {
 
     double currentAssemblyScore = AssemblyScorer::calculateAssemblyScore(assembly, scores, ligands);
@@ -81,78 +81,88 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
     unsigned stepCount = 0;
     while (std::any_of(ligandAvailable.begin(), ligandAvailable.end(), LigandIsAvailable())
            && stepCount < Constants::OPTIMIZER_STEP_LIMIT) {
+        for(const auto& ligand : ligands) {
+            if(ligand.getNumPoses() != ligand.getMolecule().getNumConformers()){
+                spdlog::error("conformer count mismatch: ligand poses {} vs. mol confs {}", ligand.getNumPoses(), ligand.getMolecule().getNumConformers());
+                assert(false);
+            }
+        }
         stepCount++;
         double maxScoreDeficit = -1;
-        Ligand worstLigand = *ligands.begin();
+        LigandID worstLigandId = 0;
         if(assembly.getMissingLigandsCount() != 0) {
-            LigandID worstLigandId = get_next_missing_ligand(assembly, ligandAvailable, ligands.size() - 1);
+            worstLigandId = get_next_missing_ligand(assembly, ligandAvailable, ligands.size() - 1);
             if(worstLigandId == ligands.size()) {
                 spdlog::error("invalid ligand id encountered in worst ligand search.");
                 break;
             }
-            worstLigand = ligands.at(worstLigandId);
         } else {
             //no missing ligands
             for (const Ligand &ligand : ligands) {
+                LigandID ligandId = ligand.getID();
                 if (!ligandAvailable.at(ligand.getID())) {
                     continue;
                 }
                 const double ligandScoreDeficit = AssemblyScorer::calculateScoreDeficitForLigand(
-                    ligand.getID(), assembly, registers, scores, ligands);
+                    ligandId, assembly, registers, scores, ligands);
                 if (maxScoreDeficit < ligandScoreDeficit) {
-                    worstLigand = ligand;
+                    worstLigandId = ligandId;
                     maxScoreDeficit = ligandScoreDeficit;
                 }
             }
         }
-        spdlog::debug("worst ligand: {} has score deficit {} (-1 if missing)", worstLigand.getID(), maxScoreDeficit);
+        spdlog::debug("worst ligand: {} has score deficit {}", worstLigandId, maxScoreDeficit);
         if (maxScoreDeficit == 0) {
             // all pairwise alignments are optimal
             // TODO can we return this assembly and be sure its the optimum?
             //maybe once finetuning isnt score diff dependant
             break;
         }
-
+        LigandPtr worstLigand = boost::make_shared<Ligand>(ligands.at(worstLigandId));
+        bool ligandIsMissing = (maxScoreDeficit == -1);
         bool swappedLigandPose = false;
-        for (const UniquePoseID &pose : worstLigand.getPoses()) {
-            // check if using this pose improves currentAssembly
-            if (pose.getLigandInternalPoseId() == assembly.getPoseOfLigand(worstLigand.getID())) {
-                continue;
-            }
-            LigandAlignmentAssembly assemblyCopy = assembly;
-            assemblyCopy.swapPoseForLigand(worstLigand.getID(), pose.getLigandInternalPoseId());
-            double const newAssemblyScore = AssemblyScorer::calculateAssemblyScore(assemblyCopy, scores, ligands);
 
-            if (newAssemblyScore > currentAssemblyScore) {
-                spdlog::debug("swapped for existing pose.");
-                assembly = assemblyCopy;
-                currentAssemblyScore = newAssemblyScore;
-                ligandAvailable.setAllAvailable();
-                swappedLigandPose = true;
-                break;
+        //try to swap conformer of worst ligand with another existing conformer
+        if(!ligandIsMissing) {
+            for (const UniquePoseID &pose : worstLigand->getPoses()) {
+                // check if using this pose improves currentAssembly
+                if (pose.getLigandInternalPoseId() == assembly.getPoseOfLigand(worstLigandId)) {
+                    continue;
+                }
+                LigandAlignmentAssembly assemblyCopy = assembly;
+                assemblyCopy.swapPoseForLigand(worstLigandId, pose.getLigandInternalPoseId());
+                double const newAssemblyScore = AssemblyScorer::calculateAssemblyScore(assemblyCopy, scores, ligands);
+
+                if (newAssemblyScore > currentAssemblyScore) {
+                    spdlog::debug("swapped for existing pose.");
+                    assembly = assemblyCopy;
+                    currentAssemblyScore = newAssemblyScore;
+                    ligandAvailable.setAllAvailable();
+                    swappedLigandPose = true;
+                    break;
+                }
             }
         }
 
-        bool ligandIsMissing = maxScoreDeficit == -1;
         // if no improving pose can be found among existing poses, generate new ones
         if (ligandIsMissing || (!swappedLigandPose && maxScoreDeficit > scoreDeficitThreshold)) {
             spdlog::debug("generating new conformer, missing ligand = {}", ligandIsMissing);
             LigandVector alignmentTargets = {ligands.begin(), ligands.end()};
 
-            // remove the worst ligand from targets, we only want to use all other ligands as target
+            // remove the worst ligand from targets, we only want to use all other ligands as alignment target
             for (auto target = alignmentTargets.begin(); target != alignmentTargets.end(); target++) {
-                if (target->getID() == worstLigand.getID()) {
+                if (target->getID() == worstLigandId) {
                     alignmentTargets.erase(target);
                     break;
                 }
             }
 
             auto newConfIDs = coaler::embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(
-                worstLigand.getMoleculePtr().get(), alignmentTargets, assembly.getAssemblyMapping());
+                worstLigand->getMoleculePtr().get(), alignmentTargets, assembly.getAssemblyMapping());
 
             if (newConfIDs.empty()) {
                 spdlog::warn("no confs generated. skipping ligand.");
-                ligandAvailable.at(worstLigand.getID()) = false;
+                ligandAvailable.at(worstLigandId) = false;
                 continue;
             }
 
@@ -163,7 +173,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             for (auto iter = newConfIDs.begin(); iter != newConfIDs.end(); iter++) {
                 const unsigned newPoseID = *iter;
                 auto assemblyCopy = assembly;
-                assemblyCopy.swapPoseForLigand(worstLigand.getID(), newPoseID);
+                assemblyCopy.swapPoseForLigand(worstLigandId, newPoseID);
 
                 // evaluate assembly
                 double const newAssemblyScore = AssemblyScorer::calculateAssemblyScore(assemblyCopy, scores, ligands);
@@ -182,25 +192,29 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                     if (*iter == bestNewPoseID) {
                         continue;
                     }
-                    ligands.at(worstLigand.getID()).getMolecule().removeConformer(*iter);
+                    worstLigand->getMoleculePtr()->removeConformer(*iter);
                 }
 
                 // from here on we keep the new pose and adapt all containers accordingly
-                updatePoseRegisters(worstLigand.getID(), bestNewPoseID, registers, scores, ligands);
-                assembly.swapPoseForLigand(worstLigand.getID(), bestNewPoseID);
-                worstLigand.addPose({worstLigand.getID(), bestNewPoseID});
+                updatePoseRegisters(worstLigandId, bestNewPoseID, registers, scores, ligands);
+                assembly.swapPoseForLigand(worstLigandId, bestNewPoseID);
+                worstLigand->addPose(bestNewPoseID);
                 ligandAvailable.setAllAvailable();
+                if(ligandIsMissing) {
+                    assembly.decrementMissingLigandsCount();
+                }
             } else {
                 spdlog::debug("discarded pose. assembly score: {}", currentAssemblyScore);
 
                 // remove all new poses from ligand
                 for (auto iter = newConfIDs.begin(); iter != newConfIDs.end(); iter++) {
-                    ligands.at(worstLigand.getID()).getMolecule().removeConformer(*iter);
+                    worstLigand->getMoleculePtr()->removeConformer(*iter);
                 }
             }
         }
+        ligands.at(worstLigandId) = *worstLigand;
         // set this to false in order to not immediately change this ligand again
-        ligandAvailable.at(worstLigand.getID()) = false;
+        ligandAvailable.at(worstLigandId) = false;
     }
     spdlog::info("optimization took {} steps.", stepCount);
     OptimizerState result{currentAssemblyScore, assembly, scores, ligands, registers};
@@ -209,6 +223,6 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
-OptimizerState AssemblyOptimizer::optimizeAssembly(const OptimizerState &state, double scoreDeficitThreshold) {
+OptimizerState AssemblyOptimizer::optimizeAssembly(OptimizerState &state, double scoreDeficitThreshold) {
     return optimizeAssembly(state.assembly, state.scores, state.ligands, state.registers, scoreDeficitThreshold);
 }

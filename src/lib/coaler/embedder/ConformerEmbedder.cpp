@@ -183,10 +183,10 @@ namespace coaler::embedder {
                                   substructMatchParams.maxMatches, substructMatchParams.numThreads);
 
             if (targetMatches.empty() || ligandMatches.empty()) {
-                spdlog::warn("unable to match mcs to target or ligand");
-                spdlog::warn("ligand: {}", RDKit::MolToSmiles(*worstLigandMol));
-                spdlog::warn("target: {}", RDKit::MolToSmiles(target.getMolecule()));
-                spdlog::warn("mcs: {}", mcsResult.SmartsString);
+                //spdlog::warn("unable to match mcs to target or ligand");
+                //spdlog::warn("ligand: {}", RDKit::MolToSmiles(*worstLigandMol));
+                //spdlog::warn("target: {}", RDKit::MolToSmiles(target.getMolecule()));
+                //spdlog::warn("mcs: {}", mcsResult.SmartsString);
                 // continue;
 
                 // try again with strict mcs rules

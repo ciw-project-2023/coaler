@@ -35,6 +35,6 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    void Ligand::addPose(const UniquePoseID& poseId) noexcept { m_poses.insert(poseId); }
+    void Ligand::addPose(const PoseID& poseId) noexcept { m_poses.insert(UniquePoseID(this->getID(),poseId)); }
 
 }  // namespace coaler::multialign

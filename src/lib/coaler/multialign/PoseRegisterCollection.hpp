@@ -29,6 +29,8 @@ namespace coaler::multialign {
 
         PairwisePoseRegisters getAllRegisters() const noexcept;
 
+        void addPoseToRegister(const LigandPair& key, const PosePair& poses, double score );
+
       private:
         PairwisePoseRegisters m_registers;
     };

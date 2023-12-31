@@ -36,4 +36,10 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
+    void PoseRegisterCollection::addPoseToRegister(const LigandPair& key, const PosePair& poses, double score) {
+        m_registers.at(key).addPoses(poses, score);
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
 }  // namespace coaler::multialign
