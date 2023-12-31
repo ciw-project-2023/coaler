@@ -7,7 +7,7 @@
 namespace coaler::multialign {
 
     Ligand::Ligand(const RDKit::ROMol& mol, const UniquePoseSet& poses, LigandID id)
-        : m_molecule(boost::make_shared<RDKit::ROMol>(mol)), m_poses(poses), m_id(id) {}
+        : m_molecule(mol), m_poses(poses), m_id(id) {}
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
@@ -19,7 +19,7 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    unsigned Ligand::getNumHeavyAtoms() const noexcept { return m_molecule->getNumHeavyAtoms(); }
+    unsigned Ligand::getNumHeavyAtoms() const noexcept { return m_molecule.getNumHeavyAtoms(); }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
@@ -27,14 +27,21 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    RDKit::ROMol Ligand::getMolecule() const noexcept { return *m_molecule; }
+    RDKit::ROMol Ligand::getMolecule() const noexcept { return m_molecule; }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    RDKit::ROMOL_SPTR Ligand::getMoleculePtr() const noexcept { return m_molecule; }
+    RDKit::RWMol const* Ligand::getMoleculePtr() const noexcept { return &m_molecule; }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    void Ligand::addPose(const PoseID& poseId) noexcept { m_poses.insert(UniquePoseID(this->getID(),poseId)); }
+    void Ligand::addPose(const PoseID& poseId) noexcept { m_poses.insert(UniquePoseID(this->getID(), poseId)); }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    void Ligand::removePose(const PoseID pose) {
+        m_molecule.removeConformer(pose);
+        m_poses.erase({this->getID(), pose});
+    }
 
 }  // namespace coaler::multialign

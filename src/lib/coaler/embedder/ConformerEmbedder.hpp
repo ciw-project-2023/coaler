@@ -6,9 +6,9 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/ROMol.h>
 
-#include "coaler/multialign/Forward.hpp"
-#include "coaler/core/Forward.hpp"
 #include "Forward.hpp"
+#include "coaler/core/Forward.hpp"
+#include "coaler/multialign/Forward.hpp"
 
 namespace coaler::embedder {
 
@@ -40,9 +40,9 @@ namespace coaler::embedder {
             const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs);
 
       private:
-
-        static std::pair<RDKit::MatchVectType,RDKit::MatchVectType> getMcsMatches(
-            const RDKit::ROMol* worstLigandMol, const RDKit::ROMol* targetMol, bool strict);
+        static std::pair<RDKit::MatchVectType, RDKit::MatchVectType> getMcsMatches(const RDKit::ROMol* worstLigandMol,
+                                                                                   const RDKit::ROMol* targetMol,
+                                                                                   bool strict);
 
         static CoreAtomMapping getLigandMcsAtomCoordsFromTargetMatch(const RDGeom::POINT3D_VECT& targetCoords,
                                                                      const RDKit::MatchVectType& ligandMcsMatch,

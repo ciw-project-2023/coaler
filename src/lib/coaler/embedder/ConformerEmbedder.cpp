@@ -12,13 +12,15 @@
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <spdlog/spdlog.h>
+
 #include <utility>
+
 #include "Forward.hpp"
 
 const unsigned seed = 42;
 const float forceTol = 0.0135;
 
-namespace{
+namespace {
     RDKit::SubstructMatchParameters get_substructure_match_params_for_optimizer_generation() {
         RDKit::SubstructMatchParameters substructMatchParams;
         substructMatchParams.uniquify = true;
@@ -42,7 +44,7 @@ namespace{
         params.clearConfs = false;
         return params;
     }
-}
+}  // namespace
 
 namespace coaler::embedder {
     ConformerEmbedder::ConformerEmbedder(const core::CoreResult &result, const int threads,
@@ -128,27 +130,32 @@ namespace coaler::embedder {
     std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
         RDKit::ROMol *worstLigandMol, const multialign::LigandVector &targets,
         const std::unordered_map<multialign::LigandID, multialign::PoseID> &conformerIDs) {
-        //TODO maybe sanitize mols?
+        // TODO maybe sanitize mols?
         std::vector<unsigned> newIds;
         for (const multialign::Ligand &target : targets) {
             // find mcs
             const multialign::LigandID targetID = target.getID();
-            if(conformerIDs.count(targetID) == 0) {
+            if (conformerIDs.count(targetID) == 0) {
                 continue;
             }
 
             const multialign::PoseID targetConformerID = conformerIDs.at(targetID);
             const RDKit::ROMol targetMol = target.getMolecule();
-            const RDKit::Conformer targetConformer = targetMol.getConformer(targetConformerID);
+            RDKit::Conformer targetConformer;
+            try {
+                targetConformer = targetMol.getConformer(targetConformerID);
+            } catch (std::runtime_error e) {
+                spdlog::error(e.what());
+            }
 
             RDKit::MatchVectType ligandMatch, targetMatch;
             std::tie(ligandMatch, targetMatch) = getMcsMatches(worstLigandMol, &targetMol, false);
-            if(ligandMatch.empty() || targetMatch.empty()) {
-                //reattempt with strict matching, i.e. chirality etc
+            if (ligandMatch.empty() || targetMatch.empty()) {
+                // reattempt with strict matching, i.e. chirality etc
                 std::tie(ligandMatch, targetMatch) = getMcsMatches(worstLigandMol, &targetMol, true);
             }
 
-            if(ligandMatch.empty() || targetMatch.empty()) {
+            if (ligandMatch.empty() || targetMatch.empty()) {
                 throw std::runtime_error(fmt::format("Unable to match MCS to mols {} and {}.",
                                                      RDKit::MolToSmiles(*worstLigandMol),
                                                      RDKit::MolToSmiles(targetMol)));
@@ -180,16 +187,15 @@ namespace coaler::embedder {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    std::pair<RDKit::MatchVectType,RDKit::MatchVectType> ConformerEmbedder::getMcsMatches(const RDKit::ROMol *worstLigandMol,
-                                                                                          const RDKit::ROMol *targetMol,
-                                                                                           bool strict) {
+    std::pair<RDKit::MatchVectType, RDKit::MatchVectType> ConformerEmbedder::getMcsMatches(
+        const RDKit::ROMol *worstLigandMol, const RDKit::ROMol *targetMol, bool strict) {
         std::vector<RDKit::ROMOL_SPTR> mols = {
             boost::make_shared<RDKit::ROMol>(*worstLigandMol),
             boost::make_shared<RDKit::ROMol>(*targetMol),
         };
 
         RDKit::MCSParameters mcsParams;
-        if(strict) {
+        if (strict) {
             mcsParams = core::Matcher::getStrictMCSParams();
         } else {
             mcsParams = core::Matcher::getRelaxedMCSParams();
@@ -200,8 +206,7 @@ namespace coaler::embedder {
             return {};
         }
 
-        RDKit::SubstructMatchParameters substructMatchParams =
-            get_substructure_match_params_for_optimizer_generation();
+        RDKit::SubstructMatchParameters substructMatchParams = get_substructure_match_params_for_optimizer_generation();
 
         auto ligandMatches = RDKit::SubstructMatch(*worstLigandMol, *mcsResult.QueryMol, substructMatchParams);
         auto targetMatches = RDKit::SubstructMatch(*targetMol, *mcsResult.QueryMol, substructMatchParams);

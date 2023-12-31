@@ -55,8 +55,9 @@ namespace coaler::multialign {
             UniquePoseID first(ligandId, firstLigandPoseId);
             UniquePoseID second(otherLigandId, secondLigandPoseId);
             double const scoreInAssembly = scores.at(PosePair{first, second}, ligands);
-            double const optimalScore = scores.at(poseRegisters.at(LigandPair(otherLigandId, ligandId)).getHighestScoringPair());
-            if(optimalScore < scoreInAssembly){
+            double const optimalScore
+                = scores.at(poseRegisters.at(LigandPair(otherLigandId, ligandId)).getHighestScoringPair());
+            if (optimalScore < scoreInAssembly) {
                 assert(false);
             }
             scoreDeficit += std::abs(optimalScore - scoreInAssembly);

@@ -37,11 +37,9 @@ namespace coaler::multialign {
          * @param ligands The input ligands.
          * @return The score deficit of the ligands conformer.
          */
-        static double calculateScoreDeficitForLigand(LigandID ligandId,
-                                                     const LigandAlignmentAssembly& assembly,
+        static double calculateScoreDeficitForLigand(LigandID ligandId, const LigandAlignmentAssembly& assembly,
                                                      const PoseRegisterCollection& registers,
                                                      PairwiseAlignments& scores, const LigandVector& ligands);
-
     };
 
 }  // namespace coaler::multialign

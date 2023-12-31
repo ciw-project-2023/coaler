@@ -29,7 +29,7 @@ namespace coaler::multialign {
          * Add a new pose to the map
          * @param poseId The ids of the ligands molecule conformer.
          */
-        void addPose(const PoseID & poseId) noexcept;
+        void addPose(const PoseID& poseId) noexcept;
 
         /**
          *
@@ -55,11 +55,13 @@ namespace coaler::multialign {
          */
         RDKit::ROMol getMolecule() const noexcept;
 
-        RDKit::ROMOL_SPTR getMoleculePtr() const noexcept;
+        RDKit::RWMol const* getMoleculePtr() const noexcept;
+
+        void removePose(const PoseID pose);
 
       private:
         LigandID m_id;
-        boost::shared_ptr<RDKit::ROMol> m_molecule;
+        RDKit::RWMol m_molecule;
         UniquePoseSet m_poses;
     };
 
