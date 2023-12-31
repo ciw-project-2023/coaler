@@ -136,7 +136,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
         bool ligandIsMissing = maxScoreDeficit == -1;
         // if no improving pose can be found among existing poses, generate new ones
         if (ligandIsMissing || (!swappedLigandPose && maxScoreDeficit > scoreDeficitThreshold)) {
-            spdlog::debug("generating new conformer");
+            spdlog::debug("generating new conformer, missing ligand = {}", ligandIsMissing);
             LigandVector alignmentTargets = {ligands.begin(), ligands.end()};
 
             // remove the worst ligand from targets, we only want to use all other ligands as target
@@ -173,7 +173,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                 }
             }
 
-            if (bestNewAssemblyScore > currentAssemblyScore) {
+            if (ligandIsMissing || bestNewAssemblyScore > currentAssemblyScore) {
                 currentAssemblyScore = bestNewAssemblyScore;
                 spdlog::debug("swapped to new pose. assembly score: {}", currentAssemblyScore);
 

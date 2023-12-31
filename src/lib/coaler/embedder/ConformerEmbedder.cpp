@@ -29,16 +29,16 @@ namespace {
     auto get_mcs(const RDKit::MOL_SPTR_VECT &mols, bool strict = true) {
         RDKit::MCSParameters mcsParams;
         RDKit::MCSAtomCompareParameters atomCompParams;
-        atomCompParams.MatchChiralTag = true;
+        atomCompParams.MatchChiralTag = strict;
         atomCompParams.MatchFormalCharge = true;
         atomCompParams.MatchIsotope = false;
         atomCompParams.MatchValences = true;
-        atomCompParams.RingMatchesRingOnly = true;
-        atomCompParams.CompleteRingsOnly = true;
+        atomCompParams.RingMatchesRingOnly = strict;
+        atomCompParams.CompleteRingsOnly = strict;
         mcsParams.AtomCompareParameters = atomCompParams;
 
         RDKit::MCSBondCompareParameters bondCompParams;
-        bondCompParams.MatchStereo = true;
+        bondCompParams.MatchStereo = strict;
         bondCompParams.RingMatchesRingOnly = false;
         bondCompParams.CompleteRingsOnly = true;
         bondCompParams.MatchFusedRings = true;
