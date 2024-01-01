@@ -43,5 +43,8 @@ namespace coaler::multialign {
         m_molecule.removeConformer(pose);
         m_poses.erase({this->getID(), pose});
     }
+    bool Ligand::operator==(const Ligand& other) const {
+        return this->getID() == other.getID();
+    }
 
 }  // namespace coaler::multialign

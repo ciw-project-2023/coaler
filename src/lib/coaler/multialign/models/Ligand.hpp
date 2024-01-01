@@ -57,7 +57,9 @@ namespace coaler::multialign {
 
         RDKit::RWMol const* getMoleculePtr() const noexcept;
 
-        void removePose(const PoseID pose);
+        void removePose(PoseID pose);
+
+        bool operator==(const Ligand& other) const;
 
       private:
         LigandID m_id;
