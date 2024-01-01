@@ -74,7 +74,7 @@ namespace coaler::multialign {
                                unsigned maxStartingAssemblies,
                                unsigned nofThreads)
 
-        : m_maxStartingAssemblies(maxStartingAssemblies), m_nofThreads(nofThreads) {
+        : m_maxStartingAssemblies(maxStartingAssemblies), m_nofThreads(nofThreads){
         assert(m_maxStartingAssemblies > 0);
         for (LigandID id = 0; id < molecules.size(); id++) {
             UniquePoseSet poses;

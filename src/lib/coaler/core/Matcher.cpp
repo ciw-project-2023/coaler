@@ -300,6 +300,7 @@ namespace coaler::core {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     PairwiseMCSMap Matcher::calcPairwiseMCS(const multialign::LigandVector& mols, bool strict) {
+
         PairwiseMCSMap mcsMap;
         RDKit::MCSParameters mcsParams;
         if (strict) {
@@ -309,7 +310,6 @@ namespace coaler::core {
             mcsParams = getRelaxedMCSParams();
         }
         const RDKit::SubstructMatchParameters substructMatchParams = get_substructure_match_params_for_optimizer_generation();
-
 
         for (multialign::LigandID firstLigandId = 0; firstLigandId < mols.size(); ++firstLigandId) {
             for (multialign::LigandID secondLigandId = firstLigandId+1; secondLigandId < mols.size(); ++secondLigandId) {

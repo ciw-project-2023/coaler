@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Forward.hpp"
+#include "coaler/multialign/Forward.hpp"
 #include "GraphMol/FMCS/FMCS.h"
 #include "coaler/core/Forward.hpp"
 
@@ -48,6 +49,7 @@ namespace coaler::core {
         static RDKit::MCSParameters getStrictMCSParams();
 
         static PairwiseMCSMap calcPairwiseMCS(const multialign::LigandVector& mols, bool strict);
+
 
       private:
         /**
