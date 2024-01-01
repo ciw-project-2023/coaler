@@ -69,7 +69,9 @@ LigandID get_next_missing_ligand(const LigandAlignmentAssembly &assembly, const 
 
 OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
                                                    LigandVector ligands, PoseRegisterCollection registers,
-                                                   double scoreDeficitThreshold) {
+                                                   double scoreDeficitThreshold,
+                                                   const core::PairwiseMCSMap& pairwiseStrictMCSMap,
+                                                   const core::PairwiseMCSMap& pairwiseRelaxedMCSMap) {
     double currentAssemblyScore = AssemblyScorer::calculateAssemblyScore(assembly, scores, ligands);
 
     LigandAvailabilityMapping ligandAvailable;
@@ -159,7 +161,8 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             }
 
             auto newConfIDs = coaler::embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(
-                (RDKit::ROMol *)worstLigand->getMoleculePtr(), alignmentTargets, assembly.getAssemblyMapping());
+                *worstLigand, alignmentTargets, assembly.getAssemblyMapping(),
+                pairwiseStrictMCSMap, pairwiseRelaxedMCSMap);
 
             if (newConfIDs.empty()) {
                 spdlog::warn("no confs generated. skipping ligand {}", RDKit::MolToSmiles(worstLigand->getMolecule()));
@@ -226,6 +229,9 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
-OptimizerState AssemblyOptimizer::optimizeAssembly(OptimizerState &state, double scoreDeficitThreshold) {
-    return optimizeAssembly(state.assembly, state.scores, state.ligands, state.registers, scoreDeficitThreshold);
+OptimizerState AssemblyOptimizer::optimizeAssembly(OptimizerState &state, double scoreDeficitThreshold,
+                                                   const core::PairwiseMCSMap& pairwiseStrictMCSMap,
+                                                   const core::PairwiseMCSMap& pairwiseRelaxedMCSMap) {
+    return optimizeAssembly(state.assembly, state.scores, state.ligands, state.registers, scoreDeficitThreshold,
+                            pairwiseStrictMCSMap, pairwiseRelaxedMCSMap);
 }

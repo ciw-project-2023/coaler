@@ -68,9 +68,12 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, unsigned maxStartingAssemblies, unsigned nofThreads)
+    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, const core::PairwiseMCSMap& pairwiseStrictMCSMap,
+                               core::PairwiseMCSMap  pairwiseRelaxedMCSMap, unsigned maxStartingAssemblies,
+                               unsigned nofThreads)
 
-        : m_maxStartingAssemblies(maxStartingAssemblies), m_nofThreads(nofThreads) {
+        : m_maxStartingAssemblies(maxStartingAssemblies), m_nofThreads(nofThreads),
+          m_pairwiseStrictMcsMap(pairwiseStrictMCSMap), m_pairwiseRelaxedMcsMap(std::move(pairwiseRelaxedMCSMap)) {
         assert(m_maxStartingAssemblies > 0);
         for (LigandID id = 0; id < molecules.size(); id++) {
             UniquePoseSet poses;
@@ -196,7 +199,7 @@ namespace coaler::multialign {
 
             OptimizerState optimizedAssembly = AssemblyOptimizer::optimizeAssembly(
                 assembliesList.at(assemblyID).first, m_pairwiseAlignments, m_ligands, m_poseRegisters,
-                Constants::COARSE_OPTIMIZATION_THRESHOLD);
+                Constants::COARSE_OPTIMIZATION_THRESHOLD, m_pairwiseStrictMcsMap, m_pairwiseRelaxedMcsMap);
 
             spdlog::info("optimized assembly {}, score: {}", assemblyID, optimizedAssembly.score);
             if (optimizedAssembly.score == -1) {
@@ -215,7 +218,8 @@ namespace coaler::multialign {
 
         // fine-tuning
         spdlog::info("Fine-tuning best assembly. Score before: {}", bestAssembly.score);
-        bestAssembly = AssemblyOptimizer::optimizeAssembly(bestAssembly, Constants::FINE_OPTIMIZATION_THRESHOLD);
+        bestAssembly = AssemblyOptimizer::optimizeAssembly(bestAssembly, Constants::FINE_OPTIMIZATION_THRESHOLD,
+                                                           m_pairwiseStrictMcsMap, m_pairwiseRelaxedMcsMap);
         spdlog::info("finished alignment optimization. Final alignment has a score of {}.", bestAssembly.score);
         if (skippedAssembliesCount > 0) {
             spdlog::info("Skipped a total of {} incomplete assemblies.", skippedAssembliesCount);

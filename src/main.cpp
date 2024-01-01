@@ -131,6 +131,9 @@ int main(int argc, char* argv[]) {
 
     // generate random coreResult with coordinates. TODO: get coordinates from input
 
+    const core::PairwiseMCSMap pairwiseStrictMcsMap = matcher.calcPairwiseMCS(mols, true);
+    const core::PairwiseMCSMap pairwiseRelaxedMcsMap = matcher.calcPairwiseMCS(mols, false);
+
     spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
 
     embedder::ConformerEmbedder embedder(core, opts.num_threads, opts.divideConformersByMatches);
@@ -144,7 +147,8 @@ int main(int argc, char* argv[]) {
         coaler::io::OutputWriter::writeConformersToSDF(opts.conformerLogPath, mols);
     }
 
-    multialign::MultiAligner aligner(mols, opts.num_start_assemblies, opts.num_threads);
+    multialign::MultiAligner aligner(mols, pairwiseStrictMcsMap, pairwiseRelaxedMcsMap,
+                                     opts.num_start_assemblies, opts.num_threads);
     auto result = aligner.alignMolecules();
 
     io::OutputWriter::writeSDF(opts.out_file, result);

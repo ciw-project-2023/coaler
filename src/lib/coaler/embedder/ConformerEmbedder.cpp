@@ -128,8 +128,10 @@ namespace coaler::embedder {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
-        RDKit::ROMol *worstLigandMol, const multialign::LigandVector &targets,
-        const std::unordered_map<multialign::LigandID, multialign::PoseID> &conformerIDs) {
+        const multialign::Ligand& worstLigand, const multialign::LigandVector &targets,
+        const std::unordered_map<multialign::LigandID, multialign::PoseID> &conformerIDs,
+        const core::PairwiseMCSMap& pairwiseStrictMCSMap,
+        const core::PairwiseMCSMap& pairwiseRelaxedMCSMap) {
         // TODO maybe sanitize mols?
         std::vector<unsigned> newIds;
         for (const multialign::Ligand &target : targets) {
@@ -150,16 +152,17 @@ namespace coaler::embedder {
 
             RDKit::MatchVectType ligandMatch, targetMatch;
             std::string mcsString;
-            std::tie(ligandMatch, targetMatch, mcsString) = getMcsMatches(worstLigandMol, &targetMol, false);
+            multialign::LigandPair ligandPair(worstLigand.getID(), targetID);
+            std::tie(ligandMatch, targetMatch, mcsString) = pairwiseRelaxedMCSMap.at(ligandPair);
             if (ligandMatch.empty() || targetMatch.empty()) {
                 spdlog::debug("flexible mcs didnt match, attempt strict mcs.");
                 // reattempt with strict matching, i.e. chirality etc
-                std::tie(ligandMatch, targetMatch, mcsString) = getMcsMatches(worstLigandMol, &targetMol, true);
+                std::tie(ligandMatch, targetMatch, mcsString) = pairwiseStrictMCSMap.at(ligandPair);
             }
 
             if (ligandMatch.empty() || targetMatch.empty()) {
                 throw std::runtime_error(fmt::format("Unable to match MCS {} to mols {} and {}.", mcsString,
-                                                     RDKit::MolToSmiles(*worstLigandMol),
+                                                     RDKit::MolToSmiles(*worstLigand.getMoleculePtr()),
                                                      RDKit::MolToSmiles(targetMol)));
             }
 
@@ -171,24 +174,26 @@ namespace coaler::embedder {
             int addedID = -1;
             // try flexible mcs first
             try {
-                addedID = RDKit::DGeomHelpers::EmbedMolecule(*worstLigandMol, params);
+                RDKit::ROMol ligandMol = *worstLigand.getMoleculePtr();
+                addedID = RDKit::DGeomHelpers::EmbedMolecule(ligandMol, params);
             } catch (const std::runtime_error &e) {
                 spdlog::debug(e.what());
             }
             if (addedID < 0) {
                 spdlog::debug("flexible approach failed. Trying strict approach.");
-                std::tie(ligandMatch, targetMatch, mcsString) = getMcsMatches(worstLigandMol, &targetMol, true);
+                std::tie(ligandMatch, targetMatch, mcsString) = pairwiseStrictMCSMap.at(ligandPair);
                 ligandMcsCoords
                     = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(), ligandMatch, targetMatch);
                 try {
-                    addedID = RDKit::DGeomHelpers::EmbedMolecule(*worstLigandMol, params);
+                    RDKit::ROMol ligandMol = *worstLigand.getMoleculePtr();
+                    addedID = RDKit::DGeomHelpers::EmbedMolecule(ligandMol, params);
                 } catch (const std::runtime_error &e) {
                     spdlog::debug(e.what());
                 }
             }
             if (addedID < 0) {
                 spdlog::debug("strict mcs confgen failed. mcs: {}, target: {}, attempted to embedd {}", mcsString,
-                              RDKit::MolToSmiles(*worstLigandMol), RDKit::MolToSmiles(targetMol));
+                              RDKit::MolToSmiles(*worstLigand.getMoleculePtr()), RDKit::MolToSmiles(targetMol));
                 spdlog::debug("target conformer {}/{}: no viable pose generated.", targetID, targets.size());
                 continue;
             }
@@ -197,39 +202,6 @@ namespace coaler::embedder {
             newIds.push_back(addedIDUnsigned);
         }
         return newIds;
-    }
-
-    /*----------------------------------------------------------------------------------------------------------------*/
-
-    std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string> ConformerEmbedder::getMcsMatches(
-        const RDKit::ROMol *worstLigandMol, const RDKit::ROMol *targetMol, bool strict) {
-        std::vector<RDKit::ROMOL_SPTR> mols = {
-            boost::make_shared<RDKit::ROMol>(*worstLigandMol),
-            boost::make_shared<RDKit::ROMol>(*targetMol),
-        };
-
-        RDKit::MCSParameters mcsParams;
-        if (strict) {
-            mcsParams = core::Matcher::getStrictMCSParams();
-        } else {
-            mcsParams = core::Matcher::getRelaxedMCSParams();
-        }
-
-        auto mcsResult = RDKit::findMCS(mols, &mcsParams);
-        if (mcsResult.QueryMol == nullptr) {
-            return {};
-        }
-
-        RDKit::SubstructMatchParameters substructMatchParams = get_substructure_match_params_for_optimizer_generation();
-
-        auto ligandMatches = RDKit::SubstructMatch(*worstLigandMol, *mcsResult.QueryMol, substructMatchParams);
-        auto targetMatches = RDKit::SubstructMatch(*targetMol, *mcsResult.QueryMol, substructMatchParams);
-        if (targetMatches.empty() || ligandMatches.empty()) {
-            return {};
-        }
-        const RDKit::MatchVectType ligandMatch = ligandMatches.at(0);
-        const RDKit::MatchVectType targetMatch = targetMatches.at(0);
-        return std::make_tuple(ligandMatch, targetMatch, mcsResult.SmartsString);
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/

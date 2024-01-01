@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Forward.hpp"
+#include "coaler/multialign/Forward.hpp"
 #include "GraphMol/FMCS/FMCS.h"
 
 namespace coaler::core {
@@ -40,6 +41,8 @@ namespace coaler::core {
          * i.e. Chirality, Bond order etc.
          */
         static RDKit::MCSParameters getStrictMCSParams();
+
+        PairwiseMCSMap calcPairwiseMCS(const RDKit::MOL_SPTR_VECT& mols, bool strict);
 
       private:
         /**
