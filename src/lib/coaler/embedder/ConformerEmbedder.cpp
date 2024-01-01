@@ -149,32 +149,47 @@ namespace coaler::embedder {
             }
 
             RDKit::MatchVectType ligandMatch, targetMatch;
-            std::tie(ligandMatch, targetMatch) = getMcsMatches(worstLigandMol, &targetMol, false);
+            std::string mcsString;
+            std::tie(ligandMatch, targetMatch, mcsString) = getMcsMatches(worstLigandMol, &targetMol, false);
             if (ligandMatch.empty() || targetMatch.empty()) {
+                spdlog::debug("flexible mcs didnt match, attempt strict mcs.");
                 // reattempt with strict matching, i.e. chirality etc
-                std::tie(ligandMatch, targetMatch) = getMcsMatches(worstLigandMol, &targetMol, true);
+                std::tie(ligandMatch, targetMatch, mcsString) = getMcsMatches(worstLigandMol, &targetMol, true);
             }
 
             if (ligandMatch.empty() || targetMatch.empty()) {
-                throw std::runtime_error(fmt::format("Unable to match MCS to mols {} and {}.",
+                throw std::runtime_error(fmt::format("Unable to match MCS {} to mols {} and {}.",
+                                                     mcsString,
                                                      RDKit::MolToSmiles(*worstLigandMol),
                                                      RDKit::MolToSmiles(targetMol)));
             }
 
-            const CoreAtomMapping ligandMcsCoords
+            CoreAtomMapping ligandMcsCoords
                 = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(), ligandMatch, targetMatch);
 
             RDKit::DGeomHelpers::EmbedParameters params = get_embed_params_for_optimizer_generation();
             params.coordMap = &ligandMcsCoords;
-
-            int addedID = 0;
+            int addedID = -1;
+            //try flexible mcs first
             try {
                 addedID = RDKit::DGeomHelpers::EmbedMolecule(*worstLigandMol, params);
             } catch (const std::runtime_error &e) {
                 spdlog::debug(e.what());
-                addedID = -1;
             }
             if (addedID < 0) {
+                spdlog::debug("flexible approach failed. Trying strict approach.");
+                std::tie(ligandMatch, targetMatch, mcsString) = getMcsMatches(worstLigandMol, &targetMol, true);
+                ligandMcsCoords
+                    = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(), ligandMatch, targetMatch);
+                try {
+                    addedID = RDKit::DGeomHelpers::EmbedMolecule(*worstLigandMol, params);
+                } catch (const std::runtime_error &e) {
+                    spdlog::debug(e.what());
+                }
+            }
+            if(addedID < 0){
+                spdlog::debug("strict mcs confgen failed. mcs: {}, target: {}, attempted to embedd {}", mcsString, RDKit::MolToSmiles(*worstLigandMol),
+                              RDKit::MolToSmiles(targetMol));
                 spdlog::debug("target conformer {}/{}: no viable pose generated.", targetID, targets.size());
                 continue;
             }
@@ -187,7 +202,7 @@ namespace coaler::embedder {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    std::pair<RDKit::MatchVectType, RDKit::MatchVectType> ConformerEmbedder::getMcsMatches(
+    std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string> ConformerEmbedder::getMcsMatches(
         const RDKit::ROMol *worstLigandMol, const RDKit::ROMol *targetMol, bool strict) {
         std::vector<RDKit::ROMOL_SPTR> mols = {
             boost::make_shared<RDKit::ROMol>(*worstLigandMol),
@@ -215,7 +230,7 @@ namespace coaler::embedder {
         }
         const RDKit::MatchVectType ligandMatch = ligandMatches.at(0);
         const RDKit::MatchVectType targetMatch = targetMatches.at(0);
-        return std::make_pair(ligandMatch, targetMatch);
+        return std::make_tuple(ligandMatch, targetMatch, mcsResult.SmartsString);
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/

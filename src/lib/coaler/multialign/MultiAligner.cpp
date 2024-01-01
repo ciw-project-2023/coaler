@@ -187,16 +187,18 @@ namespace coaler::multialign {
 
         OptimizerState bestAssembly{-1, {}, {}, {}, {}};
 
+
+
 #pragma omp parallel for shared(bestAssembly, bestAssemblyLock, skippedAssembliesCount, skippedAssembliesCountLock, \
                                     assembliesList) default(none)
-        //TODO change back to 0
-        for (unsigned assemblyID = 1; assemblyID < assembliesList.size(); assemblyID++) {
+
+        for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
             spdlog::debug("Assembly {} has mapped Conformers for {}/{} molecules.", assemblyID,
                           assembliesList.at(assemblyID).first.getAssemblyMapping().size(), m_ligands.size());
 
-            OptimizerState optimizedAssembly
-                = AssemblyOptimizer::optimizeAssembly(assembliesList.at(assemblyID).first, m_pairwiseAlignments, m_ligands,
-                                                      m_poseRegisters, Constants::COARSE_OPTIMIZATION_THRESHOLD);
+            OptimizerState optimizedAssembly = AssemblyOptimizer::optimizeAssembly(
+                assembliesList.at(assemblyID).first, m_pairwiseAlignments, m_ligands, m_poseRegisters,
+                Constants::COARSE_OPTIMIZATION_THRESHOLD);
 
             spdlog::info("optimized assembly {}, score: {}", assemblyID, optimizedAssembly.score);
             if (optimizedAssembly.score == -1) {
@@ -214,7 +216,7 @@ namespace coaler::multialign {
         }
 
         // fine-tuning
-        spdlog::info("Fine-tuning best assembly");
+        spdlog::info("Fine-tuning best assembly. Score before: {}", bestAssembly.score);
         bestAssembly = AssemblyOptimizer::optimizeAssembly(bestAssembly, Constants::FINE_OPTIMIZATION_THRESHOLD);
         spdlog::info("finished alignment optimization. Final alignment has a score of {}.", bestAssembly.score);
         if (skippedAssembliesCount > 0) {

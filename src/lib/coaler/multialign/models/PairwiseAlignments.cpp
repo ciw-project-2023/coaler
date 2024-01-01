@@ -31,8 +31,7 @@ namespace coaler::multialign {
             return this->std::unordered_map<PosePair, double, PosePairHash>::at(key);
         }
         if (!ligands.empty()) {
-            if(key == PosePair({0,29},{6,32})){
-
+            if (key == PosePair({0, 29}, {6, 32})) {
             }
             double score = calc_score(key, ligands);
             if (store) {

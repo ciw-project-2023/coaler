@@ -22,13 +22,14 @@ namespace coaler::multialign {
          * This treshold determines the score deficit above which new conformers are attempted to be generated
          * during assembly optimization.
          */
-        constexpr double COARSE_OPTIMIZATION_THRESHOLD = 1.0;
+        constexpr double COARSE_OPTIMIZATION_THRESHOLD = 0.5;
 
         /**
          * This treshold determines the score deficit above which new conformers are attempted to be generated
          * during the fine tuning of the best alignment assembly.
          */
-        constexpr double FINE_OPTIMIZATION_THRESHOLD = 0.2;
+        constexpr double FINE_OPTIMIZATION_THRESHOLD = 0.05;
+
         constexpr unsigned OPTIMIZER_STEP_LIMIT = 1000;
     }  // namespace Constants
 
@@ -41,7 +42,6 @@ namespace coaler::multialign {
     // using PairwiseAlignment = std::unordered_map<PosePair, double, PosePairHash>;
     using PairwisePoseRegisters = std::unordered_map<LigandPair, PoseRegister, LigandPairHash>;
 
-    using LigandPtr = boost::shared_ptr<Ligand>;
     using LigandVector = std::vector<Ligand>;
 
 }  // namespace coaler::multialign

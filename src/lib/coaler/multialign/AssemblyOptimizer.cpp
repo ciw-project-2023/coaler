@@ -9,6 +9,8 @@
 #include <coaler/embedder/ConformerEmbedder.hpp>
 
 #include "coaler/multialign/scorer/AssemblyScorer.hpp"
+#include <GraphMol/SmilesParse/SmilesWrite.h>
+
 
 using namespace coaler::multialign;
 
@@ -83,7 +85,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                 spdlog::error("conformer count mismatch: ligand poses {} vs. mol confs {}", ligand.getNumPoses(),
                               ligand.getMolecule().getNumConformers());
                 assert(false);
-            }
+            } // todo rewrite std::allof
         }
         stepCount++;
         double maxScoreDeficit = -1;
@@ -91,7 +93,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
         if (assembly.getMissingLigandsCount() != 0) {
             worstLigandId = get_next_missing_ligand(assembly, ligandAvailable, ligands.size() - 1);
             if (worstLigandId == ligands.size()) {
-                spdlog::error("invalid ligand id encountered in worst ligand search.");
+                spdlog::debug("all invalid ligands are unavailable.");
                 break;
             }
         } else {
@@ -117,7 +119,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             break;
         }
 
-        Ligand* worstLigand = &ligands.at(worstLigandId);
+        Ligand *worstLigand = &ligands.at(worstLigandId);
         bool ligandIsMissing = (maxScoreDeficit == -1);
         bool swappedLigandPose = false;
 
@@ -160,7 +162,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                 (RDKit::ROMol *)worstLigand->getMoleculePtr(), alignmentTargets, assembly.getAssemblyMapping());
 
             if (newConfIDs.empty()) {
-                spdlog::warn("no confs generated. skipping ligand.");
+                spdlog::warn("no confs generated. skipping ligand {}", RDKit::MolToSmiles(worstLigand->getMolecule()));
                 ligandAvailable.at(worstLigandId) = false;
                 continue;
             }
@@ -212,7 +214,8 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             }
         }
         ligands.at(worstLigandId) = *worstLigand;
-        assert(ligands.at(worstLigandId).getMoleculePtr()->getNumConformers() == ligands.at(worstLigandId).getNumPoses());
+        assert(ligands.at(worstLigandId).getMoleculePtr()->getNumConformers()
+               == ligands.at(worstLigandId).getNumPoses());
         // set this to false in order to not immediately change this ligand again
         ligandAvailable.at(worstLigandId) = false;
     }

@@ -44,8 +44,6 @@ namespace coaler::multialign {
                 omp_unset_lock(&poseRegistersLock);
             }
         }
-
-        spdlog::info("Finished building pose registers");
         PoseRegisterCollection collection;
         for (const auto &reg : poseRegisters) {
             collection.addRegister(reg.second);

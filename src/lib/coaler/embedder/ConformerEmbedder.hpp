@@ -39,14 +39,14 @@ namespace coaler::embedder {
             RDKit::ROMol* worstLigandMol, const multialign::LigandVector& targets,
             const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs);
 
-      private:
-        static std::pair<RDKit::MatchVectType, RDKit::MatchVectType> getMcsMatches(const RDKit::ROMol* worstLigandMol,
-                                                                                   const RDKit::ROMol* targetMol,
-                                                                                   bool strict);
-
         static CoreAtomMapping getLigandMcsAtomCoordsFromTargetMatch(const RDGeom::POINT3D_VECT& targetCoords,
                                                                      const RDKit::MatchVectType& ligandMcsMatch,
                                                                      const RDKit::MatchVectType& targetMcsMatch);
+      private:
+        static std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>  getMcsMatches(const RDKit::ROMol* worstLigandMol,
+                                                                                   const RDKit::ROMol* targetMol,
+                                                                                   bool strict);
+
         core::CoreResult m_core;
         int m_threads;
         bool m_divideConformersByMatches;
