@@ -16,7 +16,7 @@ namespace coaler::multialign {
          *
          * @param poseRegister PoseRegister to add to the collection.
          */
-        void addRegister(const PoseRegisterPtr& poseRegister);
+        void addRegister(const PoseRegister& poseRegister);
 
         /**
          * Get all pose registers that contain a given pose.
@@ -25,7 +25,11 @@ namespace coaler::multialign {
          */
         PairwisePoseRegisters getAllRegistersForPose(const UniquePoseID& pose) const noexcept;
 
+        PoseRegisterPtr getRegisterPtr(const LigandPair& key) const noexcept;
+
         PairwisePoseRegisters getAllRegisters() const noexcept;
+
+        void addPoseToRegister(const LigandPair& key, const PosePair& poses, double score);
 
       private:
         PairwisePoseRegisters m_registers;

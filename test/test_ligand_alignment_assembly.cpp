@@ -16,7 +16,7 @@ TEST_CASE("test_ligand_alignment_assembly", "[multialign]") {
     Ligand l1(*RDKit::SmilesToMol("CN"), {m0p0, m0p1}, 0);
     Ligand l2(*RDKit::SmilesToMol("CO"), {m1p0, m1p1}, 1);
 
-    PairwiseAlignment pairwiseScores;
+    PairwiseAlignments pairwiseScores;
     PosePair m0p0m1p0(m0p0, m1p0);
     PosePair m0p0m1p1(m0p0, m1p1);
     PosePair m0p1m1p0(m0p1, m1p0);

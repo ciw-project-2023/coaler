@@ -233,4 +233,56 @@ namespace coaler::core {
         return substructMatchParams;
     }
 
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    RDKit::MCSParameters Matcher::getRelaxedMCSParams() {
+        RDKit::MCSParameters mcsParams;
+        RDKit::MCSAtomCompareParameters atomCompParams;
+        atomCompParams.MatchChiralTag = false;
+        atomCompParams.MatchFormalCharge = true;
+        atomCompParams.MatchIsotope = false;
+        atomCompParams.MatchValences = true;
+        atomCompParams.RingMatchesRingOnly = false;
+        atomCompParams.CompleteRingsOnly = false;
+        mcsParams.AtomCompareParameters = atomCompParams;
+
+        RDKit::MCSBondCompareParameters bondCompParams;
+        bondCompParams.MatchStereo = false;
+        bondCompParams.RingMatchesRingOnly = false;
+        bondCompParams.CompleteRingsOnly = true;
+        bondCompParams.MatchFusedRings = true;
+        bondCompParams.MatchFusedRingsStrict = false;
+        mcsParams.BondCompareParameters = bondCompParams;
+        mcsParams.Timeout = 1;
+        mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareAny);
+        mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareAny);
+        return mcsParams;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    RDKit::MCSParameters Matcher::getStrictMCSParams() {
+        RDKit::MCSParameters mcsParams;
+        RDKit::MCSAtomCompareParameters atomCompParams;
+        atomCompParams.MatchChiralTag = true;
+        atomCompParams.MatchFormalCharge = true;
+        atomCompParams.MatchIsotope = false;
+        atomCompParams.MatchValences = true;
+        atomCompParams.RingMatchesRingOnly = true;
+        atomCompParams.CompleteRingsOnly = true;
+        mcsParams.AtomCompareParameters = atomCompParams;
+
+        RDKit::MCSBondCompareParameters bondCompParams;
+        bondCompParams.MatchStereo = true;
+        bondCompParams.RingMatchesRingOnly = false;
+        bondCompParams.CompleteRingsOnly = true;
+        bondCompParams.MatchFusedRings = true;
+        bondCompParams.MatchFusedRingsStrict = false;
+        mcsParams.BondCompareParameters = bondCompParams;
+        mcsParams.Timeout = 1;
+        mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareElements);
+        mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareOrderExact);
+        return mcsParams;
+    }
+
 }  // namespace coaler::core

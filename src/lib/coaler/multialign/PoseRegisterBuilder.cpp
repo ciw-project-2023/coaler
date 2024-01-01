@@ -8,10 +8,11 @@
 
 #include "PoseRegister.hpp"
 #include "models/Ligand.hpp"
+#include "models/PairwiseAlignments.hpp"
 
 namespace coaler::multialign {
 
-    PoseRegisterCollection PoseRegisterBuilder::buildPoseRegisters(const PairwiseAlignment &alignmentScores,
+    PoseRegisterCollection PoseRegisterBuilder::buildPoseRegisters(PairwiseAlignments &alignmentScores,
                                                                    const std::vector<Ligand> &ligands,
                                                                    unsigned nofThreads) noexcept {
         PairwisePoseRegisters poseRegisters;
@@ -29,23 +30,20 @@ namespace coaler::multialign {
                 const unsigned size = calculateRegisterSizeForLigand(ligands.at(firstLigand), ligands.at(secondLigand));
                 const LigandPair currentLigandPair(firstLigand, secondLigand);
 
-                const std::shared_ptr<PoseRegister> registerPtr
-                    = std::make_shared<PoseRegister>(PoseRegister(firstLigand, secondLigand, size));
+                PoseRegister poseRegister(firstLigand, secondLigand, size);
 
                 for (const UniquePoseID firstLigandPose : ligands.at(firstLigand).getPoses()) {
                     for (const UniquePoseID secondLigandPose : ligands.at(secondLigand).getPoses()) {
                         const PosePair pair(firstLigandPose, secondLigandPose);
                         const double score = alignmentScores.at(pair);
-                        registerPtr->addPoses(pair, score);
+                        poseRegister.addPoses(pair, score);
                     }
                 }
                 omp_set_lock(&poseRegistersLock);
-                poseRegisters.emplace(currentLigandPair, registerPtr);
+                poseRegisters.emplace(currentLigandPair, poseRegister);
                 omp_unset_lock(&poseRegistersLock);
             }
         }
-
-        spdlog::info("Finished building pose registers");
         PoseRegisterCollection collection;
         for (const auto &reg : poseRegisters) {
             collection.addRegister(reg.second);

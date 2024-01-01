@@ -49,11 +49,15 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    PosePair PoseRegister::getHighestScoringPair() { return m_highest.first; }
+    PosePair PoseRegister::getHighestScoringPair() const noexcept { return m_highest.first; }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    bool PoseRegister::containsPose(const UniquePoseID &pose) {
+    double PoseRegister::getHighestScore() const noexcept { return m_highest.second; }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    bool PoseRegister::containsPose(const UniquePoseID &pose) const {
         return std::any_of(m_register.begin(), m_register.end(), [pose](const auto entry) {
             return entry.first.getFirst() == pose || entry.first.getSecond() == pose;
         });
