@@ -13,7 +13,6 @@
 #include "GraphMol/ForceFieldHelpers/UFF/UFF.h"
 #include "GraphMol/RWMol.h"
 #include "GraphMol/SmilesParse/SmartsWrite.h"
-#include "GraphMol/SmilesParse/SmilesParse.h"
 
 namespace {
     RDKit::SubstructMatchParameters get_substructure_match_params_for_optimizer_generation() {
@@ -300,7 +299,7 @@ namespace coaler::core {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    PairwiseMCSMap Matcher::calcPairwiseMCS(const RDKit::MOL_SPTR_VECT& mols, bool strict) {
+    PairwiseMCSMap Matcher::calcPairwiseMCS(const multialign::LigandVector& mols, bool strict) {
         PairwiseMCSMap mcsMap;
         RDKit::MCSParameters mcsParams;
         if (strict) {
@@ -312,24 +311,32 @@ namespace coaler::core {
         const RDKit::SubstructMatchParameters substructMatchParams = get_substructure_match_params_for_optimizer_generation();
 
 
-        for (int mol1ID = 0; mol1ID < mols.size(); ++mol1ID) {
-            for (int mol2ID = mol1ID+1; mol2ID < mols.size(); ++mol2ID) {
-                multialign::LigandPair ligandPair(mol1ID, mol2ID);
-                RDKit::MOL_SPTR_VECT molPair{mols.at(mol1ID), mols.at(mol2ID)};
+        for (multialign::LigandID firstLigandId = 0; firstLigandId < mols.size(); ++firstLigandId) {
+            for (multialign::LigandID secondLigandId = firstLigandId+1; secondLigandId < mols.size(); ++secondLigandId) {
+                multialign::LigandPair ligandPair(firstLigandId, secondLigandId);
+                multialign::Ligand firstLigand = mols.at(firstLigandId);
+                multialign::Ligand secondLigand = mols.at(secondLigandId);
+                auto firstMol = firstLigand.getMolecule();
+                auto firstMolPtr = boost::make_shared<RDKit::ROMol>(firstMol);
+                auto secondMol = secondLigand.getMolecule();
+                auto secondMolPtr = boost::make_shared<RDKit::ROMol>(secondMol);
+                RDKit::MOL_SPTR_VECT molPair{firstMolPtr, secondMolPtr};
                 const RDKit::MCSResult mcsResult = RDKit::findMCS(molPair, &mcsParams);
                 if (mcsResult.QueryMol == nullptr) {
                     mcsMap.emplace(ligandPair, std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>());
+                    //todo throw
+                    spdlog::error("no mcs found between {} and {}", RDKit::MolToSmiles(firstMol), RDKit::MolToSmiles(secondMol));
+                    continue;
                 }
-                auto ligandMatches = RDKit::SubstructMatch(*mols.at(mol1ID), *mcsResult.QueryMol, substructMatchParams);
-                auto targetMatches = RDKit::SubstructMatch(*mols.at(mol2ID), *mcsResult.QueryMol, substructMatchParams);
+                auto ligandMatches = RDKit::SubstructMatch(firstMol, *mcsResult.QueryMol, substructMatchParams);
+                auto targetMatches = RDKit::SubstructMatch(secondMol, *mcsResult.QueryMol, substructMatchParams);
                 if (targetMatches.empty() || ligandMatches.empty()) {
                     mcsMap.emplace(ligandPair, std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>());
-
+                    continue;
                 }
                 const RDKit::MatchVectType ligandMatch = ligandMatches.at(0);
                 const RDKit::MatchVectType targetMatch = targetMatches.at(0);
                 mcsMap.emplace(ligandPair, std::make_tuple(ligandMatch, targetMatch, mcsResult.SmartsString));
-
             }
         }
 

@@ -68,12 +68,13 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, const core::PairwiseMCSMap& pairwiseStrictMCSMap,
-                               core::PairwiseMCSMap  pairwiseRelaxedMCSMap, unsigned maxStartingAssemblies,
+    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules,
+                               //const core::PairwiseMCSMap& pairwiseStrictMCSMap,
+                               //core::PairwiseMCSMap  pairwiseRelaxedMCSMap,
+                               unsigned maxStartingAssemblies,
                                unsigned nofThreads)
 
-        : m_maxStartingAssemblies(maxStartingAssemblies), m_nofThreads(nofThreads),
-          m_pairwiseStrictMcsMap(pairwiseStrictMCSMap), m_pairwiseRelaxedMcsMap(std::move(pairwiseRelaxedMCSMap)) {
+        : m_maxStartingAssemblies(maxStartingAssemblies), m_nofThreads(nofThreads) {
         assert(m_maxStartingAssemblies > 0);
         for (LigandID id = 0; id < molecules.size(); id++) {
             UniquePoseSet poses;
@@ -84,6 +85,10 @@ namespace coaler::multialign {
 
             m_ligands.emplace_back(*molecules.at(id), poses, id);
         }
+        spdlog::info("Start calculating pairwise MCS.");
+        m_pairwiseRelaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(m_ligands, false);
+        m_pairwiseStrictMcsMap = coaler::core::Matcher::calcPairwiseMCS(m_ligands, true);
+        spdlog::info("Finished calculating pairwise MCS.");
         omp_set_num_threads(m_nofThreads);  // this sets the number of threads used for ALL subsequent parallel regions.
     }
 
@@ -190,8 +195,8 @@ namespace coaler::multialign {
 
         OptimizerState bestAssembly{-1, {}, {}, {}, {}};
 
-#pragma omp parallel for shared(bestAssembly, bestAssemblyLock, skippedAssembliesCount, skippedAssembliesCountLock, \
-                                    assembliesList) default(none)
+//#pragma omp parallel for shared(bestAssembly, bestAssemblyLock, skippedAssembliesCount, skippedAssembliesCountLock, \
+//                                    assembliesList) default(none)
 
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
             spdlog::debug("Assembly {} has mapped Conformers for {}/{} molecules.", assemblyID,

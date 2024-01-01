@@ -17,9 +17,7 @@
 #include "Matcher.hpp"
 
 namespace coaler::core {
+
     class Matcher;
 
-    using PairwiseMCSMap = std::unordered_map<multialign::LigandPair,
-                                    std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>,
-                                        multialign::LigandPairHash>;
 }

@@ -131,8 +131,8 @@ int main(int argc, char* argv[]) {
 
     // generate random coreResult with coordinates. TODO: get coordinates from input
 
-    const core::PairwiseMCSMap pairwiseStrictMcsMap = matcher.calcPairwiseMCS(mols, true);
-    const core::PairwiseMCSMap pairwiseRelaxedMcsMap = matcher.calcPairwiseMCS(mols, false);
+    //const core::PairwiseMCSMap pairwiseStrictMcsMap = matcher.calcPairwiseMCS(mols, true);
+    //const core::PairwiseMCSMap pairwiseRelaxedMcsMap = matcher.calcPairwiseMCS(mols, false);
 
     spdlog::info("embedding {} conformers each into molecules", opts.num_conformers);
 
@@ -147,11 +147,18 @@ int main(int argc, char* argv[]) {
         coaler::io::OutputWriter::writeConformersToSDF(opts.conformerLogPath, mols);
     }
 
-    multialign::MultiAligner aligner(mols, pairwiseStrictMcsMap, pairwiseRelaxedMcsMap,
+    multialign::MultiAligner aligner(mols,
+                                     //pairwiseStrictMcsMap, pairwiseRelaxedMcsMap,
                                      opts.num_start_assemblies, opts.num_threads);
-    auto result = aligner.alignMolecules();
+    try {
+        auto result = aligner.alignMolecules();
+        io::OutputWriter::writeSDF(opts.out_file, result);
+    } catch (const std::runtime_error& e)
+    {
+        spdlog::error(e.what());
+        return 5;
+    }
 
-    io::OutputWriter::writeSDF(opts.out_file, result);
 
     spdlog::info("done: exiting");
 }
