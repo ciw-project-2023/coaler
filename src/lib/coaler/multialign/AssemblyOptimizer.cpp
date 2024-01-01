@@ -69,11 +69,10 @@ LigandID get_next_missing_ligand(const LigandAlignmentAssembly &assembly, const 
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
-std::pair<LigandID, double> get_worst_ligand_in_assembly(const LigandAlignmentAssembly& assembly,
-                                      const PoseRegisterCollection& registers,
-                                      PairwiseAlignments& scores,
-                                      const LigandVector& ligands,
-                                      const LigandAvailabilityMapping& ligandAvailability){
+std::pair<LigandID, double> get_worst_ligand_in_assembly(const LigandAlignmentAssembly &assembly,
+                                                         const PoseRegisterCollection &registers,
+                                                         PairwiseAlignments &scores, const LigandVector &ligands,
+                                                         const LigandAvailabilityMapping &ligandAvailability) {
     double maxScoreDeficit = -1;
     LigandID worstLigandId = 0;
     if (assembly.getMissingLigandsCount() != 0) {
@@ -102,7 +101,7 @@ std::pair<LigandID, double> get_worst_ligand_in_assembly(const LigandAlignmentAs
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
-LigandVector generate_alignment_targets(const LigandVector& ligands, const Ligand& ligandToAlign) {
+LigandVector generate_alignment_targets(const LigandVector &ligands, const Ligand &ligandToAlign) {
     LigandVector alignmentTargets = {ligands.begin(), ligands.end()};
 
     // remove the worst ligand from targets, we only want to use all other ligands as alignment target
@@ -113,10 +112,9 @@ LigandVector generate_alignment_targets(const LigandVector& ligands, const Ligan
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
-std::pair<PoseID, double> find_optimal_pose(const LigandID ligand, const std::vector<PoseID>& poses,
-                                            const LigandAlignmentAssembly& assembly,
-                                            PairwiseAlignments& scores,
-                                            const LigandVector& ligands){
+std::pair<PoseID, double> find_optimal_pose(const LigandID ligand, const std::vector<PoseID> &poses,
+                                            const LigandAlignmentAssembly &assembly, PairwiseAlignments &scores,
+                                            const LigandVector &ligands) {
     PoseID bestNewPoseID = 0;
     double bestNewAssemblyScore = 0;
 
@@ -150,20 +148,14 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
     unsigned stepCount = 0;
     while (std::any_of(ligandAvailable.begin(), ligandAvailable.end(), LigandIsAvailable())
            && stepCount < Constants::OPTIMIZER_STEP_LIMIT) {
-
-        assert(std::all_of(ligands.begin(), ligands.end(), [](const Ligand& l){
-            return l.getNumPoses() == l.getMoleculePtr()->getNumConformers();
-        }));
+        assert(std::all_of(ligands.begin(), ligands.end(),
+                           [](const Ligand &l) { return l.getNumPoses() == l.getMoleculePtr()->getNumConformers(); }));
         stepCount++;
         double maxScoreDeficit;
         LigandID worstLigandId;
 
-        std::tie(worstLigandId, maxScoreDeficit) = get_worst_ligand_in_assembly(
-            assembly,
-            registers,
-            scores,
-            ligands,
-            ligandAvailable);
+        std::tie(worstLigandId, maxScoreDeficit)
+            = get_worst_ligand_in_assembly(assembly, registers, scores, ligands, ligandAvailable);
         spdlog::debug("worst ligand: {} has score deficit {}", worstLigandId, maxScoreDeficit);
 
         if (maxScoreDeficit == 0) {
@@ -201,7 +193,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
         if (ligandIsMissing || (!swappedLigandPose && maxScoreDeficit > scoreDeficitThreshold)) {
             spdlog::debug("generating new conformer, missing ligand = {}", ligandIsMissing);
             LigandVector alignmentTargets = generate_alignment_targets(ligands, *worstLigand);
-            assert(alignmentTargets.size() == ligands.size() -1);
+            assert(alignmentTargets.size() == ligands.size() - 1);
 
             auto newConfIDs = coaler::embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(
                 (RDKit::ROMol *)worstLigand->getMoleculePtr(), alignmentTargets, assembly.getAssemblyMapping());
@@ -217,9 +209,8 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             PoseID bestNewPoseID;
             double bestNewAssemblyScore;
 
-            std::tie(bestNewPoseID, bestNewAssemblyScore) = find_optimal_pose(
-                worstLigandId, newConfIDs, assembly, scores, ligands
-                );
+            std::tie(bestNewPoseID, bestNewAssemblyScore)
+                = find_optimal_pose(worstLigandId, newConfIDs, assembly, scores, ligands);
 
             if (ligandIsMissing || bestNewAssemblyScore > currentAssemblyScore) {
                 // from here on we keep the new pose and adapt all containers accordingly
