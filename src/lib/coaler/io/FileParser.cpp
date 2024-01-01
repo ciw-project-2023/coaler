@@ -17,7 +17,7 @@
 
 namespace coaler::io {
 
-    RDKit::MOL_SPTR_VECT FileParser::parse(const std::string &file_path) {
+    RDKit::MOL_SPTR_VECT FileParser::parse(const std::string& file_path) {
         RDKit::MOL_SPTR_VECT result;
 
         spdlog::debug("searching at: {}", std::filesystem::current_path().string());
@@ -43,7 +43,7 @@ namespace coaler::io {
             while (!supplier.atEnd()) {
                 line++;
 
-                auto *const next = supplier.next();
+                auto* const next = supplier.next();
                 if (next == nullptr) {
                     spdlog::warn("Could not parse line {} in smi file", line);
                     continue;
@@ -60,19 +60,20 @@ namespace coaler::io {
         return checkInputMolecules(result, file_path);
     }
 
-    RDKit::MOL_SPTR_VECT FileParser::checkInputMolecules(const RDKit::MOL_SPTR_VECT mols, const std::string file_path) {
+    RDKit::MOL_SPTR_VECT FileParser::checkInputMolecules(const RDKit::MOL_SPTR_VECT& mols,
+                                                         const std::string& file_path) {
         RDKit::MOL_SPTR_VECT retMols;
-        std::vector<std::string> smilesVec;
+        std::unordered_set<std::string> smilesSet;
         unsigned duplicates = 0;
         for (auto mol : mols) {
             std::string smiles = RDKit::MolToSmiles(*mol);
-            if (std::find(smilesVec.begin(), smilesVec.end(), smiles) == smilesVec.end()) {
-                smilesVec.emplace_back(smiles);
+            if (smilesSet.insert(smiles).second) {
                 retMols.emplace_back(mol);
             } else {
                 duplicates++;
             }
         }
+
         if (duplicates > 0) {
             spdlog::warn("input file {} contains {} duplicates. All duplicates will be removed", file_path, duplicates);
         }

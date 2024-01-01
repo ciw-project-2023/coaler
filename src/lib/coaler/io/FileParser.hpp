@@ -12,7 +12,7 @@
 namespace coaler::io {
     class FileParser {
       public:
-        static RDKit::MOL_SPTR_VECT parse(const std::string &file_path);
+        static RDKit::MOL_SPTR_VECT parse(const std::string& file_path);
 
       private:
         /***
@@ -20,6 +20,6 @@ namespace coaler::io {
          * @param mols molecules parsed in parse()
          * @return RDKit::MOL_SPTR_VECT without duplicates
          */
-        static RDKit::MOL_SPTR_VECT checkInputMolecules(const RDKit::MOL_SPTR_VECT mols, const std::string file_path);
+        static RDKit::MOL_SPTR_VECT checkInputMolecules(const RDKit::MOL_SPTR_VECT& mols, const std::string& file_path);
     };
 }  // namespace coaler::io

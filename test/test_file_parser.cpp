@@ -17,6 +17,7 @@ TEST_CASE("File Parser", "[io]") {
 TEST_CASE("Duplicates", "[io]") {
     SECTION("SMILES") {
         auto mols = coaler::io::FileParser::parse("test/data/AID_5_dup.smi");
+        CHECK(mols.size() == 5);
         std::vector<std::string> smilesVec;
         for (auto mol : mols) {
             if (std::find(smilesVec.begin(), smilesVec.end(), RDKit::MolToSmiles(*mol)) == smilesVec.end()) {
@@ -26,6 +27,5 @@ TEST_CASE("Duplicates", "[io]") {
                 FAIL("error: duplicate not handled");
             }
         }
-        CHECK(mols.size() == 5);
     }
 }
