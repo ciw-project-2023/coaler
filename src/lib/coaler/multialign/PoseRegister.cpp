@@ -49,7 +49,11 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    PosePair PoseRegister::getHighestScoringPair() { return m_highest.first; }
+    PosePair PoseRegister::getHighestScoringPair() const noexcept { return m_highest.first; }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    double PoseRegister::getHighestScore() const noexcept { return m_highest.second; }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 

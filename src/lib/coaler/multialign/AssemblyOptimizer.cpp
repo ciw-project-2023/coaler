@@ -67,7 +67,7 @@ LigandID get_next_missing_ligand(const LigandAlignmentAssembly &assembly, const 
 /*----------------------------------------------------------------------------------------------------------------*/
 
 OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
-                                                   LigandVector ligands, PoseRegisterCollection &registers,
+                                                   LigandVector ligands, PoseRegisterCollection registers,
                                                    double scoreDeficitThreshold) {
     double currentAssemblyScore = AssemblyScorer::calculateAssemblyScore(assembly, scores, ligands);
 
@@ -116,7 +116,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             // maybe once finetuning isnt score diff dependant
             break;
         }
-        //ptr may be unnessecary
+
         Ligand* worstLigand = &ligands.at(worstLigandId);
         bool ligandIsMissing = (maxScoreDeficit == -1);
         bool swappedLigandPose = false;
@@ -184,7 +184,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 
             if (ligandIsMissing || bestNewAssemblyScore > currentAssemblyScore) {
                 currentAssemblyScore = bestNewAssemblyScore;
-                spdlog::debug("swapped to new pose. assembly score: {}", currentAssemblyScore);
+                spdlog::debug("ligand {} now has conformer {}.", worstLigandId, bestNewPoseID);
 
                 // remove all (except best) new poses from ligand
                 for (auto iter = newConfIDs.begin(); iter != newConfIDs.end(); iter++) {

@@ -30,7 +30,7 @@ namespace coaler::multialign {
          * @note You can re-call the optimization with a smaller threshold (for refinment) using the overloaded function
          */
         static OptimizerState optimizeAssembly(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
-                                               LigandVector ligands, PoseRegisterCollection& registers,
+                                               LigandVector ligands, PoseRegisterCollection registers,
                                                double scoreDeficitThreshold);
 
         /**
