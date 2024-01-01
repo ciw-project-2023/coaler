@@ -15,6 +15,19 @@
 #include "GraphMol/SmilesParse/SmartsWrite.h"
 #include "GraphMol/SmilesParse/SmilesParse.h"
 
+namespace {
+    RDKit::SubstructMatchParameters get_substructure_match_params_for_optimizer_generation() {
+        RDKit::SubstructMatchParameters substructMatchParams;
+        substructMatchParams.uniquify = true;
+        substructMatchParams.useChirality = false;
+        substructMatchParams.useQueryQueryMatches = false;
+        substructMatchParams.maxMatches = 1;
+        substructMatchParams.numThreads = 1;
+        substructMatchParams.useEnhancedStereo = false;
+        return substructMatchParams;
+    }
+}
+
 namespace coaler::core {
     Matcher::Matcher(int threads) : m_threads(threads) {}
 
@@ -283,6 +296,44 @@ namespace coaler::core {
         mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareElements);
         mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareOrderExact);
         return mcsParams;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    PairwiseMCSMap Matcher::calcPairwiseMCS(const RDKit::MOL_SPTR_VECT& mols, bool strict) {
+        PairwiseMCSMap mcsMap;
+        RDKit::MCSParameters mcsParams;
+        if (strict) {
+            mcsParams = getStrictMCSParams();
+        }
+        else {
+            mcsParams = getRelaxedMCSParams();
+        }
+        const RDKit::SubstructMatchParameters substructMatchParams = get_substructure_match_params_for_optimizer_generation();
+
+
+        for (int mol1ID = 0; mol1ID < mols.size(); ++mol1ID) {
+            for (int mol2ID = mol1ID+1; mol2ID < mols.size(); ++mol2ID) {
+                multialign::LigandPair ligandPair(mol1ID, mol2ID);
+                RDKit::MOL_SPTR_VECT molPair{mols.at(mol1ID), mols.at(mol2ID)};
+                const RDKit::MCSResult mcsResult = RDKit::findMCS(molPair, &mcsParams);
+                if (mcsResult.QueryMol == nullptr) {
+                    mcsMap.emplace(ligandPair, std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>());
+                }
+                auto ligandMatches = RDKit::SubstructMatch(*mols.at(mol1ID), *mcsResult.QueryMol, substructMatchParams);
+                auto targetMatches = RDKit::SubstructMatch(*mols.at(mol2ID), *mcsResult.QueryMol, substructMatchParams);
+                if (targetMatches.empty() || ligandMatches.empty()) {
+                    mcsMap.emplace(ligandPair, std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>());
+
+                }
+                const RDKit::MatchVectType ligandMatch = ligandMatches.at(0);
+                const RDKit::MatchVectType targetMatch = targetMatches.at(0);
+                mcsMap.emplace(ligandPair, std::make_tuple(ligandMatch, targetMatch, mcsResult.SmartsString));
+
+            }
+        }
+
+        return mcsMap;
     }
 
 }  // namespace coaler::core

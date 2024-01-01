@@ -6,6 +6,7 @@
 
 #include <GraphMol/RWMol.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
+#include "coaler/multialign/Forward.hpp"
 
 #include <cassert>
 #include <queue>
@@ -14,3 +15,11 @@
 #include <vector>
 
 #include "Matcher.hpp"
+
+namespace coaler::core {
+    class Matcher;
+
+    using PairwiseMCSMap = std::unordered_map<multialign::LigandPair,
+                                    std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>,
+                                        multialign::LigandPairHash>;
+}
