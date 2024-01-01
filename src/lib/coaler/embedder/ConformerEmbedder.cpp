@@ -158,8 +158,7 @@ namespace coaler::embedder {
             }
 
             if (ligandMatch.empty() || targetMatch.empty()) {
-                throw std::runtime_error(fmt::format("Unable to match MCS {} to mols {} and {}.",
-                                                     mcsString,
+                throw std::runtime_error(fmt::format("Unable to match MCS {} to mols {} and {}.", mcsString,
                                                      RDKit::MolToSmiles(*worstLigandMol),
                                                      RDKit::MolToSmiles(targetMol)));
             }
@@ -170,7 +169,7 @@ namespace coaler::embedder {
             RDKit::DGeomHelpers::EmbedParameters params = get_embed_params_for_optimizer_generation();
             params.coordMap = &ligandMcsCoords;
             int addedID = -1;
-            //try flexible mcs first
+            // try flexible mcs first
             try {
                 addedID = RDKit::DGeomHelpers::EmbedMolecule(*worstLigandMol, params);
             } catch (const std::runtime_error &e) {
@@ -187,9 +186,9 @@ namespace coaler::embedder {
                     spdlog::debug(e.what());
                 }
             }
-            if(addedID < 0){
-                spdlog::debug("strict mcs confgen failed. mcs: {}, target: {}, attempted to embedd {}", mcsString, RDKit::MolToSmiles(*worstLigandMol),
-                              RDKit::MolToSmiles(targetMol));
+            if (addedID < 0) {
+                spdlog::debug("strict mcs confgen failed. mcs: {}, target: {}, attempted to embedd {}", mcsString,
+                              RDKit::MolToSmiles(*worstLigandMol), RDKit::MolToSmiles(targetMol));
                 spdlog::debug("target conformer {}/{}: no viable pose generated.", targetID, targets.size());
                 continue;
             }

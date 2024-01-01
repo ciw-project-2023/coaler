@@ -187,8 +187,6 @@ namespace coaler::multialign {
 
         OptimizerState bestAssembly{-1, {}, {}, {}, {}};
 
-
-
 #pragma omp parallel for shared(bestAssembly, bestAssemblyLock, skippedAssembliesCount, skippedAssembliesCountLock, \
                                     assembliesList) default(none)
 

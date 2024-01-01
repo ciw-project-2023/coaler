@@ -4,13 +4,12 @@
 
 #include "AssemblyOptimizer.hpp"
 
+#include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <spdlog/spdlog.h>
 
 #include <coaler/embedder/ConformerEmbedder.hpp>
 
 #include "coaler/multialign/scorer/AssemblyScorer.hpp"
-#include <GraphMol/SmilesParse/SmilesWrite.h>
-
 
 using namespace coaler::multialign;
 
@@ -85,7 +84,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                 spdlog::error("conformer count mismatch: ligand poses {} vs. mol confs {}", ligand.getNumPoses(),
                               ligand.getMolecule().getNumConformers());
                 assert(false);
-            } // todo rewrite std::allof
+            }  // todo rewrite std::allof
         }
         stepCount++;
         double maxScoreDeficit = -1;
@@ -146,6 +145,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
         }
 
         // if no improving pose can be found among existing poses, generate new ones
+        // TODO add some absolute shape overlap threshold
         if (ligandIsMissing || (!swappedLigandPose && maxScoreDeficit > scoreDeficitThreshold)) {
             spdlog::debug("generating new conformer, missing ligand = {}", ligandIsMissing);
             LigandVector alignmentTargets = {ligands.begin(), ligands.end()};

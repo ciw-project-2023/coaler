@@ -42,10 +42,10 @@ namespace coaler::embedder {
         static CoreAtomMapping getLigandMcsAtomCoordsFromTargetMatch(const RDGeom::POINT3D_VECT& targetCoords,
                                                                      const RDKit::MatchVectType& ligandMcsMatch,
                                                                      const RDKit::MatchVectType& targetMcsMatch);
+
       private:
-        static std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>  getMcsMatches(const RDKit::ROMol* worstLigandMol,
-                                                                                   const RDKit::ROMol* targetMol,
-                                                                                   bool strict);
+        static std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string> getMcsMatches(
+            const RDKit::ROMol* worstLigandMol, const RDKit::ROMol* targetMol, bool strict);
 
         core::CoreResult m_core;
         int m_threads;
