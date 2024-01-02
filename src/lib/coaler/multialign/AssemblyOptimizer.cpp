@@ -198,7 +198,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             assert(alignmentTargets.size() == ligands.size() - 1);
             auto newConfIDs = coaler::embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(
                 *worstLigand, alignmentTargets, assembly.getAssemblyMapping(), pairwiseStrictMCSMap,
-                pairwiseRelaxedMCSMap);
+                pairwiseRelaxedMCSMap, 1);
 
             if (newConfIDs.empty()) {
                 spdlog::warn("no confs generated. skipping ligand {}", RDKit::MolToSmiles(worstLigand->getMolecule()));
@@ -215,6 +215,11 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                 = find_optimal_pose(worstLigandId, newConfIDs, assembly, scores, ligands);
 
             if (ligandIsMissing || bestNewAssemblyScore > currentAssemblyScore) {
+                if(ligandIsMissing ||
+                    bestNewAssemblyScore * Constants::LIGAND_AVAILABILITY_RESET_THRESHOLD > currentAssemblyScore) {
+                    spdlog::debug("All ligands set available.");
+                    ligandAvailable.setAllAvailable();
+                }
                 // from here on we keep the new pose and adapt all containers accordingly
 
                 currentAssemblyScore = bestNewAssemblyScore;
@@ -230,7 +235,6 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                 updatePoseRegisters(worstLigandId, bestNewPoseID, registers, scores, ligands);
                 assembly.swapPoseForLigand(worstLigandId, bestNewPoseID);
                 worstLigand->addPose(bestNewPoseID);
-                ligandAvailable.setAllAvailable();
                 if (ligandIsMissing) {
                     assembly.decrementMissingLigandsCount();
                 }

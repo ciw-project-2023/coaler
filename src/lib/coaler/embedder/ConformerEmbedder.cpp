@@ -130,7 +130,8 @@ namespace coaler::embedder {
     std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
         const multialign::Ligand &worstLigand, const multialign::LigandVector &targets,
         const std::unordered_map<multialign::LigandID, multialign::PoseID> &conformerIDs,
-        const core::PairwiseMCSMap &pairwiseStrictMCSMap, const core::PairwiseMCSMap &pairwiseRelaxedMCSMap) {
+        const core::PairwiseMCSMap &pairwiseStrictMCSMap, const core::PairwiseMCSMap &pairwiseRelaxedMCSMap,
+        const unsigned nofConfs) {
         // TODO maybe sanitize mols?
         std::vector<unsigned> newIds;
         RDKit::ROMol *ligandMol = (RDKit::ROMol *)worstLigand.getMoleculePtr();
@@ -169,7 +170,7 @@ namespace coaler::embedder {
 
             CoreAtomMapping ligandMcsCoords;
             RDKit::DGeomHelpers::EmbedParameters params = get_embed_params_for_optimizer_generation();
-            int addedID = -1;
+            std::vector<int> addedIDs;
 
             // try relaxed mcs first
             if (!ligandMatchRelaxed.empty() && !targetMatchRelaxed.empty()) {
@@ -178,34 +179,34 @@ namespace coaler::embedder {
                 params.coordMap = &ligandMcsCoords;
 
                 try {
-                    addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligandMol, params);
+                    addedIDs = RDKit::DGeomHelpers::EmbedMultipleConfs(*ligandMol, nofConfs, params);
                 } catch (const std::runtime_error &e) {
-                    spdlog::debug(e.what());
+                    //spdlog::debug(e.what());
                 }
             }
 
             // if relaxed mcs params didnt yield valid embedding, reattempt with strict mcs.
-            if (addedID < 0 && !ligandMatchStrict.empty() && !targetMatchStrict.empty()) {
-                spdlog::debug("flexible approach failed. Trying strict approach.");
+            if (addedIDs.empty() && !ligandMatchStrict.empty() && !targetMatchStrict.empty()) {
+                //spdlog::debug("flexible approach failed. Trying strict approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchStrict, targetMatchStrict);
                 params.coordMap = &ligandMcsCoords;
                 try {
-                    addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligandMol, params);
+                    addedIDs = RDKit::DGeomHelpers::EmbedMultipleConfs(*ligandMol, nofConfs, params);
                 } catch (const std::runtime_error &e) {
-                    spdlog::debug(e.what());
+                    //spdlog::debug(e.what());
                 }
             }
-            if (addedID < 0) {
+            if (addedIDs.empty()) {
                 spdlog::debug("strict mcs confgen failed. mcs: {}, target: {}, mol {}", mcsStringStrict,
                               RDKit::MolToSmiles(*worstLigand.getMoleculePtr()), RDKit::MolToSmiles(targetMol));
                 spdlog::debug("target conformer {}/{}: no viable pose generated.", targetID, targets.size());
                 continue;
             }
-            spdlog::debug("target conformer {}/{}: generated valid pose.", targetID, targets.size());
-            const unsigned addedIDUnsigned = static_cast<unsigned>(addedID);
-            newIds.push_back(addedIDUnsigned);
+            //spdlog::debug("target conformer {}/{}: generated valid pose.", targetID + 1, targets.size());
+            newIds.insert(newIds.end(), addedIDs.begin(), addedIDs.end());
         }
+        spdlog::debug("Generated {} new Conformers.", newIds.size());
         return newIds;
     }
 
