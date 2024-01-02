@@ -254,7 +254,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
         // set this to false in order to not immediately change this ligand again
         ligandAvailable.at(worstLigandId) = false;
     }
-    spdlog::info("optimization took {} steps.", stepCount);
+    spdlog::debug("optimization took {} steps.", stepCount);
     OptimizerState result{currentAssemblyScore, assembly, scores, ligands, registers};
     return result;
 }
