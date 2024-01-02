@@ -19,18 +19,19 @@ namespace coaler::multialign {
         constexpr double POSE_REGISTER_SIZE_FACTOR = 0.5;
 
         /**
-         * This treshold determines the score deficit above which new conformers are attempted to be generated
-         * during assembly optimization.
+         * This treshold determines the mean shape overlap distance above which new conformers are attempted to be
+         * generated during assembly optimization.
          */
-        constexpr double COARSE_OPTIMIZATION_THRESHOLD = 1;
+        constexpr double COARSE_OPTIMIZATION_THRESHOLD = 0.3;
 
         /**
-         * This treshold determines the score deficit above which new conformers are attempted to be generated
-         * during the fine tuning of the best alignment assembly.
+         * This treshold determines the mean shape overlap distance above which new conformers are attempted to be
+         * generated during the fine tuning of the best alignment assembly.
          */
-        constexpr double FINE_OPTIMIZATION_THRESHOLD = 0.05;
+        constexpr double FINE_OPTIMIZATION_THRESHOLD = 0.005;
 
-        constexpr unsigned OPTIMIZER_STEP_LIMIT = 100;
+        constexpr double LIGAND_AVAILABILITY_RESET_THRESHOLD = 0.97;
+        constexpr unsigned OPTIMIZER_STEP_LIMIT = 50;
     }  // namespace Constants
 
     static_assert(Constants::POSE_REGISTER_SIZE_FACTOR < 1);

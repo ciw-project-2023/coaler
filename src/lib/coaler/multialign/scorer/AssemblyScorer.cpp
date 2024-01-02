@@ -64,4 +64,24 @@ namespace coaler::multialign {
         return scoreDeficit;
     }
 
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    double AssemblyScorer::calculateMeanLigandDistance(LigandID ligandId, const LigandAlignmentAssembly& assembly,
+                                                       PairwiseAlignments& scores, const LigandVector& ligands) {
+        unsigned nofLigands = ligands.size() - 1;
+        double distanceSum = 0;
+        for (LigandID otherLigandId = 0; otherLigandId < ligands.size(); otherLigandId++) {
+            if (otherLigandId == ligandId) {
+                continue;
+            }
+            PoseID firstLigandPoseId = assembly.getPoseOfLigand(ligandId);
+            PoseID secondLigandPoseId = assembly.getPoseOfLigand(otherLigandId);
+            UniquePoseID first(ligandId, firstLigandPoseId);
+            UniquePoseID second(otherLigandId, secondLigandPoseId);
+            PosePair ligandPoses = PosePair{first, second};
+            distanceSum += scores.at(ligandPoses, ligands);
+        }
+        return distanceSum / nofLigands;
+    }
+
 }  // namespace coaler::multialign

@@ -147,9 +147,9 @@ namespace coaler::multialign {
         spdlog::info("Mols: {} | Confs/Mol: {} | total pairwise scores: {}", m_ligands.size(),
                      m_ligands.begin()->getNumPoses(), m_pairwiseAlignments.size());
         // build pose registers
-        spdlog::info("Start building pose registers.");
+        spdlog::debug("Start building pose registers.");
         m_poseRegisters = PoseRegisterBuilder::buildPoseRegisters(m_pairwiseAlignments, m_ligands, m_nofThreads);
-        spdlog::info("Finish building pose registers.");
+        spdlog::debug("Finish building pose registers.");
 
         // build starting ensembles from registers
         // AssemblyCollection assemblies;
