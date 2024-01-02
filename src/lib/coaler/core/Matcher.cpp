@@ -5,6 +5,7 @@
 #include "Matcher.hpp"
 
 #include <GraphMol/SmilesParse/SmilesWrite.h>
+#include <omp.h>
 #include <spdlog/spdlog.h>
 
 #include "GraphMol/ChemTransforms/ChemTransforms.h"
@@ -13,7 +14,19 @@
 #include "GraphMol/ForceFieldHelpers/UFF/UFF.h"
 #include "GraphMol/RWMol.h"
 #include "GraphMol/SmilesParse/SmartsWrite.h"
-#include "GraphMol/SmilesParse/SmilesParse.h"
+
+namespace {
+    RDKit::SubstructMatchParameters get_substructure_match_params_for_optimizer_generation() {
+        RDKit::SubstructMatchParameters substructMatchParams;
+        substructMatchParams.uniquify = true;
+        substructMatchParams.useChirality = false;
+        substructMatchParams.useQueryQueryMatches = false;
+        substructMatchParams.maxMatches = 1;
+        substructMatchParams.numThreads = 1;
+        substructMatchParams.useEnhancedStereo = false;
+        return substructMatchParams;
+    }
+}  // namespace
 
 namespace coaler::core {
     Matcher::Matcher(int threads) : m_threads(threads) {}
@@ -283,6 +296,67 @@ namespace coaler::core {
         mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareElements);
         mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareOrderExact);
         return mcsParams;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    PairwiseMCSMap Matcher::calcPairwiseMCS(const multialign::LigandVector &mols, bool strict) {
+        PairwiseMCSMap mcsMap;
+        RDKit::MCSParameters mcsParams;
+        if (strict) {
+            mcsParams = getStrictMCSParams();
+        } else {
+            mcsParams = getRelaxedMCSParams();
+        }
+
+        omp_lock_t mapLock;
+        omp_init_lock(&mapLock);
+
+        const RDKit::SubstructMatchParameters substructMatchParams
+            = get_substructure_match_params_for_optimizer_generation();
+#pragma omp parallel for shared(mols, mcsParams, substructMatchParams, mcsMap, mapLock, strict) default(none)
+        for (multialign::LigandID firstLigandId = 0; firstLigandId < mols.size(); ++firstLigandId) {
+            for (multialign::LigandID secondLigandId = firstLigandId + 1; secondLigandId < mols.size();
+                 ++secondLigandId) {
+                multialign::LigandPair ligandPair(firstLigandId, secondLigandId);
+                multialign::Ligand firstLigand = mols.at(firstLigandId);
+                multialign::Ligand secondLigand = mols.at(secondLigandId);
+                auto firstMol = firstLigand.getMolecule();
+                auto firstMolPtr = boost::make_shared<RDKit::ROMol>(firstMol);
+                auto secondMol = secondLigand.getMolecule();
+                auto secondMolPtr = boost::make_shared<RDKit::ROMol>(secondMol);
+                RDKit::MOL_SPTR_VECT molPair{firstMolPtr, secondMolPtr};
+                const RDKit::MCSResult mcsResult = RDKit::findMCS(molPair, &mcsParams);
+                if (mcsResult.QueryMol == nullptr) {
+                    omp_set_lock(&mapLock);
+                    mcsMap.emplace(ligandPair, std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>());
+                    omp_unset_lock(&mapLock);
+                    std::string mcsType = strict ? "strict" : "relaxed";
+                    spdlog::error("no {} mcs found between {} and {}", mcsType, RDKit::MolToSmiles(firstMol),
+                                  RDKit::MolToSmiles(secondMol));
+                    continue;
+                }
+                std::vector<RDKit::MatchVectType> firstligandMatches
+                    = RDKit::SubstructMatch(firstMol, *mcsResult.QueryMol, substructMatchParams);
+                std::vector<RDKit::MatchVectType> secondLigandMatches
+                    = RDKit::SubstructMatch(secondMol, *mcsResult.QueryMol, substructMatchParams);
+                if (secondLigandMatches.empty() || firstligandMatches.empty()) {
+                    omp_set_lock(&mapLock);
+                    mcsMap.emplace(ligandPair, std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>());
+                    omp_unset_lock(&mapLock);
+                    continue;
+                }
+                const RDKit::MatchVectType firstLigandMatch = firstligandMatches.at(0);
+                const RDKit::MatchVectType secondLigandMatch = secondLigandMatches.at(0);
+
+                omp_set_lock(&mapLock);
+                mcsMap.emplace(ligandPair,
+                               std::make_tuple(firstLigandMatch, secondLigandMatch, mcsResult.SmartsString));
+                omp_unset_lock(&mapLock);
+            }
+        }
+
+        return mcsMap;
     }
 
 }  // namespace coaler::core

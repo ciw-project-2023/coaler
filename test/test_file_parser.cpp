@@ -1,5 +1,6 @@
-#include <catch2/catch.hpp>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
+
+#include <catch2/catch.hpp>
 #include <coaler/io/FileParser.hpp>
 #include <filesystem>
 
@@ -22,8 +23,7 @@ TEST_CASE("Duplicates", "[io]") {
         for (auto mol : mols) {
             if (std::find(smilesVec.begin(), smilesVec.end(), RDKit::MolToSmiles(*mol)) == smilesVec.end()) {
                 smilesVec.emplace_back(RDKit::MolToSmiles(*mol));
-            }
-            else {
+            } else {
                 FAIL("error: duplicate not handled");
             }
         }

@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include <coaler/core/Forward.hpp>
 #include <coaler/multialign/models/PairwiseAlignments.hpp>
 
 #include "Forward.hpp"
@@ -31,7 +32,9 @@ namespace coaler::multialign {
          */
         static OptimizerState optimizeAssembly(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
                                                LigandVector ligands, PoseRegisterCollection registers,
-                                               double scoreDeficitThreshold);
+                                               double scoreDeficitThreshold,
+                                               const core::PairwiseMCSMap& pairwiseStrictMCSMap,
+                                               const core::PairwiseMCSMap& pairwiseRelaxedMCSMap);
 
         /**
          * @overload
@@ -41,6 +44,8 @@ namespace coaler::multialign {
          * generation of a new pose.
          * @return The optimized state.
          */
-        static OptimizerState optimizeAssembly(OptimizerState& state, double scoreDeficitThreshold);
+        static OptimizerState optimizeAssembly(OptimizerState& state, double scoreDeficitThreshold,
+                                               const core::PairwiseMCSMap& pairwiseStrictMCSMap,
+                                               const core::PairwiseMCSMap& pairwiseRelaxedMCSMap);
     };
 }  // namespace coaler::multialign

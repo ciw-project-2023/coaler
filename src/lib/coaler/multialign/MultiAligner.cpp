@@ -68,7 +68,10 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, unsigned maxStartingAssemblies, unsigned nofThreads)
+    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules,
+                               // const core::PairwiseMCSMap& pairwiseStrictMCSMap,
+                               // core::PairwiseMCSMap  pairwiseRelaxedMCSMap,
+                               unsigned maxStartingAssemblies, unsigned nofThreads)
 
         : m_maxStartingAssemblies(maxStartingAssemblies), m_nofThreads(nofThreads) {
         assert(m_maxStartingAssemblies > 0);
@@ -81,6 +84,10 @@ namespace coaler::multialign {
 
             m_ligands.emplace_back(*molecules.at(id), poses, id);
         }
+        spdlog::info("Start calculating pairwise MCS.");
+        m_pairwiseRelaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(m_ligands, false);
+        m_pairwiseStrictMcsMap = coaler::core::Matcher::calcPairwiseMCS(m_ligands, true);
+        spdlog::info("Finished calculating pairwise MCS.");
         omp_set_num_threads(m_nofThreads);  // this sets the number of threads used for ALL subsequent parallel regions.
     }
 
@@ -196,7 +203,7 @@ namespace coaler::multialign {
 
             OptimizerState optimizedAssembly = AssemblyOptimizer::optimizeAssembly(
                 assembliesList.at(assemblyID).first, m_pairwiseAlignments, m_ligands, m_poseRegisters,
-                Constants::COARSE_OPTIMIZATION_THRESHOLD);
+                Constants::COARSE_OPTIMIZATION_THRESHOLD, m_pairwiseStrictMcsMap, m_pairwiseRelaxedMcsMap);
 
             spdlog::info("optimized assembly {}, score: {}", assemblyID, optimizedAssembly.score);
             if (optimizedAssembly.score == -1) {
@@ -215,7 +222,8 @@ namespace coaler::multialign {
 
         // fine-tuning
         spdlog::info("Fine-tuning best assembly. Score before: {}", bestAssembly.score);
-        bestAssembly = AssemblyOptimizer::optimizeAssembly(bestAssembly, Constants::FINE_OPTIMIZATION_THRESHOLD);
+        bestAssembly = AssemblyOptimizer::optimizeAssembly(bestAssembly, Constants::FINE_OPTIMIZATION_THRESHOLD,
+                                                           m_pairwiseStrictMcsMap, m_pairwiseRelaxedMcsMap);
         spdlog::info("finished alignment optimization. Final alignment has a score of {}.", bestAssembly.score);
         if (skippedAssembliesCount > 0) {
             spdlog::info("Skipped a total of {} incomplete assemblies.", skippedAssembliesCount);
