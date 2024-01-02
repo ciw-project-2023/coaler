@@ -181,20 +181,20 @@ namespace coaler::embedder {
                 try {
                     addedIDs = RDKit::DGeomHelpers::EmbedMultipleConfs(*ligandMol, nofConfs, params);
                 } catch (const std::runtime_error &e) {
-                    //spdlog::debug(e.what());
+                    // spdlog::debug(e.what());
                 }
             }
 
             // if relaxed mcs params didnt yield valid embedding, reattempt with strict mcs.
             if (addedIDs.empty() && !ligandMatchStrict.empty() && !targetMatchStrict.empty()) {
-                //spdlog::debug("flexible approach failed. Trying strict approach.");
+                // spdlog::debug("flexible approach failed. Trying strict approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchStrict, targetMatchStrict);
                 params.coordMap = &ligandMcsCoords;
                 try {
                     addedIDs = RDKit::DGeomHelpers::EmbedMultipleConfs(*ligandMol, nofConfs, params);
                 } catch (const std::runtime_error &e) {
-                    //spdlog::debug(e.what());
+                    // spdlog::debug(e.what());
                 }
             }
             if (addedIDs.empty()) {
@@ -203,7 +203,7 @@ namespace coaler::embedder {
                 spdlog::debug("target conformer {}/{}: no viable pose generated.", targetID, targets.size());
                 continue;
             }
-            //spdlog::debug("target conformer {}/{}: generated valid pose.", targetID + 1, targets.size());
+            // spdlog::debug("target conformer {}/{}: generated valid pose.", targetID + 1, targets.size());
             newIds.insert(newIds.end(), addedIDs.begin(), addedIDs.end());
         }
         spdlog::debug("Generated {} new Conformers.", newIds.size());

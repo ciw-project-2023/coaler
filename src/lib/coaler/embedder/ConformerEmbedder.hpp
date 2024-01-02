@@ -46,7 +46,6 @@ namespace coaler::embedder {
                                                                      const RDKit::MatchVectType& targetMcsMatch);
 
       private:
-
         core::CoreResult m_core;
         int m_threads;
         bool m_divideConformersByMatches;

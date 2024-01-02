@@ -191,7 +191,8 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
         }
 
         // if no improving pose can be found among existing poses, generate new ones
-        const double meanDistance = AssemblyScorer::calculateMeanLigandDistance(worstLigandId, assembly, scores, ligands);
+        const double meanDistance
+            = AssemblyScorer::calculateMeanLigandDistance(worstLigandId, assembly, scores, ligands);
         if (ligandIsMissing || (!swappedLigandPose && meanDistance > scoreDeficitThreshold)) {
             spdlog::debug("generating new conformer, missing ligand = {}", ligandIsMissing);
             LigandVector alignmentTargets = generate_alignment_targets(ligands, *worstLigand);
@@ -215,8 +216,8 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                 = find_optimal_pose(worstLigandId, newConfIDs, assembly, scores, ligands);
 
             if (ligandIsMissing || bestNewAssemblyScore > currentAssemblyScore) {
-                if(ligandIsMissing ||
-                    bestNewAssemblyScore * Constants::LIGAND_AVAILABILITY_RESET_THRESHOLD > currentAssemblyScore) {
+                if (ligandIsMissing
+                    || bestNewAssemblyScore * Constants::LIGAND_AVAILABILITY_RESET_THRESHOLD > currentAssemblyScore) {
                     spdlog::debug("All ligands set available.");
                     ligandAvailable.setAllAvailable();
                 }
