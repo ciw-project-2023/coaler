@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#include <coaler/multialign/models/PairwiseAlignments.hpp>
 #include <coaler/core/Forward.hpp>
+#include <coaler/multialign/models/PairwiseAlignments.hpp>
 
 #include "Forward.hpp"
 #include "LigandAlignmentAssembly.hpp"

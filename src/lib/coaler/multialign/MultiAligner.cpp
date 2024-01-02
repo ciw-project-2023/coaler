@@ -69,12 +69,11 @@ namespace coaler::multialign {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules,
-                               //const core::PairwiseMCSMap& pairwiseStrictMCSMap,
-                               //core::PairwiseMCSMap  pairwiseRelaxedMCSMap,
-                               unsigned maxStartingAssemblies,
-                               unsigned nofThreads)
+                               // const core::PairwiseMCSMap& pairwiseStrictMCSMap,
+                               // core::PairwiseMCSMap  pairwiseRelaxedMCSMap,
+                               unsigned maxStartingAssemblies, unsigned nofThreads)
 
-        : m_maxStartingAssemblies(maxStartingAssemblies), m_nofThreads(nofThreads){
+        : m_maxStartingAssemblies(maxStartingAssemblies), m_nofThreads(nofThreads) {
         assert(m_maxStartingAssemblies > 0);
         for (LigandID id = 0; id < molecules.size(); id++) {
             UniquePoseSet poses;
@@ -195,8 +194,8 @@ namespace coaler::multialign {
 
         OptimizerState bestAssembly{-1, {}, {}, {}, {}};
 
-//#pragma omp parallel for shared(bestAssembly, bestAssemblyLock, skippedAssembliesCount, skippedAssembliesCountLock, \
-//                                    assembliesList) default(none)
+#pragma omp parallel for shared(bestAssembly, bestAssemblyLock, skippedAssembliesCount, skippedAssembliesCountLock, \
+                                    assembliesList) default(none)
 
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
             spdlog::debug("Assembly {} has mapped Conformers for {}/{} molecules.", assemblyID,

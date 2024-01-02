@@ -22,7 +22,7 @@ namespace coaler::multialign {
          * This treshold determines the score deficit above which new conformers are attempted to be generated
          * during assembly optimization.
          */
-        constexpr double COARSE_OPTIMIZATION_THRESHOLD = 0.5;
+        constexpr double COARSE_OPTIMIZATION_THRESHOLD = 1;
 
         /**
          * This treshold determines the score deficit above which new conformers are attempted to be generated
@@ -30,7 +30,7 @@ namespace coaler::multialign {
          */
         constexpr double FINE_OPTIMIZATION_THRESHOLD = 0.05;
 
-        constexpr unsigned OPTIMIZER_STEP_LIMIT = 1000;
+        constexpr unsigned OPTIMIZER_STEP_LIMIT = 100;
     }  // namespace Constants
 
     static_assert(Constants::POSE_REGISTER_SIZE_FACTOR < 1);

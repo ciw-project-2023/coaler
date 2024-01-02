@@ -36,4 +36,5 @@ TEST_CASE("test_strict_mcs_no_stereo_smiles", "[multialign]") {
     spdlog::info("mcs: {}", mcsResult.SmartsString);
     CHECK(mcsResult.QueryMol->getNumAtoms() == mol1->getNumAtoms());
 }
+
  */

@@ -6,7 +6,6 @@
 
 #include <GraphMol/RWMol.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
-#include "coaler/multialign/Forward.hpp"
 
 #include <cassert>
 #include <queue>
@@ -15,6 +14,7 @@
 #include <vector>
 
 #include "Matcher.hpp"
+#include "coaler/multialign/Forward.hpp"
 
 namespace coaler::core {
 

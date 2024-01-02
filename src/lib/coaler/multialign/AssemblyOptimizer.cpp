@@ -139,8 +139,8 @@ std::pair<PoseID, double> find_optimal_pose(const LigandID ligand, const std::ve
 OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
                                                    LigandVector ligands, PoseRegisterCollection registers,
                                                    double scoreDeficitThreshold,
-                                                   const core::PairwiseMCSMap& pairwiseStrictMCSMap,
-                                                   const core::PairwiseMCSMap& pairwiseRelaxedMCSMap) {
+                                                   const core::PairwiseMCSMap &pairwiseStrictMCSMap,
+                                                   const core::PairwiseMCSMap &pairwiseRelaxedMCSMap) {
     double currentAssemblyScore = AssemblyScorer::calculateAssemblyScore(assembly, scores, ligands);
 
     LigandAvailabilityMapping ligandAvailable;
@@ -196,10 +196,9 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             spdlog::debug("generating new conformer, missing ligand = {}", ligandIsMissing);
             LigandVector alignmentTargets = generate_alignment_targets(ligands, *worstLigand);
             assert(alignmentTargets.size() == ligands.size() - 1);
-
             auto newConfIDs = coaler::embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(
-                *worstLigand, alignmentTargets, assembly.getAssemblyMapping(),
-                pairwiseStrictMCSMap, pairwiseRelaxedMCSMap);
+                *worstLigand, alignmentTargets, assembly.getAssemblyMapping(), pairwiseStrictMCSMap,
+                pairwiseRelaxedMCSMap);
 
             if (newConfIDs.empty()) {
                 spdlog::warn("no confs generated. skipping ligand {}", RDKit::MolToSmiles(worstLigand->getMolecule()));
@@ -250,7 +249,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
         // set this to false in order to not immediately change this ligand again
         ligandAvailable.at(worstLigandId) = false;
     }
-    spdlog::info("optimization took {} steps.", stepCount);
+    spdlog::debug("optimization took {} steps.", stepCount);
     OptimizerState result{currentAssemblyScore, assembly, scores, ligands, registers};
     return result;
 }
@@ -258,8 +257,8 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 /*----------------------------------------------------------------------------------------------------------------*/
 
 OptimizerState AssemblyOptimizer::optimizeAssembly(OptimizerState &state, double scoreDeficitThreshold,
-                                                   const core::PairwiseMCSMap& pairwiseStrictMCSMap,
-                                                   const core::PairwiseMCSMap& pairwiseRelaxedMCSMap) {
+                                                   const core::PairwiseMCSMap &pairwiseStrictMCSMap,
+                                                   const core::PairwiseMCSMap &pairwiseRelaxedMCSMap) {
     return optimizeAssembly(state.assembly, state.scores, state.ligands, state.registers, scoreDeficitThreshold,
                             pairwiseStrictMCSMap, pairwiseRelaxedMCSMap);
 }

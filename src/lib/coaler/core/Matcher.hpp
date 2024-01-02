@@ -5,15 +5,15 @@
 #pragma once
 
 #include "Forward.hpp"
-#include "coaler/multialign/Forward.hpp"
 #include "GraphMol/FMCS/FMCS.h"
 #include "coaler/core/Forward.hpp"
+#include "coaler/multialign/Forward.hpp"
 
 namespace coaler::core {
 
     using PairwiseMCSMap = std::unordered_map<multialign::LigandPair,
-        std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>,
-        multialign::LigandPairHash>;
+                                              std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>,
+                                              multialign::LigandPairHash>;
 
     struct CoreResult {
         RDKit::ROMOL_SPTR core;
@@ -49,7 +49,6 @@ namespace coaler::core {
         static RDKit::MCSParameters getStrictMCSParams();
 
         static PairwiseMCSMap calcPairwiseMCS(const multialign::LigandVector& mols, bool strict);
-
 
       private:
         /**

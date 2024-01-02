@@ -3,8 +3,8 @@
  */
 
 #pragma once
-#include <coaler/multialign/models/PairwiseAlignments.hpp>
 #include <coaler/core/Forward.hpp>
+#include <coaler/multialign/models/PairwiseAlignments.hpp>
 
 #include "Forward.hpp"
 #include "GraphMol/FMCS/FMCS.h"
@@ -18,8 +18,8 @@ namespace coaler::multialign {
     class MultiAligner {
       public:
         explicit MultiAligner(RDKit::MOL_SPTR_VECT molecules,
-                              //const core::PairwiseMCSMap& pairwiseStrictMCSMap,
-                              //core::PairwiseMCSMap  pairwiseRelaxedMCSMap,
+                              // const core::PairwiseMCSMap& pairwiseStrictMCSMap,
+                              // core::PairwiseMCSMap  pairwiseRelaxedMCSMap,
                               unsigned maxStartingAssemblies = Constants::DEFAULT_NOF_STARTING_ASSEMBLIES,
                               unsigned nofThreads = Constants::DEFAULT_NOF_THREADS);
 
@@ -35,7 +35,6 @@ namespace coaler::multialign {
         unsigned m_nofThreads;
         core::PairwiseMCSMap m_pairwiseStrictMcsMap;
         core::PairwiseMCSMap m_pairwiseRelaxedMcsMap;
-
     };
 
 }  // namespace coaler::multialign
