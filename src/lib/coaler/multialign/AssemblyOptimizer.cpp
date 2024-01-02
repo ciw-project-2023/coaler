@@ -191,10 +191,8 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
         }
 
         // if no improving pose can be found among existing poses, generate new ones
-        // TODO add some absolute shape overlap threshold
-        //if (ligandIsMissing || (!swappedLigandPose && maxScoreDeficit > scoreDeficitThreshold)) {
         const double meanDistance = AssemblyScorer::calculateMeanLigandDistance(worstLigandId, assembly, scores, ligands);
-        if (ligandIsMissing || (!swappedLigandPose && meanDistance > 0.1)) {
+        if (ligandIsMissing || (!swappedLigandPose && meanDistance > scoreDeficitThreshold)) {
             spdlog::debug("generating new conformer, missing ligand = {}", ligandIsMissing);
             LigandVector alignmentTargets = generate_alignment_targets(ligands, *worstLigand);
             assert(alignmentTargets.size() == ligands.size() - 1);

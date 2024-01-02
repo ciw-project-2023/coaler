@@ -33,7 +33,7 @@ namespace coaler::multialign {
          * @param ligandId ID of the ligand to asses.
          * @param assembly The assembly in whose context the ligand conformer is scored.
          * @param registers The pairwise pose registers of the ligands.
-         * @param scores The pairwise overlap scores of the ligands´ conformers
+         * @param scores The pairwise overlap scores of the ligands´ conformers.
          * @param ligands The input ligands.
          * @return The score deficit of the ligands conformer.
          */
@@ -41,6 +41,14 @@ namespace coaler::multialign {
                                                      const PoseRegisterCollection& registers,
                                                      PairwiseAlignments& scores, const LigandVector& ligands);
 
+        /**
+         * @brief Calculate the mean distance of a ligand to all other ligands in an assembly.
+         * @param ligandId ID of the ligand to asses.
+         * @param assembly The assembly in whose context the ligand conformer is scored.
+         * @param scores The pairwise overlap scores of the ligands´ conformers.
+         * @param ligands The input ligands.
+         * @return The mean distance.
+         */
         static double calculateMeanLigandDistance(LigandID ligandId, const LigandAlignmentAssembly& assembly,
                                                   PairwiseAlignments& scores, const LigandVector& ligands);
     };
