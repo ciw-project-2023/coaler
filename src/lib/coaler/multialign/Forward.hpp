@@ -28,7 +28,7 @@ namespace coaler::multialign {
          * This treshold determines the score deficit above which new conformers are attempted to be generated
          * during the fine tuning of the best alignment assembly.
          */
-        constexpr double FINE_OPTIMIZATION_THRESHOLD = 0.05;
+        constexpr double FINE_OPTIMIZATION_THRESHOLD = 0.01;
         constexpr double LIGAND_AVAILABILITY_RESET_THRESHOLD = 0.97;
         constexpr unsigned OPTIMIZER_STEP_LIMIT = 50;
     }  // namespace Constants
