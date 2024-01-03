@@ -6,12 +6,13 @@
 #include "PoseRegisterCollection.hpp"
 #include "models/Ligand.hpp"
 #include "models/LigandPair.hpp"
+#include "models/PairwiseAlignments.hpp"
 
 namespace coaler::multialign {
 
     class PoseRegisterBuilder {
       public:
-        static PoseRegisterCollection buildPoseRegisters(const PairwiseAlignment& alignmentScores,
+        static PoseRegisterCollection buildPoseRegisters(PairwiseAlignments& alignmentScores,
                                                          const std::vector<Ligand>& ligands,
                                                          unsigned nofThreads) noexcept;
 

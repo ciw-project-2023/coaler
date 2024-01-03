@@ -1,12 +1,9 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
-#include <GraphMol/FileParsers/FileParsers.h>
 #include <GraphMol/GraphMol.h>
-#include <GraphMol/SmilesParse/SmilesParse.h>
 
 #include <iostream>
 
 #include "catch2/catch.hpp"
-#include "coaler/multialign/Forward.hpp"
 #include "coaler/multialign/MultiAligner.hpp"
 #include "test_helper.h"
 using namespace coaler;

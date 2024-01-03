@@ -6,7 +6,9 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/ROMol.h>
 
+#include "Forward.hpp"
 #include "coaler/core/Forward.hpp"
+#include "coaler/multialign/Forward.hpp"
 
 namespace coaler::embedder {
 
@@ -18,7 +20,7 @@ namespace coaler::embedder {
      */
     class ConformerEmbedder {
       public:
-        ConformerEmbedder(const core::CoreResult &result, const int threads, const bool divideConformersByMatches);
+        ConformerEmbedder(const core::CoreResult& result, const int threads, const bool divideConformersByMatches);
 
         /**
          * Embed an even amount of Conformers at every core match.
@@ -29,9 +31,23 @@ namespace coaler::embedder {
          *
          * @return True upon success.
          */
-        void embedConformers(const RDKit::ROMOL_SPTR &mol, unsigned numConfs);
+        void embedConformers(const RDKit::ROMOL_SPTR& mol, unsigned numConfs);
+
+        // std::vector<RDKit::MatchVectType> filterMatches(const std::vector<RDKit::MatchVectType>& matches);
+
+        static std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(
+            const multialign::Ligand& worstLigand, const multialign::LigandVector& targets,
+            const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs,
+            const core::PairwiseMCSMap& pairwiseStrictMCSMap, const core::PairwiseMCSMap& pairwiseRelaxedMCSMap);
+
+        static CoreAtomMapping getLigandMcsAtomCoordsFromTargetMatch(const RDGeom::POINT3D_VECT& targetCoords,
+                                                                     const RDKit::MatchVectType& ligandMcsMatch,
+                                                                     const RDKit::MatchVectType& targetMcsMatch);
 
       private:
+        static std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string> getMcsMatches(
+            const RDKit::ROMol* worstLigandMol, const RDKit::ROMol* targetMol, bool strict);
+
         core::CoreResult m_core;
         int m_threads;
         bool m_divideConformersByMatches;

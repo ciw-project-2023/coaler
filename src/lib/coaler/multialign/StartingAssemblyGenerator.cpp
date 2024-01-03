@@ -29,7 +29,7 @@ namespace coaler::multialign {
                 assembly.incrementMissingLigandsCount();
                 continue;
             }
-            PosePair highestScoringPair = registers.at(ligandPair)->getHighestScoringPosePairForPose(pose);
+            PosePair highestScoringPair = registers.at(ligandPair).getHighestScoringPosePairForPose(pose);
 
             UniquePoseID otherPose;
             if (highestScoringPair.getFirst() == pose) {

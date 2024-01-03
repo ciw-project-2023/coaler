@@ -14,3 +14,10 @@
 #include <vector>
 
 #include "Matcher.hpp"
+#include "coaler/multialign/Forward.hpp"
+
+namespace coaler::core {
+
+    class Matcher;
+
+}

@@ -4,16 +4,16 @@
 
 #include "MultiAligner.hpp"
 
-#include <GraphMol/ShapeHelpers/ShapeUtils.h>
 #include <omp.h>
 #include <spdlog/spdlog.h>
 
+#include <coaler/multialign/scorer/AssemblyScorer.hpp>
 #include <queue>
 #include <utility>
 
+#include "AssemblyOptimizer.hpp"
 #include "LigandAlignmentAssembly.hpp"
 #include "StartingAssemblyGenerator.hpp"
-#include "coaler/multialign/scorer/AssemblyScorer.hpp"
 #include "scorer/AlignmentScorer.hpp"
 
 namespace coaler::multialign {
@@ -68,7 +68,10 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, unsigned maxStartingAssemblies, unsigned nofThreads)
+    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules,
+                               // const core::PairwiseMCSMap& pairwiseStrictMCSMap,
+                               // core::PairwiseMCSMap  pairwiseRelaxedMCSMap,
+                               unsigned maxStartingAssemblies, unsigned nofThreads)
 
         : m_maxStartingAssemblies(maxStartingAssemblies), m_nofThreads(nofThreads) {
         assert(m_maxStartingAssemblies > 0);
@@ -81,13 +84,17 @@ namespace coaler::multialign {
 
             m_ligands.emplace_back(*molecules.at(id), poses, id);
         }
+        spdlog::info("Start calculating pairwise MCS.");
+        m_pairwiseRelaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(m_ligands, false);
+        m_pairwiseStrictMcsMap = coaler::core::Matcher::calcPairwiseMCS(m_ligands, true);
+        spdlog::info("Finished calculating pairwise MCS.");
         omp_set_num_threads(m_nofThreads);  // this sets the number of threads used for ALL subsequent parallel regions.
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    PairwiseAlignment MultiAligner::calculateAlignmentScores(const LigandVector &ligands) {
-        PairwiseAlignment scores;
+    PairwiseAlignments MultiAligner::calculateAlignmentScores(const LigandVector &ligands) {
+        PairwiseAlignments scores;
 
         // calculate number of combinations. Each pair of ligands A,B has
         // A.getNumPoses() * B.getNumPoses() many embeddings
@@ -115,9 +122,8 @@ namespace coaler::multialign {
                     for (unsigned secondMolPoseId = 0; secondMolPoseId < nofPosesSecond; secondMolPoseId++) {
                         RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
                         RDKit::RWMol const secondMol = ligands.at(secondMolId).getMolecule();
-
-                        double score = AlignmentScorer::calc_tanimoto_shape_similarity(firstMol, secondMol,
-                                                                                       firstMolPoseId, secondMolPoseId);
+                        const double score = AlignmentScorer::calc_tanimoto_shape_similarity(
+                            firstMol, secondMol, firstMolPoseId, secondMolPoseId);
 
                         UniquePoseID firstPose(firstMolId, firstMolPoseId);
                         UniquePoseID secondPose(secondMolId, secondMolPoseId);
@@ -133,6 +139,7 @@ namespace coaler::multialign {
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
+
     MultiAlignerResult MultiAligner::alignMolecules() {
         // calculate pairwise alignments
         m_pairwiseAlignments = this->calculateAlignmentScores(m_ligands);
@@ -156,8 +163,6 @@ namespace coaler::multialign {
                 const AssemblyWithScore newAssembly = std::make_pair(assembly, score);
 
                 // insert if queue not full or new assembly is larger that worst assembly in queue
-
-                // TODO ensure this is called correctly
                 if (assemblies.size() < m_maxStartingAssemblies) {
                     assemblies.push(newAssembly);
                     continue;
@@ -171,13 +176,6 @@ namespace coaler::multialign {
             }
         }
 
-        // top #m_maxStartingAssemblies are now in queue. find best scoring assembly by optimizing all
-        // TODO SYMMETRY?
-        // optimize all starting assemblies.
-        LigandAlignmentAssembly currentBestAssembly = assemblies.top().first;  // TODO default constructor for assembly?
-        double currentBestAssemblyScore
-            = AssemblyScorer::calculateAssemblyScore(currentBestAssembly, m_pairwiseAlignments, m_ligands);
-
         // write queue content to vector to allow for parallel for
         std::vector<AssemblyWithScore> assembliesList;
         while (!assemblies.empty()) {
@@ -189,95 +187,49 @@ namespace coaler::multialign {
         unsigned skippedAssembliesCount = 0;
 
         // locks for shared variables
-        omp_lock_t bestAssemblyScoreLock;
-        omp_init_lock(&bestAssemblyScoreLock);
         omp_lock_t bestAssemblyLock;
         omp_init_lock(&bestAssemblyLock);
         omp_lock_t skippedAssembliesCountLock;
         omp_init_lock(&skippedAssembliesCountLock);
 
-#pragma omp parallel for shared(bestAssemblyScoreLock, bestAssemblyLock, skippedAssembliesCountLock, \
-                                    currentBestAssembly, currentBestAssemblyScore, assembliesList,   \
-                                    skippedAssembliesCount) default(none)
+        OptimizerState bestAssembly{-1, {}, {}, {}, {}};
+
+#pragma omp parallel for shared(bestAssembly, bestAssemblyLock, skippedAssembliesCount, skippedAssembliesCountLock, \
+                                    assembliesList) default(none)
+
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
-            auto [currentAssembly, currentAssemblyScore] = assembliesList.at(assemblyID);
-            spdlog::debug("Score before opt: {}", currentAssemblyScore);
-            if (currentAssembly.getMissingLigandsCount() != 0) {
-                spdlog::debug("Skip assembly because its missing ligands.");
+            spdlog::debug("Assembly {} has mapped Conformers for {}/{} molecules.", assemblyID,
+                          assembliesList.at(assemblyID).first.getAssemblyMapping().size(), m_ligands.size());
+
+            OptimizerState optimizedAssembly = AssemblyOptimizer::optimizeAssembly(
+                assembliesList.at(assemblyID).first, m_pairwiseAlignments, m_ligands, m_poseRegisters,
+                Constants::COARSE_OPTIMIZATION_THRESHOLD, m_pairwiseStrictMcsMap, m_pairwiseRelaxedMcsMap);
+
+            spdlog::info("optimized assembly {}, score: {}", assemblyID, optimizedAssembly.score);
+            if (optimizedAssembly.score == -1) {
                 omp_set_lock(&skippedAssembliesCountLock);
                 skippedAssembliesCount++;
                 omp_unset_lock(&skippedAssembliesCountLock);
                 continue;
             }
 
-            LigandAvailabilityMapping ligandAvailable;
-            ligandAvailable.init(m_ligands);
-
-            // assembly optimization step
-            while (std::any_of(ligandAvailable.begin(), ligandAvailable.end(), LigandIsAvailable())) {
-                // determine ligand with highest score deficit TODO move to own func
-                double maxScoreDeficit = 0;
-                Ligand worstLigand = *m_ligands.begin();  // dummy init --> better idea?
-                for (const Ligand &ligand : m_ligands) {
-                    if (!ligandAvailable.at(ligand.getID())) {
-                        continue;
-                    }
-                    double ligandScoreDeficit = AssemblyScorer::calculateScoreDeficitForLigand(
-                        ligand.getID(), m_ligands.size() - 1, currentAssembly, m_poseRegisters, m_pairwiseAlignments);
-                    if (maxScoreDeficit < ligandScoreDeficit) {
-                        worstLigand = ligand;
-                        maxScoreDeficit = ligandScoreDeficit;
-                    }
-                }
-                if (maxScoreDeficit == 0) {
-                    // all pairwise alignments are optimal
-                    // TODO can we return this assembly and be sure its the optimum?
-                    break;
-                }
-
-                bool swappedLigandPose = false;
-                for (const UniquePoseID &pose : worstLigand.getPoses()) {
-                    // check if using this pose improves currentAssembly
-                    if (pose.getLigandInternalPoseId() == currentAssembly.getPoseOfLigand(worstLigand.getID())) {
-                        continue;
-                    }
-                    LigandAlignmentAssembly assemblyCopy = currentAssembly;
-                    assemblyCopy.swapPoseForLigand(worstLigand.getID(), pose.getLigandInternalPoseId());
-                    // avoid identity swap
-                    double const newAssemblyScore
-                        = AssemblyScorer::calculateAssemblyScore(assemblyCopy, m_pairwiseAlignments, m_ligands);
-
-                    if (newAssemblyScore > currentAssemblyScore) {
-                        currentAssembly = assemblyCopy;
-                        currentAssemblyScore = newAssemblyScore;
-                        ligandAvailable.setAllAvailable();
-                        swappedLigandPose = true;
-                        break;
-                    }
-                }
-                if (!swappedLigandPose) {
-                    ligandAvailable.at(worstLigand.getID()) = false;
-                }
-            }
-
-            double const assemblyScore
-                = AssemblyScorer::calculateAssemblyScore(currentAssembly, m_pairwiseAlignments, m_ligands);
-            spdlog::debug("Score after opt: {}", assemblyScore);
             omp_set_lock(&bestAssemblyLock);
-            omp_set_lock(&bestAssemblyScoreLock);
-            if (assemblyScore > currentBestAssemblyScore) {
-                currentBestAssembly = currentAssembly;
-                currentBestAssemblyScore = assemblyScore;
+            if (bestAssembly.score < optimizedAssembly.score) {
+                bestAssembly = optimizedAssembly;
             }
             omp_unset_lock(&bestAssemblyLock);
-            omp_unset_lock(&bestAssemblyScoreLock);
         }
-        spdlog::info("finished alignment optimization.");
+
+        // fine-tuning
+        spdlog::info("Fine-tuning best assembly. Score before: {}", bestAssembly.score);
+        bestAssembly = AssemblyOptimizer::optimizeAssembly(bestAssembly, Constants::FINE_OPTIMIZATION_THRESHOLD,
+                                                           m_pairwiseStrictMcsMap, m_pairwiseRelaxedMcsMap);
+        spdlog::info("finished alignment optimization. Final alignment has a score of {}.", bestAssembly.score);
         if (skippedAssembliesCount > 0) {
             spdlog::info("Skipped a total of {} incomplete assemblies.", skippedAssembliesCount);
         }
-
-        return {currentBestAssemblyScore, currentBestAssembly.getAssemblyMapping(), m_ligands};
+        MultiAlignerResult result(bestAssembly.score, bestAssembly.assembly.getAssemblyMapping(), bestAssembly.ligands);
+        return result;
     }
 
 }  // namespace coaler::multialign

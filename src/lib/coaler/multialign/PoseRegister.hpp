@@ -41,10 +41,14 @@ namespace coaler::multialign {
         void addPoses(PosePair pair, double score);
 
         /**
-         *
          * @return The two poses yielding the best alignment of the registers ligands.
          */
-        PosePair getHighestScoringPair();
+        PosePair getHighestScoringPair() const noexcept;
+
+        /**
+         * @return The overlap score of the best scoring pose pair.
+         */
+        double getHighestScore() const noexcept;
 
         /**
          *
@@ -58,7 +62,7 @@ namespace coaler::multialign {
          * @param pose The pose to check for.
          * @return True if the register contains the @p pose.
          */
-        bool containsPose(const UniquePoseID& pose);
+        bool containsPose(const UniquePoseID& pose) const;
 
       private:
         void updateLowest();

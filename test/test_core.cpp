@@ -24,6 +24,18 @@ TEST_CASE("Core_MCS", "[core]") {
           == "[#6]1:&@[#6]:&@[#6](:&@[#6]:&@[#6]:&@[#6]:&@1)-&!@[#7&R]");
 }
 
+TEST_CASE("failing_mcs", "[core]") {
+    auto mol1 = MolFromSmiles("Cc1nnc2n1-c1sc3c(c1[C@@H](c1ccccc1Cl)NC2)C[C@H](C(=O)N1CCOCC1)C3");
+    auto mol2 = MolFromSmiles("CCc1ccc(C2NCc3nnc(C)n3-c3sc4c(c32)CC(C(=O)N2CCOCC2)C4)cc1");
+    RDKit::MOL_SPTR_VECT mols;
+    mols.emplace_back(mol1);
+    mols.emplace_back(mol2);
+
+    Matcher matcher(1);
+    auto coreScaffoldMCS = matcher.calculateCoreMcs(mols);
+    CHECK(coreScaffoldMCS.value().core);
+}
+
 TEST_CASE("Core_Murcko", "[core]") {
     SECTION("test for a small core") {
         Matcher matcher(1);

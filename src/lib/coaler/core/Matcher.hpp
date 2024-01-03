@@ -6,8 +6,16 @@
 
 #include <GraphMol/FMCS/FMCS.h>
 #include "Forward.hpp"
+#include "GraphMol/FMCS/FMCS.h"
+#include "coaler/core/Forward.hpp"
+#include "coaler/multialign/Forward.hpp"
 
 namespace coaler::core {
+
+    using PairwiseMCSMap = std::unordered_map<multialign::LigandPair,
+            std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>,
+            multialign::LigandPairHash>;
+
     struct CoreResult {
         RDKit::ROMOL_SPTR core;
         RDKit::ROMOL_SPTR ref;
@@ -15,45 +23,34 @@ namespace coaler::core {
     };
 
     class Matcher {
-      public:
+    public:
         explicit Matcher(int threads);
+
         /**
          * calculates the MCS of the molecules
          * @return MCS as ROMol
          */
-        std::optional<CoreResult> calculateCoreMcs(RDKit::MOL_SPTR_VECT& mols);
+        std::optional<CoreResult> calculateCoreMcs(RDKit::MOL_SPTR_VECT &mols);
 
         /**
          * calculates the Murcko scaffold of the molecules
          * @return Murcko Scaffold as ROMol
          */
-        std::optional<CoreResult> calculateCoreMurcko(RDKit::MOL_SPTR_VECT& mols);
+        std::optional<CoreResult> calculateCoreMurcko(RDKit::MOL_SPTR_VECT &mols);
 
-        static RDKit::MCSParameters getMCSParams() {
-            RDKit::MCSParameters mcsParams;
-            RDKit::MCSAtomCompareParameters atomCompParams;
-            atomCompParams.MatchChiralTag = false;
-            atomCompParams.MatchFormalCharge = true;
-            atomCompParams.MatchIsotope = false;
-            atomCompParams.MatchValences = false;
-            atomCompParams.RingMatchesRingOnly = true;
-            atomCompParams.CompleteRingsOnly = true;
-            mcsParams.AtomCompareParameters = atomCompParams;
+        /**
+         * @return mcs params for very flexibly mcs search
+         * i.e. no atom types, bond types, chirality
+         */
+        static RDKit::MCSParameters getRelaxedMCSParams();
 
-            RDKit::MCSBondCompareParameters bondCompParams;
-            bondCompParams.MatchStereo = false;
-            bondCompParams.RingMatchesRingOnly = true;
-            bondCompParams.CompleteRingsOnly = true;
-            bondCompParams.MatchFusedRings = true;
-            bondCompParams.MatchFusedRingsStrict = true;
-            mcsParams.BondCompareParameters = bondCompParams;
+        /**
+         * @return mcs params fora strict mcs search
+         * i.e. Chirality, Bond order etc.
+         */
+        static RDKit::MCSParameters getStrictMCSParams();
 
-            mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareAnyHeavyAtom);
-            //mcsParams.setMCSBondTyperFromEnum(RDKit::Bond);
-            mcsParams.Timeout = 10;
-
-            return mcsParams;
-        }
+        static PairwiseMCSMap calcPairwiseMCS(const multialign::LigandVector &mols, bool strict);
 
     private:
         /**
@@ -66,9 +63,9 @@ namespace coaler::core {
          * @param delAtoms vector to save atoms to be deleted
          * @param delBonds vector to save bonds to be deleted
          */
-        void murckoPruningRecursive(RDKit::RWMOL_SPTR& mol, int atomID, int parentID, std::vector<bool>& visit,
-                                    std::vector<int>& delAtoms, std::vector<std::pair<int, int>>& delBonds,
-                                    std::vector<int>& ringAtoms);
+        void murckoPruningRecursive(RDKit::RWMOL_SPTR &mol, int atomID, int parentID, std::vector<bool> &visit,
+                                    std::vector<int> &delAtoms, std::vector<std::pair<int, int>> &delBonds,
+                                    std::vector<int> &ringAtoms);
 
         /**
          * recursive implementation to find atoms in delAtoms which are sidechains in the murcko structure and therefore
@@ -80,8 +77,8 @@ namespace coaler::core {
          * @param ringAtoms atoms which are inside a ring of the molecule  @param mol
          * @param foundRingAtoms atoms found during DFS which are ringatoms of @param mol
          */
-        void murckoCheckDelAtoms(RDKit::RWMOL_SPTR& mol, int atomID, int parentID, std::vector<bool>& visit,
-                                 std::vector<int>& ringAtoms, std::vector<int>& foundRingAtoms);
+        void murckoCheckDelAtoms(RDKit::RWMOL_SPTR &mol, int atomID, int parentID, std::vector<bool> &visit,
+                                 std::vector<int> &ringAtoms, std::vector<int> &foundRingAtoms);
 
         int m_threads;
 
@@ -89,4 +86,4 @@ namespace coaler::core {
 
         [[nodiscard]] RDKit::ROMOL_SPTR buildMolConformerForQuery(RDKit::RWMol first, RDKit::ROMol query);
     };
-}  // namespace coaler::core
+}

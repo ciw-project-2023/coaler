@@ -3,6 +3,8 @@
  */
 
 #pragma once
+#include <coaler/multialign/models/PairwiseAlignments.hpp>
+
 #include "coaler/multialign/Forward.hpp"
 #include "coaler/multialign/LigandAlignmentAssembly.hpp"
 #include "coaler/multialign/PoseRegisterCollection.hpp"
@@ -10,14 +12,34 @@
 namespace coaler::multialign {
     class AssemblyScorer {
       public:
+        /**
+         * @brief calculate the score of an assembly.
+         * Scoring method: sum of all pairwise overlaps.
+         * @param assembly The assembly to score.
+         * @param scores The pairwise overlap scores.
+         * @param ligands The ligands the assembly contains.
+         * @return The score of the assembly.
+         */
         static double calculateAssemblyScore(const coaler::multialign::LigandAlignmentAssembly& assembly,
-                                             const coaler::multialign::PairwiseAlignment& scores,
+                                             coaler::multialign::PairwiseAlignments& scores,
                                              const coaler::multialign::LigandVector& ligands);
 
-        static double calculateScoreDeficitForLigand(LigandID ligandId, LigandID maxLigandId,
-                                                     const LigandAlignmentAssembly& assembly,
+        /**
+         * @brief Calculate the score deficit of some Ligand conformer.
+         *
+         * The score defecit is a measure of how bad a conformer is in an assembly in comparison to the best conformer
+         * of a ligand.
+         *
+         * @param ligandId ID of the ligand to asses.
+         * @param assembly The assembly in whose context the ligand conformer is scored.
+         * @param registers The pairwise pose registers of the ligands.
+         * @param scores The pairwise overlap scores of the ligands´ conformers
+         * @param ligands The input ligands.
+         * @return The score deficit of the ligands conformer.
+         */
+        static double calculateScoreDeficitForLigand(LigandID ligandId, const LigandAlignmentAssembly& assembly,
                                                      const PoseRegisterCollection& registers,
-                                                     const PairwiseAlignment& scores);
+                                                     PairwiseAlignments& scores, const LigandVector& ligands);
     };
 
 }  // namespace coaler::multialign
