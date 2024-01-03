@@ -31,29 +31,15 @@ namespace {
 namespace coaler::core {
     Matcher::Matcher(int threads) : m_threads(threads) {}
 
+    RDKit::MOL_SPTR_VECT sortMolsBySizeDesc(RDKit::MOL_SPTR_VECT &mols) {
+        std::sort(mols.begin(), mols.end(), [](const auto &a, const auto &b) {
+            return a->getNumAtoms() > b->getNumAtoms();
+        });
+        return mols;
+    }
+
     std::optional<CoreResult> Matcher::calculateCoreMcs(RDKit::MOL_SPTR_VECT &mols) {
-        // Generates all parameters needed for RDKit::findMCS()
-        RDKit::MCSParameters mcsParams;
-        RDKit::MCSAtomCompareParameters atomCompParams;
-        atomCompParams.MatchChiralTag = true;
-        atomCompParams.MatchFormalCharge = true;
-        atomCompParams.MatchIsotope = false;
-        atomCompParams.MatchValences = true;
-        atomCompParams.RingMatchesRingOnly = true;
-        atomCompParams.CompleteRingsOnly = false;
-        mcsParams.AtomCompareParameters = atomCompParams;
-
-        RDKit::MCSBondCompareParameters bondCompParams;
-        bondCompParams.MatchStereo = true;
-        bondCompParams.RingMatchesRingOnly = false;
-        bondCompParams.CompleteRingsOnly = true;
-        bondCompParams.MatchFusedRings = true;
-        bondCompParams.MatchFusedRingsStrict = false;
-        mcsParams.BondCompareParameters = bondCompParams;
-
-        mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareAnyHeavyAtom);
-        mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareAny);
-
+        auto mcsParams = Matcher::getRelaxedMCSParams();
         RDKit::MCSResult const mcs = RDKit::findMCS(mols, &mcsParams);
         if (mcs.QueryMol == nullptr) {
             return std::nullopt;
@@ -61,7 +47,9 @@ namespace coaler::core {
 
         spdlog::info("MCS: {}", mcs.SmartsString);
 
-        auto ref = this->buildMolConformerForQuery(*mols.at(0), *mcs.QueryMol);
+        auto biggest = sortMolsBySizeDesc(mols).at(0);
+        spdlog::debug("biggest MCS ({} atoms): {}", biggest->getNumAtoms(), RDKit::MolToSmiles(*biggest));
+        auto ref = this->buildMolConformerForQuery(*biggest, *mcs.QueryMol);
 
         auto matches = RDKit::SubstructMatch(*ref, *mcs.QueryMol, this->getMatchParams());
         assert(!matches.empty());
@@ -252,11 +240,11 @@ namespace coaler::core {
         RDKit::MCSParameters mcsParams;
         RDKit::MCSAtomCompareParameters atomCompParams;
         atomCompParams.MatchChiralTag = false;
-        atomCompParams.MatchFormalCharge = true;
+        atomCompParams.MatchFormalCharge = false;
         atomCompParams.MatchIsotope = false;
         atomCompParams.MatchValences = true;
-        atomCompParams.RingMatchesRingOnly = false;
-        atomCompParams.CompleteRingsOnly = false;
+        atomCompParams.RingMatchesRingOnly = true;
+        atomCompParams.CompleteRingsOnly = true;
         mcsParams.AtomCompareParameters = atomCompParams;
 
         RDKit::MCSBondCompareParameters bondCompParams;
