@@ -55,7 +55,7 @@ std::optional<ProgrammOptions> parseArgs(int argc, char* argv[]) {
         "input-file,i", opts::value<std::string>(&parsed_options.input_file_path)->required(), "path to input file")(
         "out,o", opts::value<std::string>(&parsed_options.out_file)->default_value("out.sdf"), "path to output file")(
         "threads,j", opts::value<int>(&parsed_options.num_threads)->default_value(1), "number of threads to use")(
-        "assemblies, a", opts::value<unsigned>(&parsed_options.num_start_assemblies)->default_value(200),
+        "assemblies, a", opts::value<unsigned>(&parsed_options.num_start_assemblies)->default_value(10),
         "number of starting assemblies to use")(
         "verbose,v", opts::value<bool>(&parsed_options.verbose)->default_value(false), "enable debug logging")(
         "core", opts::value<std::string>(&parsed_options.core_type)->default_value("mcs"),
