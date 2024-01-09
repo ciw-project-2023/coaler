@@ -3,10 +3,11 @@
 //
 
 #include "LigandVector.hpp"
+
 #include "Alias.hpp"
 #include "UniquePoseSet.hpp"
 
-namespace  coaler::multialign {
+namespace coaler::multialign {
     LigandVector::LigandVector(RDKit::MOL_SPTR_VECT molecules) {
         for (LigandID id = 0; id < molecules.size(); id++) {
             UniquePoseSet poses;
@@ -21,4 +22,4 @@ namespace  coaler::multialign {
             this->emplace_back(ligand);
         }
     }
-}
+}  // namespace coaler::multialign

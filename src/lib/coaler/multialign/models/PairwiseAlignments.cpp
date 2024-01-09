@@ -3,9 +3,10 @@
 //
 
 #include "PairwiseAlignments.hpp"
-#include "Ligand.hpp"
 
 #include <GraphMol/ShapeHelpers/ShapeUtils.h>
+
+#include "Ligand.hpp"
 
 namespace {
 
@@ -24,8 +25,7 @@ namespace {
 
 namespace coaler::multialign {
 
-    double PairwiseAlignments::at(const coaler::multialign::PosePair& key, const LigandVector& ligands,
-                                  bool store) {
+    double PairwiseAlignments::at(const coaler::multialign::PosePair& key, const LigandVector& ligands, bool store) {
         if (this->count(key) == 1) {
             return this->std::unordered_map<PosePair, double, PosePairHash>::at(key);
         }

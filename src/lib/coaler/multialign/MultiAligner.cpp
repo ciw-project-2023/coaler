@@ -79,7 +79,6 @@ namespace coaler::multialign {
         m_ligands = LigandVector(molecules);
         spdlog::info("Start calculating pairwise MCS.");
 
-
         // calculate pairwise alignments
         spdlog::info("Start calculating pairwise alignments.");
         m_pairwiseAlignments = this->calculateAlignmentScores(m_ligands);
@@ -143,7 +142,8 @@ namespace coaler::multialign {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     MultiAlignerResult MultiAligner::alignMolecules() {
-        spdlog::info("Mols: {} | Confs/Mol: {} | total pairwise scores: {}", m_ligands.size(), m_ligands.begin()->getNumPoses(), m_pairwiseAlignments.size());
+        spdlog::info("Mols: {} | Confs/Mol: {} | total pairwise scores: {}", m_ligands.size(),
+                     m_ligands.begin()->getNumPoses(), m_pairwiseAlignments.size());
 
         // build starting ensembles from registers
         // AssemblyCollection assemblies;

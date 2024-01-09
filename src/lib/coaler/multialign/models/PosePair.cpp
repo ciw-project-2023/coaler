@@ -3,6 +3,7 @@
  */
 
 #include "PosePair.hpp"
+
 #include <boost/functional/hash.hpp>
 #include <cassert>
 

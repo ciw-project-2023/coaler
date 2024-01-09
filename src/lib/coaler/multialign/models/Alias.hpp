@@ -3,5 +3,4 @@ namespace coaler::multialign {
     using LigandID = unsigned;
     using PoseID = unsigned;
 
-}
-
+}  // namespace coaler::multialign

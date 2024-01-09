@@ -3,8 +3,9 @@
  */
 #pragma once
 
-#include "Alias.hpp"
 #include <string>
+
+#include "Alias.hpp"
 
 namespace coaler::multialign {
     /**

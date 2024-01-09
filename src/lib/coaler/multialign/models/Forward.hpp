@@ -5,8 +5,8 @@
 
 #include "Alias.hpp"
 #include "Ligand.hpp"
-#include "LigandVector.hpp"
 #include "LigandPair.hpp"
+#include "LigandVector.hpp"
 #include "PairwiseAlignments.hpp"
 #include "PosePair.hpp"
 #include "UniquePoseID.hpp"
