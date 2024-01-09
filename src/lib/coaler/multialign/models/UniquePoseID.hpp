@@ -2,7 +2,9 @@
  * Copyright 2023 CoAler Group, all rights reserved.
  */
 #pragma once
-#include "Forward.hpp"
+
+#include "Alias.hpp"
+#include <string>
 
 namespace coaler::multialign {
     /**

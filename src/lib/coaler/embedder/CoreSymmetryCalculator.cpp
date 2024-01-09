@@ -14,7 +14,7 @@ namespace coaler::embedder {
         RDKit::ROMol patternMol = *RDKit::SmartsToMol(patternString);
         RDKit::SubstructMatchParameters params;
         params.uniquify = false;
-        std::vector<RDKit::MatchVectType> matches = RDKit::SubstructMatch(mol, mol, params);
+        auto matches = RDKit::SubstructMatch(mol, mol, params);
         return matches.size();
     }
 }  // namespace coaler::embedder

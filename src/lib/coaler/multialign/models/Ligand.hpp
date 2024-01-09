@@ -5,10 +5,9 @@
 
 #include <GraphMol/GraphMol.h>
 
-#include <unordered_set>
-
-#include "Forward.hpp"
+#include "Alias.hpp"
 #include "UniquePoseID.hpp"
+#include "UniquePoseSet.hpp"
 
 namespace coaler::multialign {
 

@@ -7,9 +7,6 @@
 #include <unordered_map>
 
 #include "models/Forward.hpp"
-#include "models/Ligand.hpp"
-#include "models/LigandPair.hpp"
-#include "models/PosePair.hpp"
 
 namespace coaler::multialign {
 
@@ -22,13 +19,13 @@ namespace coaler::multialign {
          * This treshold determines the score deficit above which new conformers are attempted to be generated
          * during assembly optimization.
          */
-        constexpr double COARSE_OPTIMIZATION_THRESHOLD = 1;
+        constexpr double COARSE_OPTIMIZATION_THRESHOLD = 1.5;
 
         /**
          * This treshold determines the score deficit above which new conformers are attempted to be generated
          * during the fine tuning of the best alignment assembly.
          */
-        constexpr double FINE_OPTIMIZATION_THRESHOLD = 0.05;
+        constexpr double FINE_OPTIMIZATION_THRESHOLD = 0.5;
 
         constexpr unsigned OPTIMIZER_STEP_LIMIT = 100;
     }  // namespace Constants
@@ -41,7 +38,5 @@ namespace coaler::multialign {
 
     // using PairwiseAlignment = std::unordered_map<PosePair, double, PosePairHash>;
     using PairwisePoseRegisters = std::unordered_map<LigandPair, PoseRegister, LigandPairHash>;
-
-    using LigandVector = std::vector<Ligand>;
 
 }  // namespace coaler::multialign
