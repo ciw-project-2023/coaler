@@ -154,10 +154,36 @@ namespace coaler::multialign {
         // build starting ensembles from registers
         // AssemblyCollection assemblies;
         std::priority_queue<AssemblyWithScore, std::vector<AssemblyWithScore>, AssemblyWithScoreGreater> assemblies;
+
+        // TODO: move / rename etc
+        std::vector<std::vector<UniquePoseID>> unique_poses_vec(m_ligands.size(), std::vector<UniquePoseID>(0));
+
         for (const Ligand &ligand : m_ligands) {
             for (const UniquePoseID &pose : ligand.getPoses()) {
                 const LigandAlignmentAssembly assembly
                     = StartingAssemblyGenerator::generateStartingAssembly(pose, m_poseRegisters, m_ligands);
+
+                // TODO: check for potential similiar starting assemblies
+                int similiar_poses_counter = 0;
+                for (auto id_pair : assembly.getAssemblyMapping()) {
+                    LigandID ligand_id = id_pair.first;
+                    PoseID pos_id = id_pair.second;
+                    UniquePoseID u_pose_id(ligand_id, pos_id);
+
+                    auto it = std::find(unique_poses_vec.at(ligand_id).begin(), unique_poses_vec.at(ligand_id).end(), u_pose_id);
+
+                    // Check if the element was found
+                    if (it != unique_poses_vec.at(ligand_id).end()) {
+                        similiar_poses_counter++;
+                    } else {
+                        // add new unique pose id
+                        unique_poses_vec.at(ligand_id).emplace_back(u_pose_id);
+                    }
+                }
+                // Assembly is not unique
+                if(similiar_poses_counter == m_ligands.size()){
+                    continue;
+                }
 
                 double const score = AssemblyScorer::calculateAssemblyScore(assembly, m_pairwiseAlignments, m_ligands);
                 const AssemblyWithScore newAssembly = std::make_pair(assembly, score);

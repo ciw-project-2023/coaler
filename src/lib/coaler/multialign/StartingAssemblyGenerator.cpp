@@ -1,7 +1,3 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
-
 #include "StartingAssemblyGenerator.hpp"
 
 namespace coaler::multialign {
@@ -40,6 +36,7 @@ namespace coaler::multialign {
 
             assembly.insertLigandPose(otherPose.getLigandId(), otherPose.getLigandInternalPoseId());
         }
+
         return assembly;
     }
 }  // namespace coaler::multialign
