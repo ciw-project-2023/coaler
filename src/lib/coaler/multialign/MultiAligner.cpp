@@ -93,9 +93,9 @@ namespace coaler::multialign {
         // A.getNumPoses() * B.getNumPoses() many embeddings
         unsigned n = ligands.size();
         unsigned combinations = 0;
-        for (unsigned id_A = 0; id_A < n; id_A++) {
-            for (unsigned id_B = id_A + 1; id_B < n; id_B++) {
-                combinations += ligands.at(id_A).getNumPoses() * ligands.at(id_B).getNumPoses();
+        for (unsigned idA = 0; idA < n; idA++) {
+            for (unsigned idB = idA + 1; idB < n; idB++) {
+                combinations += ligands.at(idA).getNumPoses() * ligands.at(idB).getNumPoses();
             }
         }
 
@@ -116,8 +116,8 @@ namespace coaler::multialign {
                         RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
                         RDKit::RWMol const secondMol = ligands.at(secondMolId).getMolecule();
 
-                        double score = AlignmentScorer::calc_tanimoto_shape_similarity(firstMol, secondMol,
-                                                                                       firstMolPoseId, secondMolPoseId);
+                        double score = AlignmentScorer::calcTanimotoShapeSimilarity(firstMol, secondMol, firstMolPoseId,
+                                                                                    secondMolPoseId);
 
                         UniquePoseID firstPose(firstMolId, firstMolPoseId);
                         UniquePoseID secondPose(secondMolId, secondMolPoseId);
