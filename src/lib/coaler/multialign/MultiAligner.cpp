@@ -14,35 +14,10 @@
 #include "AssemblyOptimizer.hpp"
 #include "LigandAlignmentAssembly.hpp"
 #include "StartingAssemblyGenerator.hpp"
+#include "models/AssemblyIDManager.hpp"
 #include "scorer/AlignmentScorer.hpp"
 
 namespace coaler::multialign {
-
-    namespace {
-        bool is_unique_assembly(std::vector<std::vector<UniquePoseID>> &unique_poses_vec, size_t ligand_count,
-                                const LigandAlignmentAssembly &assembly) {
-            int similiar_poses_counter = 0;
-            for (auto id_pair : assembly.getAssemblyMapping()) {
-                LigandID ligand_id = id_pair.first;
-                PoseID pos_id = id_pair.second;
-                UniquePoseID u_pose_id(ligand_id, pos_id);
-
-                auto it = std::find(unique_poses_vec.at(ligand_id).begin(), unique_poses_vec.at(ligand_id).end(),
-                                    u_pose_id);
-
-                // Check if the element was found
-                if (it != unique_poses_vec.at(ligand_id).end()) {
-                    similiar_poses_counter++;
-                } else {
-                    // add new unique pose id
-                    unique_poses_vec.at(ligand_id).emplace_back(u_pose_id);
-                }
-            }
-
-            return similiar_poses_counter != ligand_count;
-        }
-    }  // namespace
-
     using AssemblyWithScore = std::pair<LigandAlignmentAssembly, double>;
 
     class LigandAvailabilityMapping : public std::unordered_map<LigandID, bool> {
@@ -181,14 +156,13 @@ namespace coaler::multialign {
         // AssemblyCollection assemblies;
         std::priority_queue<AssemblyWithScore, std::vector<AssemblyWithScore>, AssemblyWithScoreGreater> assemblies;
 
-        std::vector<std::vector<UniquePoseID>> unique_poses_vec(m_ligands.size(), std::vector<UniquePoseID>(0));
-
+        AssemblyIDManager assemblyIdManager;
         for (const Ligand &ligand : m_ligands) {
             for (const UniquePoseID &pose : ligand.getPoses()) {
                 const LigandAlignmentAssembly assembly
                     = StartingAssemblyGenerator::generateStartingAssembly(pose, m_poseRegisters, m_ligands);
 
-                if (!is_unique_assembly(unique_poses_vec, m_ligands.size(), assembly)) {
+                if (!assemblyIdManager.is_assembly_new(assembly)) {
                     continue;
                 }
 
