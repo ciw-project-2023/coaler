@@ -15,13 +15,11 @@
 
 #include <utility>
 
-#include "Forward.hpp"
-
 const unsigned seed = 42;
 const float forceTol = 0.0135;
 
 namespace {
-    RDKit::SubstructMatchParameters get_substructure_match_params_for_optimizer_generation() {
+    RDKit::SubstructMatchParameters get_optimizer_substruct_params() {
         RDKit::SubstructMatchParameters substructMatchParams;
         substructMatchParams.uniquify = true;
         substructMatchParams.useChirality = false;
@@ -134,6 +132,7 @@ namespace coaler::embedder {
         // TODO maybe sanitize mols?
         std::vector<unsigned> newIds;
         RDKit::ROMol *ligandMol = (RDKit::ROMol *)worstLigand.getMoleculePtr();
+
         for (const multialign::Ligand &target : targets) {
             // find mcs
             const multialign::LigandID targetID = target.getID();
@@ -173,10 +172,10 @@ namespace coaler::embedder {
 
             // try relaxed mcs first
             if (!ligandMatchRelaxed.empty() && !targetMatchRelaxed.empty()) {
+                spdlog::debug("trying relaxed substructure approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchRelaxed, targetMatchRelaxed);
                 params.coordMap = &ligandMcsCoords;
-
                 try {
                     addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligandMol, params);
                 } catch (const std::runtime_error &e) {

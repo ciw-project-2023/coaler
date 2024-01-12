@@ -4,6 +4,7 @@
 #pragma once
 
 #include "PoseRegisterCollection.hpp"
+#include "models/Forward.hpp"
 
 namespace coaler::multialign {
 

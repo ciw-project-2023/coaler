@@ -3,7 +3,7 @@
  */
 
 #pragma once
-#include "Forward.hpp"
+
 #include "PoseRegister.hpp"
 #include "models/Forward.hpp"
 

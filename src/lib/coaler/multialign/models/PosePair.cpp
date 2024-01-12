@@ -4,6 +4,9 @@
 
 #include "PosePair.hpp"
 
+#include <boost/functional/hash.hpp>
+#include <cassert>
+
 namespace coaler::multialign {
     PosePair::PosePair(const UniquePoseID first, const UniquePoseID second) {
         // swap values to rule out duplicates

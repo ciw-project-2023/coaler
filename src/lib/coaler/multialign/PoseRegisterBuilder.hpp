@@ -2,11 +2,9 @@
  * Copyright 2023 CoAler Group, all rights reserved.
  */
 #pragma once
-#include "Forward.hpp"
+
 #include "PoseRegisterCollection.hpp"
-#include "models/Ligand.hpp"
-#include "models/LigandPair.hpp"
-#include "models/PairwiseAlignments.hpp"
+#include "models/Forward.hpp"
 
 namespace coaler::multialign {
 

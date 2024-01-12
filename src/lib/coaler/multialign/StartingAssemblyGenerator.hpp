@@ -6,6 +6,7 @@
 
 #include "LigandAlignmentAssembly.hpp"
 #include "PoseRegisterCollection.hpp"
+#include "models/Forward.hpp"
 
 namespace coaler::multialign {
     class StartingAssemblyGenerator {

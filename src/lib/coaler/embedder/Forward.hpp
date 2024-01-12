@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <GraphMol/Conformer.h>
-
-#include <vector>
-
-using ConformerVector = std::vector<RDKit::Conformer>;
+#include "ConformerEmbedder.hpp"
+#include "CoreSymmetryCalculator.hpp"
+#include "SubstructureAnalyzer.hpp"

@@ -25,8 +25,7 @@ namespace {
 
 namespace coaler::multialign {
 
-    double PairwiseAlignments::at(const coaler::multialign::PosePair& key, const std::vector<Ligand>& ligands,
-                                  bool store) {
+    double PairwiseAlignments::at(const coaler::multialign::PosePair& key, const LigandVector& ligands, bool store) {
         if (this->count(key) == 1) {
             return this->std::unordered_map<PosePair, double, PosePairHash>::at(key);
         }
