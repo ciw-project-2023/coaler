@@ -15,8 +15,8 @@ namespace coaler::multialign {
       public:
         explicit PosePair(UniquePoseID first, UniquePoseID second);
 
-        [[nodiscard]] const UniquePoseID getFirst() const noexcept;
-        [[nodiscard]] const UniquePoseID getSecond() const noexcept;
+        [[nodiscard]] UniquePoseID getFirst() const noexcept;
+        [[nodiscard]] UniquePoseID getSecond() const noexcept;
 
         bool operator==(const PosePair& other) const;
 

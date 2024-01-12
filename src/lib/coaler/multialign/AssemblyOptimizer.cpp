@@ -64,6 +64,7 @@ LigandID get_next_missing_ligand(const LigandAlignmentAssembly &assembly, const 
             return id;
         }
     }
+
     return maxLigandID + 1;
 }
 

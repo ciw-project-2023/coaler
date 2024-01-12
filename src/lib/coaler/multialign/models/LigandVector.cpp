@@ -8,7 +8,7 @@
 #include "UniquePoseSet.hpp"
 
 namespace coaler::multialign {
-    LigandVector::LigandVector(RDKit::MOL_SPTR_VECT molecules) {
+    LigandVector::LigandVector(RDKit::MOL_SPTR_VECT& molecules) {
         for (LigandID id = 0; id < molecules.size(); id++) {
             UniquePoseSet poses;
 

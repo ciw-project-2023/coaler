@@ -40,6 +40,7 @@ namespace coaler::multialign {
                         poseRegister.addPoses(pair, score);
                     }
                 }
+
                 omp_set_lock(&poseRegistersLock);
                 poseRegisters.emplace(currentLigandPair, poseRegister);
                 omp_unset_lock(&poseRegistersLock);
