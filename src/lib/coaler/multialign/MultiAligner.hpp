@@ -1,18 +1,14 @@
 /*
  * Copyright 2023 CoAler Group, all rights reserved.
  */
-
 #pragma once
-#include <coaler/core/Forward.hpp>
-#include <coaler/multialign/models/PairwiseAlignments.hpp>
+
+#include "coaler/core/Forward.hpp"
+#include "coaler/multialign/models/Forward.hpp"
 
 #include "AssemblyOptimizer.hpp"
-#include "Forward.hpp"
-#include "GraphMol/FMCS/FMCS.h"
-#include "LigandAlignmentAssembly.hpp"
 #include "MultiAlignerResult.hpp"
-#include "PoseRegister.hpp"
-#include "PoseRegisterBuilder.hpp"
+#include "Constants.hpp"
 
 namespace coaler::multialign {
 

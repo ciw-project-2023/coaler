@@ -15,8 +15,6 @@
 
 #include <utility>
 
-#include "Forward.hpp"
-
 const unsigned seed = 42;
 const float forceTol = 0.0135;
 

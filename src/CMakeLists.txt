@@ -1,6 +1,8 @@
 add_executable (coaler main.cpp)
 add_subdirectory(lib)
 
+set_property(TARGET coaler PROPERTY CXX_STANDARD 20)
+
 target_link_libraries(coaler PUBLIC "-Wl,--disable-new-dtags")
 
 find_package(spdlog REQUIRED)

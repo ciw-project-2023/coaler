@@ -1,10 +1,8 @@
 #include "AlignmentScorer.hpp"
 
 #include <GraphMol/FMCS/FMCS.h>
-#include <GraphMol/MolAlign/AlignMolecules.h>
 #include <GraphMol/ShapeHelpers/ShapeUtils.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
-#include <spdlog/spdlog.h>
 
 namespace coaler::multialign {
     double AlignmentScorer::calc_tanimoto_shape_similarity(const RDKit::ROMol &mol_a, const RDKit::ROMol &mol_b,

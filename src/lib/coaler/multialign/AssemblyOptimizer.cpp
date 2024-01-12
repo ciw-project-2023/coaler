@@ -8,8 +8,7 @@
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <spdlog/spdlog.h>
 
-#include <coaler/embedder/ConformerEmbedder.hpp>
-
+#include "coaler/embedder/ConformerEmbedder.hpp"
 #include "coaler/multialign/scorer/AssemblyScorer.hpp"
 
 using namespace coaler::multialign;

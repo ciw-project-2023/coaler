@@ -4,7 +4,6 @@
 
 #include "Matcher.hpp"
 
-#include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <omp.h>
 #include <spdlog/spdlog.h>
 
@@ -14,6 +13,7 @@
 #include "GraphMol/ForceFieldHelpers/UFF/UFF.h"
 #include "GraphMol/RWMol.h"
 #include "GraphMol/SmilesParse/SmartsWrite.h"
+#include "GraphMol/SmilesParse/SmilesWrite.h"
 
 namespace {
     RDKit::SubstructMatchParameters get_optimizer_substruct_params() {

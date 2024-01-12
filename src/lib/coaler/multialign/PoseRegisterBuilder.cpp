@@ -6,6 +6,7 @@
 #include <omp.h>
 #include <spdlog/spdlog.h>
 
+#include "Constants.hpp"
 #include "PoseRegister.hpp"
 #include "models/Ligand.hpp"
 #include "models/PairwiseAlignments.hpp"

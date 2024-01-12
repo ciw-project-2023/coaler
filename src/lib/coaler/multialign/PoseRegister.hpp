@@ -5,9 +5,8 @@
 #pragma once
 
 #include <unordered_map>
-
-#include "Forward.hpp"
-#include "models/PosePair.hpp"
+#include "models/Forward.hpp"
+#include "boost/shared_ptr.hpp"
 
 using PosePairAndScore = std::pair<coaler::multialign::PosePair, double>;
 
@@ -77,4 +76,6 @@ namespace coaler::multialign {
         PosePairAndScore m_highest;
     };
 
+    using PoseRegisterPtr = boost::shared_ptr<PoseRegister>;
+    using PairwisePoseRegisters = std::unordered_map<LigandPair, PoseRegister, LigandPairHash>;
 }  // namespace coaler::multialign

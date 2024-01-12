@@ -2,17 +2,14 @@
  * Copyright 2023 CoAler Group, all rights reserved.
  */
 #include <GraphMol/SmilesParse/SmartsWrite.h>
-#include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <omp.h>
-
 #include <boost/program_options.hpp>
-#include <coaler/embedder/ConformerEmbedder.hpp>
-#include <coaler/io/Forward.hpp>
-#include <coaler/multialign/MultiAligner.hpp>
-#include <coaler/multialign/MultiAlignerResult.hpp>
 #include <sstream>
 
-#include "coaler/core/Matcher.hpp"
+#include "coaler/io/Forward.hpp"
+#include "coaler/embedder/Forward.hpp"
+#include "coaler/multialign/Forward.hpp"
+#include "coaler/core/Forward.hpp"
 
 namespace opts = boost::program_options;
 using namespace coaler;

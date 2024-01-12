@@ -3,10 +3,9 @@
 //
 
 #pragma once
-#include <coaler/core/Forward.hpp>
-#include <coaler/multialign/models/PairwiseAlignments.hpp>
+#include "models/Forward.hpp"
+#include "coaler/core/Forward.hpp"
 
-#include "Forward.hpp"
 #include "LigandAlignmentAssembly.hpp"
 #include "MultiAlignerResult.hpp"
 #include "OptimizerState.hpp"

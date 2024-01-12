@@ -7,14 +7,16 @@
 #include <omp.h>
 #include <spdlog/spdlog.h>
 
-#include <coaler/multialign/scorer/AssemblyScorer.hpp>
 #include <queue>
 #include <utility>
 
+#include "PoseRegisterBuilder.hpp"
+#include "GraphMol/FMCS/FMCS.h"
 #include "AssemblyOptimizer.hpp"
 #include "LigandAlignmentAssembly.hpp"
 #include "StartingAssemblyGenerator.hpp"
 #include "scorer/AlignmentScorer.hpp"
+#include "scorer/AssemblyScorer.hpp"
 
 namespace coaler::multialign {
     using AssemblyWithScore = std::pair<LigandAlignmentAssembly, double>;

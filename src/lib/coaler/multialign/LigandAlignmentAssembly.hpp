@@ -3,8 +3,7 @@
  */
 #pragma once
 #include <unordered_map>
-
-#include "Forward.hpp"
+#include "models/Forward.hpp"
 
 namespace coaler::multialign {
 

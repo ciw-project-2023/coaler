@@ -4,8 +4,8 @@
 
 #include "OutputWriter.hpp"
 
-#include <GraphMol/FileParsers/MolWriters.h>
 #include <GraphMol/RWMol.h>
+#include <GraphMol/FileParsers/MolWriters.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <spdlog/spdlog.h>
 
