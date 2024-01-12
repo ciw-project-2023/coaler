@@ -142,8 +142,8 @@ int main(int argc, char* argv[]) {
 
     // generate random coreResult with coordinates. TODO: get coordinates from input
 
-    // const core::PairwiseMCSMap pairwiseStrictMcsMap = matcher.calcPairwiseMCS(mols, true);
-    // const core::PairwiseMCSMap pairwiseRelaxedMcsMap = matcher.calcPairwiseMCS(mols, false);
+    // const core::PairwiseMCSMap pairwiseStrictMcsMap = matcher.getPairwiseMCS(mols, true);
+    // const core::PairwiseMCSMap pairwiseRelaxedMcsMap = matcher.getPairwiseMCS(mols, false);
 
     spdlog::info("Embedding {} conformers for all molecules.", opts.numConformers);
 
@@ -155,8 +155,8 @@ int main(int argc, char* argv[]) {
     }
 
     auto ligands = multialign::LigandVector(mols);
-    auto strictMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, false);
-    auto relaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, true);
+    auto strictMcsMap = coaler::core::Matcher::getPairwiseMCS(ligands, false);
+    auto relaxedMcsMap = coaler::core::Matcher::getPairwiseMCS(ligands, true);
 
     const multialign::AssemblyOptimizer optimizer(strictMcsMap, relaxedMcsMap, opts.coarseOptimizationThreshold,
                                                   opts.fineOptimizationThreshold, opts.optimizerStepLimit,

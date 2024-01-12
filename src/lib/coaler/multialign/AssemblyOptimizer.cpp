@@ -226,7 +226,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             }
 
             std::vector<std::pair<int, double>> result;
-            RDKit::UFF::UFFOptimizeMoleculeConfs((RDKit::ROMol &)*worstLigand->getMoleculePtr(), result, 1);
+            RDKit::UFF::UFFOptimizeMoleculeConfs((RDKit::ROMol &)*worstLigand->getMoleculePtr(), result, m_threads, 2000, 10.0, false);
 
             auto [bestNewPoseID, bestNewAssemblyScore]
                 = find_optimal_pose(worstLigandId, newConfIDs, assembly, scores, ligands);

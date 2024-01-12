@@ -7,10 +7,10 @@ TEST_CASE("test_ligand_pair", "[multialign]") {
     coaler::multialign::LigandPair pair3(2, 1);
     coaler::multialign::LigandPair pair4(0, 1);
 
-    CHECK(pair1.getFirst() == 0);
-    CHECK(pair1.getSecond() == 1);
-    CHECK(pair2.getFirst() == 0);
-    CHECK(pair2.getSecond() == 1);
+    CHECK(std::get<0>(pair1) == 0);
+    CHECK(std::get<1>(pair1) == 1);
+    CHECK(std::get<0>(pair2) == 0);
+    CHECK(std::get<1>(pair2) == 1);
     CHECK(pair1 == pair2);
     CHECK(!(pair1 == pair3));
     CHECK(pair1 == pair4);

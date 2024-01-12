@@ -19,16 +19,6 @@ const unsigned seed = 42;
 const float forceTol = 0.0135;
 
 namespace {
-    RDKit::SubstructMatchParameters get_optimizer_substruct_params() {
-        RDKit::SubstructMatchParameters substructMatchParams;
-        substructMatchParams.uniquify = true;
-        substructMatchParams.useChirality = false;
-        substructMatchParams.useQueryQueryMatches = false;
-        substructMatchParams.maxMatches = 1;
-        substructMatchParams.numThreads = 1;
-        substructMatchParams.useEnhancedStereo = false;
-        return substructMatchParams;
-    }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
@@ -85,7 +75,7 @@ namespace coaler::embedder {
             }
 
             std::vector<std::pair<int, double>> result;
-            RDKit::UFF::UFFOptimizeMoleculeConfs(*mol, result, m_threads);
+            RDKit::UFF::UFFOptimizeMoleculeConfs(*mol, result, m_threads, 2000, 10.0, false);
 
             // This is somewhat unintuitive:
             // We use a reference molecule (m_core.ref) to have a "real" conformer, as we cannot generate
@@ -152,7 +142,7 @@ namespace coaler::embedder {
             RDKit::MatchVectType ligandMatchRelaxed, targetMatchRelaxed, ligandMatchStrict, targetMatchStrict;
             // RDKit::MatchVectType smallerIDLigandMatch, largerIDLigandMatch;
             std::string mcsStringRelaxed, mcsStringStrict;
-            multialign::LigandPair ligandPair(worstLigand.getID(), targetID);
+            multialign::LigandPair ligandPair {worstLigand.getID(), targetID};
 
             // since mcs maps are accessed via ligand pair, i.e. smaller id first, we have to check in which
             // order ligand and target are.

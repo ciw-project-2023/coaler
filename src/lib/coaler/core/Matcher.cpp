@@ -15,35 +15,24 @@
 #include "GraphMol/SmilesParse/SmartsWrite.h"
 #include "GraphMol/SmilesParse/SmilesWrite.h"
 
-namespace {
-    RDKit::SubstructMatchParameters get_optimizer_substruct_params() {
-        RDKit::SubstructMatchParameters substructMatchParams;
-        substructMatchParams.uniquify = true;
-        substructMatchParams.useChirality = false;
-        substructMatchParams.useQueryQueryMatches = false;
-        substructMatchParams.maxMatches = 1;
-        substructMatchParams.numThreads = 1;
-        substructMatchParams.useEnhancedStereo = false;
-        return substructMatchParams;
-    }
-}  // namespace
-
 namespace coaler::core {
     Matcher::Matcher(int threads) : m_threads(threads) {}
 
     std::optional<CoreResult> Matcher::calculateCoreMcs(RDKit::MOL_SPTR_VECT &mols) {
         // Generates all parameters needed for RDKit::findMCS()
         auto mcsParams = Matcher::getRelaxedMCSParams();
-        RDKit::MCSResult const mcs = RDKit::findMCS(mols, &mcsParams);
-        if (mcs.QueryMol == nullptr) {
+        RDKit::MCSResult const globalMcs = RDKit::findMCS(mols, &mcsParams);
+        if (globalMcs.QueryMol == nullptr) {
             return std::nullopt;
         }
 
-        spdlog::info("MCS: {}", mcs.SmartsString);
+        spdlog::info("MCS: {}", globalMcs.SmartsString);
 
-        auto ref = this->buildMolConformerForQuery(*mols.at(0), *mcs.QueryMol);
+        auto pairwiseMcs = this->getPairwiseMCS(mols);
+        auto reference = this->findReferenceMolecule(mols, pairwiseMcs);
+        auto ref = this->buildMolConformerForQuery(reference, *globalMcs.QueryMol);
 
-        auto matches = RDKit::SubstructMatch(*ref, *mcs.QueryMol, this->getMatchParams());
+        auto matches = RDKit::SubstructMatch(*ref, *globalMcs.QueryMol, this->getMatchParams());
         assert(!matches.empty());
 
         auto match = matches.at(0);
@@ -52,7 +41,7 @@ namespace coaler::core {
             coreToRef[queryId] = molId;
         }
 
-        return CoreResult{mcs.QueryMol, ref, coreToRef};
+        return CoreResult{globalMcs.QueryMol, ref, coreToRef};
     }
 
     std::optional<CoreResult> Matcher::calculateCoreMurcko(RDKit::MOL_SPTR_VECT &mols) {
@@ -162,7 +151,7 @@ namespace coaler::core {
         RDKit::DGeomHelpers::EmbedMolecule(first, params);
 
         std::vector<std::pair<int, double>> result;
-        RDKit::UFF::UFFOptimizeMoleculeConfs(first, result, m_threads);
+        RDKit::UFF::UFFOptimizeMoleculeConfs(first, result, m_threads, 2000, 10.0, false);
 
         return boost::make_shared<RDKit::ROMol>(first);
     }
@@ -178,6 +167,7 @@ namespace coaler::core {
                 || std::find(ringAtoms.begin(), ringAtoms.end(), neighborID) != ringAtoms.end()) {
                 continue;
             }
+
             murckoPruningRecursive(mol, neighborID, atomID, visit, delAtoms, delBonds, ringAtoms);
 
             // find neighbors that are not on the to-be-deleted-list and count them
@@ -214,6 +204,101 @@ namespace coaler::core {
             }
             murckoCheckDelAtoms(mol, neighborID, atomID, visit, ringAtoms, foundRingAtoms);
         }
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+    PairwiseMCSResult Matcher::getPairwiseMCS(RDKit::MOL_SPTR_VECT &mols) {
+        PairwiseMCSMap strictMcsMap, relaxedMcsMap;
+
+        omp_lock_t mapLock;
+        omp_init_lock(&mapLock);
+
+#pragma omp parallel for shared(mols, strictMcsMap, relaxedMcsMap, mapLock) default(none)
+        for (auto firstId = 0; firstId < mols.size(); firstId++) {
+            auto firstMol = mols.at(firstId);
+            for (auto secondId = firstId + 1; secondId < mols.size(); secondId++) {
+                const auto secondMol = mols.at(secondId);
+                const auto key = multialign::LigandPair(firstId, secondId);
+
+                const RDKit::MOL_SPTR_VECT molPair{firstMol, secondMol};
+
+                const auto strictParams = getStrictMCSParams();
+                const auto relaxedParams = getRelaxedMCSParams();
+
+                const auto firstMolSmiles = RDKit::MolToSmiles(*firstMol);
+                const auto secondMolSmiles = RDKit::MolToSmiles(*secondMol);
+
+                const auto strictMcs = RDKit::findMCS(molPair, &strictParams);
+                const auto relaxedMcs = RDKit::findMCS(molPair, &relaxedParams);
+
+                auto empty = std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>();
+                if (strictMcs.QueryMol == nullptr) {
+                    spdlog::error("no strict mcs found between {} and {}", firstMolSmiles, secondMolSmiles);
+                    omp_set_lock(&mapLock);
+                    strictMcsMap.emplace(key, empty);
+                    omp_unset_lock(&mapLock);
+                }
+
+                if (relaxedMcs.QueryMol == nullptr) {
+                    spdlog::error("no relaxed mcs found between {} and {}", firstMolSmiles, secondMolSmiles);
+                    omp_set_lock(&mapLock);
+                    relaxedMcsMap.emplace(key, empty);
+                    omp_unset_lock(&mapLock);
+                }
+
+                auto firstStrictMatches = RDKit::SubstructMatch(*firstMol, *strictMcs.QueryMol, getMatchParams());
+                auto secondStrictMatches = RDKit::SubstructMatch(*secondMol, *strictMcs.QueryMol, getMatchParams());
+                auto firstRelaxedMatches = RDKit::SubstructMatch(*firstMol, *relaxedMcs.QueryMol, getMatchParams());
+                auto secondRelaxedMatches = RDKit::SubstructMatch(*secondMol, *relaxedMcs.QueryMol, getMatchParams());
+
+                if (firstStrictMatches.empty() || secondStrictMatches.empty()) {
+                    spdlog::error("no strict mcs match between {} and {}", firstMolSmiles, secondMolSmiles);
+                    omp_set_lock(&mapLock);
+                    strictMcsMap.emplace(key, empty);
+                    omp_unset_lock(&mapLock);
+                }
+
+                if (firstRelaxedMatches.empty() || secondRelaxedMatches.empty()) {
+                    spdlog::error("no relaxed mcs match between {} and {}", firstMolSmiles, secondMolSmiles);
+                    omp_set_lock(&mapLock);
+                    relaxedMcsMap.emplace(key, empty);
+                    omp_unset_lock(&mapLock);
+                }
+
+                omp_set_lock(&mapLock);
+                strictMcsMap.emplace(
+                    key, std::make_tuple(firstStrictMatches.at(0), secondStrictMatches.at(0), strictMcs.SmartsString));
+                relaxedMcsMap.emplace(key, std::make_tuple(firstRelaxedMatches.at(0), secondRelaxedMatches.at(0),
+                                                           relaxedMcs.SmartsString));
+                omp_unset_lock(&mapLock);
+            }
+        }
+
+        return {strictMcsMap, relaxedMcsMap};
+    }
+
+    RDKit::ROMol Matcher::findReferenceMolecule(RDKit::MOL_SPTR_VECT &mols, PairwiseMCSResult &pairwiseMcsResult) {
+        auto relaxedMcsMap = pairwiseMcsResult.relaxedMcsMap;
+
+        std::map<multialign::LigandID, int> result;
+        for (auto [key, value] : relaxedMcsMap) {
+            auto [firstId, secondId] = key;
+            auto [firstMatch, secondMatch, _] = value;
+
+            result[firstId] += firstMatch.size();
+            result[secondId] += secondMatch.size();
+        }
+
+        multialign::LigandID candidate;
+        int max = 0;
+        for (auto [key, value] : result) {
+            if (value > max) {
+                candidate = key;
+                max = value;
+            }
+        }
+
+        return *mols.at(candidate);
     }
 
     RDKit::SubstructMatchParameters Matcher::getMatchParams() const {
@@ -277,75 +362,4 @@ namespace coaler::core {
         mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareOrderExact);
         return mcsParams;
     }
-
-    /*----------------------------------------------------------------------------------------------------------------*/
-
-    PairwiseMCSMap Matcher::calcPairwiseMCS(const multialign::LigandVector &mols, bool strict) {
-        PairwiseMCSMap mcsMap;
-        RDKit::MCSParameters mcsParams;
-        if (strict) {
-            mcsParams = getStrictMCSParams();
-        } else {
-            mcsParams = getRelaxedMCSParams();
-        }
-
-        omp_lock_t mapLock;
-        omp_init_lock(&mapLock);
-
-        const RDKit::SubstructMatchParameters substructMatchParams = get_optimizer_substruct_params();
-
-#pragma omp parallel for shared(mols, mcsParams, substructMatchParams, mcsMap, mapLock, strict) default(none)
-        for (auto firstLigandId = 0; firstLigandId < mols.size(); ++firstLigandId) {
-            for (auto secondLigandId = firstLigandId + 1; secondLigandId < mols.size(); ++secondLigandId) {
-                const multialign::LigandPair ligandPair(firstLigandId, secondLigandId);
-
-                const auto &firstLigand = mols.at(firstLigandId);
-                const auto &secondLigand = mols.at(secondLigandId);
-
-                auto firstMol = firstLigand.getMolecule();
-                auto firstMolPtr = boost::make_shared<RDKit::ROMol>(firstMol);
-
-                auto secondMol = secondLigand.getMolecule();
-                auto secondMolPtr = boost::make_shared<RDKit::ROMol>(secondMol);
-
-                const RDKit::MOL_SPTR_VECT molPair{firstMolPtr, secondMolPtr};
-                const RDKit::MCSResult mcsResult = RDKit::findMCS(molPair, &mcsParams);
-
-                if (mcsResult.QueryMol == nullptr) {
-                    omp_set_lock(&mapLock);
-                    mcsMap.emplace(ligandPair, std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>());
-                    omp_unset_lock(&mapLock);
-
-                    spdlog::error("no {} mcs found between {} and {}", strict ? "strict" : "relaxed",
-                                  RDKit::MolToSmiles(firstMol), RDKit::MolToSmiles(secondMol));
-
-                    continue;
-                }
-
-                auto fistMatches = RDKit::SubstructMatch(firstMol, *mcsResult.QueryMol, substructMatchParams);
-                auto secondMatches = RDKit::SubstructMatch(secondMol, *mcsResult.QueryMol, substructMatchParams);
-
-                if (fistMatches.empty() || secondMatches.empty()) {
-                    auto empty = std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>();
-
-                    omp_set_lock(&mapLock);
-                    mcsMap.emplace(ligandPair, empty);
-                    omp_unset_lock(&mapLock);
-
-                    continue;
-                }
-
-                const RDKit::MatchVectType firstLigandMatch = fistMatches.at(0);
-                const RDKit::MatchVectType secondLigandMatch = secondMatches.at(0);
-
-                omp_set_lock(&mapLock);
-                mcsMap.emplace(ligandPair,
-                               std::make_tuple(firstLigandMatch, secondLigandMatch, mcsResult.SmartsString));
-                omp_unset_lock(&mapLock);
-            }
-        }
-
-        return mcsMap;
-    }
-
 }  // namespace coaler::core

@@ -22,10 +22,16 @@ namespace coaler::core {
                                               std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>,
                                               multialign::LigandPairHash>;
 
+    struct PairwiseMCSResult {
+        PairwiseMCSMap strictMcsMap;
+        PairwiseMCSMap relaxedMcsMap;
+    };
+
     struct CoreResult {
         RDKit::ROMOL_SPTR core;
         RDKit::ROMOL_SPTR ref;
         std::unordered_map<int, int> coreToRef;
+        PairwiseMCSResult pairwiseMCSResult;
     };
 
     class Matcher {
@@ -43,6 +49,7 @@ namespace coaler::core {
          */
         std::optional<CoreResult> calculateCoreMurcko(RDKit::MOL_SPTR_VECT& mols);
 
+        PairwiseMCSResult getPairwiseMCS(RDKit::MOL_SPTR_VECT& mols);
         /**
          * @return mcs params for very flexibly mcs search
          * i.e. no atom types, bond types, chirality
@@ -54,9 +61,6 @@ namespace coaler::core {
          * i.e. Chirality, Bond order etc.
          */
         static RDKit::MCSParameters getStrictMCSParams();
-
-        static PairwiseMCSMap calcPairwiseMCS(const multialign::LigandVector& mols, bool strict);
-
       private:
         /**
          * recursive implementation of a murcko pruning of the mcs structure. The function does not delete atoms or
@@ -90,5 +94,7 @@ namespace coaler::core {
         [[nodiscard]] RDKit::SubstructMatchParameters getMatchParams() const;
 
         [[nodiscard]] RDKit::ROMOL_SPTR buildMolConformerForQuery(RDKit::RWMol first, RDKit::ROMol query);
+
+        RDKit::ROMol findReferenceMolecule(RDKit::MOL_SPTR_VECT& mols, PairwiseMCSResult& pairwiseMcsResult);
     };
 }  // namespace coaler::core
