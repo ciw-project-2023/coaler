@@ -3,13 +3,12 @@
 //
 
 #pragma once
-#include "models/Forward.hpp"
-#include "coaler/core/Forward.hpp"
-
 #include "LigandAlignmentAssembly.hpp"
 #include "MultiAlignerResult.hpp"
 #include "OptimizerState.hpp"
 #include "PoseRegisterCollection.hpp"
+#include "coaler/core/Forward.hpp"
+#include "models/Forward.hpp"
 
 namespace coaler::multialign {
 

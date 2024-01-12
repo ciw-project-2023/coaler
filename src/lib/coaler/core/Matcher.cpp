@@ -299,8 +299,8 @@ namespace coaler::core {
             for (auto secondLigandId = firstLigandId + 1; secondLigandId < mols.size(); ++secondLigandId) {
                 const multialign::LigandPair ligandPair(firstLigandId, secondLigandId);
 
-                const auto& firstLigand = mols.at(firstLigandId);
-                const auto& secondLigand = mols.at(secondLigandId);
+                const auto &firstLigand = mols.at(firstLigandId);
+                const auto &secondLigand = mols.at(secondLigandId);
 
                 auto firstMol = firstLigand.getMolecule();
                 auto firstMolPtr = boost::make_shared<RDKit::ROMol>(firstMol);

@@ -1,8 +1,8 @@
 
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
-#include "GraphMol/SmilesParse/SmilesWrite.h"
 
+#include "GraphMol/SmilesParse/SmilesWrite.h"
 #include "catch2/catch.hpp"
 #include "coaler/core/Forward.hpp"
 #include "coaler/embedder/ConformerEmbedder.hpp"

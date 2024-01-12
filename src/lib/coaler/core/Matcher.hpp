@@ -4,19 +4,17 @@
 
 #pragma once
 
-#include "coaler/core/Forward.hpp"
-#include "coaler/multialign/models/Forward.hpp"
-
-#include "GraphMol/RWMol.h"
-#include "GraphMol/Substruct/SubstructMatch.h"
-#include "GraphMol/FMCS/FMCS.h"
-
 #include <cassert>
 #include <queue>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "GraphMol/FMCS/FMCS.h"
+#include "GraphMol/RWMol.h"
+#include "GraphMol/Substruct/SubstructMatch.h"
+#include "coaler/core/Forward.hpp"
+#include "coaler/multialign/models/Forward.hpp"
 
 namespace coaler::core {
 

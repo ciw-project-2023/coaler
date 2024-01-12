@@ -3,12 +3,11 @@
  */
 #pragma once
 
+#include "AssemblyOptimizer.hpp"
+#include "Constants.hpp"
+#include "MultiAlignerResult.hpp"
 #include "coaler/core/Forward.hpp"
 #include "coaler/multialign/models/Forward.hpp"
-
-#include "AssemblyOptimizer.hpp"
-#include "MultiAlignerResult.hpp"
-#include "Constants.hpp"
 
 namespace coaler::multialign {
 

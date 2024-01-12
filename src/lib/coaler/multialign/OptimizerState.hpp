@@ -3,8 +3,8 @@
 //
 #pragma once
 
-#include "models/Forward.hpp"
 #include "PoseRegisterCollection.hpp"
+#include "models/Forward.hpp"
 
 namespace coaler::multialign {
 

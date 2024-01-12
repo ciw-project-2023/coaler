@@ -5,8 +5,9 @@
 #pragma once
 
 #include <unordered_map>
-#include "models/Forward.hpp"
+
 #include "boost/shared_ptr.hpp"
+#include "models/Forward.hpp"
 
 using PosePairAndScore = std::pair<coaler::multialign::PosePair, double>;
 

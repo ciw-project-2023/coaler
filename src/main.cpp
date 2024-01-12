@@ -3,13 +3,14 @@
  */
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <omp.h>
+
 #include <boost/program_options.hpp>
 #include <sstream>
 
-#include "coaler/io/Forward.hpp"
-#include "coaler/embedder/Forward.hpp"
-#include "coaler/multialign/Forward.hpp"
 #include "coaler/core/Forward.hpp"
+#include "coaler/embedder/Forward.hpp"
+#include "coaler/io/Forward.hpp"
+#include "coaler/multialign/Forward.hpp"
 
 namespace opts = boost::program_options;
 using namespace coaler;

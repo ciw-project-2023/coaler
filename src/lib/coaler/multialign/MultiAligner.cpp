@@ -10,10 +10,10 @@
 #include <queue>
 #include <utility>
 
-#include "PoseRegisterBuilder.hpp"
-#include "GraphMol/FMCS/FMCS.h"
 #include "AssemblyOptimizer.hpp"
+#include "GraphMol/FMCS/FMCS.h"
 #include "LigandAlignmentAssembly.hpp"
+#include "PoseRegisterBuilder.hpp"
 #include "StartingAssemblyGenerator.hpp"
 #include "scorer/AlignmentScorer.hpp"
 #include "scorer/AssemblyScorer.hpp"

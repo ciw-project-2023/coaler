@@ -8,7 +8,7 @@
 #include "UniquePoseID.hpp"
 
 #ifndef COALER_UNIQUEPOSESET_HPP
-#define COALER_UNIQUEPOSESET_HPP
+#    define COALER_UNIQUEPOSESET_HPP
 namespace coaler::multialign {
     using UniquePoseSet = std::unordered_set<UniquePoseID, UniquePoseIdentifierHash>;
 }
