@@ -37,7 +37,7 @@ namespace coaler::multialign {
     void PoseRegister::addPoses(const PosePair pair, const double score) {
         if (m_register.size() < m_maxSize) {
             m_register.emplace_back(pair, score);
-            PosePairAndScore insertedElement = m_register.back();
+            PosePairAndScore const insertedElement = m_register.back();
             updateHighest(insertedElement);
             updateLowest();
         } else if (score > m_lowest.second) {
@@ -99,6 +99,7 @@ namespace coaler::multialign {
         assert(m_register.size() == m_maxSize + 1);
         auto itemToRemove = m_register.begin();
         auto newLowest = m_register.begin();
+
         for (auto iter = m_register.begin(); iter != m_register.end(); iter++) {
             if (iter->second < itemToRemove->second) {
                 newLowest = itemToRemove;
@@ -107,6 +108,7 @@ namespace coaler::multialign {
                 newLowest = iter;
             }
         }
+
         m_register.erase(itemToRemove);
         m_lowest = *newLowest;
         assert(m_register.size() == m_maxSize);

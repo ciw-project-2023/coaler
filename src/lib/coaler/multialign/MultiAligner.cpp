@@ -21,43 +21,7 @@
 namespace coaler::multialign {
     using AssemblyWithScore = std::pair<LigandAlignmentAssembly, double>;
 
-    class LigandAvailabilityMapping : public std::unordered_map<LigandID, bool> {
-      public:
-        void setAllAvailable() {
-            for (auto &pair : *this) {
-                pair.second = true;
-            }
-        }
-
-        /*----------------------------------------------------------------------------------------------------------------*/
-
-        void init(const LigandVector &ligands) {
-            for (const Ligand &ligand : ligands) {
-                this->emplace(ligand.getID(), true);
-            }
-        }
-    };
-
     /*----------------------------------------------------------------------------------------------------------------*/
-
-    struct LigandIsAvailable {
-        bool operator()(std::pair<LigandID, bool> entry) { return entry.second; }
-    };
-
-    /*----------------------------------------------------------------------------------------------------------------*/
-
-    struct AssemblyWithScoreLess {
-        bool operator()(const AssemblyWithScore &lhs, const AssemblyWithScore &rhs) {
-            if (lhs.first.getMissingLigandsCount() != lhs.first.getMissingLigandsCount()) {
-                return lhs.first.getMissingLigandsCount() < lhs.first.getMissingLigandsCount();
-            }
-
-            return lhs.second < rhs.second;
-        }
-    };
-
-    /*----------------------------------------------------------------------------------------------------------------*/
-
     struct AssemblyWithScoreGreater {
         bool operator()(const AssemblyWithScore &lhs, const AssemblyWithScore &rhs) {
             if (lhs.first.getMissingLigandsCount() != lhs.first.getMissingLigandsCount()) {
@@ -83,7 +47,7 @@ namespace coaler::multialign {
 
         // calculate pairwise alignments
         spdlog::info("Start calculating pairwise alignments.");
-        m_pairwiseAlignments = this->calculateAlignmentScores(m_ligands);
+        m_pairwiseAlignments = MultiAligner::calculateAlignmentScores(m_ligands);
         spdlog::info("Finished calculating pairwise alignments.");
 
         // build pose registers
@@ -101,7 +65,7 @@ namespace coaler::multialign {
 
         // calculate number of combinations. Each pair of ligands A,B has
         // A.getNumPoses() * B.getNumPoses() many embeddings
-        unsigned n = ligands.size();
+        unsigned const n = ligands.size();
         unsigned combinations = 0;
         for (unsigned id_A = 0; id_A < n; id_A++) {
             for (unsigned id_B = id_A + 1; id_B < n; id_B++) {
@@ -114,8 +78,9 @@ namespace coaler::multialign {
         for (LigandID firstMolId = 0; firstMolId < ligands.size(); firstMolId++) {
             spdlog::info("calculated {} combinations so far.", scores.size());
             for (LigandID secondMolId = firstMolId + 1; secondMolId < ligands.size(); secondMolId++) {
-                unsigned nofPosesFirst = ligands.at(firstMolId).getNumPoses();
-                unsigned nofPosesSecond = ligands.at(secondMolId).getNumPoses();
+                unsigned const nofPosesFirst = ligands.at(firstMolId).getNumPoses();
+                unsigned const nofPosesSecond = ligands.at(secondMolId).getNumPoses();
+
                 omp_lock_t maplock;
                 omp_init_lock(&maplock);
 
