@@ -295,12 +295,12 @@ namespace coaler::core {
         const RDKit::SubstructMatchParameters substructMatchParams = get_optimizer_substruct_params();
 
 #pragma omp parallel for shared(mols, mcsParams, substructMatchParams, mcsMap, mapLock, strict) default(none)
-        for (auto fstId = 0; fstId < mols.size(); ++fstId) {
-            for (auto scndId = fstId + 1; scndId < mols.size(); ++scndId) {
-                const multialign::LigandPair ligandPair(fstId, scndId);
+        for (auto firstLigandId = 0; firstLigandId < mols.size(); ++firstLigandId) {
+            for (auto secondLigandId = firstLigandId + 1; secondLigandId < mols.size(); ++secondLigandId) {
+                const multialign::LigandPair ligandPair(firstLigandId, secondLigandId);
 
-                const auto firstLigand = mols.at(fstId);
-                const auto secondLigand = mols.at(scndId);
+                const auto& firstLigand = mols.at(firstLigandId);
+                const auto& secondLigand = mols.at(secondLigandId);
 
                 auto firstMol = firstLigand.getMolecule();
                 auto firstMolPtr = boost::make_shared<RDKit::ROMol>(firstMol);
