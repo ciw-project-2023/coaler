@@ -74,5 +74,51 @@ jobs:
 
       - run: ls build
 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up python
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - run: pip install conan
+
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.13
+        with:
+          cmake-version: '3.16.x'
+
+      - name: Cache conan files
+        id: cached-conan-files
+        uses: actions/cache@v3
+        with:
+          path: "~/.conan2"
+          key: ${{ runner.os }}-${{ hashFiles('conan.lock') }}
+
+      - name: Create conan profile
+        if: steps.cached-conan-files.outputs.cache-hit != 'true'
+        run: conan profile detect
+
+      - name: Add conan remote
+        if: steps.cached-conan-files.outputs.cache-hit != 'true'
+        run: conan remote add coaler $CONAN_SERVER_URL
+
+      - name: Login into conan server
+        if: steps.cached-conan-files.outputs.cache-hit != 'true'
+        run: conan remote login coaler $CONAN_SERVER_USER --password $CONAN_SERVER_PASSWORD
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: graph explain
+        run: conan graph info .
+
+      - name: Build
+        run: conan build . --build_type=Debug
+
+      - run: ls build
+
       - name: Clang-Tidy
         run: clang-tidy -p=/build/Release --quiet $(find . -not \( -path "./test/*" -or -path "./build/*" \) \( -name '*.cpp' -or -name '*.h' -or -name '*.hpp' \) )
