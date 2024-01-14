@@ -21,7 +21,7 @@ TEST_CASE("Core_MCS", "[core]") {
     Matcher matcher(1);
     auto coreScaffoldMCS = matcher.calculateCoreMcs(mols);
     CHECK(RDKit::MolToSmarts(*coreScaffoldMCS.value().core)
-          == "[#6]1:&@[#6]:&@[#6](:&@[#6]:&@[#6]:&@[#6]:&@1)-&!@[#7&R]");
+          ==  "[#6]1:&@[#6]:&@[#6](:&@[#6]:&@[#6]:&@[#6]:&@1)-&!@[#7]1-&@[#6]-&@[#6](-&@[#8,#7]-&@[#6]-&@1=&!@[#8,#16;!R])-,=;!@[#6,#8;!R]");
 }
 
 TEST_CASE("failing_mcs", "[core]") {

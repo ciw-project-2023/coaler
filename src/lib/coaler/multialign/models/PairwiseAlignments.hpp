@@ -7,8 +7,10 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Forward.hpp"
+#include "Alias.hpp"
+#include "LigandVector.hpp"
 #include "PosePair.hpp"
+
 namespace coaler::multialign {
 
     /**
@@ -30,7 +32,7 @@ namespace coaler::multialign {
          * @param store
          * @return
          */
-        double at(const PosePair& key, const std::vector<Ligand>& ligands = {}, bool store = false);
+        double at(const PosePair& key, const LigandVector& ligands = {}, bool store = false);
 
         PairwiseAlignments& operator=(const PairwiseAlignments& p);
         virtual PairwiseAlignments& operator=(const std::unordered_map<PosePair, double, PosePairHash>& p);

@@ -3,7 +3,7 @@
  */
 
 #pragma once
-#include "Forward.hpp"
+
 #include "PoseRegister.hpp"
 #include "models/Forward.hpp"
 
@@ -11,9 +11,7 @@ namespace coaler::multialign {
 
     class PoseRegisterCollection {
       public:
-        // TODO prefer init in constructor.
         /**
-         *
          * @param poseRegister PoseRegister to add to the collection.
          */
         void addRegister(const PoseRegister& poseRegister);

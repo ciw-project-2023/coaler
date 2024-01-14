@@ -10,11 +10,11 @@
 namespace coaler::embedder {
 
     unsigned CoreSymmetryCalculator::getNofSymmetryAxes(const RDKit::ROMol& mol) {
-        std::string patternString = RDKit::MolToSmarts(mol);
-        RDKit::ROMol patternMol = *RDKit::SmartsToMol(patternString);
+        std::string const patternString = RDKit::MolToSmarts(mol);
+        RDKit::ROMol const patternMol = *RDKit::SmartsToMol(patternString);
         RDKit::SubstructMatchParameters params;
         params.uniquify = false;
-        std::vector<RDKit::MatchVectType> matches = RDKit::SubstructMatch(mol, mol, params);
+        auto matches = RDKit::SubstructMatch(mol, mol, params);
         return matches.size();
     }
 }  // namespace coaler::embedder

@@ -6,6 +6,7 @@
 #include <omp.h>
 #include <spdlog/spdlog.h>
 
+#include "Constants.hpp"
 #include "PoseRegister.hpp"
 #include "models/Ligand.hpp"
 #include "models/PairwiseAlignments.hpp"
@@ -39,6 +40,7 @@ namespace coaler::multialign {
                         poseRegister.addPoses(pair, score);
                     }
                 }
+
                 omp_set_lock(&poseRegistersLock);
                 poseRegisters.emplace(currentLigandPair, poseRegister);
                 omp_unset_lock(&poseRegistersLock);

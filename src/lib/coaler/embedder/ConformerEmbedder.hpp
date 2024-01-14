@@ -6,12 +6,10 @@
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/ROMol.h>
 
-#include "Forward.hpp"
 #include "coaler/core/Forward.hpp"
 #include "coaler/multialign/Forward.hpp"
 
 namespace coaler::embedder {
-
     using CoreAtomMapping = std::map<int, RDGeom::Point3D>;
 
     /**
@@ -20,7 +18,7 @@ namespace coaler::embedder {
      */
     class ConformerEmbedder {
       public:
-        ConformerEmbedder(const core::CoreResult& result, const int threads, const bool divideConformersByMatches);
+        ConformerEmbedder(const core::CoreResult& result, int threads, bool divideConformersByMatches);
 
         /**
          * Embed an even amount of Conformers at every core match.
@@ -45,9 +43,6 @@ namespace coaler::embedder {
                                                                      const RDKit::MatchVectType& targetMcsMatch);
 
       private:
-        static std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string> getMcsMatches(
-            const RDKit::ROMol* worstLigandMol, const RDKit::ROMol* targetMol, bool strict);
-
         core::CoreResult m_core;
         int m_threads;
         bool m_divideConformersByMatches;

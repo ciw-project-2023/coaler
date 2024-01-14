@@ -3,11 +3,10 @@
  */
 
 #pragma once
-#include <coaler/multialign/models/PairwiseAlignments.hpp>
 
-#include "coaler/multialign/Forward.hpp"
 #include "coaler/multialign/LigandAlignmentAssembly.hpp"
 #include "coaler/multialign/PoseRegisterCollection.hpp"
+#include "coaler/multialign/models/PairwiseAlignments.hpp"
 
 namespace coaler::multialign {
     class AssemblyScorer {
