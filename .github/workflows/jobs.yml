@@ -1,10 +1,12 @@
-name: Test
+name: TestNew
 on:
-  workflow_dispatch:
-
   pull_request:
     branches:
       - main
+      - clang-tidy2.0
+
+  workflow_dispatch:
+
 env:
   CONAN_SERVER_URL: http://server.conan.corealigner.de
   CONAN_SERVER_USER: ciw
@@ -15,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Run clang-format
         uses: jidicula/clang-format-action@v4.11.0
         with:
@@ -25,9 +28,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       - name: Set up python
         id: setup-python
         uses: actions/setup-python@v4
@@ -60,8 +60,17 @@ jobs:
         if: steps.cached-conan-files.outputs.cache-hit != 'true'
         run: conan remote login coaler $CONAN_SERVER_USER --password $CONAN_SERVER_PASSWORD
 
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: graph explain
+        run: conan graph info .
+
       - name: Build
         run: conan build .
 
       - name: Run Tests
         run: ./build/Release/test/Test
+
+      - name: Clang-Tidy
+        run: clang-tidy -p=build --quiet $(find . -not \( -path "./test/*" -or -path "./build/*" \) \( -name '*.cpp' -or -name '*.h' -or -name '*.hpp' \) )
