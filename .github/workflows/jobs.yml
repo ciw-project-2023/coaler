@@ -116,7 +116,7 @@ jobs:
         run: conan graph info .
 
       - name: Build
-        run: conan build . --build_type=Debug
+        run: conan build . -s build_type=Debug
 
       - run: ls build
 
