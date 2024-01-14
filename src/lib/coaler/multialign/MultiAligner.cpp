@@ -15,6 +15,7 @@
 #include "LigandAlignmentAssembly.hpp"
 #include "PoseRegisterBuilder.hpp"
 #include "StartingAssemblyGenerator.hpp"
+#include "models/AssemblyIDManager.hpp"
 #include "scorer/AlignmentScorer.hpp"
 #include "scorer/AssemblyScorer.hpp"
 
@@ -115,10 +116,16 @@ namespace coaler::multialign {
         // build starting ensembles from registers
         // AssemblyCollection assemblies;
         std::priority_queue<AssemblyWithScore, std::vector<AssemblyWithScore>, AssemblyWithScoreGreater> assemblies;
+
+        AssemblyIDManager assemblyIdManager;
         for (const Ligand &ligand : m_ligands) {
             for (const UniquePoseID &pose : ligand.getPoses()) {
                 const LigandAlignmentAssembly assembly
                     = StartingAssemblyGenerator::generateStartingAssembly(pose, m_poseRegisters, m_ligands);
+
+                if (!assemblyIdManager.is_assembly_new(assembly)) {
+                    continue;
+                }
 
                 double const score = AssemblyScorer::calculateAssemblyScore(assembly, m_pairwiseAlignments, m_ligands);
                 const AssemblyWithScore newAssembly = std::make_pair(assembly, score);
