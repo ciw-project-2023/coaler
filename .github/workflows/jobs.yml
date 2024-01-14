@@ -118,7 +118,7 @@ jobs:
       - name: Build
         run: conan build . -s build_type=Debug --build=missing
 
-      - run: cmake . -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=build/Debug/generators/conan_toolchain.cmake -G Ninja -S . -B ./build
+      - run: cmake . -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=build/Debug/generators/conan_toolchain.cmake
 
       - run: ls build
 
