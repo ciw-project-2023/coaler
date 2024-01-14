@@ -72,19 +72,5 @@ jobs:
       - name: Run Tests
         run: ./build/Release/test/Test
 
-      - run: pwd
-
-      - run: ls
-
-      - run: cd ..
-
-      - run: pwd
-
-      - run: ls
-
-      - run: cd build
-
-      - run: ls
-
       - name: Clang-Tidy
-        run: clang-tidy -p=build --quiet $(find . -not \( -path "./test/*" -or -path "./build/*" \) \( -name '*.cpp' -or -name '*.h' -or -name '*.hpp' \) )
+        run: clang-tidy -p=./build --quiet $(find . -not \( -path "./test/*" -or -path "./build/*" \) \( -name '*.cpp' -or -name '*.h' -or -name '*.hpp' \) )
