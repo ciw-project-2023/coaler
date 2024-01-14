@@ -78,6 +78,12 @@ jobs:
 
       - run: cd ..
 
+      - run: pwd
+
+      - run: ls
+
+      - run: cd build
+
       - run: ls
 
       - name: Clang-Tidy
