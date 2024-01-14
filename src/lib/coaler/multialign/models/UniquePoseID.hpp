@@ -2,7 +2,10 @@
  * Copyright 2023 CoAler Group, all rights reserved.
  */
 #pragma once
-#include "Forward.hpp"
+
+#include <string>
+
+#include "Alias.hpp"
 
 namespace coaler::multialign {
     /**
@@ -25,7 +28,7 @@ namespace coaler::multialign {
 
         bool operator>(const UniquePoseID &other) const;
 
-        [[maybe_unused]] [[nodiscard]] std::string toString() const noexcept;
+        [[nodiscard]] std::string toString() const noexcept;
 
         [[nodiscard]] LigandID getLigandId() const;
 

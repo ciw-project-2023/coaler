@@ -1,8 +1,23 @@
 #pragma once
 
-#include "Forward.hpp"
+#include <cassert>
+#include <queue>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "GraphMol/FMCS/FMCS.h"
+#include "GraphMol/RWMol.h"
+#include "GraphMol/Substruct/SubstructMatch.h"
+#include "coaler/core/Forward.hpp"
+#include "coaler/multialign/models/Forward.hpp"
 
 namespace coaler::core {
+
+    using PairwiseMCSMap = std::unordered_map<multialign::LigandPair,
+                                              std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>,
+                                              multialign::LigandPairHash>;
+
     struct CoreResult {
         RDKit::ROMOL_SPTR core{};
         RDKit::ROMOL_SPTR ref{};
@@ -23,6 +38,20 @@ namespace coaler::core {
          * @return Murcko Scaffold as ROMol
          */
         std::optional<CoreResult> calculateCoreMurcko(const RDKit::MOL_SPTR_VECT& mols);
+
+        /**
+         * @return mcs params for very flexibly mcs search
+         * i.e. no atom types, bond types, chirality
+         */
+        static RDKit::MCSParameters getRelaxedMCSParams();
+
+        /**
+         * @return mcs params fora strict mcs search
+         * i.e. Chirality, Bond order etc.
+         */
+        static RDKit::MCSParameters getStrictMCSParams();
+
+        static PairwiseMCSMap calcPairwiseMCS(const multialign::LigandVector& mols, bool strict);
 
       private:
         /**

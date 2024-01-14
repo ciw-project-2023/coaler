@@ -37,7 +37,7 @@ namespace coaler::multialign {
     void PoseRegister::addPoses(const PosePair pair, const double score) {
         if (m_register.size() < m_maxSize) {
             m_register.emplace_back(pair, score);
-            PosePairAndScore insertedElement = m_register.back();
+            PosePairAndScore const insertedElement = m_register.back();
             updateHighest(insertedElement);
             updateLowest();
         } else if (score > m_lowest.second) {
@@ -49,11 +49,15 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    PosePair PoseRegister::getHighestScoringPair() { return m_highest.first; }
+    PosePair PoseRegister::getHighestScoringPair() const noexcept { return m_highest.first; }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    bool PoseRegister::containsPose(const UniquePoseID &pose) {
+    double PoseRegister::getHighestScore() const noexcept { return m_highest.second; }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    bool PoseRegister::containsPose(const UniquePoseID &pose) const {
         return std::any_of(m_register.begin(), m_register.end(), [pose](const auto entry) {
             return entry.first.getFirst() == pose || entry.first.getSecond() == pose;
         });
@@ -95,6 +99,7 @@ namespace coaler::multialign {
         assert(m_register.size() == m_maxSize + 1);
         auto itemToRemove = m_register.begin();
         auto newLowest = m_register.begin();
+
         for (auto iter = m_register.begin(); iter != m_register.end(); iter++) {
             if (iter->second < itemToRemove->second) {
                 newLowest = itemToRemove;
@@ -103,6 +108,7 @@ namespace coaler::multialign {
                 newLowest = iter;
             }
         }
+
         m_register.erase(itemToRemove);
         m_lowest = *newLowest;
         assert(m_register.size() == m_maxSize);

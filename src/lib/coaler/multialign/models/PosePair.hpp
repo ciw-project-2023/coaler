@@ -2,8 +2,9 @@
  * Copyright 2023 CoAler Group, all rights reserved.
  */
 #pragma once
-#include "Forward.hpp"
+#include "Alias.hpp"
 #include "UniquePoseID.hpp"
+#include "boost/functional/hash.hpp"
 
 namespace coaler::multialign {
 
@@ -14,8 +15,8 @@ namespace coaler::multialign {
       public:
         explicit PosePair(UniquePoseID first, UniquePoseID second);
 
-        [[nodiscard]] const UniquePoseID getFirst() const noexcept;
-        [[nodiscard]] const UniquePoseID getSecond() const noexcept;
+        [[nodiscard]] UniquePoseID getFirst() const noexcept;
+        [[nodiscard]] UniquePoseID getSecond() const noexcept;
 
         bool operator==(const PosePair& other) const;
 

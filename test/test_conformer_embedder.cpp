@@ -46,3 +46,22 @@ TEST_CASE("test_mcs", "[conformer_generator_tester]") {
         CHECK(mol1->getNumConformers() == 10);
     }
 }
+
+TEST_CASE("test_mcs_match_mapping", "[conformer_generator_tester]") {
+    RDGeom::POINT3D_VECT points;
+    for (int i = 0; i <= 5; i++) {
+        points.emplace_back(i, 0, 0);
+    }
+    const RDKit::MatchVectType targetMatch = {{0, 2}, {1, 3}, {2, 4}};
+    const RDKit::MatchVectType ligandMatch = {{0, 2}, {1, 3}, {2, 4}};
+    CoreAtomMapping ligandCoords
+        = ConformerEmbedder::getLigandMcsAtomCoordsFromTargetMatch(points, ligandMatch, targetMatch);
+
+    CHECK(ligandCoords.count(2) == 1);
+    CHECK(ligandCoords.count(3) == 1);
+    CHECK(ligandCoords.count(4) == 1);
+
+    CHECK(ligandCoords.at(2).x == 2);
+    CHECK(ligandCoords.at(3).x == 3);
+    CHECK(ligandCoords.at(4).x == 4);
+}

@@ -2,7 +2,10 @@
  * Copyright 2023 CoAler Group, all rights reserved.
  */
 #pragma once
-#include "Forward.hpp"
+#include <cstddef>
+
+#include "Alias.hpp"
+#include "boost/functional/hash.hpp"
 
 namespace coaler::multialign {
     /**

@@ -8,8 +8,7 @@
 
 #include <unordered_map>
 
-#include "../multialign/Forward.hpp"
-#include "../multialign/MultiAlignerResult.hpp"
+#include "coaler/multialign/Forward.hpp"
 
 namespace coaler::io {
     /**

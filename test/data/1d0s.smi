@@ -1,0 +1,12 @@
+[H]O[C@@]1([H])[C@@]([H])(O[H])[C@@]([H])(N2C([H])=NC3=NC(=O)N([H])C([H])=C32)O[C@]1([H])C([H])([H])OP(=O)(O[H])O[H]	P2P_A_990
+[H]O[C@@]1([H])[C@@]([H])(O[H])[C@@]([H])(N2C([H])=NC3=C2C([H])=C(C([H])([H])[H])C(C([H])([H])[H])=C3[H])O[C@]1([H])C([H])([H])OP(=O)(O[H])O[H]	RBZ_A_990
+[H]O[C@@]1([H])[C@@]([H])(O[H])[C@@]([H])(N2C([H])=NC3=C2C([H])=C([H])C([H])=C3[H])O[C@]1([H])C([H])([H])OP(=O)(O[H])O[H]	1RB_A_990
+[H]C1=C(C([H])([H])[H])C(C([H])([H])[H])=C([H])C(N([H])[H])=C1N([H])[H]	150_A_990
+[H]O[C@@]1([H])[C@@]([H])(O[H])[C@@]([H])(N2C([H])=NC3=C2C([H])=NC([H])=N3)O[C@]1([H])C([H])([H])OP(=O)(O[H])O[H]	7RP_A_990
+[H]O[C@@]1([H])[C@@]([H])(O[H])[C@@]([H])(N2C([H])=NC3=C2C([H])=NC(N([H])[H])=N3)O[C@]1([H])C([H])([H])OP(=O)(O[H])O[H]	7RA_A_990
+[H]O[C@@]1([H])[C@@]([H])(O[H])[C@@]([H])(N2C([H])=NC3=C2C([H])=C([H])C(C([H])([H])[H])=C3[H])O[C@]1([H])C([H])([H])OP(=O)(O[H])O[H]	RMB_A_990
+[H]C1=NC2=C(C([H])=C(C([H])([H])[H])C(C([H])([H])[H])=C2[H])N1[H]	DMD_A_999
+[H]O[C@@]1([H])[C@@]([H])(O[H])[C@@]([H])(N2C([H])=NC3=C2C([H])=C([H])C(OC([H])([H])[H])=C3[H])O[C@]1([H])C([H])([H])OP(=O)(O[H])O[H]	PMO_A_990
+[H]O[C@@]1([H])[C@@]([H])(O[H])[C@@]([H])(N2C([H])=NC3=C2C(N([H])[H])=NC([H])=N3)O[C@]1([H])C([H])([H])OP(=O)(O[H])O[H]	AAM_A_990
+[H]C1=NC2=C(C([H])=C(OC([H])([H])[H])C([H])=C2[H])N1[H]	5OB_A_990
+[H]C1=NC2=C(C([H])=C(C([H])([H])[H])C([H])=C2[H])N1[H]	5MB_A_990

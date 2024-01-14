@@ -5,10 +5,9 @@
 
 #include <GraphMol/GraphMol.h>
 
-#include <unordered_set>
-
-#include "Forward.hpp"
+#include "Alias.hpp"
 #include "UniquePoseID.hpp"
+#include "UniquePoseSet.hpp"
 
 namespace coaler::multialign {
 
@@ -17,13 +16,19 @@ namespace coaler::multialign {
      */
     class Ligand {
       public:
-        Ligand(const RDKit::RWMol& mol, const UniquePoseSet& poses, LigandID id);
+        Ligand(const RDKit::ROMol& mol, const UniquePoseSet& poses, LigandID id);
 
         /**
          * get idenitifers of all poses embedded in ligand.
          * @return
          */
         [[nodiscard]] UniquePoseSet getPoses() const noexcept;
+
+        /**
+         * Add a new pose to the map
+         * @param poseId The ids of the ligands molecule conformer.
+         */
+        void addPose(const PoseID& poseId) noexcept;
 
         /**
          *
@@ -47,7 +52,13 @@ namespace coaler::multialign {
          *
          * @return The molecule represented by the ligand.
          */
-        RDKit::RWMol getMolecule() const noexcept;
+        RDKit::ROMol getMolecule() const noexcept;
+
+        RDKit::RWMol const* getMoleculePtr() const noexcept;
+
+        void removePose(PoseID pose);
+
+        bool operator==(const Ligand& other) const;
 
       private:
         LigandID m_id;
