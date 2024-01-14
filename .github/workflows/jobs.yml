@@ -63,6 +63,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: graph explain
+        run: conan graph info .
+
       - name: Build
         run: conan build .
 
