@@ -1,3 +1,5 @@
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 file(GLOB_RECURSE library_src CONFIGURE_DEPENDS *.cpp *.hpp *.h)
 
 find_package(OpenMP REQUIRED)

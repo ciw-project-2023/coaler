@@ -1,3 +1,5 @@
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 add_executable (coaler main.cpp)
 add_subdirectory(lib)
 
