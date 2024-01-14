@@ -32,8 +32,7 @@ TEST_CASE("test_pose_register_builder", "[multialign]") {
         PairwisePoseRegisters reg = collection.getAllRegisters();
 
         CHECK(reg.size() == 1);
-        CHECK(reg.at(ligandPair)->getSize()
-              == constants::PoseRegisterSizeFactor * l1.getNumPoses() * l2.getNumPoses());
+        CHECK(reg.at(ligandPair)->getSize() == constants::PoseRegisterSizeFactor * l1.getNumPoses() * l2.getNumPoses());
         CHECK(reg.at(ligandPair)->getHighestScoringPair() == m0p0m1p0);
     }
     SECTION("parallel") {
@@ -42,8 +41,7 @@ TEST_CASE("test_pose_register_builder", "[multialign]") {
         PairwisePoseRegisters reg = collection.getAllRegisters();
 
         CHECK(reg.size() == 1);
-        CHECK(reg.at(ligandPair)->getSize()
-              == constants::PoseRegisterSizeFactor * l1.getNumPoses() * l2.getNumPoses());
+        CHECK(reg.at(ligandPair)->getSize() == constants::PoseRegisterSizeFactor * l1.getNumPoses() * l2.getNumPoses());
         CHECK(reg.at(ligandPair)->getHighestScoringPair() == m0p0m1p0);
     }
 }

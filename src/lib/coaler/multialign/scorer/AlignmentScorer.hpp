@@ -19,7 +19,7 @@ namespace coaler::multialign {
          * @return Tanimoto shape similarity of molecules
          */
         static double calcTanimotoShapeSimilarity(const RDKit::ROMol& molA, const RDKit::ROMol& molB,
-                                                     unsigned int posIdA, unsigned int posIdB);
+                                                  unsigned int posIdA, unsigned int posIdB);
     };
 
 }  // namespace coaler::multialign
