@@ -10,7 +10,7 @@
 #include "GraphMol/ChemTransforms/ChemTransforms.h"
 #include "GraphMol/DistGeomHelpers/Embedder.h"
 #include "GraphMol/FMCS/FMCS.h"
-#include "GraphMol/ForceFieldHelpers/UFF/UFF.h"
+#include "GraphMol/ForceFieldHelpers/MMFF/MMFF.h"
 #include "GraphMol/RWMol.h"
 #include "GraphMol/SmilesParse/SmartsWrite.h"
 #include "GraphMol/SmilesParse/SmilesWrite.h"
@@ -29,7 +29,7 @@ namespace coaler::core {
         spdlog::info("MCS: {}", globalMcs.SmartsString);
 
         auto pairwiseMcs = this->getPairwiseMCS(mols);
-        auto reference = this->findReferenceMolecule(mols, pairwiseMcs);
+        auto [refId, reference] = this->findReferenceMolecule(mols, pairwiseMcs);
         auto ref = this->buildMolConformerForQuery(reference, *globalMcs.QueryMol);
 
         auto matches = RDKit::SubstructMatch(*ref, *globalMcs.QueryMol, this->getMatchParams());
@@ -41,7 +41,7 @@ namespace coaler::core {
             coreToRef[queryId] = molId;
         }
 
-        return CoreResult{globalMcs.QueryMol, ref, coreToRef};
+        return CoreResult{globalMcs.QueryMol, refId, ref, coreToRef, pairwiseMcs};
     }
 
     std::optional<CoreResult> Matcher::calculateCoreMurcko(RDKit::MOL_SPTR_VECT &mols) {
@@ -136,7 +136,7 @@ namespace coaler::core {
             coreToRef[queryId] = molId;
         }
 
-        return CoreResult{murckoPtr, ref, coreToRef};
+        return CoreResult{murckoPtr, 0, ref, coreToRef};
     }
 
     // TODO this only creates a conformer for one specific reference point. A query can contain wildcards
@@ -151,7 +151,7 @@ namespace coaler::core {
         RDKit::DGeomHelpers::EmbedMolecule(first, params);
 
         std::vector<std::pair<int, double>> result;
-        RDKit::UFF::UFFOptimizeMoleculeConfs(first, result, m_threads, 2000, 10.0, false);
+        RDKit::MMFF::MMFFOptimizeMoleculeConfs(first, result, m_threads);
 
         return boost::make_shared<RDKit::ROMol>(first);
     }
@@ -277,7 +277,7 @@ namespace coaler::core {
         return {strictMcsMap, relaxedMcsMap};
     }
 
-    RDKit::ROMol Matcher::findReferenceMolecule(RDKit::MOL_SPTR_VECT &mols, PairwiseMCSResult &pairwiseMcsResult) {
+    std::pair<multialign::LigandID, RDKit::ROMol> Matcher::findReferenceMolecule(RDKit::MOL_SPTR_VECT &mols, PairwiseMCSResult &pairwiseMcsResult) {
         auto relaxedMcsMap = pairwiseMcsResult.relaxedMcsMap;
 
         std::map<multialign::LigandID, int> result;
@@ -298,7 +298,9 @@ namespace coaler::core {
             }
         }
 
-        return *mols.at(candidate);
+        spdlog::info("reference molecule: {}", RDKit::MolToSmiles(*mols.at(candidate)));
+
+        return {candidate, *mols.at(candidate)};
     }
 
     RDKit::SubstructMatchParameters Matcher::getMatchParams() const {

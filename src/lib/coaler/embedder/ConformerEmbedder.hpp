@@ -18,7 +18,7 @@ namespace coaler::embedder {
      */
     class ConformerEmbedder {
       public:
-        ConformerEmbedder(const core::CoreResult& result, int threads, bool divideConformersByMatches);
+        ConformerEmbedder(core::CoreResult  result, int threads, bool divideConformersByMatches);
 
         /**
          * Embed an even amount of Conformers at every core match.
@@ -29,7 +29,7 @@ namespace coaler::embedder {
          *
          * @return True upon success.
          */
-        void embedConformers(const RDKit::ROMOL_SPTR& mol, unsigned numConfs);
+        void embedConformers(const RDKit::ROMOL_SPTR& mol, multialign::LigandID id, unsigned numConfs);
 
         // std::vector<RDKit::MatchVectType> filterMatches(const std::vector<RDKit::MatchVectType>& matches);
 
@@ -48,5 +48,6 @@ namespace coaler::embedder {
         bool m_divideConformersByMatches;
 
         RDKit::DGeomHelpers::EmbedParameters getEmbeddingParameters() const;
+        RDKit::SubstructMatchParameters getSubstructMatchParameters() const;
     };
 }  // namespace coaler::embedder

@@ -29,6 +29,7 @@ namespace coaler::core {
 
     struct CoreResult {
         RDKit::ROMOL_SPTR core;
+        multialign::LigandID refID;
         RDKit::ROMOL_SPTR ref;
         std::unordered_map<int, int> coreToRef;
         PairwiseMCSResult pairwiseMCSResult;
@@ -95,6 +96,6 @@ namespace coaler::core {
 
         [[nodiscard]] RDKit::ROMOL_SPTR buildMolConformerForQuery(RDKit::RWMol first, RDKit::ROMol query);
 
-        RDKit::ROMol findReferenceMolecule(RDKit::MOL_SPTR_VECT& mols, PairwiseMCSResult& pairwiseMcsResult);
+        std::pair<multialign::LigandID, RDKit::ROMol> findReferenceMolecule(RDKit::MOL_SPTR_VECT& mols, PairwiseMCSResult& pairwiseMcsResult);
     };
 }  // namespace coaler::core

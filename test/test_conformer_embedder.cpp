@@ -23,7 +23,7 @@ TEST_CASE("test_mcs", "[conformer_generator_tester]") {
         auto core = matcher.calculateCoreMcs(mols).value();
 
         ConformerEmbedder embedder(core, 1, true);
-        embedder.embedConformers(mol1, 10);
+        embedder.embedConformers(mol1, 0, 10);
 
         CHECK(RDKit::MolToSmarts(*core.core) == "[#6]1:&@[#6](-&!@[#8,#6;!R]):&@[#6]:&@[#6,#7]:&@[#6]:&@[#6]:&@1");
         CHECK(mol1->getNumConformers() == 10);
@@ -39,7 +39,7 @@ TEST_CASE("test_mcs", "[conformer_generator_tester]") {
         auto core = matcher.calculateCoreMcs(mols).value();
 
         ConformerEmbedder embedder(core, 1, true);
-        embedder.embedConformers(mol1, 10);
+        embedder.embedConformers(mol1, 0, 10);
 
         CHECK(RDKit::MolToSmarts(*core.core)
               == "[#6]12-,:;@[#6]-,:;@[#6]=,:;@[#6]-,:;@[#6]-,:;@[#6]:&@1:&@[#6]:&@[#6]:&@[#6]:&@[#6]:&@2");

@@ -4,7 +4,7 @@
 
 #include "AssemblyOptimizer.hpp"
 
-#include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
+#include <GraphMol/ForceFieldHelpers/MMFF/MMFF.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <spdlog/spdlog.h>
 
@@ -226,7 +226,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             }
 
             std::vector<std::pair<int, double>> result;
-            RDKit::UFF::UFFOptimizeMoleculeConfs((RDKit::ROMol &)*worstLigand->getMoleculePtr(), result, m_threads, 2000, 10.0, false);
+            RDKit::MMFF::MMFFOptimizeMoleculeConfs((RDKit::ROMol &)*worstLigand->getMoleculePtr(), result, m_threads);
 
             auto [bestNewPoseID, bestNewAssemblyScore]
                 = find_optimal_pose(worstLigandId, newConfIDs, assembly, scores, ligands);

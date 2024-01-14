@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
         spdlog::set_level(spdlog::level::debug);
     }
 
-    omp_set_num_threads(opts.numThreads);
+    omp_set_num_threads(1);
 
     std::ofstream output_file(opts.outFile);
     if (!output_file.is_open()) {
@@ -137,30 +137,20 @@ int main(int argc, char* argv[]) {
     }
 
     auto core = coreResult.value();
-
     spdlog::info("core structure: {}", RDKit::MolToSmarts(*core.core));
 
-    // generate random coreResult with coordinates. TODO: get coordinates from input
-
-    // const core::PairwiseMCSMap pairwiseStrictMcsMap = matcher.getPairwiseMCS(mols, true);
-    // const core::PairwiseMCSMap pairwiseRelaxedMcsMap = matcher.getPairwiseMCS(mols, false);
-
     spdlog::info("Embedding {} conformers for all molecules.", opts.numConformers);
-
     embedder::ConformerEmbedder embedder(core, opts.numThreads, opts.divideConformersByMatches);
 
 #pragma omp parallel for shared(mols, embedder, opts) default(none)
     for (unsigned i = 0; i < mols.size(); i++) {
-        embedder.embedConformers(mols.at(i), opts.numConformers);
+        embedder.embedConformers(mols.at(i), i, opts.numConformers);
     }
 
     auto ligands = multialign::LigandVector(mols);
-    auto strictMcsMap = coaler::core::Matcher::getPairwiseMCS(ligands, false);
-    auto relaxedMcsMap = coaler::core::Matcher::getPairwiseMCS(ligands, true);
-
-    const multialign::AssemblyOptimizer optimizer(strictMcsMap, relaxedMcsMap, opts.coarseOptimizationThreshold,
-                                                  opts.fineOptimizationThreshold, opts.optimizerStepLimit,
-                                                  opts.numThreads);
+    const multialign::AssemblyOptimizer optimizer(
+        coreResult->pairwiseMCSResult.strictMcsMap, coreResult->pairwiseMCSResult.relaxedMcsMap,
+        opts.coarseOptimizationThreshold, opts.fineOptimizationThreshold, opts.optimizerStepLimit, opts.numThreads);
 
     spdlog::info("Finished embedding.");
 
