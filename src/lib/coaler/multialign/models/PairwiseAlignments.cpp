@@ -1,7 +1,3 @@
-//
-// Created by chris on 12/29/23.
-//
-
 #include "PairwiseAlignments.hpp"
 
 #include <GraphMol/ShapeHelpers/ShapeUtils.h>

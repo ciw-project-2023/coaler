@@ -1,6 +1,3 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
 #include "PoseRegisterBuilder.hpp"
 
 #include <omp.h>

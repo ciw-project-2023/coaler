@@ -1,7 +1,3 @@
-//
-// Created by chris on 12/30/23.
-//
-
 #include "AssemblyOptimizer.hpp"
 
 #include <GraphMol/ForceFieldHelpers/UFF/UFF.h>

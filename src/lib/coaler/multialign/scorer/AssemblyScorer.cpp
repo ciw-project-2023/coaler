@@ -1,12 +1,6 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
-
 #include "AssemblyScorer.hpp"
 
 #include <spdlog/spdlog.h>
-
-#include "coaler/multialign/models/PairwiseAlignments.hpp"
 
 namespace coaler::multialign {
     double AssemblyScorer::calculateAssemblyScore(const LigandAlignmentAssembly& assembly, PairwiseAlignments& scores,

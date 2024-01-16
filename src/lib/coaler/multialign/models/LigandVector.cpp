@@ -1,7 +1,3 @@
-//
-// Created by niklas on 1/9/24.
-//
-
 #include "LigandVector.hpp"
 
 #include "Alias.hpp"

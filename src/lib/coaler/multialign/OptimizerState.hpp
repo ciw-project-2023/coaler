@@ -1,6 +1,3 @@
-//
-// Created by chris on 12/30/23.
-//
 #pragma once
 
 #include "PoseRegisterCollection.hpp"

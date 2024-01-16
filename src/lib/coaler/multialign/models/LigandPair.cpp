@@ -1,7 +1,3 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
-
 #include "LigandPair.hpp"
 
 #include <cassert>

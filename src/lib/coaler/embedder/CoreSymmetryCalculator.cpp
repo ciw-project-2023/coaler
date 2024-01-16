@@ -1,7 +1,3 @@
-//
-// Created by chris on 12/6/23.
-//
-
 #include "CoreSymmetryCalculator.hpp"
 
 #include <GraphMol/SmilesParse/SmartsWrite.h>
