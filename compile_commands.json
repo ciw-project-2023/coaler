@@ -1,0 +1,117 @@
+[
+{
+  "directory": "/home/mike/projects/coaler/src",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++20 -o CMakeFiles/coaler.dir/main.cpp.o -c /home/mike/projects/coaler/src/main.cpp",
+  "file": "/home/mike/projects/coaler/src/main.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/core/Matcher.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/core/Matcher.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/core/Matcher.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/embedder/ConformerEmbedder.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/embedder/ConformerEmbedder.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/embedder/ConformerEmbedder.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/embedder/CoreSymmetryCalculator.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/embedder/CoreSymmetryCalculator.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/embedder/CoreSymmetryCalculator.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/embedder/SubstructureAnalyzer.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/embedder/SubstructureAnalyzer.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/embedder/SubstructureAnalyzer.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/io/FileParser.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/io/FileParser.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/io/FileParser.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/io/OutputWriter.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/io/OutputWriter.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/io/OutputWriter.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/AssemblyOptimizer.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/AssemblyOptimizer.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/AssemblyOptimizer.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/LigandAlignmentAssembly.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/LigandAlignmentAssembly.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/LigandAlignmentAssembly.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/MultiAligner.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/MultiAligner.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/MultiAligner.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/PoseRegister.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/PoseRegister.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/PoseRegister.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/PoseRegisterBuilder.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/PoseRegisterBuilder.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/PoseRegisterBuilder.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/PoseRegisterCollection.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/PoseRegisterCollection.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/PoseRegisterCollection.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/StartingAssemblyGenerator.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/StartingAssemblyGenerator.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/StartingAssemblyGenerator.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/models/AssemblyIDManager.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/models/AssemblyIDManager.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/models/AssemblyIDManager.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/models/Ligand.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/models/Ligand.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/models/Ligand.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/models/LigandPair.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/models/LigandPair.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/models/LigandPair.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/models/LigandVector.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/models/LigandVector.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/models/LigandVector.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/models/PairwiseAlignments.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/models/PairwiseAlignments.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/models/PairwiseAlignments.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/models/PosePair.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/models/PosePair.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/models/PosePair.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/models/UniquePoseID.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/models/UniquePoseID.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/models/UniquePoseID.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/scorer/AlignmentScorer.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/scorer/AlignmentScorer.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/scorer/AlignmentScorer.cpp"
+},
+{
+  "directory": "/home/mike/projects/coaler/src/lib",
+  "command": "/usr/bin/c++ -DBOOST_STACKTRACE_ADDR2LINE_LOCATION=\\\"/usr/bin/addr2line\\\" -DBOOST_STACKTRACE_USE_ADDR2LINE -DBOOST_STACKTRACE_USE_BACKTRACE -DBOOST_STACKTRACE_USE_NOOP -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I/home/mike/projects/coaler/src/lib/. -isystem /home/mike/.conan2/p/b/rdkitb14c959c53f5b/p/include -isystem /home/mike/.conan2/p/b/boost8d27e1c977610/p/include -isystem /home/mike/.conan2/p/b/spdloaf7e7283dc64e/p/include -isystem /home/mike/.conan2/p/b/fmt590336a58c06e/p/include -isystem /home/mike/.conan2/p/b/libba5748bc723d344/p/include -m64 -g -fopenmp -std=gnu++17 -o CMakeFiles/coaler_lib.dir/coaler/multialign/scorer/AssemblyScorer.cpp.o -c /home/mike/projects/coaler/src/lib/coaler/multialign/scorer/AssemblyScorer.cpp",
+  "file": "/home/mike/projects/coaler/src/lib/coaler/multialign/scorer/AssemblyScorer.cpp"
+}
+]

@@ -142,14 +142,14 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mike/projects/coaler/CMakeFiles /home/mike/projects/coaler//CMakeFiles/progress.marks
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
+	cd /home/mike/projects/coaler && $(CMAKE_COMMAND) -E cmake_progress_start /home/mike/projects/coaler/CMakeFiles /home/mike/projects/coaler/src//CMakeFiles/progress.marks
+	cd /home/mike/projects/coaler && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/mike/projects/coaler/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 clean
+	cd /home/mike/projects/coaler && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/clean
 .PHONY : clean
 
 # The main clean target
@@ -158,58 +158,57 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 preinstall
+	cd /home/mike/projects/coaler && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 preinstall
+	cd /home/mike/projects/coaler && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	$(CMAKE_COMMAND) -P /home/mike/projects/coaler/CMakeFiles/VerifyGlobs.cmake
-	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/mike/projects/coaler && $(CMAKE_COMMAND) -P /home/mike/projects/coaler/CMakeFiles/VerifyGlobs.cmake
+	cd /home/mike/projects/coaler && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
-#=============================================================================
-# Target rules for targets named coaler
+# Convenience name for target.
+src/CMakeFiles/coaler.dir/rule:
+	cd /home/mike/projects/coaler && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 src/CMakeFiles/coaler.dir/rule
+.PHONY : src/CMakeFiles/coaler.dir/rule
 
-# Build rule for target.
-coaler: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 coaler
+# Convenience name for target.
+coaler: src/CMakeFiles/coaler.dir/rule
 .PHONY : coaler
 
 # fast build rule for target.
 coaler/fast:
-	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/coaler.dir/build.make src/CMakeFiles/coaler.dir/build
+	cd /home/mike/projects/coaler && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/coaler.dir/build.make src/CMakeFiles/coaler.dir/build
 .PHONY : coaler/fast
 
-#=============================================================================
-# Target rules for targets named coaler_lib
+main.o: main.cpp.o
+.PHONY : main.o
 
-# Build rule for target.
-coaler_lib: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 coaler_lib
-.PHONY : coaler_lib
+# target to build an object file
+main.cpp.o:
+	cd /home/mike/projects/coaler && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/coaler.dir/build.make src/CMakeFiles/coaler.dir/main.cpp.o
+.PHONY : main.cpp.o
 
-# fast build rule for target.
-coaler_lib/fast:
-	$(MAKE) $(MAKESILENT) -f src/lib/CMakeFiles/coaler_lib.dir/build.make src/lib/CMakeFiles/coaler_lib.dir/build
-.PHONY : coaler_lib/fast
+main.i: main.cpp.i
+.PHONY : main.i
 
-#=============================================================================
-# Target rules for targets named Test
+# target to preprocess a source file
+main.cpp.i:
+	cd /home/mike/projects/coaler && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/coaler.dir/build.make src/CMakeFiles/coaler.dir/main.cpp.i
+.PHONY : main.cpp.i
 
-# Build rule for target.
-Test: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Test
-.PHONY : Test
+main.s: main.cpp.s
+.PHONY : main.s
 
-# fast build rule for target.
-Test/fast:
-	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/Test.dir/build.make test/CMakeFiles/Test.dir/build
-.PHONY : Test/fast
+# target to generate assembly for a file
+main.cpp.s:
+	cd /home/mike/projects/coaler && $(MAKE) $(MAKESILENT) -f src/CMakeFiles/coaler.dir/build.make src/CMakeFiles/coaler.dir/main.cpp.s
+.PHONY : main.cpp.s
 
 # Help Target
 help:
@@ -224,9 +223,10 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... test"
-	@echo "... Test"
 	@echo "... coaler"
-	@echo "... coaler_lib"
+	@echo "... main.o"
+	@echo "... main.i"
+	@echo "... main.s"
 .PHONY : help
 
 
@@ -238,7 +238,7 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -P /home/mike/projects/coaler/CMakeFiles/VerifyGlobs.cmake
-	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/mike/projects/coaler && $(CMAKE_COMMAND) -P /home/mike/projects/coaler/CMakeFiles/VerifyGlobs.cmake
+	cd /home/mike/projects/coaler && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 
