@@ -1,7 +1,3 @@
-//
-// Created by malte on 12/4/23.
-//
-
 #pragma once
 
 #include <cassert>
@@ -22,11 +18,13 @@ namespace coaler::core {
                                               std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>,
                                               multialign::LigandPairHash>;
 
+    // NOLINTBEGIN(cppcoreguidelines-pro-type-member-init)
     struct CoreResult {
-        RDKit::ROMOL_SPTR core;
-        RDKit::ROMOL_SPTR ref;
-        std::unordered_map<int, int> coreToRef;
+        RDKit::ROMOL_SPTR core{nullptr};
+        RDKit::ROMOL_SPTR ref{nullptr};
+        std::unordered_map<int, int> core_to_ref{};
     };
+    // NOLINTEND(cppcoreguidelines-pro-type-member-init)
 
     class Matcher {
       public:
@@ -89,6 +87,6 @@ namespace coaler::core {
 
         [[nodiscard]] RDKit::SubstructMatchParameters getMatchParams() const;
 
-        [[nodiscard]] RDKit::ROMOL_SPTR buildMolConformerForQuery(RDKit::RWMol first, RDKit::ROMol query);
+        [[nodiscard]] RDKit::ROMOL_SPTR buildMolConformerForQuery(RDKit::RWMol first, const RDKit::ROMol& query) const;
     };
 }  // namespace coaler::core

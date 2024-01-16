@@ -1,3 +1,5 @@
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 file(GLOB_RECURSE library_src CONFIGURE_DEPENDS *.cpp *.hpp *.h)
 
 find_package(OpenMP REQUIRED)
@@ -26,6 +28,9 @@ target_include_directories(coaler_lib PUBLIC .)
 foreach(lib IN LISTS rdkitlibs)
     target_link_libraries(coaler_lib PUBLIC rdkit::${lib})
 endforeach()
+
+target_compile_options(coaler_lib PRIVATE ${OpenMP_CXX_FLAGS})
+target_include_directories(coaler_lib PRIVATE ${OpenMP_CXX_INCLUDE_DIRS})
 
 target_link_libraries(coaler_lib PUBLIC OpenMP::OpenMP_CXX)
 target_link_libraries(coaler_lib PUBLIC spdlog::spdlog)

@@ -18,8 +18,8 @@ namespace coaler::multialign {
          * @param pos_id_b: Conforemere ID for molecules B
          * @return Tanimoto shape similarity of molecules
          */
-        static double calc_tanimoto_shape_similarity(const RDKit::ROMol& mol_a, const RDKit::ROMol& mol_b,
-                                                     unsigned int pos_id_a, unsigned int pos_id_b);
+        static double calcTanimotoShapeSimilarity(const RDKit::ROMol& molA, const RDKit::ROMol& molB,
+                                                  unsigned int posIdA, unsigned int posIdB);
     };
 
 }  // namespace coaler::multialign

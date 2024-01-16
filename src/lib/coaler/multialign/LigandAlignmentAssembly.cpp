@@ -1,13 +1,13 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
-
 #include "LigandAlignmentAssembly.hpp"
 
 namespace coaler::multialign {
 
+    // NOLINTBEGIN(readability-avoid-const-params-in-decls, cppcoreguidelines-pro-type-member-init,
+    // modernize-pass-by-value)
     LigandAlignmentAssembly::LigandAlignmentAssembly(const std::unordered_map<LigandID, PoseID>& initialAssembly)
         : m_assembly(initialAssembly) {}
+    // NOLINTEND(readability-avoid-const-params-in-decls, cppcoreguidelines-pro-type-member-init,
+    // modernize-pass-by-value)
 
     /*----------------------------------------------------------------------------------------------------------------*/
 

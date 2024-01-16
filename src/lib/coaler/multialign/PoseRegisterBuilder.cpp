@@ -1,6 +1,3 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
 #include "PoseRegisterBuilder.hpp"
 
 #include <omp.h>
@@ -13,9 +10,11 @@
 
 namespace coaler::multialign {
 
+    // NOLINTBEGIN(misc-unused-parameters, readability-convert-member-functions-to-static)
     PoseRegisterCollection PoseRegisterBuilder::buildPoseRegisters(PairwiseAlignments &alignmentScores,
                                                                    const std::vector<Ligand> &ligands,
                                                                    unsigned nofThreads) noexcept {
+        // NOLINTEND(misc-unused-parameters, readability-convert-member-functions-to-static)
         PairwisePoseRegisters poseRegisters;
         omp_lock_t poseRegistersLock;
         omp_init_lock(&poseRegistersLock);
@@ -57,7 +56,7 @@ namespace coaler::multialign {
     unsigned PoseRegisterBuilder::calculateRegisterSizeForLigand(const Ligand &firstLigand,
                                                                  const Ligand &secondLigand) {
         // return 2* (firstLigand.getNumHeavyAtoms() + secondLigand.getNumHeavyAtoms());  // TODO find appropriate value
-        double size = Constants::POSE_REGISTER_SIZE_FACTOR * firstLigand.getNumPoses() * secondLigand.getNumPoses();
+        double size = constants::POSE_REGISTER_SIZE_FACTOR * firstLigand.getNumPoses() * secondLigand.getNumPoses();
         return static_cast<unsigned>(size);
     }
 }  // namespace coaler::multialign

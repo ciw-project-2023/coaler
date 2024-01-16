@@ -1,7 +1,3 @@
-//
-// Created by malte on 12/4/23.
-//
-
 #include "Matcher.hpp"
 
 #include <omp.h>
@@ -55,6 +51,7 @@ namespace coaler::core {
         return CoreResult{mcs.QueryMol, ref, coreToRef};
     }
 
+    // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
     std::optional<CoreResult> Matcher::calculateCoreMurcko(RDKit::MOL_SPTR_VECT &mols) {
         // calculate MCS first and sanitize molecule
         auto mcs = Matcher::calculateCoreMcs(mols);
@@ -154,7 +151,7 @@ namespace coaler::core {
     // for atoms (i.e. [#6,#7] = C or N and this can have an impact on conformers (swapping Atoms can lead
     // differnet geometries). We should take that into account and try to create a diverse set of conformers
     // thta models the output of the query more closely. For now, this is a pretty good reference though.
-    RDKit::ROMOL_SPTR Matcher::buildMolConformerForQuery(RDKit::RWMol first, RDKit::ROMol query) {
+    RDKit::ROMOL_SPTR Matcher::buildMolConformerForQuery(RDKit::RWMol first, const RDKit::ROMol & /*query*/) const {
         auto params = RDKit::DGeomHelpers::srETKDGv3;
         params.numThreads = m_threads;
         params.randomSeed = 42;
@@ -198,8 +195,11 @@ namespace coaler::core {
         }
     }
 
+    // NOLINTBEGIN(misc-unused-parameters)
+    // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
     void Matcher::murckoCheckDelAtoms(RDKit::RWMOL_SPTR &mol, int atomID, int parentID, std::vector<bool> &visit,
                                       std::vector<int> &ringAtoms, std::vector<int> &foundRingAtoms) {
+        // NOLINTEND(misc-unused-parameters)
         // mark atom as visited and check if they are part of any ring. If yes save and return to
         // recursive call before
         visit.at(atomID) = true;

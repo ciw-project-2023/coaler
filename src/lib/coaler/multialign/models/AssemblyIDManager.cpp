@@ -3,27 +3,27 @@
 namespace coaler::multialign {
 
     namespace {
-        std::size_t calculate_assembly_hash(const coaler::multialign::LigandAlignmentAssembly &assembly) {
-            std::vector<size_t> unique_pos_id_hashs;
-            for (auto id_pair : assembly.getAssemblyMapping()) {
-                LigandID ligand_id = id_pair.first;
-                PoseID pos_id = id_pair.second;
-                UniquePoseID u_pose_id(ligand_id, pos_id);
-                unique_pos_id_hashs.emplace_back(UniquePoseIdentifierHash()(u_pose_id));
+        std::size_t calculateAssemblyHash(const coaler::multialign::LigandAlignmentAssembly &assembly) {
+            std::vector<size_t> uniquePosIdHashs;
+            for (auto idPair : assembly.getAssemblyMapping()) {
+                LigandID ligandId = idPair.first;
+                PoseID posId = idPair.second;
+                UniquePoseID uPoseId(ligandId, posId);
+                uniquePosIdHashs.emplace_back(UniquePoseIdentifierHash()(uPoseId));
             }
 
             std::hash<size_t> hasher;
-            size_t assembly_hash = 0;
-            for (size_t value : unique_pos_id_hashs) {
-                assembly_hash ^= hasher(value) + 0x9e3779b9 + (assembly_hash << 6) + (assembly_hash >> 2);
+            size_t assemblyHash = 0;
+            for (size_t value : uniquePosIdHashs) {
+                assemblyHash ^= hasher(value) + 0x9e3779b9 + (assemblyHash << 6) + (assemblyHash >> 2);
             }
-            return assembly_hash;
+            return assemblyHash;
         }
     }  // namespace
 
-    bool AssemblyIDManager::is_assembly_new(const coaler::multialign::LigandAlignmentAssembly &assembly) {
-        size_t assembly_hash = calculate_assembly_hash(assembly);
-        auto it = std::find(m_existing_assembly_hashes.begin(), m_existing_assembly_hashes.end(), assembly_hash);
+    bool AssemblyIDManager::isAssemblyNew(const coaler::multialign::LigandAlignmentAssembly &assembly) {
+        size_t assemblyHash = calculateAssemblyHash(assembly);
+        auto it = std::find(m_existing_assembly_hashes.begin(), m_existing_assembly_hashes.end(), assemblyHash);
 
         // Check if assembly combination is unique
         if (it != m_existing_assembly_hashes.end()) {
@@ -31,7 +31,7 @@ namespace coaler::multialign {
         }
 
         // add new unique pose id
-        m_existing_assembly_hashes.emplace_back(assembly_hash);
+        m_existing_assembly_hashes.emplace_back(assemblyHash);
         return true;
     }
 

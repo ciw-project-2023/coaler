@@ -1,6 +1,3 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
 #pragma once
 
 #include <GraphMol/GraphMol.h>
@@ -40,21 +37,21 @@ namespace coaler::multialign {
          *
          * @return
          */
-        unsigned getNumHeavyAtoms() const noexcept;
+        [[nodiscard]] unsigned getNumHeavyAtoms() const noexcept;
 
         /**
          *
          * @return The number of conformers embedded in the ligand.
          */
-        unsigned getNumPoses() const noexcept;
+        [[nodiscard]] unsigned getNumPoses() const noexcept;
 
         /**
          *
          * @return The molecule represented by the ligand.
          */
-        RDKit::ROMol getMolecule() const noexcept;
+        [[nodiscard]] RDKit::ROMol getMolecule() const noexcept;
 
-        RDKit::RWMol const* getMoleculePtr() const noexcept;
+        [[nodiscard]] RDKit::RWMol const* getMoleculePtr() const noexcept;
 
         void removePose(PoseID pose);
 

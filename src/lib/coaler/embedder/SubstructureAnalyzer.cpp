@@ -1,26 +1,22 @@
-//
-// Created by chris on 12/7/23.
-//
-
 #include "SubstructureAnalyzer.hpp"
 
 #include <GraphMol/Substruct/SubstructMatch.h>
 #include <GraphMol/new_canon.h>
 
 namespace {
-    struct hasDegreeTwo {
+    struct HasDegreeTwo {
         bool operator()(RDKit::Atom* atom) { return atom->getDegree() == 2; }
     };
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    bool allElementsEqual(const std::vector<unsigned> vector) {
+    bool allElementsEqual(const std::vector<unsigned>& vector) {
         return std::all_of(vector.begin(), vector.end(), [vector](unsigned i) { return i == vector.at(0); });
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    std::vector<unsigned> makeSteadyRankVector(const std::vector<unsigned> originalRanks) {
+    std::vector<unsigned> makeSteadyRankVector(const std::vector<unsigned>& originalRanks) {
         std::unordered_map<unsigned, unsigned> originalToSteadyRank;
         unsigned rank = 0;
         for (unsigned orignalRank : originalRanks) {
@@ -30,10 +26,12 @@ namespace {
             }
         }
 
+        // NOLINTBEGIN(performance-inefficient-vector-operation)
         std::vector<unsigned> newRanks;
-        for (unsigned originalRank : originalRanks) {
+        for (unsigned const originalRank : originalRanks) {
             newRanks.push_back(originalToSteadyRank.at(originalRank));
         }
+        // NOLINTEND(performance-inefficient-vector-operation)
         return newRanks;
     }
 }  // namespace
@@ -52,7 +50,7 @@ unsigned coaler::embedder::SubstructureAnalyzer::getNumberOfUniqueSubstructureMa
 
 unsigned coaler::embedder::SubstructureAnalyzer::getNumberOfRingRotations(const RDKit::ROMol& molecule) {
     // catch mols that have chains
-    if (!std::all_of(molecule.atoms().begin(), molecule.atoms().end(), hasDegreeTwo())) {
+    if (!std::all_of(molecule.atoms().begin(), molecule.atoms().end(), HasDegreeTwo())) {
         return 1;
     }
 

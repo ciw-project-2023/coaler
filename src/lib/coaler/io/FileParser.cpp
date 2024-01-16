@@ -1,7 +1,3 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
-
 #include "FileParser.hpp"
 
 #include <GraphMol/FileParsers/MolSupplier.h>
@@ -17,29 +13,29 @@
 
 namespace coaler::io {
 
-    RDKit::MOL_SPTR_VECT FileParser::parse(const std::string& file_path) {
+    RDKit::MOL_SPTR_VECT FileParser::parse(const std::string& filePath) {
         RDKit::MOL_SPTR_VECT result;
 
         spdlog::debug("searching at: {}", std::filesystem::current_path().string());
 
-        std::ifstream infile(file_path);
+        const std::ifstream infile(filePath);
         if (!infile) {
-            spdlog::error("file not found: {}", file_path);
-            throw FileNotFoundException(file_path);
+            spdlog::error("file not found: {}", filePath);
+            throw FileNotFoundException(filePath);
         }
 
-        const auto file_extension = std::filesystem::path(file_path).extension().string();
-        if (file_extension == ".sdf") {
+        const auto fileExtension = std::filesystem::path(filePath).extension().string();
+        if (fileExtension == ".sdf") {
             // Parse as sdf file
-            RDKit::SDMolSupplier supplier(file_path, true, false, false);
+            RDKit::SDMolSupplier supplier(filePath, true, false, false);
             while (!supplier.atEnd()) {
                 auto mol = boost::make_shared<RDKit::RWMol>(*supplier.next());
                 result.emplace_back(mol);
             }
-        } else if (file_extension == ".smi") {
+        } else if (fileExtension == ".smi") {
             // Parse as smi file
             int line = 0;
-            RDKit::SmilesMolSupplier supplier(file_path, "\t", 0, 1, false, true);
+            RDKit::SmilesMolSupplier supplier(filePath, "\t", 0, 1, false, true);
             while (!supplier.atEnd()) {
                 line++;
 
@@ -53,19 +49,19 @@ namespace coaler::io {
                 result.emplace_back(mol);
             }
         } else {
-            spdlog::error("Unsupported file extension: {}", file_extension);
-            throw std::runtime_error("Unsupported file extension: " + file_extension);
+            spdlog::error("Unsupported file extension: {}", fileExtension);
+            throw std::runtime_error("Unsupported file extension: " + fileExtension);
         }
 
-        return checkInputMolecules(result, file_path);
+        return checkInputMolecules(result, filePath);
     }
 
     RDKit::MOL_SPTR_VECT FileParser::checkInputMolecules(const RDKit::MOL_SPTR_VECT& mols,
-                                                         const std::string& file_path) {
+                                                         const std::string& filePath) {
         RDKit::MOL_SPTR_VECT retMols;
         std::unordered_set<std::string> smilesSet;
         unsigned duplicates = 0;
-        for (auto mol : mols) {
+        for (auto const& mol : mols) {
             std::string smiles = RDKit::MolToSmiles(*mol);
             if (smilesSet.insert(smiles).second) {
                 retMols.emplace_back(mol);
@@ -75,7 +71,7 @@ namespace coaler::io {
         }
 
         if (duplicates > 0) {
-            spdlog::warn("input file {} contains {} duplicates. All duplicates will be removed", file_path, duplicates);
+            spdlog::warn("input file {} contains {} duplicates. All duplicates will be removed", filePath, duplicates);
         }
 
         return retMols;

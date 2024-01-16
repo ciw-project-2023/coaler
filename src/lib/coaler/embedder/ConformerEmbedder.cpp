@@ -1,7 +1,3 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
-
 #include "ConformerEmbedder.hpp"
 
 #include <GraphMol/DistGeomHelpers/Embedder.h>
@@ -15,8 +11,8 @@
 
 #include <utility>
 
-const unsigned seed = 42;
-const float forceTol = 0.0135;
+const unsigned SEED = 42;
+const float FORCE_TOL = 0.0135;
 
 namespace {
     RDKit::SubstructMatchParameters get_optimizer_substruct_params() {
@@ -35,8 +31,8 @@ namespace {
     RDKit::DGeomHelpers::EmbedParameters get_embed_params_for_optimizer_generation() {
         RDKit::DGeomHelpers::EmbedParameters params;
         params = RDKit::DGeomHelpers::srETKDGv3;
-        params.optimizerForceTol = forceTol;
-        params.randomSeed = seed;
+        params.optimizerForceTol = FORCE_TOL;
+        params.randomSeed = SEED;
         params.useRandomCoords = true;
         params.numThreads = 1;
         params.clearConfs = false;
@@ -45,9 +41,9 @@ namespace {
 }  // namespace
 
 namespace coaler::embedder {
-    ConformerEmbedder::ConformerEmbedder(const core::CoreResult &result, const int threads,
+    ConformerEmbedder::ConformerEmbedder(core::CoreResult result, const int threads,
                                          const bool divideConformersByMatches)
-        : m_core(result), m_threads(threads), m_divideConformersByMatches(divideConformersByMatches) {}
+        : m_core(std::move(result)), m_threads(threads), m_divideConformersByMatches(divideConformersByMatches) {}
 
     void ConformerEmbedder::embedConformers(const RDKit::ROMOL_SPTR &mol, unsigned numConfs) {
         // firstMatch molecule and core
@@ -79,11 +75,6 @@ namespace coaler::embedder {
                 confs = RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
             }
 
-            std::vector<unsigned> confIds;
-            for (auto const confId : confs) {
-                confIds.emplace_back(confId);
-            }
-
             std::vector<std::pair<int, double>> result;
             RDKit::UFF::UFFOptimizeMoleculeConfs(*mol, result, m_threads);
 
@@ -96,7 +87,7 @@ namespace coaler::embedder {
             // and have to provide (molId, queryId) to the alignment.
             RDKit::MatchVectType matchReverse;
             for (const auto &[queryId, molId] : match) {
-                matchReverse.emplace_back(std::make_pair(molId, m_core.coreToRef.at(queryId)));
+                matchReverse.emplace_back(std::make_pair(molId, m_core.core_to_ref.at(queryId)));
             }
 
             for (auto const confId : confs) {
@@ -116,9 +107,9 @@ namespace coaler::embedder {
 
     RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbeddingParameters() const {
         auto params = RDKit::DGeomHelpers::srETKDGv3;
-        params.randomSeed = seed;
+        params.randomSeed = SEED;
         params.numThreads = m_threads;
-        params.optimizerForceTol = forceTol;
+        params.optimizerForceTol = FORCE_TOL;
         params.clearConfs = false;
         return params;
     }
@@ -131,7 +122,7 @@ namespace coaler::embedder {
         const core::PairwiseMCSMap &pairwiseStrictMCSMap, const core::PairwiseMCSMap &pairwiseRelaxedMCSMap) {
         // TODO maybe sanitize mols?
         std::vector<unsigned> newIds;
-        RDKit::ROMol *ligandMol = (RDKit::ROMol *)worstLigand.getMoleculePtr();
+        auto *ligandMol = (RDKit::ROMol *)worstLigand.getMoleculePtr();
 
         for (const multialign::Ligand &target : targets) {
             // find mcs
@@ -144,15 +135,20 @@ namespace coaler::embedder {
             const RDKit::ROMol targetMol = target.getMolecule();
             RDKit::Conformer targetConformer;
             try {
-                targetConformer = targetMol.getConformer(targetConformerID);
-            } catch (std::runtime_error e) {
+                targetConformer = targetMol.getConformer(static_cast<int>(targetConformerID));
+            } catch (std::runtime_error &e) {
                 spdlog::error(e.what());
             }
 
-            RDKit::MatchVectType ligandMatchRelaxed, targetMatchRelaxed, ligandMatchStrict, targetMatchStrict;
+            // Clang-tidy readability!
+            RDKit::MatchVectType ligandMatchRelaxed;
+            RDKit::MatchVectType targetMatchRelaxed;
+            RDKit::MatchVectType ligandMatchStrict;
+            RDKit::MatchVectType targetMatchStrict;
             // RDKit::MatchVectType smallerIDLigandMatch, largerIDLigandMatch;
-            std::string mcsStringRelaxed, mcsStringStrict;
-            multialign::LigandPair ligandPair(worstLigand.getID(), targetID);
+            std::string mcsStringRelaxed;
+            std::string mcsStringStrict;
+            const multialign::LigandPair ligandPair(worstLigand.getID(), targetID);
 
             // since mcs maps are accessed via ligand pair, i.e. smaller id first, we have to check in which
             // order ligand and target are.
@@ -202,7 +198,7 @@ namespace coaler::embedder {
                 continue;
             }
             spdlog::debug("target conformer {}/{}: generated valid pose.", targetID, targets.size());
-            const unsigned addedIDUnsigned = static_cast<unsigned>(addedID);
+            const auto addedIDUnsigned = static_cast<unsigned>(addedID);
             newIds.push_back(addedIDUnsigned);
         }
         return newIds;

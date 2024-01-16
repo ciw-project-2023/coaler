@@ -1,7 +1,3 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
-
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <spdlog/spdlog.h>
 
@@ -12,7 +8,7 @@
 namespace coaler::io {
     class FileParser {
       public:
-        static RDKit::MOL_SPTR_VECT parse(const std::string& file_path);
+        static RDKit::MOL_SPTR_VECT parse(const std::string& filePath);
 
       private:
         /***
@@ -20,6 +16,6 @@ namespace coaler::io {
          * @param mols molecules parsed in parse()
          * @return RDKit::MOL_SPTR_VECT without duplicates
          */
-        static RDKit::MOL_SPTR_VECT checkInputMolecules(const RDKit::MOL_SPTR_VECT& mols, const std::string& file_path);
+        static RDKit::MOL_SPTR_VECT checkInputMolecules(const RDKit::MOL_SPTR_VECT& mols, const std::string& filePath);
     };
 }  // namespace coaler::io

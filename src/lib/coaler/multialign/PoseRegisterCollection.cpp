@@ -1,16 +1,14 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
-
 #include "PoseRegisterCollection.hpp"
 
 namespace coaler::multialign {
 
+    // NOLINTBEGIN(cppcoreguidelines-pro-type-member-init)
     void PoseRegisterCollection::addRegister(const PoseRegister& poseRegister) {
         LigandPair const pair(poseRegister.getFirstLigandID(), poseRegister.getSecondLigandID());
 
         m_registers.emplace(pair, poseRegister);
     }
+    // NOLINTEND(cppcoreguidelines-pro-type-member-init)
 
     /*----------------------------------------------------------------------------------------------------------------*/
 

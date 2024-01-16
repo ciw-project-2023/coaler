@@ -1,6 +1,4 @@
-#ifndef COALER_LIGANDVECTOR_HPP
-#define COALER_LIGANDVECTOR_HPP
-
+#pragma once
 #include <vector>
 
 #include "GraphMol/RDKitBase.h"
@@ -13,4 +11,3 @@ namespace coaler::multialign {
         explicit LigandVector(RDKit::MOL_SPTR_VECT& molecules);
     };
 }  // namespace coaler::multialign
-#endif  // COALER_LIGANDVECTOR_HPP

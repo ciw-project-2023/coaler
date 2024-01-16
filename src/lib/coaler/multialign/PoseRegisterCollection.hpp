@@ -1,7 +1,3 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
-
 #pragma once
 
 #include "PoseRegister.hpp"
@@ -9,6 +5,7 @@
 
 namespace coaler::multialign {
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     class PoseRegisterCollection {
       public:
         /**
@@ -21,11 +18,11 @@ namespace coaler::multialign {
          * @param pose The pose to search in the register collection
          * @return A subset of all the registers; all registers containing the pose.
          */
-        PairwisePoseRegisters getAllRegistersForPose(const UniquePoseID& pose) const noexcept;
+        [[nodiscard]] PairwisePoseRegisters getAllRegistersForPose(const UniquePoseID& pose) const noexcept;
 
-        PoseRegisterPtr getRegisterPtr(const LigandPair& key) const noexcept;
+        [[nodiscard]] PoseRegisterPtr getRegisterPtr(const LigandPair& key) const noexcept;
 
-        PairwisePoseRegisters getAllRegisters() const noexcept;
+        [[nodiscard]] PairwisePoseRegisters getAllRegisters() const noexcept;
 
         void addPoseToRegister(const LigandPair& key, const PosePair& poses, double score);
 

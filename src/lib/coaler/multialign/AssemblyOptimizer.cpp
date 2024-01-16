@@ -1,7 +1,3 @@
-//
-// Created by chris on 12/30/23.
-//
-
 #include "AssemblyOptimizer.hpp"
 
 #include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
@@ -13,8 +9,8 @@
 
 using namespace coaler::multialign;
 
-void updatePoseRegisters(const LigandID ligandId, const PoseID newPose, PoseRegisterCollection &registers,
-                         PairwiseAlignments &scores, const LigandVector &ligands) {
+void update_pose_registers(const LigandID ligandId, const PoseID newPose, PoseRegisterCollection &registers,
+                           PairwiseAlignments &scores, const LigandVector &ligands) {
     for (const Ligand &otherLigand : ligands) {
         if (otherLigand.getID() == ligandId) {
             continue;
@@ -246,7 +242,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                     worstLigand->removePose(confId);
                 }
 
-                updatePoseRegisters(worstLigandId, bestNewPoseID, registers, scores, ligands);
+                update_pose_registers(worstLigandId, bestNewPoseID, registers, scores, ligands);
                 assembly.swapPoseForLigand(worstLigandId, bestNewPoseID);
                 worstLigand->addPose(bestNewPoseID);
                 ligandAvailable.setAllAvailable();

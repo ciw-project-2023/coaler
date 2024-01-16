@@ -1,6 +1,3 @@
-/*
- * Copyright 2023 CoAler Group, all rights reserved.
- */
 #pragma once
 #include <unordered_map>
 
@@ -11,8 +8,10 @@ namespace coaler::multialign {
     /**
      * An alignment of a set of ligands. Contains one pose for each ligand.
      */
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init,)
     class LigandAlignmentAssembly {
       public:
+        // NOLINTNEXTLINE(readability-avoid-const-params-in-decls)
         explicit LigandAlignmentAssembly(const std::unordered_map<LigandID, PoseID>& initialAssembly);
 
         /**
@@ -28,7 +27,7 @@ namespace coaler::multialign {
          * @param ligandId Ligand to get the associated pose for.
          * @return The Pose that is associated with the @p ligandId.
          */
-        PoseID getPoseOfLigand(LigandID ligandId) const;
+        [[nodiscard]] PoseID getPoseOfLigand(LigandID ligandId) const;
 
         /**
          * increase missing ligands count by one
@@ -43,9 +42,11 @@ namespace coaler::multialign {
         /**
          * @return The missing ligand count for the assembly.
          */
-        unsigned getMissingLigandsCount() const noexcept;
+        [[nodiscard]] unsigned getMissingLigandsCount() const noexcept;
 
+        // NOLINTBEGIN(cppcoreguidelines-non-private-member-variables-in-classes)
         std::unordered_map<LigandID, PoseID> getAssemblyMapping() const noexcept;
+        // NOLINTEND(cppcoreguidelines-non-private-member-variables-in-classes)
 
       private:
         void setMissingLigandsCount(unsigned count);

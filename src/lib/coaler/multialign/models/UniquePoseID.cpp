@@ -1,7 +1,3 @@
-//
-// Created by malte on 11/27/23.
-//
-
 #include "UniquePoseID.hpp"
 
 namespace coaler::multialign {
