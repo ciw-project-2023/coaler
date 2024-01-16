@@ -1,6 +1,5 @@
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 
-// NOLINTNEXTLINE(clang-diagnostic-error)
 #include <omp.h>
 
 #include <boost/program_options.hpp>

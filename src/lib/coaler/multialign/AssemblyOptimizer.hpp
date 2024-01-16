@@ -25,9 +25,10 @@ namespace coaler::multialign {
          *
          * @note You can re-call the optimization with a smaller threshold (for refinment) using the overloaded function
          */
-
+        // NOLINTBEGIN(readability-inconsistent-declaration-parameter-name)
         AssemblyOptimizer(core::PairwiseMCSMap& strictMCSMap, core::PairwiseMCSMap& relaxedMCSMap,
                           double coarseScoreThreshold, double fineScoreTreshold, int stepLimit, int threads);
+        // NOLINTEND(readability-inconsistent-declaration-parameter-name)
 
         OptimizerState optimizeAssembly(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
                                         LigandVector ligands, PoseRegisterCollection registers,

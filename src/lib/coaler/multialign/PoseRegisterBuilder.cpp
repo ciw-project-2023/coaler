@@ -10,11 +10,11 @@
 
 namespace coaler::multialign {
 
-    // NOLINTBEGIN(misc-unused-parameters)
+    // NOLINTBEGIN(misc-unused-parameters, readability-convert-member-functions-to-static)
     PoseRegisterCollection PoseRegisterBuilder::buildPoseRegisters(PairwiseAlignments &alignmentScores,
                                                                    const std::vector<Ligand> &ligands,
                                                                    unsigned nofThreads) noexcept {
-        // NOLINTEND(misc-unused-parameters)
+        // NOLINTEND(misc-unused-parameters, readability-convert-member-functions-to-static)
         PairwisePoseRegisters poseRegisters;
         omp_lock_t poseRegistersLock;
         omp_init_lock(&poseRegistersLock);

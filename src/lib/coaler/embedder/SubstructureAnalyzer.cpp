@@ -26,10 +26,12 @@ namespace {
             }
         }
 
+        // NOLINTBEGIN(performance-inefficient-vector-operation)
         std::vector<unsigned> newRanks;
         for (unsigned const originalRank : originalRanks) {
             newRanks.push_back(originalToSteadyRank.at(originalRank));
         }
+        // NOLINTBEGIN(performance-inefficient-vector-operation)
         return newRanks;
     }
 }  // namespace

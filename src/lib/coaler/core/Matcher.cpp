@@ -1,6 +1,5 @@
 #include "Matcher.hpp"
 
-// NOLINTNEXTLINE(clang-diagnostic-error)
 #include <omp.h>
 #include <spdlog/spdlog.h>
 

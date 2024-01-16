@@ -21,6 +21,10 @@ target_link_directories(coaler PRIVATE lib)
 target_link_libraries(coaler PUBLIC spdlog::spdlog)
 target_link_libraries(coaler PUBLIC coaler_lib)
 
+find_package(OpenMP REQUIRED)
+target_compile_options(coaler PRIVATE ${OpenMP_CXX_FLAGS})
+target_link_libraries(coaler PUBLIC OpenMP::OpenMP_CXX)
+
 install(TARGETS coaler
         RUNTIME DESTINATION ${CMAKE_BINARY_DIR}
         LIBRARY DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
