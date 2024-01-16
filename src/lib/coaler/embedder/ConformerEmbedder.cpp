@@ -41,9 +41,9 @@ namespace {
 }  // namespace
 
 namespace coaler::embedder {
-    ConformerEmbedder::ConformerEmbedder(const core::CoreResult &result, const int threads,
+    ConformerEmbedder::ConformerEmbedder(core::CoreResult result, const int threads,
                                          const bool divideConformersByMatches)
-        : m_core(result), m_threads(threads), m_divideConformersByMatches(divideConformersByMatches) {}
+        : m_core(std::move(result)), m_threads(threads), m_divideConformersByMatches(divideConformersByMatches) {}
 
     void ConformerEmbedder::embedConformers(const RDKit::ROMOL_SPTR &mol, unsigned numConfs) {
         // firstMatch molecule and core
@@ -141,7 +141,7 @@ namespace coaler::embedder {
             RDKit::Conformer targetConformer;
             try {
                 targetConformer = targetMol.getConformer(targetConformerID);
-            } catch (std::runtime_error& e) {
+            } catch (std::runtime_error &e) {
                 spdlog::error(e.what());
             }
 
