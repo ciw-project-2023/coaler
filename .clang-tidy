@@ -34,7 +34,7 @@ Checks: >
   -cppcoreguidelines-init-variables, # TODO: this should be included!, But Clang-tidy does not recognize RDKit yet 
 
 WarningsAsErrors: '*'
-HeaderFilterRegex: '.*.h(pp|xx)'
+HeaderFilterRegex: '^$'
 
 # Same as in coding
 FormatStyle: file
