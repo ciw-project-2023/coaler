@@ -16,7 +16,7 @@ namespace coaler::multialign {
          * @param assembly
          * @return
          */
-        bool is_assembly_new(const LigandAlignmentAssembly &assembly);
+        bool isAssemblyNew(const LigandAlignmentAssembly &assembly);
 
       private:
         std::vector<size_t> m_existing_assembly_hashes{};

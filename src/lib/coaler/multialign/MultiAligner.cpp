@@ -119,7 +119,7 @@ namespace coaler::multialign {
                 const LigandAlignmentAssembly assembly
                     = StartingAssemblyGenerator::generateStartingAssembly(pose, m_poseRegisters, m_ligands);
 
-                if (!assemblyIdManager.is_assembly_new(assembly)) {
+                if (!assemblyIdManager.isAssemblyNew(assembly)) {
                     continue;
                 }
 

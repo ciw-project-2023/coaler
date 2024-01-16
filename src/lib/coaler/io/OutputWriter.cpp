@@ -41,15 +41,14 @@ namespace coaler::io {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    void OutputWriter::writeConformersToSDF(const std::string &folderPath,
-                                            const std::vector<RDKit::ROMOL_SPTR> &mols) {
+    void OutputWriter::writeConformersToSDF(const std::string &folderPath, const std::vector<RDKit::ROMOL_SPTR> &mols) {
         std::string filePath = folderPath;
         if (filePath.back() != '/') {
             filePath += "/";
         }
         const unsigned magnitude = std::to_string(mols.size()).length();
         for (unsigned molId = 0; molId < mols.size(); molId++) {
-            const auto& mol = mols.at(molId);
+            const auto &mol = mols.at(molId);
 
             const std::string currentFilePath = filePath + "mol_" + get_formatted_string(molId, magnitude) + ".sdf";
             std::ofstream output_file(currentFilePath);

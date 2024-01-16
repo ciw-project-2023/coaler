@@ -11,7 +11,7 @@ namespace {
         auto pose2 = key.getSecond();
         const double distance = RDKit::MolShapes::tanimotoDistance(
             ligands.at(pose1.getLigandId()).getMolecule(), ligands.at(pose2.getLigandId()).getMolecule(),
-            pose1.getLigandInternalPoseId(), pose2.getLigandInternalPoseId());
+            static_cast<int>(pose1.getLigandInternalPoseId()), static_cast<int>(pose2.getLigandInternalPoseId()));
         const double similarity = 1 - distance;
         return similarity;
     }
@@ -28,7 +28,7 @@ namespace coaler::multialign {
         if (!ligands.empty()) {
             if (key == PosePair({0, 29}, {6, 32})) {
             }
-            double score = calc_score(key, ligands);
+            const double score = calc_score(key, ligands);
             if (store) {
                 this->emplace(key, score);
             }

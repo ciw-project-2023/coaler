@@ -27,7 +27,7 @@ namespace {
         }
 
         std::vector<unsigned> newRanks;
-        for (unsigned originalRank : originalRanks) {
+        for (unsigned const originalRank : originalRanks) {
             newRanks.push_back(originalToSteadyRank.at(originalRank));
         }
         return newRanks;
