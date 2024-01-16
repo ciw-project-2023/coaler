@@ -70,11 +70,11 @@ std::optional<ProgrammOptions> parse_args(int argc, char* argv[]) {
         "confs-log", opts::value<std::string>(&parsedOptions.conformer_log_path)->default_value("none"))(
         "optimizer-coarse_optimization_threshold-threshold",
         opts::value<double>(&parsedOptions.coarse_optimization_threshold)
-            ->default_value(multialign::Constants::COARSE_OPTIMIZATION_THRESHOLD))(
+            ->default_value(multialign::constants::COARSE_OPTIMIZATION_THRESHOLD))(
         "optimizer-fine-threshold", opts::value<double>(&parsedOptions.fine_optimization_threshold)
-                                        ->default_value(multialign::Constants::FINE_OPTIMIZATION_THRESHOLD))(
+                                        ->default_value(multialign::constants::FINE_OPTIMIZATION_THRESHOLD))(
         "optimizer-step-limit", opts::value<int>(&parsedOptions.optimizer_step_limit)
-                                    ->default_value(multialign::Constants::OPTIMIZER_STEP_LIMIT));
+                                    ->default_value(multialign::constants::OPTIMIZER_STEP_LIMIT));
 
     opts::variables_map vm;
     opts::store(opts::parse_command_line(argc, argv, desc), vm);

@@ -24,15 +24,15 @@ namespace coaler::io {
             throw FileNotFoundException(filePath);
         }
 
-        const auto file_extension = std::filesystem::path(filePath).extension().string();
-        if (file_extension == ".sdf") {
+        const auto fileExtension = std::filesystem::path(filePath).extension().string();
+        if (fileExtension == ".sdf") {
             // Parse as sdf file
             RDKit::SDMolSupplier supplier(filePath, true, false, false);
             while (!supplier.atEnd()) {
                 auto mol = boost::make_shared<RDKit::RWMol>(*supplier.next());
                 result.emplace_back(mol);
             }
-        } else if (file_extension == ".smi") {
+        } else if (fileExtension == ".smi") {
             // Parse as smi file
             int line = 0;
             RDKit::SmilesMolSupplier supplier(filePath, "\t", 0, 1, false, true);
@@ -49,8 +49,8 @@ namespace coaler::io {
                 result.emplace_back(mol);
             }
         } else {
-            spdlog::error("Unsupported file extension: {}", file_extension);
-            throw std::runtime_error("Unsupported file extension: " + file_extension);
+            spdlog::error("Unsupported file extension: {}", fileExtension);
+            throw std::runtime_error("Unsupported file extension: " + fileExtension);
         }
 
         return checkInputMolecules(result, filePath);

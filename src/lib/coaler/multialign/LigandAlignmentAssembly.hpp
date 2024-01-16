@@ -25,7 +25,7 @@ namespace coaler::multialign {
          * @param ligandId Ligand to get the associated pose for.
          * @return The Pose that is associated with the @p ligandId.
          */
-        PoseID getPoseOfLigand(LigandID ligandId) const;
+        [[nodiscard]] PoseID getPoseOfLigand(LigandID ligandId) const;
 
         /**
          * increase missing ligands count by one
@@ -40,9 +40,13 @@ namespace coaler::multialign {
         /**
          * @return The missing ligand count for the assembly.
          */
-        unsigned getMissingLigandsCount() const noexcept;
+        [[nodiscard]] unsigned getMissingLigandsCount() const noexcept;
 
+        // NOLINTBEGIN(cppcoreguidelines-non-private-member-variables-in-classes)
+        // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
         std::unordered_map<LigandID, PoseID> getAssemblyMapping() const noexcept;
+        // NOLINTEND(cppcoreguidelines-non-private-member-variables-in-classes)
+        // NOLINTEND(misc-non-private-member-variables-in-classes)
 
       private:
         void setMissingLigandsCount(unsigned count);

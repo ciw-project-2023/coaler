@@ -30,12 +30,10 @@ namespace coaler::multialign {
     };
 
     /*----------------------------------------------------------------------------------------------------------------*/
-
+    // NOLINTBEGIN(misc-unused-parameters)
     MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, AssemblyOptimizer optimizer,
-                               // const core::PairwiseMCSMap& pairwiseStrictMCSMap,
-                               // core::PairwiseMCSMap  pairwiseRelaxedMCSMap,
                                unsigned maxStartingAssemblies, unsigned nofThreads)
-
+        // NOLINTEND(misc-unused-parameters)
         : m_maxStartingAssemblies(maxStartingAssemblies), m_threads(nofThreads), m_assemblyOptimizer(optimizer) {
         assert(m_maxStartingAssemblies > 0);
 
@@ -64,9 +62,9 @@ namespace coaler::multialign {
         // A.getNumPoses() * B.getNumPoses() many embeddings
         unsigned const n = ligands.size();
         unsigned combinations = 0;
-        for (unsigned id_A = 0; id_A < n; id_A++) {
-            for (unsigned id_B = id_A + 1; id_B < n; id_B++) {
-                combinations += ligands.at(id_A).getNumPoses() * ligands.at(id_B).getNumPoses();
+        for (unsigned idA = 0; idA < n; idA++) {
+            for (unsigned idB = idA + 1; idB < n; idB++) {
+                combinations += ligands.at(idA).getNumPoses() * ligands.at(idB).getNumPoses();
             }
         }
 
@@ -87,7 +85,7 @@ namespace coaler::multialign {
                     for (unsigned secondMolPoseId = 0; secondMolPoseId < nofPosesSecond; secondMolPoseId++) {
                         RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
                         RDKit::RWMol const secondMol = ligands.at(secondMolId).getMolecule();
-                        const double score = AlignmentScorer::calc_tanimoto_shape_similarity(
+                        const double score = AlignmentScorer::calcTanimotoShapeSimilarity(
                             firstMol, secondMol, firstMolPoseId, secondMolPoseId);
 
                         UniquePoseID firstPose(firstMolId, firstMolPoseId);

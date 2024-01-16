@@ -19,9 +19,9 @@ namespace coaler::core {
                                               multialign::LigandPairHash>;
 
     struct CoreResult {
-        RDKit::ROMOL_SPTR core;
-        RDKit::ROMOL_SPTR ref;
-        std::unordered_map<int, int> core_to_ref;
+        RDKit::ROMOL_SPTR core{nullptr};
+        RDKit::ROMOL_SPTR ref{nullptr};
+        std::unordered_map<int, int> core_to_ref{};
     };
 
     class Matcher {

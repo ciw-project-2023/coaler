@@ -7,9 +7,9 @@
 
 namespace {
     std::string get_formatted_string(unsigned num, unsigned digits) {
-        const unsigned num_digits = std::to_string(num).length();
+        const unsigned numDigits = std::to_string(num).length();
         std::string result;
-        while (result.size() < digits - num_digits) {
+        while (result.size() < digits - numDigits) {
             result += "0";
         }
         result += std::to_string(num);
@@ -21,20 +21,20 @@ namespace {
 
 namespace coaler::io {
     void OutputWriter::writeSDF(const std::string &filePath, const coaler::multialign::MultiAlignerResult &result) {
-        if (result.inputLigands.size() != result.poseIDsByLigandID.size()) {
+        if (result.input_ligands.size() != result.pose_ids_by_ligand_id.size()) {
             throw std::runtime_error(fmt::format("received less output molecules than there was in input: {}/{}",
-                                                 result.poseIDsByLigandID.size(), result.inputLigands.size()));
+                                                 result.pose_ids_by_ligand_id.size(), result.input_ligands.size()));
         }
-        std::ofstream output_file(filePath);
-        if (!output_file.is_open()) {
+        std::ofstream outputFile(filePath);
+        if (!outputFile.is_open()) {
             spdlog::error("Cannot open file: {}", filePath);
             return;
         }
 
-        boost::shared_ptr<RDKit::SDWriter> const sdf_writer(new RDKit::SDWriter(&output_file, false));
-        for (const auto &[ligandId, poseId] : result.poseIDsByLigandID) {
-            auto entry = result.inputLigands.at(ligandId).getMolecule();
-            entry.setProp("_Score", result.alignmentScore);
+        boost::shared_ptr<RDKit::SDWriter> const sdf_writer(new RDKit::SDWriter(&outputFile, false));
+        for (const auto &[ligandId, poseId] : result.pose_ids_by_ligand_id) {
+            auto entry = result.input_ligands.at(ligandId).getMolecule();
+            entry.setProp("_Score", result.alignment_score);
             sdf_writer->write(entry, static_cast<int>(poseId));
         }
     }
@@ -58,9 +58,9 @@ namespace coaler::io {
                 return;
             }
 
-            boost::shared_ptr<RDKit::SDWriter> const sdf_writer(new RDKit::SDWriter(&output_file, false));
+            boost::shared_ptr<RDKit::SDWriter> const sdfWriter(new RDKit::SDWriter(&output_file, false));
             for (unsigned poseId = 0; poseId < mol->getNumConformers(); poseId++) {
-                sdf_writer->write(*mol, static_cast<int>(poseId));
+                sdfWriter->write(*mol, static_cast<int>(poseId));
             }
         }
     }

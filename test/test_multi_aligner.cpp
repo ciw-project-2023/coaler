@@ -24,5 +24,5 @@ TEST_CASE("basic_test", "[multialigner_tester]") {
     multialign::MultiAligner aligner(mols, optimizer, 2);
     multialign::MultiAlignerResult result = aligner.alignMolecules();
 
-    CHECK(result.poseIDsByLigandID.size() == 2);  // ´
+    CHECK(result.pose_ids_by_ligand_id.size() == 2);  // ´
 }

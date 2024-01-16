@@ -1,6 +1,6 @@
 #pragma once
 
-namespace coaler::multialign::Constants {
+namespace coaler::multialign::constants {
     const unsigned DEFAULT_NOF_STARTING_ASSEMBLIES = 50;
     const unsigned DEFAULT_NOF_THREADS = 1;
     const double POSE_REGISTER_SIZE_FACTOR = 0.5;

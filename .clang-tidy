@@ -23,6 +23,7 @@ Checks: >
   -modernize-use-trailing-return-type,
   -modernize-avoid-c-arrays,
   -modernize-use-default-member-init,
+  -modernize-concat-nested-namespaces,
   -cppcoreguidelines-use-default-member-init,
   -readability-identifier-length,
   -readability-magic-numbers,
