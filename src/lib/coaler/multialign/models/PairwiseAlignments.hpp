@@ -13,6 +13,7 @@ namespace coaler::multialign {
      * This class stores pairwise conformer overlap values. If its presented a pair that it hasn´t encounted
      * before, it calculates the overlap and stores it if desired.
      */
+    // NOLINTBEGIN(cppcoreguidelines-virtual-class-destructor, cppcoreguidelines-special-member-functions)
     class PairwiseAlignments : public std::unordered_map<PosePair, double, PosePairHash> {
       public:
         PairwiseAlignments() = default;
@@ -34,4 +35,5 @@ namespace coaler::multialign {
         PairwiseAlignments& operator=(const PairwiseAlignments& p);
         virtual PairwiseAlignments& operator=(const std::unordered_map<PosePair, double, PosePairHash>& p);
     };
+    // NOLINTEND(cppcoreguidelines-virtual-class-destructor, cppcoreguidelines-special-member-functions)
 }  // namespace coaler::multialign
