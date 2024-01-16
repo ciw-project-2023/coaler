@@ -31,7 +31,7 @@ namespace {
         for (unsigned const originalRank : originalRanks) {
             newRanks.push_back(originalToSteadyRank.at(originalRank));
         }
-        // NOLINTBEGIN(performance-inefficient-vector-operation)
+        // NOLINTEND(performance-inefficient-vector-operation)
         return newRanks;
     }
 }  // namespace

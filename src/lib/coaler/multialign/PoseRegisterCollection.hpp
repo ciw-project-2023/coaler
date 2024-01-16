@@ -5,6 +5,7 @@
 
 namespace coaler::multialign {
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
     class PoseRegisterCollection {
       public:
         /**

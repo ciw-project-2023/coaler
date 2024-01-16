@@ -33,6 +33,7 @@ namespace coaler::multialign {
         double at(const PosePair& key, const LigandVector& ligands = {}, bool store = false);
 
         PairwiseAlignments& operator=(const PairwiseAlignments& p);
+        // NOLINTNEXTLINE(readability-avoid-const-params-in-decls)
         virtual PairwiseAlignments& operator=(const std::unordered_map<PosePair, double, PosePairHash>& p);
     };
     // NOLINTEND(cppcoreguidelines-virtual-class-destructor, cppcoreguidelines-special-member-functions)

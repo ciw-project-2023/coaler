@@ -18,11 +18,13 @@ namespace coaler::core {
                                               std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>,
                                               multialign::LigandPairHash>;
 
+    // NOLINTBEGIN(cppcoreguidelines-pro-type-member-init)
     struct CoreResult {
         RDKit::ROMOL_SPTR core{nullptr};
         RDKit::ROMOL_SPTR ref{nullptr};
         std::unordered_map<int, int> core_to_ref{};
     };
+    // NOLINTEND(cppcoreguidelines-pro-type-member-init)
 
     class Matcher {
       public:
