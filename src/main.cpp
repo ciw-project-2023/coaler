@@ -39,10 +39,12 @@ const std::string HELP
       "  --divide <bool>\t\t\t\t\tDivide the number of conformers by the number of times the core is matched in the input "
       "molecule.\n\t\t\t\t\t\t\t"
       "Helps against combinatorial explosion if core is small or has high symmetry (default: false)\n"
-      "  --assemblies <amount>\t\t\t\t\tNumber of starting assemblies (default: 10)\n"
-      "  --core <algorithm>\t\t\t\t\tAlgorithm to detect core structure (default: mcs, allowed: mcs, murcko)\n"
-      "  --confs-log <path>\t\t\t\t\tOptional path to folder to store the generated conformers\n"
-      "  --optimizer-coarse-threshold <float>\t\t\tTreshold for the optimization step (default: 1.5)\n"
+      "  --assemblies <amount>\t\t\tNumber of starting assemblies (default: 10)\n"
+      "  --core <algorithm>\t\t\tAlgorithm to detect core structure (default: mcs, allowed: mcs, murcko)\n"
+      "  --confs-log <path>\t\t\tOptional path to folder to store the generated conformers\n"
+      "  --optimizer-coarse_optimization_threshold-threshold <float>\t\t\tTreshold for the "
+      "coarse_optimization_threshold "
+      "optimization step (default: 1.5)\n"
       "  --optimizer-fine-threshold <float>\t\t\tTreshold for the fine optimization step (default: 0.5)\n"
       "  --optimizer-step-limit <amount> \t\t\tMaximum number of steps for the optimizer (default: 100)\n";
 
