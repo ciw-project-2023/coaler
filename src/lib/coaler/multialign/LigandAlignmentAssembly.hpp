@@ -8,7 +8,7 @@ namespace coaler::multialign {
     /**
      * An alignment of a set of ligands. Contains one pose for each ligand.
      */
-    // NOLINTNEXTLINE(ppcoreguidelines-pro-type-member-init,)
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init,)
     class LigandAlignmentAssembly {
       public:
         // NOLINTNEXTLINE(readability-avoid-const-params-in-decls)
