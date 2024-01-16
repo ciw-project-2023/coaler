@@ -33,11 +33,10 @@ Checks: >
   -cppcoreguidelines-avoid-do-while,
   -misc-include-cleaner,
   -misc-non-private-member-variables-in-classes,
-  -clang-diagnostic-error,
   -cppcoreguidelines-init-variables, # TODO: this should be included!, But Clang-tidy does not recognize RDKit yet 
 
 WarningsAsErrors: '*'
-HeaderFilterRegex: '^$'
+HeaderFilterRegex: '.*.h(pp|xx)'
 
 # Same as in coding
 FormatStyle: file
