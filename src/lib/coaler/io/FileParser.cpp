@@ -18,7 +18,7 @@ namespace coaler::io {
 
         spdlog::debug("searching at: {}", std::filesystem::current_path().string());
 
-        std::ifstream infile(filePath);
+        const std::ifstream infile(filePath);
         if (!infile) {
             spdlog::error("file not found: {}", filePath);
             throw FileNotFoundException(filePath);
@@ -61,7 +61,7 @@ namespace coaler::io {
         RDKit::MOL_SPTR_VECT retMols;
         std::unordered_set<std::string> smilesSet;
         unsigned duplicates = 0;
-        for (auto mol : mols) {
+        for (auto const& mol : mols) {
             std::string smiles = RDKit::MolToSmiles(*mol);
             if (smilesSet.insert(smiles).second) {
                 retMols.emplace_back(mol);
