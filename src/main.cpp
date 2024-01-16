@@ -1,5 +1,4 @@
 #include <GraphMol/SmilesParse/SmartsWrite.h>
-
 #include <omp.h>
 
 #include <boost/program_options.hpp>
