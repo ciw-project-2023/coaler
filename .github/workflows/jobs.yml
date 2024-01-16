@@ -120,7 +120,5 @@ jobs:
 
       - run: cmake . -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=build/Debug/generators/conan_toolchain.cmake
 
-      - run: ls build
-
       - name: Clang-Tidy
         run: clang-tidy -p=build --quiet $(find . -not \( -path "./test/*" -or -path "./build/*" -or -path "./CMakeFiles/*" \) \( -name '*.cpp' -or -name '*.h' -or -name '*.hpp' \) )
