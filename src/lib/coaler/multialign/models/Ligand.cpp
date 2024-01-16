@@ -2,9 +2,10 @@
 
 namespace coaler::multialign {
 
+    // NOLINTBEGIN(modernize-pass-by-value)
     Ligand::Ligand(const RDKit::ROMol& mol, const UniquePoseSet& poses, LigandID id)
         : m_molecule(mol), m_poses(poses), m_id(id) {}
-
+    // NOLINTEND(modernize-pass-by-value)
     /*----------------------------------------------------------------------------------------------------------------*/
 
     UniquePoseSet Ligand::getPoses() const noexcept { return m_poses; }

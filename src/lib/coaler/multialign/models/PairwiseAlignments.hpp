@@ -19,6 +19,7 @@ namespace coaler::multialign {
         ~PairwiseAlignments() = default;
         PairwiseAlignments(PairwiseAlignments& p);
         PairwiseAlignments(const PairwiseAlignments& p);
+        PairwiseAlignments(PairwiseAlignments&& p) = default;
 
         /**
          * @brief looks up or calculates the overlap score

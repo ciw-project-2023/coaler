@@ -31,11 +31,11 @@ namespace coaler::io {
             return;
         }
 
-        boost::shared_ptr<RDKit::SDWriter> const sdf_writer(new RDKit::SDWriter(&outputFile, false));
+        const boost::shared_ptr<RDKit::SDWriter> sdfWriter(new RDKit::SDWriter(&outputFile, false));
         for (const auto &[ligandId, poseId] : result.pose_ids_by_ligand_id) {
             auto entry = result.input_ligands.at(ligandId).getMolecule();
             entry.setProp("_Score", result.alignment_score);
-            sdf_writer->write(entry, static_cast<int>(poseId));
+            sdfWriter->write(entry, static_cast<int>(poseId));
         }
     }
 
@@ -51,14 +51,14 @@ namespace coaler::io {
             const auto &mol = mols.at(molId);
 
             const std::string currentFilePath = filePath + "mol_" + get_formatted_string(molId, magnitude) + ".sdf";
-            std::ofstream output_file(currentFilePath);
+            std::ofstream outputFile(currentFilePath);
 
-            if (!output_file.is_open()) {
+            if (!outputFile.is_open()) {
                 spdlog::error("Cannot open file: {}", folderPath);
                 return;
             }
 
-            boost::shared_ptr<RDKit::SDWriter> const sdfWriter(new RDKit::SDWriter(&output_file, false));
+            boost::shared_ptr<RDKit::SDWriter> const sdfWriter(new RDKit::SDWriter(&outputFile, false));
             for (unsigned poseId = 0; poseId < mol->getNumConformers(); poseId++) {
                 sdfWriter->write(*mol, static_cast<int>(poseId));
             }

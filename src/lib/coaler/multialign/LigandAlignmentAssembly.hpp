@@ -43,10 +43,8 @@ namespace coaler::multialign {
         [[nodiscard]] unsigned getMissingLigandsCount() const noexcept;
 
         // NOLINTBEGIN(cppcoreguidelines-non-private-member-variables-in-classes)
-        // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
         std::unordered_map<LigandID, PoseID> getAssemblyMapping() const noexcept;
         // NOLINTEND(cppcoreguidelines-non-private-member-variables-in-classes)
-        // NOLINTEND(misc-non-private-member-variables-in-classes)
 
       private:
         void setMissingLigandsCount(unsigned count);

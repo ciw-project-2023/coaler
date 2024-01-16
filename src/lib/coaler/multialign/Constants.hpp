@@ -18,4 +18,4 @@ namespace coaler::multialign::constants {
     const double FINE_OPTIMIZATION_THRESHOLD = 0.5;
 
     const unsigned OPTIMIZER_STEP_LIMIT = 100;
-}  // namespace coaler::multialign::Constants
+}  // namespace coaler::multialign::constants

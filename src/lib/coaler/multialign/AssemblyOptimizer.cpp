@@ -10,7 +10,7 @@
 using namespace coaler::multialign;
 
 void update_pose_registers(const LigandID ligandId, const PoseID newPose, PoseRegisterCollection &registers,
-                         PairwiseAlignments &scores, const LigandVector &ligands) {
+                           PairwiseAlignments &scores, const LigandVector &ligands) {
     for (const Ligand &otherLigand : ligands) {
         if (otherLigand.getID() == ligandId) {
             continue;

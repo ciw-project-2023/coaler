@@ -8,17 +8,18 @@ namespace coaler {
     namespace multialign {
 
         struct MultiAlignerResult {
-            // NOLINTBEGIN(cppcoreguidelines-pro-type-member-init, modernize-pass-by-value)
-            // NOLINTNEXTLINE(readability-named-parameter)
+            // NOLINTBEGIN(cppcoreguidelines-pro-type-member-init, modernize-pass-by-value, readability-named-parameter)
             MultiAlignerResult(double score, const std::unordered_map<LigandID, PoseID>& mapping,
                                const LigandVector& ligands)
                 : alignment_score(score), pose_ids_by_ligand_id(mapping), input_ligands(ligands) {}
-            // NOLINTEND(cppcoreguidelines-pro-type-member-init, modernize-pass-by-value)
+            // NOLINTEND(cppcoreguidelines-pro-type-member-init, modernize-pass-by-value, readability-named-parameter)
             /*--------------------------------------------------------------------------------------------------------*/
 
+            // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
             double alignment_score;
             std::unordered_map<LigandID, PoseID> pose_ids_by_ligand_id;
             std::vector<Ligand> input_ligands;
+            // NOLINTEND(misc-non-private-member-variables-in-classes)
         };
 
     }  // namespace multialign

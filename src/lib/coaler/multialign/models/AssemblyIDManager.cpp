@@ -5,19 +5,19 @@ namespace coaler::multialign {
     namespace {
         std::size_t calculateAssemblyHash(const coaler::multialign::LigandAlignmentAssembly &assembly) {
             std::vector<size_t> uniquePosIdHashs;
-            for (auto id_pair : assembly.getAssemblyMapping()) {
-                LigandID ligandId = id_pair.first;
-                PoseID posId = id_pair.second;
+            for (auto idPair : assembly.getAssemblyMapping()) {
+                LigandID ligandId = idPair.first;
+                PoseID posId = idPair.second;
                 UniquePoseID uPoseId(ligandId, posId);
                 uniquePosIdHashs.emplace_back(UniquePoseIdentifierHash()(uPoseId));
             }
 
             std::hash<size_t> hasher;
-            size_t assembly_hash = 0;
+            size_t assemblyHash = 0;
             for (size_t value : uniquePosIdHashs) {
-                assembly_hash ^= hasher(value) + 0x9e3779b9 + (assembly_hash << 6) + (assembly_hash >> 2);
+                assemblyHash ^= hasher(value) + 0x9e3779b9 + (assemblyHash << 6) + (assemblyHash >> 2);
             }
-            return assembly_hash;
+            return assemblyHash;
         }
     }  // namespace
 

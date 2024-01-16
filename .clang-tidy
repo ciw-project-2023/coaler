@@ -32,6 +32,7 @@ Checks: >
   -bugprone-unchecked-optional-access,
   -cppcoreguidelines-avoid-do-while,
   -misc-include-cleaner,
+  -misc-non-private-member-variables-in-classes,
   -cppcoreguidelines-init-variables, # TODO: this should be included!, But Clang-tidy does not recognize RDKit yet 
 
 WarningsAsErrors: '*'
