@@ -196,8 +196,11 @@ namespace coaler::core {
         }
     }
 
+    // NOLINTBEGIN(misc-unused-parameters)
+    // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
     void Matcher::murckoCheckDelAtoms(RDKit::RWMOL_SPTR &mol, int atomID, int parentID, std::vector<bool> &visit,
                                       std::vector<int> &ringAtoms, std::vector<int> &foundRingAtoms) {
+        // NOLINTEND(misc-unused-parameters)
         // mark atom as visited and check if they are part of any ring. If yes save and return to
         // recursive call before
         visit.at(atomID) = true;

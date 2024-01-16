@@ -75,11 +75,6 @@ namespace coaler::embedder {
                 confs = RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
             }
 
-            std::vector<unsigned> confIds;
-            for (auto const confId : confs) {
-                confIds.emplace_back(confId);
-            }
-
             std::vector<std::pair<int, double>> result;
             RDKit::UFF::UFFOptimizeMoleculeConfs(*mol, result, m_threads);
 
@@ -140,15 +135,20 @@ namespace coaler::embedder {
             const RDKit::ROMol targetMol = target.getMolecule();
             RDKit::Conformer targetConformer;
             try {
-                targetConformer = targetMol.getConformer(targetConformerID);
+                targetConformer = targetMol.getConformer(static_cast<int>(targetConformerID));
             } catch (std::runtime_error &e) {
                 spdlog::error(e.what());
             }
 
-            RDKit::MatchVectType ligandMatchRelaxed, targetMatchRelaxed, ligandMatchStrict, targetMatchStrict;
+            // Clang-tidy readability!
+            RDKit::MatchVectType ligandMatchRelaxed;
+            RDKit::MatchVectType targetMatchRelaxed;
+            RDKit::MatchVectType ligandMatchStrict;
+            RDKit::MatchVectType targetMatchStrict;
             // RDKit::MatchVectType smallerIDLigandMatch, largerIDLigandMatch;
-            std::string mcsStringRelaxed, mcsStringStrict;
-            multialign::LigandPair ligandPair(worstLigand.getID(), targetID);
+            std::string mcsStringRelaxed;
+            std::string mcsStringStrict;
+            const multialign::LigandPair ligandPair(worstLigand.getID(), targetID);
 
             // since mcs maps are accessed via ligand pair, i.e. smaller id first, we have to check in which
             // order ligand and target are.

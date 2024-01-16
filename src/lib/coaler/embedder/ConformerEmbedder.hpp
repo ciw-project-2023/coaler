@@ -18,7 +18,7 @@ namespace coaler::embedder {
      */
     class ConformerEmbedder {
       public:
-        ConformerEmbedder(core::CoreResult  result, int threads, bool divideConformersByMatches);
+        ConformerEmbedder(core::CoreResult result, int threads, bool divideConformersByMatches);
 
         /**
          * Embed an even amount of Conformers at every core match.
@@ -47,6 +47,6 @@ namespace coaler::embedder {
         int m_threads;
         bool m_divideConformersByMatches;
 
-        RDKit::DGeomHelpers::EmbedParameters getEmbeddingParameters() const;
+        [[nodiscard]] RDKit::DGeomHelpers::EmbedParameters getEmbeddingParameters() const;
     };
 }  // namespace coaler::embedder
