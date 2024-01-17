@@ -3,7 +3,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable (coaler main.cpp)
 add_subdirectory(lib)
 
-set_property(TARGET coaler PROPERTY CXX_STANDARD 20)
+set_property(TARGET coaler PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(coaler PUBLIC "-Wl,--disable-new-dtags")
 
