@@ -97,6 +97,8 @@ namespace coaler::embedder {
         }
 
         if (m_divideConformersByMatches) {
+            unsigned molGetNumConfs = mol->getNumConformers();
+
             assert(mol->getNumConformers() == numConfs);
         } else {
             assert(mol->getNumConformers() == numConfs * matches.size());
@@ -178,7 +180,6 @@ namespace coaler::embedder {
                     spdlog::debug(e.what());
                 }
             }
-
             // if relaxed mcs params didnt yield valid embedding, reattempt with strict mcs.
             if (addedID < 0 && !ligandMatchStrict.empty() && !targetMatchStrict.empty()) {
                 spdlog::debug("flexible approach failed. Trying strict approach.");

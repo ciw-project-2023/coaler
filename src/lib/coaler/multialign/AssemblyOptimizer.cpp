@@ -7,6 +7,22 @@
 #include "coaler/embedder/ConformerEmbedder.hpp"
 #include "coaler/multialign/scorer/AssemblyScorer.hpp"
 
+const unsigned SEED = 42;
+const float FORCE_TOL = 0.0135;
+
+namespace {
+    RDKit::DGeomHelpers::EmbedParameters get_embed_params_for_optimizer_generation() {
+        RDKit::DGeomHelpers::EmbedParameters params;
+        params = RDKit::DGeomHelpers::srETKDGv3;
+        params.optimizerForceTol = FORCE_TOL;
+        params.randomSeed = SEED;
+        params.useRandomCoords = true;
+        params.numThreads = 1;
+        params.clearConfs = false;
+        return params;
+    }
+}  // namespace
+
 using namespace coaler::multialign;
 
 void update_pose_registers(const LigandID ligandId, const PoseID newPose, PoseRegisterCollection &registers,
@@ -210,15 +226,39 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 
             LigandVector const alignmentTargets = generate_alignment_targets(ligands, *worstLigand);
             assert(alignmentTargets.size() == ligands.size() - 1);
-
             auto newConfIDs = coaler::embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(
                 *worstLigand, alignmentTargets, assembly.getAssemblyMapping(), m_strictMCSMap, m_relaxedMCSMap);
-
             if (newConfIDs.empty()) {
-                spdlog::warn("no confs generated. skipping ligand {}", RDKit::MolToSmiles(worstLigand->getMolecule()));
-                ligandAvailable.at(worstLigandId) = false;
+                RDKit::DGeomHelpers::EmbedParameters params = get_embed_params_for_optimizer_generation();
+                params.clearConfs = true;
+                const unsigned numNewConfs = worstLigand->getNumHeavyAtoms() * 10;
+                spdlog::warn(
+                    "no confs with matching MCS generated. trying bruteforce for ligand {} with {} new conformers",
+                    RDKit::MolToSmiles(worstLigand->getMolecule()), numNewConfs);
 
-                continue;
+                const std::vector<int> confs = RDKit::DGeomHelpers::EmbedMultipleConfs(
+                    *boost::make_shared<RDKit::ROMol>(worstLigand->getMolecule()), numNewConfs, params);
+
+                bool newPoseFound = false;
+                unsigned bestConfID;
+                for (const auto pose : worstLigand->getPoses()) {
+                    LigandAlignmentAssembly assemblyCopy = assembly;
+                    assemblyCopy.swapPoseForLigand(worstLigandId, pose.getLigandInternalPoseId());
+                    double const newAssemblyScore
+                        = AssemblyScorer::calculateAssemblyScore(assemblyCopy, scores, ligands);
+
+                    if (newAssemblyScore > assemblyScore) {
+                        bestConfID = pose.getLigandInternalPoseId();
+                        newPoseFound = true;
+                        assembly = assemblyCopy;
+                        assemblyScore = newAssemblyScore;
+                        ligandAvailable.at(worstLigandId) = true;
+                    }
+                }
+                if (newPoseFound) {
+                    spdlog::debug("swapped for new pose.");
+                    newConfIDs.push_back(bestConfID);
+                }
             }
 
             std::vector<std::pair<int, double>> result;
