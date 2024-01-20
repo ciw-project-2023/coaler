@@ -20,3 +20,8 @@ clean:
 install:
 	@echo "Installing..."
 	@install -m755 ./build/Release/src/coaler /usr/local/bin/coaler
+
+container:
+	@echo "Building container..."
+	@podman build -t coaler:latest .
+
