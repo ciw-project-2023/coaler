@@ -280,7 +280,8 @@ namespace coaler::core {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    PairwiseMCSMap Matcher::calcPairwiseMCS(const multialign::LigandVector &mols, bool strict, const std::string& seed) {
+    PairwiseMCSMap Matcher::calcPairwiseMCS(const multialign::LigandVector &mols, bool strict,
+                                            const std::string &seed) {
         PairwiseMCSMap mcsMap;
         RDKit::MCSParameters mcsParams;
         if (strict) {
