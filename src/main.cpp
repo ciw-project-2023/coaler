@@ -175,7 +175,7 @@ int main(int argc, char* argv[]) {
         coaler::io::OutputWriter::writeConformersToSDF(opts.conformer_log_path, mols);
     }
 
-    multialign::MultiAligner aligner(mols, optimizer, opts.num_start_assemblies, opts.num_threads);
+    multialign::MultiAligner aligner(mols, optimizer, core, opts.num_start_assemblies, opts.num_threads);
 
     const multialign::MultiAlignerResult result = aligner.alignMolecules();
     io::OutputWriter::writeSDF(opts.out_file, result);

@@ -10,7 +10,7 @@ namespace coaler::multialign {
 
     class MultiAligner {
       public:
-        explicit MultiAligner(RDKit::MOL_SPTR_VECT molecules, AssemblyOptimizer optimizer,
+        explicit MultiAligner(RDKit::MOL_SPTR_VECT molecules, AssemblyOptimizer optimizer, core::CoreResult core,
                               unsigned maxStartingAssemblies = constants::DEFAULT_NOF_STARTING_ASSEMBLIES,
                               unsigned nofThreads = constants::DEFAULT_NOF_THREADS);
 
@@ -29,6 +29,7 @@ namespace coaler::multialign {
 
         unsigned m_threads;
 
+        core::CoreResult m_core;
         core::PairwiseMCSMap m_pairwiseStrictMcsMap;
         core::PairwiseMCSMap m_pairwiseRelaxedMcsMap;
     };

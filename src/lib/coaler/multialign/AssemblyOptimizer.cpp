@@ -7,6 +7,23 @@
 #include "coaler/embedder/ConformerEmbedder.hpp"
 #include "coaler/multialign/scorer/AssemblyScorer.hpp"
 
+const unsigned SEED = 42;
+const float FORCE_TOL = 0.0135;
+const float SCORE_THRESHOLD = 0.5;
+
+namespace {
+    RDKit::DGeomHelpers::EmbedParameters get_embed_params_for_optimizer_generation() {
+        RDKit::DGeomHelpers::EmbedParameters params;
+        params = RDKit::DGeomHelpers::srETKDGv3;
+        params.optimizerForceTol = FORCE_TOL;
+        params.randomSeed = SEED;
+        params.useRandomCoords = true;
+        params.numThreads = 1;
+        params.clearConfs = false;
+        return params;
+    }
+}  // namespace
+
 using namespace coaler::multialign;
 
 void update_pose_registers(const LigandID ligandId, const PoseID newPose, PoseRegisterCollection &registers,
@@ -276,6 +293,81 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
-OptimizerState AssemblyOptimizer::fineTuneState(OptimizerState &state) {
-    return optimizeAssembly(state.assembly, state.scores, state.ligands, state.registers, m_fineScoreThreshold);
+void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, PairwiseAlignments scores, LigandVector ligands,
+                                        PoseRegisterCollection registers, const coaler::core::CoreResult &core) {
+    double assemblyScore = AssemblyScorer::calculateAssemblyScore(assembly, scores, ligands);
+    double lowestScore = std::numeric_limits<double>::max();
+    unsigned ligandsPartners = ligands.size() - 1;
+    for (Ligand firstLigand : ligands) {
+        unsigned firstLigandID = firstLigand.getID();
+        double currScore = 0.0;
+        for (const Ligand& secondLigand : ligands) {
+            if (firstLigandID >= secondLigand.getID()) {
+                continue;
+            }
+
+            PoseID const firstLigandPoseID = assembly.getPoseOfLigand(firstLigandID);
+            PoseID const secondLigandPoseID = assembly.getPoseOfLigand(secondLigand.getID());
+
+            // check whether assembly didnt contain one of the ligands
+            if (firstLigandPoseID == std::numeric_limits<PoseID>::max()
+                || secondLigandPoseID == std::numeric_limits<PoseID>::max()) {
+                continue;
+            }
+            const UniquePoseID first(firstLigandID, firstLigandPoseID);
+            const UniquePoseID second(secondLigand.getID(), secondLigandPoseID);
+            currScore += scores.at(PosePair{first, second}, ligands);
+        }
+        currScore /= ligandsPartners;
+        if (currScore < SCORE_THRESHOLD) {
+            LigandAlignmentAssembly assemblyCopy = assembly;
+            const std::vector<multialign::PoseID> newPoseIDs = embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(
+                firstLigand, targets, assemblyCopy.getAssemblyMapping(), core);
+            if (newPoseIDs.empty()) {
+                spdlog::warn("no confs generated. skipping ligand {}", RDKit::MolToSmiles(firstLigand.getMolecule()));
+                continue;
+            }
+
+            std::vector<std::pair<int, double>> result;
+            RDKit::UFF::UFFOptimizeMoleculeConfs((RDKit::ROMol &)*firstLigand.getMoleculePtr(), result, 1);
+
+            auto [bestNewPoseID, bestNewAssemblyScore]
+                = find_optimal_pose(firstLigandID, newPoseIDs, assemblyCopy, scores, ligands);
+
+
+            double const newAssemblyScore = AssemblyScorer::calculateAssemblyScore(assemblyCopy, scores, ligands);
+            if (newAssemblyScore > assemblyScore) {
+                assemblyScore = newAssemblyScore;
+                spdlog::debug("ligand {} now has conformer {}.", firstLigandID, bestNewPoseID);
+                // remove all (except best) new poses from ligand
+                for (auto const confId : newPoseIDs) {
+                    if (confId == bestNewPoseID) {
+                        continue;
+                    }
+                    firstLigand.removePose(confId);
+                }
+                update_pose_registers(firstLigandID, bestNewPoseID, registers, scores, ligands);
+                assembly.swapPoseForLigand(firstLigandID, bestNewPoseID);
+                firstLigand.addPose(bestNewPoseID);
+
+            } else {
+                spdlog::debug("discarded pose. assembly score: {}", assemblyScore);
+
+                // remove all new poses from ligand
+                for (const auto confId : newPoseIDs) {
+                    firstLigand.removePose(confId);
+                }
+            }
+        }
+    }
+    return assemblyScore / paircount;
 }
+
+/*----------------------------------------------------------------------------------------------------------------*/
+
+OptimizerState AssemblyOptimizer::fineTuneState(OptimizerState &state, const core::CoreResult& core) {
+    OptimizerState optState = optimizeAssembly(state.assembly, state.scores, state.ligands, state.registers, m_fineScoreThreshold);
+    fixWorstLigands(state.assembly, state.scores, state.ligands, state.registers, core);
+}
+
+

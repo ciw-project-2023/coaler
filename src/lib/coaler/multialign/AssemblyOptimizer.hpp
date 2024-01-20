@@ -42,9 +42,15 @@ namespace coaler::multialign {
          * generation of a new pose.
          * @return The optimized state.
          */
-        OptimizerState fineTuneState(OptimizerState& state);
+        OptimizerState fineTuneState(OptimizerState& state, const core::CoreResult& core);
+
+
 
       private:
+
+        static void fixWorstLigands(LigandAlignmentAssembly assembly, PairwiseAlignments scores, LigandVector ligands,
+                                    PoseRegisterCollection registers, const core::CoreResult& core);
+
         int m_threads;
         int m_stepLimit;
 

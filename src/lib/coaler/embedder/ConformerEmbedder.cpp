@@ -13,6 +13,7 @@
 
 const unsigned SEED = 42;
 const float FORCE_TOL = 0.0135;
+const unsigned BRUTEFORCE_CONFS = 100;
 
 namespace {
     RDKit::SubstructMatchParameters get_optimizer_substruct_params() {
@@ -206,6 +207,50 @@ namespace coaler::embedder {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
+    std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
+        const multialign::Ligand &worstLigand, const multialign::LigandVector &targets,
+        const std::unordered_map<multialign::LigandID, multialign::PoseID> &conformerIDs,
+        const core::CoreResult &core) {
+
+        std::vector<unsigned> newIds;
+        auto *ligandMol = (RDKit::ROMol *)worstLigand.getMoleculePtr();
+
+        for (const multialign::Ligand &target : targets) {
+            // find mcs
+            const multialign::LigandID targetID = target.getID();
+            if (conformerIDs.count(targetID) == 0) {
+                continue;
+            }
+
+            const multialign::PoseID targetConformerID = conformerIDs.at(targetID);
+            const RDKit::ROMol targetMol = target.getMolecule();
+            RDKit::Conformer targetConformer;
+            try {
+                targetConformer = targetMol.getConformer(static_cast<int>(targetConformerID));
+            } catch (std::runtime_error &e) {
+                spdlog::error(e.what());
+            }
+
+            CoreAtomMapping coreCoords;
+            RDKit::DGeomHelpers::EmbedParameters params = get_embed_params_for_optimizer_generation();
+            int addedID = -1;
+
+            coreCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
+                                                                        ligandMatchRelaxed, targetMatchRelaxed);
+            params.coordMap = &ligandMcsCoords;
+            try {
+                addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligandMol, params);
+            } catch (const std::runtime_error &e) {
+                spdlog::debug(e.what());
+            }
+        }
+
+
+        return std::vector<multialign::PoseID>();
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     CoreAtomMapping ConformerEmbedder::getLigandMcsAtomCoordsFromTargetMatch(
         const RDGeom::POINT3D_VECT &targetCoords, const RDKit::MatchVectType &ligandMcsMatch,
         const RDKit::MatchVectType &targetMcsMatch) {
@@ -219,5 +264,6 @@ namespace coaler::embedder {
         }
         return ligandCoords;
     }
+
 
 }  // namespace coaler::embedder

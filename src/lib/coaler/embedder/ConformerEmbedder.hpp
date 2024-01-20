@@ -38,6 +38,11 @@ namespace coaler::embedder {
             const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs,
             const core::PairwiseMCSMap& pairwiseStrictMCSMap, const core::PairwiseMCSMap& pairwiseRelaxedMCSMap);
 
+        static std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(
+            const multialign::Ligand& worstLigand, const multialign::LigandVector &targets,
+            const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs,
+            const core::CoreResult& core);
+
         static CoreAtomMapping getLigandMcsAtomCoordsFromTargetMatch(const RDGeom::POINT3D_VECT& targetCoords,
                                                                      const RDKit::MatchVectType& ligandMcsMatch,
                                                                      const RDKit::MatchVectType& targetMcsMatch);
