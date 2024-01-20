@@ -4,119 +4,35 @@
 
 Core Aligner
 
-### UPDATE YOUR SYSTEM
+## Building locally
 
-We have prebuild rdkit for the following setups:
-
-```
-[settings]
-arch=x86_64
-build_type=Debug
-compiler=gcc
-compiler.cppstd=gnu17
-compiler.libcxx=libstdc++11
-compiler.version=13
-os=Linux
-
--- GlibC 2.36/2.38
-```
-
-And
-
-```
-[settings]
-arch=x86_64
-build_type=Debug
-compiler=gcc
-compiler.cppstd=gnu17
-compiler.libcxx=libstdc++11
-compiler.version=11
-os=Linux
-
--- GlibC 2.34/2.36 (should work for both)
-```
-
-Please check your version you have installed locally and update them if you need to:
+To build the project locally, you need to have a valid GCC installation as well as
+python (>3.10 with venv support) installed. You can build the project with the following commands:
 
 ```bash
-# Check g++ (compile.version)
-g++ -v
+./confgiure
+make
+sudo make install
+````
 
-# Check libc version
-ldd --version
+The configure script will create a virtual environment in the `venv` directory and install the conan package manager.
+The make targets will use conan to build the project. The binary will be installed to `/usr/local/bin/coaler`. You might
+have to add `/usr/local/bin` to your `PATH` variable.
 
-# Check cmake version 
-cmake --version
-```
-
-### Install conan
-
-<https://conan.io/downloads>
-
-### Add your conan profile
-
-Make conan detect the default profile:
-
-```
-conan profile detect
-```
-
-This will create `~/.conan2/profiles/default`.
-
-Then for local development, you want a debug profile. So add change this in your
-conan default profile.
-
-~/.conan2/profiles/default
-
-```
-- build_type=Release
-+ build_type=Debug
-```
-
-### Fetch the rdkit package from Artifactory
-
-Credentials are:
-
-```
-username: ciw
-password: VZKhzh2v5nCnijAS3A8R
-```
+### Building Containerized
+If you want to use Podman to run the application, you can use the following command:
 
 ```bash
-conan remote add coaler http://server.conan.corealigner.de
+make container
 ```
 
-```
-conan remote login coaler
-```
-
-You can then proceed to the conan install step and it should pull rdkit from the server
-
-### Clone the client Repo
-
-<https://github.com/ciw-project-2023/coaler>
-
-```sh
-git clone https://github.com/ciw-project-2023/coaler && cd coaler
-```
-
-### Build Project
+This will build an container image with the name `coaler:latest`. You can run the container with the following command:
 
 ```bash
-conan build . --build missing --update
+./run.sh
 ```
 
-To run the programm from the CMD:
-
-```
-./build/Debug/src/aligner
-```
-
-To run the tests from the CMD:
-
-```
-./build/Debug/test/Test
-```
+The script will mount the current directory to your PWD in the container and run the application passing all arguments to it.
 
 ### Setup Clion
 
