@@ -53,7 +53,8 @@ namespace coaler::core {
          */
         static RDKit::MCSParameters getStrictMCSParams();
 
-        static PairwiseMCSMap calcPairwiseMCS(const multialign::LigandVector& mols, bool strict, const std::string& seed = "");
+        static PairwiseMCSMap calcPairwiseMCS(const multialign::LigandVector& mols, bool strict,
+                                              const std::string& seed = "");
 
       private:
         /**
