@@ -280,7 +280,7 @@ namespace coaler::core {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    PairwiseMCSMap Matcher::calcPairwiseMCS(const multialign::LigandVector &mols, bool strict) {
+    PairwiseMCSMap Matcher::calcPairwiseMCS(const multialign::LigandVector &mols, bool strict, const std::string& seed) {
         PairwiseMCSMap mcsMap;
         RDKit::MCSParameters mcsParams;
         if (strict) {
@@ -294,7 +294,7 @@ namespace coaler::core {
 
         const RDKit::SubstructMatchParameters substructMatchParams = get_optimizer_substruct_params();
 
-#pragma omp parallel for shared(mols, mcsParams, substructMatchParams, mcsMap, mapLock, strict) default(none)
+#pragma omp parallel for shared(mols, mcsParams, substructMatchParams, mcsMap, mapLock, strict, seed) default(none)
         for (auto firstLigandId = 0; firstLigandId < mols.size(); ++firstLigandId) {
             for (auto secondLigandId = firstLigandId + 1; secondLigandId < mols.size(); ++secondLigandId) {
                 const multialign::LigandPair ligandPair(firstLigandId, secondLigandId);
@@ -309,6 +309,7 @@ namespace coaler::core {
                 auto secondMolPtr = boost::make_shared<RDKit::ROMol>(secondMol);
 
                 const RDKit::MOL_SPTR_VECT molPair{firstMolPtr, secondMolPtr};
+                mcsParams.InitialSeed = seed;
                 const RDKit::MCSResult mcsResult = RDKit::findMCS(molPair, &mcsParams);
 
                 if (mcsResult.QueryMol == nullptr) {
