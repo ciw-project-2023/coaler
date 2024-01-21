@@ -155,7 +155,6 @@ int main(int argc, char* argv[]) {
     } else {
         spdlog::info("Embedding {} conformers for all molecules.", opts.num_conformers);
     }
-
     embedder::ConformerEmbedder embedder(core, opts.num_threads, opts.divide_conformers_by_matches);
 
 #pragma omp parallel for shared(mols, embedder, opts) default(none)
