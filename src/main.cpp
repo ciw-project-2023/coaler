@@ -115,7 +115,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    auto mols = io::FileParser::parse(opts.input_file_path);
+    RDKit::MOL_SPTR_VECT mols;
+    try {
+        mols = io::FileParser::parse(opts.input_file_path);
+    } catch (coaler::io::FileNotFoundException& exception) {
+        spdlog::error(exception.what());
+        return 1;
+    };
 
     std::optional<coaler::core::CoreResult> coreResult;
     core::Matcher matcher(opts.num_threads);
