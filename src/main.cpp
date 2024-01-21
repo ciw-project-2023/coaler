@@ -152,7 +152,13 @@ int main(int argc, char* argv[]) {
     // const core::PairwiseMCSMap pairwiseStrictMcsMap = matcher.calcPairwiseMCS(mols, true);
     // const core::PairwiseMCSMap pairwiseRelaxedMcsMap = matcher.calcPairwiseMCS(mols, false);
 
-    spdlog::info("Embedding {} conformers for all molecules.", opts.num_conformers);
+    if (mOpts->divide_conformers_by_matches) {
+        spdlog::info(
+            "Number of conformeres per molecules is equal to the number of conformers divided by the number of times "
+            "the core is matched.");
+    } else {
+        spdlog::info("Embedding {} conformers for all molecules.", opts.num_conformers);
+    }
 
     embedder::ConformerEmbedder embedder(core, opts.num_threads, opts.divide_conformers_by_matches);
 
