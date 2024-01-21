@@ -48,12 +48,13 @@ namespace coaler::core {
         static RDKit::MCSParameters getRelaxedMCSParams();
 
         /**
-         * @return mcs params fora strict mcs search
+         * @return mcs params for a strict mcs search
          * i.e. Chirality, Bond order etc.
          */
         static RDKit::MCSParameters getStrictMCSParams();
 
-        static PairwiseMCSMap calcPairwiseMCS(const multialign::LigandVector& mols, bool strict);
+        static PairwiseMCSMap calcPairwiseMCS(const multialign::LigandVector& mols, bool strict,
+                                              const std::string& seed = "");
 
       private:
         /**
