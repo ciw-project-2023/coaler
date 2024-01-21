@@ -30,13 +30,17 @@ TEST_CASE("mcs contains core", "[core]") {
         ligands.push_back(coaler::multialign::Ligand(*mol, {}, id));
         id++;
     }
+
     auto pairwiseMCS = coaler::core::Matcher::calcPairwiseMCS(ligands, false, coreSmarts);
 
     for (const auto& mcs : pairwiseMCS) {
         std::string mcsString = get<2>(mcs.second);
         spdlog::info("shared mcs smarts: {}", mcsString);
         auto* sharedMcsMol = RDKit::SmartsToMol(mcsString);
-        auto containsCore = RDKit::SubstructMatch(*sharedMcsMol, *expectedCoreMol);
+
+        RDKit::SubstructMatchParameters params;
+        params.useChirality = false;
+        auto containsCore = RDKit::SubstructMatch(*sharedMcsMol, *expectedCoreMol, params);
         CHECK(!containsCore.empty());
     }
 }

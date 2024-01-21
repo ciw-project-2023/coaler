@@ -62,6 +62,12 @@ namespace coaler::embedder {
         spdlog::debug("number of Core Matches: {}", matches.size());
 
         unsigned matchCounter = 0;
+        if (m_divideConformersByMatches && (numConfs / (float)matches.size()) < 5) {
+            spdlog::warn("adding more conformers to get at least 5 per match");
+
+            numConfs = matches.size() * 5;
+        }
+
         for (auto const &match : matches) {
             auto params = this->getEmbeddingParameters();
 
@@ -174,7 +180,12 @@ namespace coaler::embedder {
                                                                         ligandMatchRelaxed, targetMatchRelaxed);
                 params.coordMap = &ligandMcsCoords;
                 try {
+                    auto start = std::chrono::high_resolution_clock::now();
                     addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligandMol, params);
+                    auto end = std::chrono::high_resolution_clock::now();
+
+                    spdlog::debug("relaxed mcs confgen took {} ms",
+                                  std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
                 } catch (const std::runtime_error &e) {
                     spdlog::debug(e.what());
                 }
@@ -187,7 +198,12 @@ namespace coaler::embedder {
                                                                         ligandMatchStrict, targetMatchStrict);
                 params.coordMap = &ligandMcsCoords;
                 try {
+                    auto start = std::chrono::high_resolution_clock::now();
                     addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligandMol, params);
+                    auto end = std::chrono::high_resolution_clock::now();
+
+                    spdlog::debug("strict mcs confgen took {} ms",
+                                  std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
                 } catch (const std::runtime_error &e) {
                     spdlog::debug(e.what());
                 }

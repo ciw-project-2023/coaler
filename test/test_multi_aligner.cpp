@@ -4,8 +4,8 @@
 #include <iostream>
 
 #include "catch2/catch.hpp"
-#include "coaler/multialign/MultiAligner.hpp"
 #include "coaler/core/Forward.hpp"
+#include "coaler/multialign/MultiAligner.hpp"
 #include "test_helper.h"
 using namespace coaler;
 

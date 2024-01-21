@@ -148,11 +148,9 @@ int main(int argc, char* argv[]) {
     spdlog::info("core structure: {}", coreSmarts);
 
     if (mOpts->divide_conformers_by_matches) {
-        spdlog::info(
-            "Number of conformeres per molecules is equal to the number of conformers divided by the number of times "
-            "the core is matched.");
+        spdlog::info("embedding {} conformers for each match of the core structure", opts.num_conformers);
     } else {
-        spdlog::info("Embedding {} conformers for all molecules.", opts.num_conformers);
+        spdlog::info("embedding {} conformers for all molecules", opts.num_conformers);
     }
     embedder::ConformerEmbedder embedder(core, opts.num_threads, opts.divide_conformers_by_matches);
 
@@ -172,7 +170,7 @@ int main(int argc, char* argv[]) {
                                                   opts.fine_optimization_threshold, opts.optimizer_step_limit,
                                                   opts.num_threads);
 
-    spdlog::info("finished embedding.");
+    spdlog::info("finished embedding");
 
     if (opts.conformer_log_path != "none") {
         coaler::io::OutputWriter::writeConformersToSDF(opts.conformer_log_path, mols);
