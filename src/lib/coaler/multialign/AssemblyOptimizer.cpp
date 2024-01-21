@@ -194,6 +194,12 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             break;
         }
 
+        if(worstLigandId == std::numeric_limits<LigandID>::max()) {
+            spdlog::error("Unable to generate feasible conformers using mcs method. Resorting to bruteforce conformer "
+                "sampling");
+            break;
+        }
+
         Ligand *worstLigand = &ligands.at(worstLigandId);
         bool ligandIsMissing = (maxScoreDeficit == -1);
         bool swappedLigandPose = false;
