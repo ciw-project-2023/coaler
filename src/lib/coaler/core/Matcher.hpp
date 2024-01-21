@@ -31,12 +31,14 @@ namespace coaler::core {
         explicit Matcher(int threads);
         /**
          * calculates the MCS of the molecules
+         * @param mols molecules the MCS is calculated for
          * @return MCS as ROMol
          */
         std::optional<CoreResult> calculateCoreMcs(RDKit::MOL_SPTR_VECT& mols);
 
         /**
          * calculates the Murcko scaffold of the molecules
+         * @param mols molecules the murcko scaffold is calculated for
          * @return Murcko Scaffold as ROMol
          */
         std::optional<CoreResult> calculateCoreMurcko(RDKit::MOL_SPTR_VECT& mols);
@@ -53,6 +55,12 @@ namespace coaler::core {
          */
         static RDKit::MCSParameters getStrictMCSParams();
 
+        /**
+         * calculates the pairwise MCS for all molecule pairs of molecules in @param mols
+         * @param mols molecules the pariwise MCS are calculated for
+         * @param strict bool, determs if parameters fpr MCS calculatin are strict or relaxed
+         * @return a map of pairwise MCS atom matches for all molecule pairs
+         */
         static PairwiseMCSMap calcPairwiseMCS(const multialign::LigandVector& mols, bool strict,
                                               const std::string& seed = "");
 
