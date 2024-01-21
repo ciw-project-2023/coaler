@@ -47,3 +47,5 @@ CMakeUserPresets.json
 #default outfile
 out.sdf
 build/
+
+venv/

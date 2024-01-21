@@ -28,7 +28,9 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    RDKit::RWMol const* Ligand::getMoleculePtr() const noexcept { return &m_molecule; }
+    RDKit::ROMOL_SPTR Ligand::getMoleculePtr() const noexcept {
+        return boost::make_shared<RDKit::ROMol>(m_molecule);
+    }
 
     /*----------------------------------------------------------------------------------------------------------------*/
 

@@ -51,7 +51,7 @@ namespace coaler::multialign {
          */
         [[nodiscard]] RDKit::ROMol getMolecule() const noexcept;
 
-        [[nodiscard]] RDKit::RWMol const* getMoleculePtr() const noexcept;
+        [[nodiscard]] RDKit::ROMOL_SPTR getMoleculePtr() const noexcept;
 
         void removePose(PoseID pose);
 

@@ -45,7 +45,7 @@ namespace coaler::embedder {
                                          const bool divideConformersByMatches)
         : m_core(std::move(result)), m_threads(threads), m_divideConformersByMatches(divideConformersByMatches) {}
 
-    void ConformerEmbedder::embedConformers(const RDKit::ROMOL_SPTR &mol, unsigned numConfs) {
+    void ConformerEmbedder::embedConformers(RDKit::ROMOL_SPTR &molPtr, unsigned numConfs) {
         // firstMatch molecule and core
         RDKit::SubstructMatchParameters substructMatchParams;
         substructMatchParams.uniquify = false;
@@ -54,8 +54,7 @@ namespace coaler::embedder {
         substructMatchParams.maxMatches = 1000;
         substructMatchParams.numThreads = m_threads;
 
-        auto matches = RDKit::SubstructMatch(*mol, *m_core.core, substructMatchParams);
-
+        auto matches = RDKit::SubstructMatch(*molPtr, *m_core.core, substructMatchParams);
         assert(!matches.empty());
 
         spdlog::debug("number of Core Matches: {}", matches.size());
@@ -64,19 +63,21 @@ namespace coaler::embedder {
         for (auto const &match : matches) {
             auto params = this->getEmbeddingParameters();
 
-            std::vector<int> confs;
+            std::optional<std::vector<int>> confs;
             if (m_divideConformersByMatches) {
                 auto numConfsMatch = (matchCounter < numConfs % matches.size()) ? (int(numConfs / matches.size()) + 1)
                                                                                 : (int(numConfs / matches.size()));
-                confs = RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfsMatch, params);
+                confs = embedMultipleConformers(molPtr, numConfsMatch, params);
 
                 matchCounter++;
             } else {
-                confs = RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
+                confs = embedMultipleConformers(molPtr, numConfs, params);
             }
 
-            std::vector<std::pair<int, double>> result;
-            RDKit::UFF::UFFOptimizeMoleculeConfs(*mol, result, m_threads);
+            if (!confs.has_value()) {
+                spdlog::debug("failed to embed conformers for match {}", matchCounter);
+                continue;
+            }
 
             // This is somewhat unintuitive:
             // We use a reference molecule (m_core.ref) to have a "real" conformer, as we cannot generate
@@ -90,28 +91,17 @@ namespace coaler::embedder {
                 matchReverse.emplace_back(std::make_pair(molId, m_core.core_to_ref.at(queryId)));
             }
 
-            for (auto const confId : confs) {
-                auto score = RDKit::MolAlign::alignMol(*mol, *m_core.ref, confId, 0, &matchReverse);
+            for (auto const confId : confs.value()) {
+                auto score = RDKit::MolAlign::alignMol(*molPtr, *m_core.ref, confId, 0, &matchReverse);
                 spdlog::debug("aligned conformer {} with score {}", confId, score);
             }
         }
 
         if (m_divideConformersByMatches) {
-            assert(mol->getNumConformers() == numConfs);
+            assert(molPtr->getNumConformers() == numConfs);
         } else {
-            assert(mol->getNumConformers() == numConfs * matches.size());
+            assert(molPtr->getNumConformers() == numConfs * matches.size());
         }
-    }
-
-    /*----------------------------------------------------------------------------------------------------------------*/
-
-    RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbeddingParameters() const {
-        auto params = RDKit::DGeomHelpers::srETKDGv3;
-        params.randomSeed = SEED;
-        params.numThreads = m_threads;
-        params.optimizerForceTol = FORCE_TOL;
-        params.clearConfs = false;
-        return params;
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
@@ -120,10 +110,9 @@ namespace coaler::embedder {
         const multialign::Ligand &worstLigand, const multialign::LigandVector &targets,
         const std::unordered_map<multialign::LigandID, multialign::PoseID> &conformerIDs,
         const core::PairwiseMCSMap &pairwiseStrictMCSMap, const core::PairwiseMCSMap &pairwiseRelaxedMCSMap) {
-        // TODO maybe sanitize mols?
-        std::vector<unsigned> newIds;
-        auto *ligandMol = (RDKit::ROMol *)worstLigand.getMoleculePtr();
 
+        std::vector<unsigned> newIds;
+        auto ligandMol = worstLigand.getMoleculePtr();
         for (const multialign::Ligand &target : targets) {
             // find mcs
             const multialign::LigandID targetID = target.getID();
@@ -163,44 +152,38 @@ namespace coaler::embedder {
             }
 
             CoreAtomMapping ligandMcsCoords;
-            RDKit::DGeomHelpers::EmbedParameters params = get_embed_params_for_optimizer_generation();
-            int addedID = -1;
+            auto embedParams = get_embed_params_for_optimizer_generation();
 
+            std::optional<int> addedID = std::nullopt;
             // try relaxed mcs first
             if (!ligandMatchRelaxed.empty() && !targetMatchRelaxed.empty()) {
                 spdlog::debug("trying relaxed substructure approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchRelaxed, targetMatchRelaxed);
-                params.coordMap = &ligandMcsCoords;
-                try {
-                    addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligandMol, params);
-                } catch (const std::runtime_error &e) {
-                    spdlog::debug(e.what());
-                }
+                embedParams.coordMap = &ligandMcsCoords;
+                addedID = embedConformer(ligandMol, embedParams);
             }
 
-            // if relaxed mcs params didnt yield valid embedding, reattempt with strict mcs.
-            if (addedID < 0 && !ligandMatchStrict.empty() && !targetMatchStrict.empty()) {
+            // if relaxed mcs embedParams didnt yield valid embedding, reattempt with strict mcs.
+            if (!addedID.has_value() && !ligandMatchStrict.empty() && !targetMatchStrict.empty()) {
                 spdlog::debug("flexible approach failed. Trying strict approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchStrict, targetMatchStrict);
-                params.coordMap = &ligandMcsCoords;
-                try {
-                    addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligandMol, params);
-                } catch (const std::runtime_error &e) {
-                    spdlog::debug(e.what());
-                }
+                embedParams.coordMap = &ligandMcsCoords;
+                addedID = embedConformer(ligandMol, embedParams);
             }
-            if (addedID < 0) {
+            if (!addedID.has_value()) {
                 spdlog::debug("strict mcs confgen failed. mcs: {}, target: {}, mol {}", mcsStringStrict,
                               RDKit::MolToSmiles(*worstLigand.getMoleculePtr()), RDKit::MolToSmiles(targetMol));
                 spdlog::debug("target conformer {}/{}: no viable pose generated.", targetID, targets.size());
                 continue;
             }
+
             spdlog::debug("target conformer {}/{}: generated valid pose.", targetID, targets.size());
-            const auto addedIDUnsigned = static_cast<unsigned>(addedID);
+            const auto addedIDUnsigned = static_cast<unsigned>(addedID.value());
             newIds.push_back(addedIDUnsigned);
         }
+
         return newIds;
     }
 
@@ -219,5 +202,51 @@ namespace coaler::embedder {
         }
         return ligandCoords;
     }
+
+    std::optional<int> ConformerEmbedder::embedConformer(RDKit::ROMOL_SPTR molPtr, RDKit::DGeomHelpers::EmbedParameters params) {
+        try {
+            RDKit::ROMol* mol = RDKit::MolOps::addHs(*molPtr);
+            int confId = RDKit::DGeomHelpers::EmbedMolecule(*mol, params);
+
+            std::vector<std::pair<int, double>> result;
+            RDKit::UFF::UFFOptimizeMoleculeConfs(*mol, result, 1);
+
+            molPtr = boost::make_shared<RDKit::ROMol>(*RDKit::MolOps::removeHs(*mol));
+            return confId;
+        } catch (RDKit::ConformerException e) {
+            spdlog::debug(e.what());
+            return std::nullopt;
+        }
+    }
+
+    std::optional<std::vector<int>> ConformerEmbedder::embedMultipleConformers(RDKit::ROMOL_SPTR molPtr, int numConfs, RDKit::DGeomHelpers::EmbedParameters params) {
+        try {
+            RDKit::ROMol* mol = RDKit::MolOps::addHs(*molPtr);
+            auto confs = RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
+
+            std::vector<std::pair<int, double>> result;
+            RDKit::UFF::UFFOptimizeMoleculeConfs(*mol, result, 1);
+
+            RDKit::ROMol molWithConfs = *RDKit::MolOps::removeHs(*mol);
+            molPtr = boost::make_shared<RDKit::ROMol>(molWithConfs);
+
+            return confs;
+        } catch (RDKit::ConformerException e) {
+            spdlog::debug(e.what());
+            return std::nullopt;
+        }
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    RDKit::DGeomHelpers::EmbedParameters ConformerEmbedder::getEmbeddingParameters() const {
+        auto params = RDKit::DGeomHelpers::srETKDGv3;
+        params.randomSeed = SEED;
+        params.numThreads = m_threads;
+        params.optimizerForceTol = FORCE_TOL;
+        params.clearConfs = false;
+        return params;
+    }
+
 
 }  // namespace coaler::embedder

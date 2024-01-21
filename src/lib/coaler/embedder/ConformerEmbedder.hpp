@@ -22,14 +22,14 @@ namespace coaler::embedder {
 
         /**
          * Embed an even amount of Conformers at every core match.
-         * @param mol The molecule to embed.
+         * @param molPtr The molecule to embed.
          *
          * @note If the core has a too high symmetry, it is possible, that no embedding can be
          * performed within the given min/max constraints.
          *
          * @return True upon success.
          */
-        void embedConformers(const RDKit::ROMOL_SPTR& mol, unsigned numConfs);
+        void embedConformers(RDKit::ROMOL_SPTR& molPtr, unsigned numConfs);
 
         // std::vector<RDKit::MatchVectType> filterMatches(const std::vector<RDKit::MatchVectType>& matches);
 
@@ -38,11 +38,16 @@ namespace coaler::embedder {
             const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs,
             const core::PairwiseMCSMap& pairwiseStrictMCSMap, const core::PairwiseMCSMap& pairwiseRelaxedMCSMap);
 
-        static CoreAtomMapping getLigandMcsAtomCoordsFromTargetMatch(const RDGeom::POINT3D_VECT& targetCoords,
-                                                                     const RDKit::MatchVectType& ligandMcsMatch,
-                                                                     const RDKit::MatchVectType& targetMcsMatch);
-
       private:
+        static std::optional<int> embedConformer(RDKit::ROMOL_SPTR molPtr, RDKit::DGeomHelpers::EmbedParameters params);
+
+        static std::optional<std::vector<int>> embedMultipleConformers(RDKit::ROMOL_SPTR molPtr, int numConfs,
+                                                 RDKit::DGeomHelpers::EmbedParameters params);
+
+        static CoreAtomMapping getLigandMcsAtomCoordsFromTargetMatch(const RDGeom::POINT3D_VECT& targetCoords,
+                                                              const RDKit::MatchVectType& ligandMcsMatch,
+                                                              const RDKit::MatchVectType& targetMcsMatch);
+
         core::CoreResult m_core;
         int m_threads;
         bool m_divideConformersByMatches;
