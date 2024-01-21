@@ -13,6 +13,7 @@
 
 const unsigned SEED = 42;
 const float FORCE_TOL = 0.0135;
+const unsigned BRUTEFORCE_CONFS = 100;
 
 namespace {
     RDKit::SubstructMatchParameters get_optimizer_substruct_params() {
@@ -216,6 +217,38 @@ namespace coaler::embedder {
             spdlog::debug("target conformer {}/{}: generated valid pose.", targetID, targets.size());
             const auto addedIDUnsigned = static_cast<unsigned>(addedID);
             newIds.push_back(addedIDUnsigned);
+        }
+        return newIds;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
+    std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
+        const multialign::Ligand &worstLigand, const core::CoreResult &core) {
+        std::vector<unsigned> newIds;
+        std::vector<int> newIntIds;
+        auto *ligandMol = (RDKit::ROMol *)worstLigand.getMoleculePtr();
+        RDKit::DGeomHelpers::EmbedParameters params = get_embed_params_for_optimizer_generation();
+
+        RDKit::MatchVectType ligandMatch;
+        RDKit::MatchVectType targetMatch;
+
+        // get atom coords for core structure
+        const CoreAtomMapping coreCoords
+            = getLigandMcsAtomCoordsFromTargetMatch(core.ref->getConformer(0).getPositions(), ligandMatch, targetMatch);
+        params.coordMap = &coreCoords;
+
+        // embed BRUTEFORCE_CONFS new conformers into ligand
+        try {
+            newIntIds = RDKit::DGeomHelpers::EmbedMultipleConfs(*ligandMol, BRUTEFORCE_CONFS, params);
+        } catch (const std::runtime_error &e) {
+            spdlog::debug(e.what());
+        }
+
+        // type casting
+        for (auto newIntId : newIntIds) {
+            unsigned newUnsignedId = static_cast<unsigned>(newIntId);
+            newIds.push_back(newUnsignedId);
         }
         return newIds;
     }

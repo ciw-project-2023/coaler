@@ -41,8 +41,9 @@ namespace coaler::core {
             return std::nullopt;
         }
 
-        spdlog::info("MCS: {}", mcs.SmartsString);
+        spdlog::info("mcs: {}", mcs.SmartsString);
 
+        // creating a reference molecule of the core to embed conformer with atom coords
         auto ref = this->buildMolConformerForQuery(*mols.at(0), *mcs.QueryMol);
 
         spdlog::info("Reference: {}", RDKit::MolToSmiles(*ref));
@@ -59,7 +60,8 @@ namespace coaler::core {
         return CoreResult{mcs.QueryMol, ref, coreToRef};
     }
 
-    // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     std::optional<CoreResult> Matcher::calculateCoreMurcko(RDKit::MOL_SPTR_VECT &mols) {
         // calculate MCS first and sanitize molecule
         auto mcs = Matcher::calculateCoreMcs(mols);
@@ -83,12 +85,11 @@ namespace coaler::core {
                 if (visit.at(atomID)) {
                     continue;
                 }
-
                 ringAtoms.push_back(atomID);
             }
         }
 
-        // start pruning of mcs, save to be deleted atoms and bonds
+        // start pruning of mcs, save to-be-deleted atoms and bonds
         std::vector<int> delAtomsMaybe;
         std::vector<std::pair<int, int>> delBonds;
         RDKit::RWMOL_SPTR murckoPtr = boost::make_shared<RDKit::RWMol>(mcsRWMol);
@@ -101,7 +102,7 @@ namespace coaler::core {
             murckoPruningRecursive(murckoPtr, atomID, -1, visit, delAtomsMaybe, delBonds, ringAtoms);
         }
 
-        // delete duplicates from deletetion lists
+        // delete duplicates from deletion lists
         sort(delAtomsMaybe.begin(), delAtomsMaybe.end());
         delAtomsMaybe.erase(unique(delAtomsMaybe.begin(), delAtomsMaybe.end()), delAtomsMaybe.end());
         sort(delBonds.begin(), delBonds.end());
@@ -139,7 +140,7 @@ namespace coaler::core {
             murckoPtr->removeAtom(atom);
         }
 
-        spdlog::info("Murco: {}", RDKit::MolToSmarts(*murckoPtr));
+        spdlog::info("murco: {}", RDKit::MolToSmarts(*murckoPtr));
 
         // Embedding of core and calculation of atomCoords
         RDKit::RWMol first = *mols.at(0);
@@ -155,11 +156,14 @@ namespace coaler::core {
         return CoreResult{murckoPtr, ref, coreToRef};
     }
 
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     // TODO this only creates a conformer for one specific reference point. A query can contain wildcards
     // for atoms (i.e. [#6,#7] = C or N and this can have an impact on conformers (swapping Atoms can lead
     // differnet geometries). We should take that into account and try to create a diverse set of conformers
     // thta models the output of the query more closely. For now, this is a pretty good reference though.
     RDKit::ROMOL_SPTR Matcher::buildMolConformerForQuery(RDKit::RWMol first, const RDKit::ROMol & /*query*/) const {
+        // Generates all parameters needed for Embedding
         auto params = RDKit::DGeomHelpers::srETKDGv3;
         params.numThreads = m_threads;
         params.randomSeed = 42;
@@ -171,6 +175,8 @@ namespace coaler::core {
 
         return boost::make_shared<RDKit::ROMol>(first);
     }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
 
     void Matcher::murckoPruningRecursive(RDKit::RWMOL_SPTR &mol, int atomID, int parentID, std::vector<bool> &visit,
                                          std::vector<int> &delAtoms, std::vector<std::pair<int, int>> &delBonds,
@@ -203,11 +209,10 @@ namespace coaler::core {
         }
     }
 
-    // NOLINTBEGIN(misc-unused-parameters)
-    // NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     void Matcher::murckoCheckDelAtoms(RDKit::RWMOL_SPTR &mol, int atomID, int parentID, std::vector<bool> &visit,
                                       std::vector<int> &ringAtoms, std::vector<int> &foundRingAtoms) {
-        // NOLINTEND(misc-unused-parameters)
         // mark atom as visited and check if they are part of any ring. If yes save and return to
         // recursive call before
         visit.at(atomID) = true;
@@ -223,6 +228,8 @@ namespace coaler::core {
             murckoCheckDelAtoms(mol, neighborID, atomID, visit, ringAtoms, foundRingAtoms);
         }
     }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
 
     RDKit::SubstructMatchParameters Matcher::getMatchParams() const {
         RDKit::SubstructMatchParameters substructMatchParams;
@@ -290,6 +297,7 @@ namespace coaler::core {
 
     PairwiseMCSMap Matcher::calcPairwiseMCS(const multialign::LigandVector &mols, bool strict,
                                             const std::string &seed) {
+        // Generates all parameters needed for RDKit::findMCS()
         PairwiseMCSMap mcsMap;
         RDKit::MCSParameters mcsParams;
         if (strict) {
@@ -303,6 +311,7 @@ namespace coaler::core {
 
         const RDKit::SubstructMatchParameters substructMatchParams = get_optimizer_substruct_params();
 
+        // iterate over all ligand pairs and calculating their pairwise MCS
 #pragma omp parallel for shared(mols, mcsParams, substructMatchParams, mcsMap, mapLock, strict, seed) default(none)
         for (auto firstLigandId = 0; firstLigandId < mols.size(); ++firstLigandId) {
             for (auto secondLigandId = firstLigandId + 1; secondLigandId < mols.size(); ++secondLigandId) {
@@ -333,10 +342,11 @@ namespace coaler::core {
                     continue;
                 }
 
-                auto fistMatches = RDKit::SubstructMatch(firstMol, *mcsResult.QueryMol, substructMatchParams);
+                // finds atom pair matches of molecule pair and saves them in mcsMap
+                auto firstMatches = RDKit::SubstructMatch(firstMol, *mcsResult.QueryMol, substructMatchParams);
                 auto secondMatches = RDKit::SubstructMatch(secondMol, *mcsResult.QueryMol, substructMatchParams);
 
-                if (fistMatches.empty() || secondMatches.empty()) {
+                if (firstMatches.empty() || secondMatches.empty()) {
                     auto empty = std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>();
 
                     omp_set_lock(&mapLock);
@@ -346,7 +356,7 @@ namespace coaler::core {
                     continue;
                 }
 
-                const RDKit::MatchVectType firstLigandMatch = fistMatches.at(0);
+                const RDKit::MatchVectType firstLigandMatch = firstMatches.at(0);
                 const RDKit::MatchVectType secondLigandMatch = secondMatches.at(0);
 
                 omp_set_lock(&mapLock);

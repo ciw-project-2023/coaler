@@ -110,7 +110,7 @@ int main(int argc, char* argv[]) {
 
     std::ofstream output_file(opts.out_file);
     if (!output_file.is_open()) {
-        spdlog::error("Cannot open output file: {}", opts.out_file);
+        spdlog::error("cannot open output file: {}", opts.out_file);
         return 1;
     }
 
@@ -160,8 +160,11 @@ int main(int argc, char* argv[]) {
     }
 
     auto ligands = multialign::LigandVector(mols);
+
+    spdlog::info("start calculating pairwise MCS.");
     auto strictMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, true, coreSmarts);
     auto relaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, false, coreSmarts);
+    spdlog::info("finished calculating pairwise MCS.");
 
     const multialign::AssemblyOptimizer optimizer(strictMcsMap, relaxedMcsMap, opts.coarse_optimization_threshold,
                                                   opts.fine_optimization_threshold, opts.optimizer_step_limit,
@@ -173,7 +176,7 @@ int main(int argc, char* argv[]) {
         coaler::io::OutputWriter::writeConformersToSDF(opts.conformer_log_path, mols);
     }
 
-    multialign::MultiAligner aligner(mols, optimizer, opts.num_start_assemblies, opts.num_threads);
+    multialign::MultiAligner aligner(mols, optimizer, core, opts.num_start_assemblies, opts.num_threads);
 
     const multialign::MultiAlignerResult result = aligner.alignMolecules();
     io::OutputWriter::writeSDF(opts.out_file, result);
