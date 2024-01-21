@@ -65,7 +65,7 @@ std::optional<ProgrammOptions> parse_args(int argc, char* argv[]) {
         "divide,d", opts::value<bool>(&parsedOptions.divide_conformers_by_matches)->default_value(false),
         "divides the number of conformers by the number of times the core is matched")(
         "confs-log", opts::value<std::string>(&parsedOptions.conformer_log_path)->default_value("none"))(
-        "optimizer-coarse_optimization_threshold-threshold",
+        "optimizer-coarse-threshold",
         opts::value<double>(&parsedOptions.coarse_optimization_threshold)
             ->default_value(multialign::constants::COARSE_OPTIMIZATION_THRESHOLD))(
         "optimizer-fine-threshold", opts::value<double>(&parsedOptions.fine_optimization_threshold)
