@@ -173,8 +173,11 @@ namespace coaler::embedder {
             RDKit::DGeomHelpers::EmbedParameters params = get_embed_params_for_optimizer_generation();
             int addedID = -1;
 
+            double relaxedMcsSizeFactor = ligandMatchRelaxed.size() / ligandMol->getNumAtoms();
+            double strictMcsSizeFactor = ligandMatchStrict.size() / ligandMol->getNumAtoms();
+
             // try relaxed mcs first
-            if (!ligandMatchRelaxed.empty() && !targetMatchRelaxed.empty()) {
+            if (!ligandMatchRelaxed.empty() && !targetMatchRelaxed.empty() && relaxedMcsSizeFactor > 0.2) {
                 spdlog::debug("trying relaxed substructure approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchRelaxed, targetMatchRelaxed);
@@ -192,7 +195,7 @@ namespace coaler::embedder {
             }
 
             // if relaxed mcs params didnt yield valid embedding, reattempt with strict mcs.
-            if (addedID < 0 && !ligandMatchStrict.empty() && !targetMatchStrict.empty()) {
+            if (addedID < 0 && !ligandMatchStrict.empty() && !targetMatchStrict.empty() && strictMcsSizeFactor > 0.2) {
                 spdlog::debug("flexible approach failed. Trying strict approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchStrict, targetMatchStrict);
