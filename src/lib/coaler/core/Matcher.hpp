@@ -55,18 +55,14 @@ namespace coaler::core {
          */
         static RDKit::MCSParameters getStrictMCSParams();
 
-<<<<<<< HEAD
-        static PairwiseMCSMap calcPairwiseMCS(const multialign::LigandVector& mols, bool strict,
-                                              const std::string& seed = "");
-=======
         /**
          * calculates the pairwise MCS for all molecule pairs of molecules in @param mols
          * @param mols molecules the pariwise MCS are calculated for
          * @param strict bool, determs if parameters fpr MCS calculatin are strict or relaxed
          * @return a map of pairwise MCS atom matches for all molecule pairs
          */
-        static PairwiseMCSMap calcPairwiseMCS(const multialign::LigandVector& mols, bool strict);
->>>>>>> 759d13b (added doc for matcher)
+        static PairwiseMCSMap calcPairwiseMCS(const multialign::LigandVector& mols, bool strict,
+                                              const std::string& seed = "");
 
       private:
         /**
