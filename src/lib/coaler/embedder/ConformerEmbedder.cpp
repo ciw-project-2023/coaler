@@ -13,7 +13,7 @@
 
 const unsigned SEED = 42;
 const float FORCE_TOL = 0.0135;
-const unsigned BRUTEFORCE_CONFS = 100;
+const unsigned BRUTEFORCE_CONFS = 500;
 
 namespace {
     RDKit::SubstructMatchParameters get_optimizer_substruct_params() {
@@ -229,7 +229,7 @@ namespace coaler::embedder {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
-        const multialign::Ligand &worstLigand, const core::CoreResult &core) {
+        const multialign::Ligand &worstLigand) {
         std::vector<unsigned> newIds;
         std::vector<int> newIntIds;
         auto *ligandMol = (RDKit::ROMol *)worstLigand.getMoleculePtr();
@@ -240,8 +240,9 @@ namespace coaler::embedder {
 
         // get atom coords for core structure
         const CoreAtomMapping coreCoords
-            = getLigandMcsAtomCoordsFromTargetMatch(core.ref->getConformer(0).getPositions(), ligandMatch, targetMatch);
+            = getLigandMcsAtomCoordsFromTargetMatch(m_core.ref->getConformer(0).getPositions(), ligandMatch, targetMatch);
         params.coordMap = &coreCoords;
+        params.numThreads = m_threads;
 
         // embed BRUTEFORCE_CONFS new conformers into ligand
         try {
