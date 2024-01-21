@@ -13,6 +13,6 @@ namespace coaler::io {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
         explicit FileNotFoundException(std::string path) : m_file_path(std::move(path)) {}
 
-        std::string what() { return m_file_path; }
+        std::string what() { return "File not found :" + m_file_path; }
     };
 }  // namespace coaler::io
