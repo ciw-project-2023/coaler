@@ -138,13 +138,9 @@ int main(int argc, char* argv[]) {
     }
 
     auto core = coreResult.value();
+    std::string coreSmarts = RDKit::MolToSmarts(*core.core);
 
-    spdlog::info("core structure: {}", RDKit::MolToSmarts(*core.core));
-
-    // generate random coreResult with coordinates. TODO: get coordinates from input
-
-    // const core::PairwiseMCSMap pairwiseStrictMcsMap = matcher.calcPairwiseMCS(mols, true);
-    // const core::PairwiseMCSMap pairwiseRelaxedMcsMap = matcher.calcPairwiseMCS(mols, false);
+    spdlog::info("core structure: {}", coreSmarts);
 
     spdlog::info("Embedding {} conformers for all molecules.", opts.num_conformers);
 
@@ -156,8 +152,8 @@ int main(int argc, char* argv[]) {
     }
 
     auto ligands = multialign::LigandVector(mols);
-    auto strictMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, false);
-    auto relaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, true);
+    auto strictMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, false, coreSmarts);
+    auto relaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, true, coreSmarts);
 
     const multialign::AssemblyOptimizer optimizer(strictMcsMap, relaxedMcsMap, opts.coarse_optimization_threshold,
                                                   opts.fine_optimization_threshold, opts.optimizer_step_limit,
