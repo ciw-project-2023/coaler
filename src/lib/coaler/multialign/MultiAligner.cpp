@@ -98,6 +98,7 @@ namespace coaler::multialign {
             }
         }
         spdlog::info("finished calculating pairwise alignments");
+
         return scores;
     }
 
