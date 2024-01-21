@@ -235,7 +235,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             assert(alignmentTargets.size() == ligands.size() - 1);
 
             auto newConfIDs = coaler::embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(
-                *worstLigand, alignmentTargets, assembly.getAssemblyMapping(), m_strictMCSMap, m_relaxedMCSMap);
+                *worstLigand, alignmentTargets, assembly.getAssemblyMapping(), m_strictMCSMap, m_relaxedMCSMap, ligandIsMissing);
 
             if (newConfIDs.empty()) {
                 spdlog::warn("no confs generated. skipping ligand {}", RDKit::MolToSmiles(worstLigand->getMolecule()));
@@ -342,7 +342,7 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
         LigandID ligandID = ligand.getID();
         const double currScore = ligandScores.at(ligandID);
         if (currScore + SCORE_THRESHOLD * currScore < ligandScoreMean) {
-            spdlog::debug(
+            spdlog::info(
                 "bruteforce: found ligand {} with below average alignment score. Starting bruteforce conformer "
                 "generation.",
                 RDKit::MolToSmiles(ligand.getMolecule()));

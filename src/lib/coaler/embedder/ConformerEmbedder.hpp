@@ -46,7 +46,8 @@ namespace coaler::embedder {
         static std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(
             const multialign::Ligand& worstLigand, const multialign::LigandVector& targets,
             const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs,
-            const core::PairwiseMCSMap& pairwiseStrictMCSMap, const core::PairwiseMCSMap& pairwiseRelaxedMCSMap);
+            const core::PairwiseMCSMap& pairwiseStrictMCSMap, const core::PairwiseMCSMap& pairwiseRelaxedMCSMap,
+            bool enforceGeneration = false);
 
         /**
          * @overload

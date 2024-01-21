@@ -126,8 +126,8 @@ namespace coaler::embedder {
     std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
         const multialign::Ligand &worstLigand, const multialign::LigandVector &targets,
         const std::unordered_map<multialign::LigandID, multialign::PoseID> &conformerIDs,
-        const core::PairwiseMCSMap &pairwiseStrictMCSMap, const core::PairwiseMCSMap &pairwiseRelaxedMCSMap) {
-        // TODO maybe sanitize mols?
+        const core::PairwiseMCSMap &pairwiseStrictMCSMap, const core::PairwiseMCSMap &pairwiseRelaxedMCSMap,
+        bool enforceGeneration) {
         std::vector<unsigned> newIds;
         auto *ligandMol = (RDKit::ROMol *)worstLigand.getMoleculePtr();
 
@@ -177,7 +177,8 @@ namespace coaler::embedder {
             double strictMcsSizeFactor = ligandMatchStrict.size() / ligandMol->getNumAtoms();
 
             // try relaxed mcs first
-            if (!ligandMatchRelaxed.empty() && !targetMatchRelaxed.empty() && relaxedMcsSizeFactor > 0.2) {
+            if (!ligandMatchRelaxed.empty() && !targetMatchRelaxed.empty()
+                && (relaxedMcsSizeFactor > 0.2 || enforceGeneration)) {
                 spdlog::debug("trying relaxed substructure approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchRelaxed, targetMatchRelaxed);
@@ -195,7 +196,8 @@ namespace coaler::embedder {
             }
 
             // if relaxed mcs params didnt yield valid embedding, reattempt with strict mcs.
-            if (addedID < 0 && !ligandMatchStrict.empty() && !targetMatchStrict.empty() && strictMcsSizeFactor > 0.2) {
+            if (addedID < 0 && !ligandMatchStrict.empty() && !targetMatchStrict.empty()
+                && (strictMcsSizeFactor > 0.2 || enforceGeneration)) {
                 spdlog::debug("flexible approach failed. Trying strict approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchStrict, targetMatchStrict);
