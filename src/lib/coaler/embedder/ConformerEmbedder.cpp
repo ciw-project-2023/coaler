@@ -207,53 +207,6 @@ namespace coaler::embedder {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
-    /*std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
-        const multialign::Ligand &worstLigand, const multialign::LigandVector &targets,
-        const std::unordered_map<multialign::LigandID, multialign::PoseID> &conformerIDs,
-        const core::CoreResult &core) {
-        std::vector<unsigned> newIds;
-        std::vector<int> newIntIds;
-        auto *ligandMol = (RDKit::ROMol *)worstLigand.getMoleculePtr();
-
-        for (const multialign::Ligand &target : targets) {
-            // find mcs
-            const multialign::LigandID targetID = target.getID();
-            if (conformerIDs.count(targetID) == 0) {
-                continue;
-            }
-
-            const multialign::PoseID targetConformerID = conformerIDs.at(targetID);
-            const RDKit::ROMol targetMol = target.getMolecule();
-            RDKit::Conformer targetConformer;
-            try {
-                targetConformer = targetMol.getConformer(static_cast<int>(targetConformerID));
-            } catch (std::runtime_error &e) {
-                spdlog::error(e.what());
-            }
-
-            RDKit::DGeomHelpers::EmbedParameters params = get_embed_params_for_optimizer_generation();
-
-            RDKit::MatchVectType ligandMatch;
-            RDKit::MatchVectType targetMatch;
-            const CoreAtomMapping coreCoords = getLigandMcsAtomCoordsFromTargetMatch(
-                core.ref->getConformer(0).getPositions(), ligandMatch, targetMatch);
-            params.coordMap = &coreCoords;
-            try {
-                newIntIds = RDKit::DGeomHelpers::EmbedMultipleConfs(*ligandMol, BRUTEFORCE_CONFS, params);
-            } catch (const std::runtime_error &e) {
-                spdlog::debug(e.what());
-            }
-        }
-
-        for (auto newIntId : newIntIds) {
-            unsigned newUnsignedId = static_cast<unsigned>(newIntId);
-            newIds.push_back(newUnsignedId);
-        }
-        return newIds;
-    }*/
-
-    /*----------------------------------------------------------------------------------------------------------------*/
-
     std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
         const multialign::Ligand &worstLigand, const core::CoreResult &core) {
         std::vector<unsigned> newIds;
