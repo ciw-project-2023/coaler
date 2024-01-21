@@ -157,8 +157,8 @@ int main(int argc, char* argv[]) {
     }
 
     auto ligands = multialign::LigandVector(mols);
-    auto strictMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, false);
-    auto relaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, true);
+    auto strictMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, true);
+    auto relaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, false);
 
     const multialign::AssemblyOptimizer optimizer(strictMcsMap, relaxedMcsMap, opts.coarseOptimizationThreshold,
                                                   opts.fineOptimizationThreshold, opts.optimizerStepLimit,
