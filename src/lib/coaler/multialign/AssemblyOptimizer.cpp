@@ -296,9 +296,8 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, PairwiseAlignments scores, LigandVector ligands,
                                         PoseRegisterCollection registers, const coaler::core::CoreResult &core) {
     double assemblyScore = AssemblyScorer::calculateAssemblyScore(assembly, scores, ligands);
-    double lowestScore = std::numeric_limits<double>::max();
     unsigned ligandsPartners = ligands.size() - 1;
-    for (Ligand firstLigand : ligands) {
+    for (Ligand& firstLigand : ligands) {
         unsigned firstLigandID = firstLigand.getID();
         double currScore = 0.0;
         for (const Ligand& secondLigand : ligands) {
@@ -351,9 +350,6 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
                 firstLigand.addPose(bestNewPoseID);
 
             } else {
-                spdlog::debug("discarded pose. assembly score: {}", assemblyScore);
-
-                // remove all new poses from ligand
                 for (const auto confId : newPoseIDs) {
                     firstLigand.removePose(confId);
                 }
