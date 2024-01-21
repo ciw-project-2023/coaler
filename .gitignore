@@ -49,3 +49,4 @@ out.sdf
 build/
 
 venv/
+confs/

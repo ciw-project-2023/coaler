@@ -30,7 +30,13 @@ namespace coaler::core {
     std::optional<CoreResult> Matcher::calculateCoreMcs(RDKit::MOL_SPTR_VECT &mols) {
         // Generates all parameters needed for RDKit::findMCS()
         auto mcsParams = Matcher::getRelaxedMCSParams();
-        RDKit::MCSResult const mcs = RDKit::findMCS(mols, &mcsParams);
+
+        RDKit::MOL_SPTR_VECT molsWithoutHs = {};
+        for (auto &mol : mols) {
+            molsWithoutHs.push_back(boost::make_shared<RDKit::ROMol>(*RDKit::MolOps::removeHs(*mol)));
+        }
+
+        RDKit::MCSResult const mcs = RDKit::findMCS(molsWithoutHs, &mcsParams);
         if (mcs.QueryMol == nullptr) {
             return std::nullopt;
         }
@@ -38,6 +44,8 @@ namespace coaler::core {
         spdlog::info("MCS: {}", mcs.SmartsString);
 
         auto ref = this->buildMolConformerForQuery(*mols.at(0), *mcs.QueryMol);
+
+        spdlog::info("Reference: {}", RDKit::MolToSmiles(*ref));
 
         auto matches = RDKit::SubstructMatch(*ref, *mcs.QueryMol, this->getMatchParams());
         assert(!matches.empty());
@@ -304,13 +312,14 @@ namespace coaler::core {
                 const auto &secondLigand = mols.at(secondLigandId);
 
                 auto firstMol = firstLigand.getMolecule();
-                auto firstMolPtr = boost::make_shared<RDKit::ROMol>(firstMol);
+                auto firstWithoutHs = boost::make_shared<RDKit::ROMol>(*RDKit::MolOps::removeHs(firstMol));
 
                 auto secondMol = secondLigand.getMolecule();
-                auto secondMolPtr = boost::make_shared<RDKit::ROMol>(secondMol);
+                auto secondWithoutHs = boost::make_shared<RDKit::ROMol>(*RDKit::MolOps::removeHs(secondMol));
 
-                const RDKit::MOL_SPTR_VECT molPair{firstMolPtr, secondMolPtr};
+                const RDKit::MOL_SPTR_VECT molPair{firstWithoutHs, secondWithoutHs};
                 mcsParams.InitialSeed = seed;
+
                 const RDKit::MCSResult mcsResult = RDKit::findMCS(molPair, &mcsParams);
 
                 if (mcsResult.QueryMol == nullptr) {
@@ -349,5 +358,4 @@ namespace coaler::core {
 
         return mcsMap;
     }
-
 }  // namespace coaler::core

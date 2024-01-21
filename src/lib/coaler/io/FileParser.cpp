@@ -1,6 +1,7 @@
 #include "FileParser.hpp"
 
 #include <GraphMol/FileParsers/MolSupplier.h>
+#include <GraphMol/MolOps.h>
 #include <GraphMol/RWMol.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
@@ -28,7 +29,8 @@ namespace coaler::io {
             // Parse as sdf file
             RDKit::SDMolSupplier supplier(filePath, true, false, false);
             while (!supplier.atEnd()) {
-                auto mol = boost::make_shared<RDKit::RWMol>(*supplier.next());
+                auto molWithHs = RDKit::MolOps::addHs(*supplier.next());
+                auto mol = boost::make_shared<RDKit::RWMol>(*molWithHs);
                 result.emplace_back(mol);
             }
         } else if (fileExtension == ".smi") {
@@ -44,7 +46,8 @@ namespace coaler::io {
                     continue;
                 }
 
-                auto mol = boost::make_shared<RDKit::RWMol>(*next);
+                auto molWithHs = RDKit::MolOps::addHs(*next);
+                auto mol = boost::make_shared<RDKit::RWMol>(*molWithHs);
                 result.emplace_back(mol);
             }
         } else {

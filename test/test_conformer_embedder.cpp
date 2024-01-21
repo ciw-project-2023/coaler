@@ -29,7 +29,7 @@ TEST_CASE("test_mcs", "[conformer_generator_tester]") {
         CHECK(mol1->getNumConformers() == 10);
     }
 
-    SECTION("with two matches") {
+    SECTION("with 7 matches and enough conformers") {
         auto mol1 = ROMolFromSmiles("CC1=C2C(C(C)=CC3=C2C4=C(CC(CCC)C4)C=C3C)=CC=C1");
         auto mol2 = ROMolFromSmiles("C1(CC(C=CC2)=C2C3)=C3C=CC=C1");
 
@@ -39,11 +39,28 @@ TEST_CASE("test_mcs", "[conformer_generator_tester]") {
         auto core = matcher.calculateCoreMcs(mols).value();
 
         ConformerEmbedder embedder(core, 1, true);
-        embedder.embedConformers(mol1, 10);
+        embedder.embedConformers(mol1, 70);
 
         CHECK(RDKit::MolToSmarts(*core.core)
               == "[#6]12-,:;@[#6]-,:;@[#6]=,:;@[#6]-,:;@[#6]-,:;@[#6]:&@1:&@[#6]:&@[#6]:&@[#6]:&@[#6]:&@2");
-        CHECK(mol1->getNumConformers() == 10);
+        CHECK(mol1->getNumConformers() == 70);
+    }
+
+    SECTION("with 7 matches and to little conformers") {
+        auto mol1 = ROMolFromSmiles("CC1=C2C(C(C)=CC3=C2C4=C(CC(CCC)C4)C=C3C)=CC=C1");
+        auto mol2 = ROMolFromSmiles("C1(CC(C=CC2)=C2C3)=C3C=CC=C1");
+
+        core::Matcher matcher(1);
+
+        RDKit::MOL_SPTR_VECT mols = {mol1, mol2};
+        auto core = matcher.calculateCoreMcs(mols).value();
+
+        ConformerEmbedder embedder(core, 1, true);
+        embedder.embedConformers(mol1, 30);
+
+        CHECK(RDKit::MolToSmarts(*core.core)
+              == "[#6]12-,:;@[#6]-,:;@[#6]=,:;@[#6]-,:;@[#6]-,:;@[#6]:&@1:&@[#6]:&@[#6]:&@[#6]:&@[#6]:&@2");
+        CHECK(mol1->getNumConformers() == 40);
     }
 }
 

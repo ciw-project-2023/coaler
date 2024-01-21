@@ -32,8 +32,8 @@ TEST_CASE("Output Parser", "[io]") {
 
             auto result = FileParser::parse("/tmp/test_output_write.sdf");
             REQUIRE(result.size() == 2);
-            REQUIRE(RDKit::MolToSmiles(*result[0]) == "CCCO");
-            REQUIRE(RDKit::MolToSmiles(*result[1]) == "CCCN");
+            REQUIRE(RDKit::MolToSmiles(*result[0]) == "[H]OC([H])([H])C([H])([H])C([H])([H])[H]");
+            REQUIRE(RDKit::MolToSmiles(*result[1]) == "[H]N([H])C([H])([H])C([H])([H])C([H])([H])[H]");
         };
     };
 }
