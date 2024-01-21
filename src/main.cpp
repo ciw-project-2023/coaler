@@ -162,8 +162,10 @@ int main(int argc, char* argv[]) {
     }
 
     auto ligands = multialign::LigandVector(mols);
-    auto strictMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, false, coreSmarts);
-    auto relaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, true, coreSmarts);
+    //auto strictMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, false, coreSmarts);
+    auto strictMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, false);
+    auto relaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, true);
+    //auto relaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, true, coreSmarts);
 
     const multialign::AssemblyOptimizer optimizer(strictMcsMap, relaxedMcsMap, opts.coarse_optimization_threshold,
                                                   opts.fine_optimization_threshold, opts.optimizer_step_limit,

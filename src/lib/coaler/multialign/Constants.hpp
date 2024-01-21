@@ -9,13 +9,19 @@ namespace coaler::multialign::constants {
      * This treshold determines the score deficit above which new conformers are attempted to be generated
      * during assembly optimization.
      */
-    const double COARSE_OPTIMIZATION_THRESHOLD = 1.0;
+    const double COARSE_OPTIMIZATION_THRESHOLD = 0.3;
 
     /**
      * This treshold determines the score deficit above which new conformers are attempted to be generated
      * during the fine tuning of the best alignment assembly.
      */
-    const double FINE_OPTIMIZATION_THRESHOLD = 0.05;
+    const double FINE_OPTIMIZATION_THRESHOLD = 0.01;
+
+    /**
+     * This value determines the change in the assembly score that has to be achieved in order
+     * to set all ligands available.
+     */
+    const double LIGAND_AVAILABILITY_RESET_THRESHOLD = 0.97;
 
     const unsigned OPTIMIZER_STEP_LIMIT = 100;
 }  // namespace coaler::multialign::constants

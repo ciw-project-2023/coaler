@@ -35,6 +35,16 @@ namespace coaler::multialign {
         static double calculateScoreDeficitForLigand(LigandID ligandId, const LigandAlignmentAssembly& assembly,
                                                      const PoseRegisterCollection& registers,
                                                      PairwiseAlignments& scores, const LigandVector& ligands);
+        /**
+         *
+         * @param ligandId
+         * @param assembly
+         * @param scores
+         * @param ligands
+         * @return
+         */
+        static double calculateMeanLigandDistance(LigandID ligandId, const LigandAlignmentAssembly& assembly,
+                                           PairwiseAlignments& scores, const LigandVector& ligands);
     };
 
 }  // namespace coaler::multialign

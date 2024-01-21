@@ -184,10 +184,10 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
         // try to swap conformer of worst ligand with another existing conformer
         if (!ligandIsMissing) {
             for (const UniquePoseID &pose : worstLigand->getPoses()) {
-                // check if using this pose improves currentAssembly
                 if (pose.getLigandInternalPoseId() == assembly.getPoseOfLigand(worstLigandId)) {
                     continue;
                 }
+                // check if using this pose improves currentAssembly
                 LigandAlignmentAssembly assemblyCopy = assembly;
                 assemblyCopy.swapPoseForLigand(worstLigandId, pose.getLigandInternalPoseId());
                 double const newAssemblyScore = AssemblyScorer::calculateAssemblyScore(assemblyCopy, scores, ligands);
@@ -205,7 +205,8 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 
         // if no improving pose can be found among existing poses, generate new ones
         // TODO add some absolute shape overlap threshold
-        if (ligandIsMissing || (!swappedLigandPose && maxScoreDeficit > scoreDeficitThreshold)) {
+        const double meanDistance = AssemblyScorer::calculateMeanLigandDistance(worstLigandId, assembly, scores, ligands);
+        if (ligandIsMissing || (!swappedLigandPose && meanDistance > scoreDeficitThreshold)) {
             spdlog::debug("generating new conformer, missing ligand = {}", ligandIsMissing);
 
             LigandVector const alignmentTargets = generate_alignment_targets(ligands, *worstLigand);
@@ -228,8 +229,13 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                 = find_optimal_pose(worstLigandId, newConfIDs, assembly, scores, ligands);
 
             if (ligandIsMissing || bestNewAssemblyScore > assemblyScore) {
-                // from here on we keep the new pose and adapt all containers accordingly
+                if(ligandIsMissing ||
+                   bestNewAssemblyScore * constants::LIGAND_AVAILABILITY_RESET_THRESHOLD > assemblyScore) {
+                    spdlog::debug("All ligands set available.");
+                    ligandAvailable.setAllAvailable();
+                }
 
+                // from here on we keep the new pose and adapt all containers accordingly
                 assemblyScore = bestNewAssemblyScore;
                 spdlog::debug("ligand {} now has conformer {}.", worstLigandId, bestNewPoseID);
 
@@ -245,7 +251,6 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                 update_pose_registers(worstLigandId, bestNewPoseID, registers, scores, ligands);
                 assembly.swapPoseForLigand(worstLigandId, bestNewPoseID);
                 worstLigand->addPose(bestNewPoseID);
-                ligandAvailable.setAllAvailable();
 
                 if (ligandIsMissing) {
                     assembly.decrementMissingLigandsCount();
