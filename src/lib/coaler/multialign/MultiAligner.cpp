@@ -34,24 +34,23 @@ namespace coaler::multialign {
     MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, AssemblyOptimizer optimizer, core::CoreResult core,
                                unsigned maxStartingAssemblies, unsigned nofThreads)
         // NOLINTEND(misc-unused-parameters)
-        : m_core(std::move(core)), m_maxStartingAssemblies(maxStartingAssemblies), m_threads(nofThreads),
+        : m_core(std::move(core)),
+          m_maxStartingAssemblies(maxStartingAssemblies),
+          m_threads(nofThreads),
           m_assemblyOptimizer(optimizer) {
         assert(m_maxStartingAssemblies > 0);
 
         m_ligands = LigandVector(molecules);
-        spdlog::info("Start calculating pairwise MCS.");
 
         // calculate pairwise alignments
-        spdlog::info("Start calculating pairwise alignments.");
+        spdlog::info("start calculating pairwise alignments.");
         m_pairwiseAlignments = MultiAligner::calculateAlignmentScores(m_ligands);
-        spdlog::info("Finished calculating pairwise alignments.");
+        spdlog::info("finished calculating pairwise alignments.");
 
         // build pose registers
-        spdlog::info("Start building pose registers.");
+        spdlog::info("start building pose registers.");
         m_poseRegisters = PoseRegisterBuilder::buildPoseRegisters(m_pairwiseAlignments, m_ligands, m_threads);
-        spdlog::info("Finish building pose registers.");
-
-        spdlog::info("Finished calculating pairwise MCS.");
+        spdlog::info("finish building pose registers.");
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
@@ -69,7 +68,7 @@ namespace coaler::multialign {
             }
         }
 
-        spdlog::info("Calculating {} combinations. This may take some time", combinations);
+        spdlog::info("calculating {} combinations. This may take some time", combinations);
 
         for (LigandID firstMolId = 0; firstMolId < ligands.size(); firstMolId++) {
             spdlog::info("calculated {} combinations so far.", scores.size());
@@ -81,7 +80,7 @@ namespace coaler::multialign {
                 omp_init_lock(&maplock);
 
 #pragma omp parallel for shared(maplock, ligands, scores, nofPosesFirst, nofPosesSecond, firstMolId, \
-                                    secondMolId) default(none)
+                                secondMolId) default(none)
                 for (unsigned firstMolPoseId = 0; firstMolPoseId < nofPosesFirst; firstMolPoseId++) {
                     for (unsigned secondMolPoseId = 0; secondMolPoseId < nofPosesSecond; secondMolPoseId++) {
                         RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
@@ -105,7 +104,7 @@ namespace coaler::multialign {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     MultiAlignerResult MultiAligner::alignMolecules() {
-        spdlog::info("Mols: {} | Confs/Mol: {} | total pairwise scores: {}", m_ligands.size(),
+        spdlog::info("mols: {} | confs/mol: {} | total pairwise scores: {}", m_ligands.size(),
                      m_ligands.begin()->getNumPoses(), m_pairwiseAlignments.size());
 
         // build starting ensembles from registers
@@ -159,10 +158,10 @@ namespace coaler::multialign {
         OptimizerState bestAssembly{-1, {}, {}, {}, {}};
 
 #pragma omp parallel for shared(bestAssembly, bestAssemblyLock, skippedAssembliesCount, skippedAssembliesCountLock, \
-                                    assembliesList) default(none)
+                                assembliesList) default(none)
 
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
-            spdlog::debug("Assembly {} has mapped Conformers for {}/{} molecules.", assemblyID,
+            spdlog::debug("assembly {} has mapped Conformers for {}/{} molecules.", assemblyID,
                           assembliesList.at(assemblyID).first.getAssemblyMapping().size(), m_ligands.size());
 
             OptimizerState optimizedAssembly = m_assemblyOptimizer.optimizeAssembly(
@@ -185,14 +184,14 @@ namespace coaler::multialign {
         }
 
         // fine-tuning
-        spdlog::info("Fine-tuning best assembly. Score before: {}", bestAssembly.score);
+        spdlog::info("fine-tuning best assembly. Score before: {}", bestAssembly.score);
 
         bestAssembly = m_assemblyOptimizer.fineTuneState(bestAssembly, m_core);
 
         spdlog::info("finished alignment optimization. Final alignment has a score of {}.", bestAssembly.score);
 
         if (skippedAssembliesCount > 0) {
-            spdlog::info("Skipped a total of {} incomplete assemblies.", skippedAssembliesCount);
+            spdlog::info("skipped a total of {} incomplete assemblies.", skippedAssembliesCount);
         }
 
         MultiAlignerResult result(bestAssembly.score, bestAssembly.assembly.getAssemblyMapping(), bestAssembly.ligands);

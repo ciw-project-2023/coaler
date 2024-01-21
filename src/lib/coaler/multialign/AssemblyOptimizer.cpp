@@ -9,7 +9,7 @@
 
 const unsigned SEED = 42;
 const float FORCE_TOL = 0.0135;
-const float SCORE_THRESHOLD = 0.5;
+const float SCORE_THRESHOLD = 0.1;
 
 namespace {
     RDKit::DGeomHelpers::EmbedParameters get_embed_params_for_optimizer_generation() {
@@ -293,19 +293,24 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
-void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, PairwiseAlignments scores, LigandVector ligands,
-                                        PoseRegisterCollection registers, const coaler::core::CoreResult &core) {
+void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
+                                        LigandVector ligands, PoseRegisterCollection registers,
+                                        const coaler::core::CoreResult &core) {
+    spdlog::info("starting bruteforcing worst alignments in assembly.");
     double assemblyScore = AssemblyScorer::calculateAssemblyScore(assembly, scores, ligands);
-    unsigned ligandsPartners = ligands.size() - 1;
-    for (Ligand& firstLigand : ligands) {
-        unsigned firstLigandID = firstLigand.getID();
-        double currScore = 0.0;
-        for (const Ligand& secondLigand : ligands) {
-            if (firstLigandID >= secondLigand.getID()) {
+
+    // calculating the alignment scores for all ligands separately and find average
+    std::unordered_map<LigandID, double> ligandScores;
+    for (Ligand &ligand : ligands) {
+        unsigned ligandID = ligand.getID();
+        double ligandScore = 0.0;
+
+        for (const Ligand &secondLigand : ligands) {
+            if (ligandID >= secondLigand.getID()) {
                 continue;
             }
 
-            PoseID const firstLigandPoseID = assembly.getPoseOfLigand(firstLigandID);
+            PoseID const firstLigandPoseID = assembly.getPoseOfLigand(ligandID);
             PoseID const secondLigandPoseID = assembly.getPoseOfLigand(secondLigand.getID());
 
             // check whether assembly didnt contain one of the ligands
@@ -313,45 +318,68 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
                 || secondLigandPoseID == std::numeric_limits<PoseID>::max()) {
                 continue;
             }
-            const UniquePoseID first(firstLigandID, firstLigandPoseID);
+            const UniquePoseID first(ligandID, firstLigandPoseID);
             const UniquePoseID second(secondLigand.getID(), secondLigandPoseID);
-            currScore += scores.at(PosePair{first, second}, ligands);
+            ligandScore += scores.at(PosePair{first, second}, ligands);
         }
-        currScore /= ligandsPartners;
-        if (currScore < SCORE_THRESHOLD) {
+        ligandScore /= (ligands.size() - 1);
+        ligandScores.emplace(ligandID, ligandScore);
+    }
+    double ligandScoreMean = 0.0;
+    for (auto &[ligandID, score] : ligandScores) {
+        ligandScoreMean += score;
+    }
+    ligandScoreMean /= ligandScores.size();
+
+    // bruteforce new conformers for all ligands which score is at least 10% below average
+    for (Ligand &ligand : ligands) {
+        LigandID ligandID = ligand.getID();
+        const double currScore = ligandScores.at(ligandID);
+        if (currScore + SCORE_THRESHOLD * currScore < ligandScoreMean) {
+            spdlog::debug(
+                "bruteforce: found ligand {} with below average alignment score. Starting bruteforce conformer "
+                "generation.",
+                RDKit::MolToSmiles(ligand.getMolecule()));
             LigandAlignmentAssembly assemblyCopy = assembly;
-            const std::vector<multialign::PoseID> newPoseIDs = embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(
-                firstLigand, assemblyCopy.getAssemblyMapping(), core);
+
+            // generate new conformers for ligand with fixed core coords
+            const std::vector<multialign::PoseID> newPoseIDs
+                = embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(ligand, core);
             if (newPoseIDs.empty()) {
-                spdlog::warn("no confs generated. skipping ligand {}", RDKit::MolToSmiles(firstLigand.getMolecule()));
+                spdlog::warn("bruteforce: no confs generated. skipping ligand {}",
+                             RDKit::MolToSmiles(ligand.getMolecule()));
                 continue;
             }
 
             std::vector<std::pair<int, double>> result;
-            RDKit::UFF::UFFOptimizeMoleculeConfs((RDKit::ROMol &)*firstLigand.getMoleculePtr(), result, 1);
+            RDKit::UFF::UFFOptimizeMoleculeConfs((RDKit::ROMol &)*ligand.getMoleculePtr(), result, 1);
 
             auto [bestNewPoseID, bestNewAssemblyScore]
-                = find_optimal_pose(firstLigandID, newPoseIDs, assemblyCopy, scores, ligands);
+                = find_optimal_pose(ligandID, newPoseIDs, assemblyCopy, scores, ligands);
 
+            spdlog::debug("bruteforce: best assembly score found with bruteforce: {}, current assembly score {}.",
+                          bestNewAssemblyScore, assemblyScore);
 
-            double const newAssemblyScore = AssemblyScorer::calculateAssemblyScore(assemblyCopy, scores, ligands);
-            if (newAssemblyScore > assemblyScore) {
-                assemblyScore = newAssemblyScore;
-                spdlog::debug("ligand {} now has conformer {}.", firstLigandID, bestNewPoseID);
+            // add new pose to assembly if new bruteforce score is higher than old score
+            if (bestNewAssemblyScore > assemblyScore) {
+                assemblyScore = bestNewAssemblyScore;
+                spdlog::debug("bruteforce: ligand {} now has conformer {}.", ligandID, bestNewPoseID);
                 // remove all (except best) new poses from ligand
                 for (auto const confId : newPoseIDs) {
                     if (confId == bestNewPoseID) {
                         continue;
                     }
-                    firstLigand.removePose(confId);
+                    ligand.removePose(confId);
                 }
-                update_pose_registers(firstLigandID, bestNewPoseID, registers, scores, ligands);
-                assembly.swapPoseForLigand(firstLigandID, bestNewPoseID);
-                firstLigand.addPose(bestNewPoseID);
+                update_pose_registers(ligandID, bestNewPoseID, registers, scores, ligands);
+                assembly.swapPoseForLigand(ligandID, bestNewPoseID);
+                ligand.addPose(bestNewPoseID);
 
             } else {
+                spdlog::debug("bruteforce: no better conformer found for ligand {}.",
+                              RDKit::MolToSmiles(ligand.getMolecule()));
                 for (const auto confId : newPoseIDs) {
-                    firstLigand.removePose(confId);
+                    ligand.removePose(confId);
                 }
             }
         }
@@ -360,10 +388,9 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
-OptimizerState AssemblyOptimizer::fineTuneState(OptimizerState &state, const core::CoreResult& core) {
-    OptimizerState optState = optimizeAssembly(state.assembly, state.scores, state.ligands, state.registers, m_fineScoreThreshold);
+OptimizerState AssemblyOptimizer::fineTuneState(OptimizerState &state, const core::CoreResult &core) {
+    OptimizerState optState
+        = optimizeAssembly(state.assembly, state.scores, state.ligands, state.registers, m_fineScoreThreshold);
     fixWorstLigands(optState.assembly, optState.scores, optState.ligands, optState.registers, core);
     return optState;
 }
-
-

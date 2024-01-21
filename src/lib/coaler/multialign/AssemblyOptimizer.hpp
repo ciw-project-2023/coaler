@@ -14,12 +14,12 @@ namespace coaler::multialign {
          * Optimize an assembly using both existing conformers and
          * newly generated ones.
          *
-         * @param assembly The assembly to optimize.
-         * @param scores The pairwise overlap scores.
-         * @param ligands The input ligands.
-         * @param registers The registers for all ligand pairs.
+         * @param assembly The assembly to optimize
+         * @param scores The pairwise overlap scores
+         * @param ligands The input ligands
+         * @param registers The registers for all ligand pairs
          * @param coarseScoreThreshold Score deficits above this value will trigger the
-         * generation of a new pose.
+         * generation of a new pose
          * @param fineScoreTreshold Score deficits above this value will trigger the
          * @return The optimized assembly state
          *
@@ -39,15 +39,20 @@ namespace coaler::multialign {
          *
          * @param state The assembly state to optimize
          * @param scoreDeficitThreshold Score deficits above this value will trigger the
-         * generation of a new pose.
-         * @return The optimized state.
+         * generation of a new pose
+         * @return The optimized state
          */
         OptimizerState fineTuneState(OptimizerState& state, const core::CoreResult& core);
 
-
-
       private:
-
+        /**
+         * Using fixed core conformer generation for ligands with a below average alignment score in the best assembly
+         * @param assembly best assembly found
+         * @param scores The pairwise overlap scores
+         * @param ligands The input ligands
+         * @param registers The registers for all ligand pairs
+         * @param core core of all input molecules
+         */
         static void fixWorstLigands(LigandAlignmentAssembly assembly, PairwiseAlignments scores, LigandVector ligands,
                                     PoseRegisterCollection registers, const core::CoreResult& core);
 
