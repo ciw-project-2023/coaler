@@ -34,9 +34,11 @@ const std::string HELP
       "  -o, --out <path>\t\t\t\t\tPath to output files\n"
       "  -j, --threads <amount>\t\t\t\tNumber of threads to use (default: 1)\n"
       "  -v, --verbose\t\t\t\t\t\tActivate verbose logging\n"
-      "  --conformers <amount>\t\t\t\t\tNumber of conformers per core match to generate for each input molecule (default: "
+      "  --conformers <amount>\t\t\t\t\tNumber of conformers per core match to generate for each input molecule "
+      "(default: "
       "10)\n"
-      "  --divide <bool>\t\t\t\t\tDivide the number of conformers by the number of times the core is matched in the input "
+      "  --divide <bool>\t\t\t\t\tDivide the number of conformers by the number of times the core is matched in the "
+      "input "
       "molecule.\n\t\t\t\t\t\t\t"
       "Helps against combinatorial explosion if core is small or has high symmetry (default: false)\n"
       "  --assemblies <amount>\t\t\t\t\tNumber of starting assemblies (default: 10)\n"
@@ -144,7 +146,13 @@ int main(int argc, char* argv[]) {
     // const core::PairwiseMCSMap pairwiseStrictMcsMap = matcher.calcPairwiseMCS(mols, true);
     // const core::PairwiseMCSMap pairwiseRelaxedMcsMap = matcher.calcPairwiseMCS(mols, false);
 
-    spdlog::info("Embedding {} conformers for all molecules.", opts.num_conformers);
+    if (mOpts->divide_conformers_by_matches) {
+        spdlog::info(
+            "Number of conformeres per molecules is equal to the number of conformers divided by the number of times "
+            "the core is matched.");
+    } else {
+        spdlog::info("Embedding {} conformers for all molecules.", opts.num_conformers);
+    }
 
     embedder::ConformerEmbedder embedder(core, opts.num_threads, opts.divide_conformers_by_matches);
 
