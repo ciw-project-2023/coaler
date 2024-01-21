@@ -322,7 +322,7 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
         if (currScore < SCORE_THRESHOLD) {
             LigandAlignmentAssembly assemblyCopy = assembly;
             const std::vector<multialign::PoseID> newPoseIDs = embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(
-                firstLigand, targets, assemblyCopy.getAssemblyMapping(), core);
+                firstLigand, assemblyCopy.getAssemblyMapping(), core);
             if (newPoseIDs.empty()) {
                 spdlog::warn("no confs generated. skipping ligand {}", RDKit::MolToSmiles(firstLigand.getMolecule()));
                 continue;
@@ -360,14 +360,14 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
             }
         }
     }
-    return assemblyScore / paircount;
 }
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
 OptimizerState AssemblyOptimizer::fineTuneState(OptimizerState &state, const core::CoreResult& core) {
     OptimizerState optState = optimizeAssembly(state.assembly, state.scores, state.ligands, state.registers, m_fineScoreThreshold);
-    fixWorstLigands(state.assembly, state.scores, state.ligands, state.registers, core);
+    fixWorstLigands(optState.assembly, optState.scores, optState.ligands, optState.registers, core);
+    return optState;
 }
 
 
