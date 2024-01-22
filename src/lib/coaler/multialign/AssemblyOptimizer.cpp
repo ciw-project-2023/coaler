@@ -308,7 +308,6 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
                                         LigandVector ligands, PoseRegisterCollection registers) {
     spdlog::info("starting brute forcing worst alignments in assembly.");
     double assemblyScore = AssemblyScorer::calculateAssemblyScore(assembly, scores, ligands);
-    coaler::embedder::ConformerEmbedder embedder(core, m_threads);
     // calculating the alignment scores for all ligands separately and find average
     std::unordered_map<LigandID, double> ligandScores;
     for (Ligand  const&ligand : ligands) {
