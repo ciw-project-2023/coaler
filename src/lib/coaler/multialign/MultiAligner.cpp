@@ -159,7 +159,7 @@ namespace coaler::multialign {
         OptimizerState bestAssembly{-1, {}, {}, {}, {}};
 
 #pragma omp parallel for shared(bestAssembly, bestAssemblyLock, skippedAssembliesCount, skippedAssembliesCountLock, \
-                                assembliesList) default(none)
+                                    assembliesList) default(none)
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
             spdlog::debug("assembly {} has mapped Conformers for {}/{} molecules.", assemblyID,
                           assembliesList.at(assemblyID).first.getAssemblyMapping().size(), m_ligands.size());
