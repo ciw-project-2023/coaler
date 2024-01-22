@@ -18,7 +18,7 @@ namespace coaler::embedder {
      */
     class ConformerEmbedder {
       public:
-        ConformerEmbedder(core::CoreResult result, int threads, bool divideConformersByMatches);
+        ConformerEmbedder(core::CoreResult result, int threads, bool divideConformersByMatches = true);
 
         /**
          * Embed an even amount of conformers at every core match.
@@ -46,7 +46,8 @@ namespace coaler::embedder {
         std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(
             const multialign::Ligand& worstLigand, const multialign::LigandVector& targets,
             const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs,
-            const core::PairwiseMCSMap& pairwiseStrictMCSMap, const core::PairwiseMCSMap& pairwiseRelaxedMCSMap);
+            const core::PairwiseMCSMap& pairwiseStrictMCSMap, const core::PairwiseMCSMap& pairwiseRelaxedMCSMap,
+            bool enforceGeneration = false);
 
         /**
          * @overload
