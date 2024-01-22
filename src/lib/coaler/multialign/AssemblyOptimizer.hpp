@@ -4,10 +4,11 @@
 #include "OptimizerState.hpp"
 #include "PoseRegisterCollection.hpp"
 #include "coaler/core/Forward.hpp"
+#include "coaler/embedder/ConformerEmbedder.hpp"
+#include "coaler/embedder/Forward.hpp"
 #include "models/Forward.hpp"
 
 namespace coaler::multialign {
-
     class AssemblyOptimizer {
       public:
         /**
@@ -27,7 +28,8 @@ namespace coaler::multialign {
          */
         // NOLINTBEGIN(readability-inconsistent-declaration-parameter-name)
         AssemblyOptimizer(core::PairwiseMCSMap& strictMCSMap, core::PairwiseMCSMap& relaxedMCSMap,
-                          double coarseScoreThreshold, double fineScoreTreshold, int stepLimit, int threads);
+                          embedder::ConformerEmbedder& embedder, double coarseScoreThreshold, double fineScoreTreshold,
+                          int stepLimit, int threads);
         // NOLINTEND(readability-inconsistent-declaration-parameter-name)
 
         OptimizerState optimizeAssembly(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
@@ -42,7 +44,7 @@ namespace coaler::multialign {
          * generation of a new pose
          * @return The optimized state
          */
-        OptimizerState fineTuneState(OptimizerState& state, const core::CoreResult& core);
+        OptimizerState fineTuneState(OptimizerState& state);
 
       private:
         /**
@@ -53,11 +55,13 @@ namespace coaler::multialign {
          * @param registers The registers for all ligand pairs
          * @param core core of all input molecules
          */
-        static void fixWorstLigands(LigandAlignmentAssembly assembly, PairwiseAlignments scores, LigandVector ligands,
-                                    PoseRegisterCollection registers, const core::CoreResult& core);
+        void fixWorstLigands(LigandAlignmentAssembly assembly, PairwiseAlignments scores, LigandVector ligands,
+                                    PoseRegisterCollection registers);
 
         int m_threads;
         int m_stepLimit;
+
+        embedder::ConformerEmbedder m_embedder;
 
         double m_coarseScoreThreshold;
         double m_fineScoreThreshold;

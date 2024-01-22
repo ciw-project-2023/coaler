@@ -31,11 +31,10 @@ namespace coaler::multialign {
 
     /*----------------------------------------------------------------------------------------------------------------*/
     // NOLINTBEGIN(misc-unused-parameters)
-    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, AssemblyOptimizer optimizer, core::CoreResult core,
-                               unsigned maxStartingAssemblies, unsigned nofThreads)
+    MultiAligner::MultiAligner(RDKit::MOL_SPTR_VECT molecules, AssemblyOptimizer& optimizer,
+                              unsigned maxStartingAssemblies, unsigned nofThreads)
         // NOLINTEND(misc-unused-parameters)
-        : m_core(std::move(core)),
-          m_maxStartingAssemblies(maxStartingAssemblies),
+        : m_maxStartingAssemblies(maxStartingAssemblies),
           m_threads(nofThreads),
           m_assemblyOptimizer(optimizer) {
         assert(m_maxStartingAssemblies > 0);
@@ -187,7 +186,7 @@ namespace coaler::multialign {
         // fine-tuning
         spdlog::info("fine-tuning best assembly. Score before: {}", bestAssembly.score);
 
-        bestAssembly = m_assemblyOptimizer.fineTuneState(bestAssembly, m_core);
+        bestAssembly = m_assemblyOptimizer.fineTuneState(bestAssembly);
 
         spdlog::info("finished alignment optimization. Final alignment has a score of {}.", bestAssembly.score);
 

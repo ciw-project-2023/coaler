@@ -24,7 +24,8 @@ TEST_CASE("basic_test", "[multialigner_tester]") {
     auto coreResult = matcher.calculateCoreMcs(mols);
 
     core::PairwiseMCSMap mcsMap;
-    multialign::AssemblyOptimizer optimizer(mcsMap, mcsMap, 1, 0.5, 100, 1);
+    embedder::ConformerEmbedder embedder(coreResult.value(), 1, false);
+    multialign::AssemblyOptimizer optimizer(mcsMap, mcsMap, embedder, 1, 0.5, 100, 1);
     multialign::MultiAligner aligner(mols, optimizer, coreResult.value(), 2);
     multialign::MultiAlignerResult result = aligner.alignMolecules();
 

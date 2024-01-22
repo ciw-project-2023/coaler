@@ -166,7 +166,7 @@ int main(int argc, char* argv[]) {
     auto relaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, false, coreSmarts);
     spdlog::info("finished calculating pairwise MCS.");
 
-    const multialign::AssemblyOptimizer optimizer(strictMcsMap, relaxedMcsMap, opts.coarse_optimization_threshold,
+    multialign::AssemblyOptimizer optimizer(strictMcsMap, relaxedMcsMap, embedder, opts.coarse_optimization_threshold,
                                                   opts.fine_optimization_threshold, opts.optimizer_step_limit,
                                                   opts.num_threads);
 
@@ -176,7 +176,7 @@ int main(int argc, char* argv[]) {
         coaler::io::OutputWriter::writeConformersToSDF(opts.conformer_log_path, mols);
     }
 
-    multialign::MultiAligner aligner(mols, optimizer, core, opts.num_start_assemblies, opts.num_threads);
+    multialign::MultiAligner aligner(mols, optimizer, opts.num_start_assemblies, opts.num_threads);
 
     const multialign::MultiAlignerResult result = aligner.alignMolecules();
     io::OutputWriter::writeSDF(opts.out_file, result);

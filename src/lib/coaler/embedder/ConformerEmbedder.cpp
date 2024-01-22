@@ -224,7 +224,7 @@ namespace coaler::embedder {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
-        const multialign::Ligand &worstLigand, const core::CoreResult &core) {
+        const multialign::Ligand &worstLigand) {
         std::vector<unsigned> newIds;
         std::vector<int> newIntIds;
         auto *ligandMol = (RDKit::ROMol *)worstLigand.getMoleculePtr();
@@ -234,8 +234,9 @@ namespace coaler::embedder {
         RDKit::MatchVectType targetMatch;
 
         // get atom coords for core structure
-        const CoreAtomMapping coreCoords
-            = getLigandMcsAtomCoordsFromTargetMatch(core.ref->getConformer(0).getPositions(), ligandMatch, targetMatch);
+        const CoreAtomMapping coreCoords = getLigandMcsAtomCoordsFromTargetMatch(
+            m_core.ref->getConformer(0).getPositions(), ligandMatch, targetMatch);
+
         params.coordMap = &coreCoords;
 
         // embed BRUTEFORCE_CONFS new conformers into ligand

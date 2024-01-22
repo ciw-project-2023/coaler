@@ -10,7 +10,7 @@ namespace coaler::multialign {
 
     class MultiAligner {
       public:
-        explicit MultiAligner(RDKit::MOL_SPTR_VECT molecules, AssemblyOptimizer optimizer, core::CoreResult core,
+        explicit MultiAligner(RDKit::MOL_SPTR_VECT molecules, AssemblyOptimizer& optimizer,
                               unsigned maxStartingAssemblies = constants::DEFAULT_NOF_STARTING_ASSEMBLIES,
                               unsigned nofThreads = constants::DEFAULT_NOF_THREADS);
 

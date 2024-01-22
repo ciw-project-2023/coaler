@@ -4,6 +4,8 @@
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <spdlog/spdlog.h>
 
+#include <utility>
+
 #include "coaler/embedder/ConformerEmbedder.hpp"
 #include "coaler/multialign/scorer/AssemblyScorer.hpp"
 
@@ -82,12 +84,14 @@ LigandID get_next_missing_ligand(const LigandAlignmentAssembly &assembly, const 
 }
 
 AssemblyOptimizer::AssemblyOptimizer(coaler::core::PairwiseMCSMap &strictMCSMap,
-                                     coaler::core::PairwiseMCSMap &relaxedMCSMap, double coarseScoreThreshold,
+                                     coaler::core::PairwiseMCSMap &relaxedMCSMap,
+                                     coaler::embedder::ConformerEmbedder &embedder, double coarseScoreThreshold,
                                      double fineScoreThreshold, int stepLimit, int threads)
     : m_strictMCSMap(strictMCSMap),
       m_relaxedMCSMap(relaxedMCSMap),
       m_coarseScoreThreshold(coarseScoreThreshold),
       m_fineScoreThreshold(fineScoreThreshold),
+      m_embedder(embedder),
       m_threads(threads),
       m_stepLimit(stepLimit) {}
 
@@ -228,7 +232,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             LigandVector const alignmentTargets = generate_alignment_targets(ligands, *worstLigand);
             assert(alignmentTargets.size() == ligands.size() - 1);
 
-            auto newConfIDs = coaler::embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(
+            auto newConfIDs = m_embedder.generateNewPosesForAssemblyLigand(
                 *worstLigand, alignmentTargets, assembly.getAssemblyMapping(), m_strictMCSMap, m_relaxedMCSMap);
 
             if (newConfIDs.empty()) {
@@ -294,15 +298,14 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 /*----------------------------------------------------------------------------------------------------------------*/
 
 void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
-                                        LigandVector ligands, PoseRegisterCollection registers,
-                                        const coaler::core::CoreResult &core) {
-    spdlog::info("starting bruteforcing worst alignments in assembly.");
+                                        LigandVector ligands, PoseRegisterCollection registers) {
+    spdlog::info("starting brute forcing worst alignments in assembly.");
     double assemblyScore = AssemblyScorer::calculateAssemblyScore(assembly, scores, ligands);
 
     // calculating the alignment scores for all ligands separately and find average
     std::unordered_map<LigandID, double> ligandScores;
-    for (Ligand &ligand : ligands) {
-        unsigned ligandID = ligand.getID();
+    for (Ligand  const&ligand : ligands) {
+        unsigned const ligandID = ligand.getID();
         double ligandScore = 0.0;
 
         for (const Ligand &secondLigand : ligands) {
@@ -313,7 +316,7 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
             PoseID const firstLigandPoseID = assembly.getPoseOfLigand(ligandID);
             PoseID const secondLigandPoseID = assembly.getPoseOfLigand(secondLigand.getID());
 
-            // check whether assembly didnt contain one of the ligands
+            // check whether assembly didn't contain one of the ligands
             if (firstLigandPoseID == std::numeric_limits<PoseID>::max()
                 || secondLigandPoseID == std::numeric_limits<PoseID>::max()) {
                 continue;
@@ -340,11 +343,11 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
                 "bruteforce: found ligand {} with below average alignment score. Starting bruteforce conformer "
                 "generation.",
                 RDKit::MolToSmiles(ligand.getMolecule()));
-            LigandAlignmentAssembly assemblyCopy = assembly;
+            LigandAlignmentAssembly const assemblyCopy = assembly;
 
             // generate new conformers for ligand with fixed core coords
-            const std::vector<multialign::PoseID> newPoseIDs
-                = embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(ligand, core);
+            const std::vector<multialign::PoseID> newPoseIDs = m_embedder.generateNewPosesForAssemblyLigand(ligand);
+
             if (newPoseIDs.empty()) {
                 spdlog::warn("bruteforce: no confs generated. skipping ligand {}",
                              RDKit::MolToSmiles(ligand.getMolecule()));
@@ -388,9 +391,9 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
-OptimizerState AssemblyOptimizer::fineTuneState(OptimizerState &state, const core::CoreResult &core) {
+OptimizerState AssemblyOptimizer::fineTuneState(OptimizerState &state) {
     OptimizerState optState
         = optimizeAssembly(state.assembly, state.scores, state.ligands, state.registers, m_fineScoreThreshold);
-    fixWorstLigands(optState.assembly, optState.scores, optState.ligands, optState.registers, core);
+    fixWorstLigands(optState.assembly, optState.scores, optState.ligands, optState.registers);
     return optState;
 }

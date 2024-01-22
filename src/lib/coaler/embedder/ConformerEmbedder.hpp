@@ -7,7 +7,7 @@
 #include <GraphMol/ROMol.h>
 
 #include "coaler/core/Forward.hpp"
-#include "coaler/multialign/Forward.hpp"
+#include "coaler/multialign/models/Forward.hpp"
 
 namespace coaler::embedder {
     using CoreAtomMapping = std::map<int, RDGeom::Point3D>;
@@ -43,7 +43,7 @@ namespace coaler::embedder {
          * @param pairwiseRelaxedMCSMap MCSMap of ligand pairs with relaxed params
          * @return IDs of conformers added to @param worstLigand
          */
-        static std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(
+        std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(
             const multialign::Ligand& worstLigand, const multialign::LigandVector& targets,
             const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs,
             const core::PairwiseMCSMap& pairwiseStrictMCSMap, const core::PairwiseMCSMap& pairwiseRelaxedMCSMap);
@@ -56,14 +56,12 @@ namespace coaler::embedder {
          * @param core core structure of all molecules
          * @return IDs of conformers added to @param worstLigand
          */
-        static std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(const multialign::Ligand& worstLigand,
-                                                                                 const core::CoreResult& core);
-
-        static CoreAtomMapping getLigandMcsAtomCoordsFromTargetMatch(const RDGeom::POINT3D_VECT& targetCoords,
-                                                                     const RDKit::MatchVectType& ligandMcsMatch,
-                                                                     const RDKit::MatchVectType& targetMcsMatch);
+        std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(const multialign::Ligand& worstLigand);
 
       private:
+        CoreAtomMapping getLigandMcsAtomCoordsFromTargetMatch(const RDGeom::POINT3D_VECT& targetCoords,
+                                                              const RDKit::MatchVectType& ligandMcsMatch,
+                                                              const RDKit::MatchVectType& targetMcsMatch);
         core::CoreResult m_core;
         int m_threads;
         bool m_divideConformersByMatches;
