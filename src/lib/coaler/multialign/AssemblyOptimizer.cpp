@@ -368,13 +368,6 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
             spdlog::debug("bruteforce: best assembly score found with bruteforce: {}, current assembly score {}.",
                           bestNewAssemblyScore, assemblyScore);
 
-            RDKit::ROMol mol = ligand.getMolecule();
-            RDKit::ROMOL_SPTR molSPTR = boost::make_shared<RDKit::ROMol>(mol);
-            std::vector<RDKit::ROMOL_SPTR> molVec;
-            molVec.push_back(molSPTR);
-            spdlog::info("ligand: {}.", RDKit::MolToSmiles(mol));
-            io::OutputWriter::writeConformersToSDF("/tmp/confs", molVec);
-
             // add new pose to assembly if new bruteforce score is higher than old score
             if (bestNewAssemblyScore > assemblyScore) {
                 assemblyScore = bestNewAssemblyScore;
