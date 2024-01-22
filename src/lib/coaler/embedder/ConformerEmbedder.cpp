@@ -13,7 +13,7 @@
 
 const unsigned SEED = 42;
 const float FORCE_TOL = 0.0135;
-const unsigned BRUTEFORCE_CONFS = 100;
+const unsigned BRUTEFORCE_CONFS = 500;
 
 namespace {
     RDKit::SubstructMatchParameters get_optimizer_substruct_params() {
@@ -126,8 +126,8 @@ namespace coaler::embedder {
     std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
         const multialign::Ligand &worstLigand, const multialign::LigandVector &targets,
         const std::unordered_map<multialign::LigandID, multialign::PoseID> &conformerIDs,
-        const core::PairwiseMCSMap &pairwiseStrictMCSMap, const core::PairwiseMCSMap &pairwiseRelaxedMCSMap) {
-        // TODO maybe sanitize mols?
+        const core::PairwiseMCSMap &pairwiseStrictMCSMap, const core::PairwiseMCSMap &pairwiseRelaxedMCSMap,
+        bool enforceGeneration) {
         std::vector<unsigned> newIds;
         auto *ligandMol = (RDKit::ROMol *)worstLigand.getMoleculePtr();
 
@@ -173,8 +173,12 @@ namespace coaler::embedder {
             RDKit::DGeomHelpers::EmbedParameters params = get_embed_params_for_optimizer_generation();
             int addedID = -1;
 
+            double relaxedMcsSizeFactor = ligandMatchRelaxed.size() / ligandMol->getNumAtoms();
+            double strictMcsSizeFactor = ligandMatchStrict.size() / ligandMol->getNumAtoms();
+
             // try relaxed mcs first
-            if (!ligandMatchRelaxed.empty() && !targetMatchRelaxed.empty()) {
+            if (!ligandMatchRelaxed.empty() && !targetMatchRelaxed.empty()
+                && (relaxedMcsSizeFactor > 0.2 || enforceGeneration)) {
                 spdlog::debug("trying relaxed substructure approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchRelaxed, targetMatchRelaxed);
@@ -192,7 +196,8 @@ namespace coaler::embedder {
             }
 
             // if relaxed mcs params didnt yield valid embedding, reattempt with strict mcs.
-            if (addedID < 0 && !ligandMatchStrict.empty() && !targetMatchStrict.empty()) {
+            if (addedID < 0 && !ligandMatchStrict.empty() && !targetMatchStrict.empty()
+                && (strictMcsSizeFactor > 0.2 || enforceGeneration)) {
                 spdlog::debug("flexible approach failed. Trying strict approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchStrict, targetMatchStrict);
@@ -224,7 +229,7 @@ namespace coaler::embedder {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
-        const multialign::Ligand &worstLigand, const core::CoreResult &core) {
+        const multialign::Ligand &worstLigand) {
         std::vector<unsigned> newIds;
         std::vector<int> newIntIds;
         auto *ligandMol = (RDKit::ROMol *)worstLigand.getMoleculePtr();
@@ -234,9 +239,10 @@ namespace coaler::embedder {
         RDKit::MatchVectType targetMatch;
 
         // get atom coords for core structure
-        const CoreAtomMapping coreCoords
-            = getLigandMcsAtomCoordsFromTargetMatch(core.ref->getConformer(0).getPositions(), ligandMatch, targetMatch);
+        const CoreAtomMapping coreCoords = getLigandMcsAtomCoordsFromTargetMatch(
+            m_core.ref->getConformer(0).getPositions(), ligandMatch, targetMatch);
         params.coordMap = &coreCoords;
+        params.numThreads = m_threads;
 
         // embed BRUTEFORCE_CONFS new conformers into ligand
         try {

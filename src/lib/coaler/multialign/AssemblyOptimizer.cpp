@@ -4,12 +4,14 @@
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <spdlog/spdlog.h>
 
+#include <coaler/io/OutputWriter.hpp>
+
 #include "coaler/embedder/ConformerEmbedder.hpp"
 #include "coaler/multialign/scorer/AssemblyScorer.hpp"
 
 const unsigned SEED = 42;
 const float FORCE_TOL = 0.0135;
-const float SCORE_THRESHOLD = 0.1;
+const float SCORE_THRESHOLD = 0.5;
 
 namespace {
     RDKit::DGeomHelpers::EmbedParameters get_embed_params_for_optimizer_generation() {
@@ -194,6 +196,13 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             break;
         }
 
+        if (worstLigandId == std::numeric_limits<LigandID>::max()) {
+            spdlog::error(
+                "Unable to generate feasible conformers using mcs method. Resorting to bruteforce conformer "
+                "sampling");
+            break;
+        }
+
         Ligand *worstLigand = &ligands.at(worstLigandId);
         bool ligandIsMissing = (maxScoreDeficit == -1);
         bool swappedLigandPose = false;
@@ -229,7 +238,8 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             assert(alignmentTargets.size() == ligands.size() - 1);
 
             auto newConfIDs = coaler::embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(
-                *worstLigand, alignmentTargets, assembly.getAssemblyMapping(), m_strictMCSMap, m_relaxedMCSMap);
+                *worstLigand, alignmentTargets, assembly.getAssemblyMapping(), m_strictMCSMap, m_relaxedMCSMap,
+                ligandIsMissing);
 
             if (newConfIDs.empty()) {
                 spdlog::warn("no confs generated. skipping ligand {}", RDKit::MolToSmiles(worstLigand->getMolecule()));
@@ -298,7 +308,7 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
                                         const coaler::core::CoreResult &core) {
     spdlog::info("starting bruteforcing worst alignments in assembly.");
     double assemblyScore = AssemblyScorer::calculateAssemblyScore(assembly, scores, ligands);
-
+    coaler::embedder::ConformerEmbedder embedder(core, m_threads);
     // calculating the alignment scores for all ligands separately and find average
     std::unordered_map<LigandID, double> ligandScores;
     for (Ligand &ligand : ligands) {
@@ -306,7 +316,7 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
         double ligandScore = 0.0;
 
         for (const Ligand &secondLigand : ligands) {
-            if (ligandID >= secondLigand.getID()) {
+            if (ligandID == secondLigand.getID()) {
                 continue;
             }
 
@@ -330,24 +340,22 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
         ligandScoreMean += score;
     }
     ligandScoreMean /= ligandScores.size();
-
     // bruteforce new conformers for all ligands which score is at least 10% below average
     for (Ligand &ligand : ligands) {
         LigandID ligandID = ligand.getID();
         const double currScore = ligandScores.at(ligandID);
         if (currScore + SCORE_THRESHOLD * currScore < ligandScoreMean) {
-            spdlog::debug(
+            spdlog::info(
                 "bruteforce: found ligand {} with below average alignment score. Starting bruteforce conformer "
                 "generation.",
                 RDKit::MolToSmiles(ligand.getMolecule()));
             LigandAlignmentAssembly assemblyCopy = assembly;
 
             // generate new conformers for ligand with fixed core coords
-            const std::vector<multialign::PoseID> newPoseIDs
-                = embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(ligand, core);
+            const std::vector<multialign::PoseID> newPoseIDs = embedder.generateNewPosesForAssemblyLigand(ligand);
             if (newPoseIDs.empty()) {
-                spdlog::warn("bruteforce: no confs generated. skipping ligand {}",
-                             RDKit::MolToSmiles(ligand.getMolecule()));
+                spdlog::debug("bruteforce: no confs generated. skipping ligand {}",
+                              RDKit::MolToSmiles(ligand.getMolecule()));
                 continue;
             }
 
@@ -385,7 +393,6 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
         }
     }
 }
-
 /*----------------------------------------------------------------------------------------------------------------*/
 
 OptimizerState AssemblyOptimizer::fineTuneState(OptimizerState &state, const core::CoreResult &core) {

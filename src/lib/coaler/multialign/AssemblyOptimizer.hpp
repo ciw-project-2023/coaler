@@ -53,8 +53,8 @@ namespace coaler::multialign {
          * @param registers The registers for all ligand pairs
          * @param core core of all input molecules
          */
-        static void fixWorstLigands(LigandAlignmentAssembly assembly, PairwiseAlignments scores, LigandVector ligands,
-                                    PoseRegisterCollection registers, const core::CoreResult& core);
+        void fixWorstLigands(LigandAlignmentAssembly assembly, PairwiseAlignments scores, LigandVector ligands,
+                             PoseRegisterCollection registers, const core::CoreResult& core);
 
         int m_threads;
         int m_stepLimit;

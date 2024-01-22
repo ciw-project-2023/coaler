@@ -18,7 +18,7 @@ namespace coaler::embedder {
      */
     class ConformerEmbedder {
       public:
-        ConformerEmbedder(core::CoreResult result, int threads, bool divideConformersByMatches);
+        ConformerEmbedder(core::CoreResult result, int threads, bool divideConformersByMatches = true);
 
         /**
          * Embed an even amount of conformers at every core match.
@@ -46,7 +46,8 @@ namespace coaler::embedder {
         static std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(
             const multialign::Ligand& worstLigand, const multialign::LigandVector& targets,
             const std::unordered_map<multialign::LigandID, multialign::PoseID>& conformerIDs,
-            const core::PairwiseMCSMap& pairwiseStrictMCSMap, const core::PairwiseMCSMap& pairwiseRelaxedMCSMap);
+            const core::PairwiseMCSMap& pairwiseStrictMCSMap, const core::PairwiseMCSMap& pairwiseRelaxedMCSMap,
+            bool enforceGeneration = false);
 
         /**
          * @overload
@@ -56,8 +57,7 @@ namespace coaler::embedder {
          * @param core core structure of all molecules
          * @return IDs of conformers added to @param worstLigand
          */
-        static std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(const multialign::Ligand& worstLigand,
-                                                                                 const core::CoreResult& core);
+        std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(const multialign::Ligand& worstLigand);
 
         static CoreAtomMapping getLigandMcsAtomCoordsFromTargetMatch(const RDGeom::POINT3D_VECT& targetCoords,
                                                                      const RDKit::MatchVectType& ligandMcsMatch,
