@@ -340,13 +340,10 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
         ligandScoreMean += score;
     }
     ligandScoreMean /= ligandScores.size();
-    spdlog::info("mean: {}", ligandScoreMean);
-    spdlog::info("threshold: {}", SCORE_THRESHOLD);
     // bruteforce new conformers for all ligands which score is at least 10% below average
     for (Ligand &ligand : ligands) {
         LigandID ligandID = ligand.getID();
         const double currScore = ligandScores.at(ligandID);
-        spdlog::info("score: {}", currScore);
         if (currScore + SCORE_THRESHOLD * currScore < ligandScoreMean) {
             spdlog::info(
                 "bruteforce: found ligand {} with below average alignment score. Starting bruteforce conformer "
@@ -357,8 +354,8 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
             // generate new conformers for ligand with fixed core coords
             const std::vector<multialign::PoseID> newPoseIDs = embedder.generateNewPosesForAssemblyLigand(ligand);
             if (newPoseIDs.empty()) {
-                spdlog::warn("bruteforce: no confs generated. skipping ligand {}",
-                             RDKit::MolToSmiles(ligand.getMolecule()));
+                spdlog::debug("bruteforce: no confs generated. skipping ligand {}",
+                              RDKit::MolToSmiles(ligand.getMolecule()));
                 continue;
             }
 
@@ -368,8 +365,8 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
             auto [bestNewPoseID, bestNewAssemblyScore]
                 = find_optimal_pose(ligandID, newPoseIDs, assemblyCopy, scores, ligands);
 
-            spdlog::info("bruteforce: best assembly score found with bruteforce: {}, current assembly score {}.",
-                         bestNewAssemblyScore, assemblyScore);
+            spdlog::debug("bruteforce: best assembly score found with bruteforce: {}, current assembly score {}.",
+                          bestNewAssemblyScore, assemblyScore);
 
             RDKit::ROMol mol = ligand.getMolecule();
             RDKit::ROMOL_SPTR molSPTR = boost::make_shared<RDKit::ROMol>(mol);
@@ -381,7 +378,7 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
             // add new pose to assembly if new bruteforce score is higher than old score
             if (bestNewAssemblyScore > assemblyScore) {
                 assemblyScore = bestNewAssemblyScore;
-                spdlog::info("bruteforce: ligand {} now has conformer {}.", ligandID, bestNewPoseID);
+                spdlog::debug("bruteforce: ligand {} now has conformer {}.", ligandID, bestNewPoseID);
                 // remove all (except best) new poses from ligand
                 for (auto const confId : newPoseIDs) {
                     if (confId == bestNewPoseID) {
@@ -403,7 +400,6 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
         }
     }
 }
-
 /*----------------------------------------------------------------------------------------------------------------*/
 
 OptimizerState AssemblyOptimizer::fineTuneState(OptimizerState &state, const core::CoreResult &core) {
