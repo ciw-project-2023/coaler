@@ -80,7 +80,7 @@ namespace coaler::multialign {
                 omp_init_lock(&maplock);
 
 #pragma omp parallel for shared(maplock, ligands, scores, nofPosesFirst, nofPosesSecond, firstMolId, \
-                                secondMolId) default(none)
+                                    secondMolId) default(none)
                 for (unsigned firstMolPoseId = 0; firstMolPoseId < nofPosesFirst; firstMolPoseId++) {
                     for (unsigned secondMolPoseId = 0; secondMolPoseId < nofPosesSecond; secondMolPoseId++) {
                         RDKit::RWMol const firstMol = ligands.at(firstMolId).getMolecule();
@@ -159,7 +159,7 @@ namespace coaler::multialign {
         OptimizerState bestAssembly{-1, {}, {}, {}, {}};
 
 #pragma omp parallel for shared(bestAssembly, bestAssemblyLock, skippedAssembliesCount, skippedAssembliesCountLock, \
-                                assembliesList) default(none)
+                                    assembliesList) default(none)
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
             spdlog::debug("assembly {} has mapped Conformers for {}/{} molecules.", assemblyID,
                           assembliesList.at(assemblyID).first.getAssemblyMapping().size(), m_ligands.size());

@@ -196,8 +196,9 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             break;
         }
 
-        if(worstLigandId == std::numeric_limits<LigandID>::max()) {
-            spdlog::error("Unable to generate feasible conformers using mcs method. Resorting to bruteforce conformer "
+        if (worstLigandId == std::numeric_limits<LigandID>::max()) {
+            spdlog::error(
+                "Unable to generate feasible conformers using mcs method. Resorting to bruteforce conformer "
                 "sampling");
             break;
         }
@@ -237,7 +238,8 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             assert(alignmentTargets.size() == ligands.size() - 1);
 
             auto newConfIDs = coaler::embedder::ConformerEmbedder::generateNewPosesForAssemblyLigand(
-                *worstLigand, alignmentTargets, assembly.getAssemblyMapping(), m_strictMCSMap, m_relaxedMCSMap, ligandIsMissing);
+                *worstLigand, alignmentTargets, assembly.getAssemblyMapping(), m_strictMCSMap, m_relaxedMCSMap,
+                ligandIsMissing);
 
             if (newConfIDs.empty()) {
                 spdlog::warn("no confs generated. skipping ligand {}", RDKit::MolToSmiles(worstLigand->getMolecule()));
@@ -353,8 +355,7 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
             LigandAlignmentAssembly assemblyCopy = assembly;
 
             // generate new conformers for ligand with fixed core coords
-            const std::vector<multialign::PoseID> newPoseIDs =
-                embedder.generateNewPosesForAssemblyLigand(ligand);
+            const std::vector<multialign::PoseID> newPoseIDs = embedder.generateNewPosesForAssemblyLigand(ligand);
             if (newPoseIDs.empty()) {
                 spdlog::warn("bruteforce: no confs generated. skipping ligand {}",
                              RDKit::MolToSmiles(ligand.getMolecule()));
@@ -368,7 +369,7 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
                 = find_optimal_pose(ligandID, newPoseIDs, assemblyCopy, scores, ligands);
 
             spdlog::info("bruteforce: best assembly score found with bruteforce: {}, current assembly score {}.",
-                          bestNewAssemblyScore, assemblyScore);
+                         bestNewAssemblyScore, assemblyScore);
 
             RDKit::ROMol mol = ligand.getMolecule();
             RDKit::ROMOL_SPTR molSPTR = boost::make_shared<RDKit::ROMol>(mol);

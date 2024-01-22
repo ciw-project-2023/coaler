@@ -223,8 +223,8 @@ namespace coaler::embedder {
         RDKit::MatchVectType targetMatch;
 
         // get atom coords for core structure
-        const CoreAtomMapping coreCoords
-            = getLigandMcsAtomCoordsFromTargetMatch(m_core.ref->getConformer(0).getPositions(), ligandMatch, targetMatch);
+        const CoreAtomMapping coreCoords = getLigandMcsAtomCoordsFromTargetMatch(
+            m_core.ref->getConformer(0).getPositions(), ligandMatch, targetMatch);
         params.coordMap = &coreCoords;
         params.numThreads = m_threads;
 
