@@ -44,8 +44,8 @@ const std::string HELP
       "  --assemblies <amount>\t\t\t\t\tNumber of starting assemblies (default: 10)\n"
       "  --core <algorithm>\t\t\t\t\tAlgorithm to detect core structure (default: mcs, allowed: mcs, murcko)\n"
       "  --confs-log <path>\t\t\t\t\tOptional path to folder to store the generated conformers\n"
-      "  --optimizer-coarse-threshold <float>\t\t\tTreshold for the optimization step (default: 1.5)\n"
-      "  --optimizer-fine-threshold <float>\t\t\tTreshold for the fine optimization step (default: 0.5)\n"
+      "  --optimizer-coarse-threshold <float>\t\t\tTreshold for the optimization step (default: 0.5)\n"
+      "  --optimizer-fine-threshold <float>\t\t\tTreshold for the fine optimization step (default: 0.01)\n"
       "  --optimizer-step-limit <amount> \t\t\tMaximum number of steps for the optimizer (default: 100)\n";
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays)

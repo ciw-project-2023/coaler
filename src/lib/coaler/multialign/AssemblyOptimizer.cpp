@@ -242,7 +242,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                 ligandIsMissing);
 
             if (newConfIDs.empty()) {
-                spdlog::warn("no confs generated. skipping ligand {}", RDKit::MolToSmiles(worstLigand->getMolecule()));
+                spdlog::debug("no confs generated. skipping ligand {}", RDKit::MolToSmiles(worstLigand->getMolecule()));
                 ligandAvailable.at(worstLigandId) = false;
 
                 continue;
