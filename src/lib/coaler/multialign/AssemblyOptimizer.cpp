@@ -262,7 +262,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                     spdlog::debug("All ligands set available.");
                     ligandAvailable.setAllAvailable();
                 } else {
-                    spdlog::info("did not reset due to minor improve.");
+                    spdlog::debug("did not reset due to minor improve.");
                 }
 
                 assemblyScore = bestNewAssemblyScore;
