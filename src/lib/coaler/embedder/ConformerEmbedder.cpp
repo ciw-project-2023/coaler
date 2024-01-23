@@ -189,11 +189,11 @@ namespace coaler::embedder {
                     auto end = std::chrono::high_resolution_clock::now();
                     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
                     if(duration > 10000) {
-                        spdlog::info("relaxed mcs confgen took {} ms", duration);
-                        spdlog::info("mol1: {} \nmol2: {}\n mcs: {}\n",
+                        spdlog::debug("relaxed mcs confgen took {} ms", duration);
+                        spdlog::debug("mol1: {} \nmol2: {}\n mcs: {}\n",
                                      RDKit::MolToSmiles(*worstLigand.getMoleculePtr()), RDKit::MolToSmiles(targetMol),
                                      mcsStringRelaxed);
-                        spdlog::info("success: {}", addedID > 0 ? "true" : "false");
+                        spdlog::debug("success: {}", addedID > 0 ? "true" : "false");
                     }
                 } catch (const std::runtime_error &e) {
                     spdlog::debug(e.what());
@@ -213,8 +213,8 @@ namespace coaler::embedder {
                     auto end = std::chrono::high_resolution_clock::now();
                     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
                     if(duration > 10000) {
-                        spdlog::info("strict mcs confgen took {} ms", duration);
-                        spdlog::info("mol1: {} \nmol2: {}\n mcs: {}\n",
+                        spdlog::debug("strict mcs confgen took {} ms", duration);
+                        spdlog::debug("mol1: {} \nmol2: {}\n mcs: {}\n",
                                      RDKit::MolToSmiles(*worstLigand.getMoleculePtr()),
                                      RDKit::MolToSmiles(targetMol),
                                      mcsStringStrict
