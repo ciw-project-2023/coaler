@@ -18,4 +18,5 @@ namespace coaler::multialign::constants {
     const double FINE_OPTIMIZATION_THRESHOLD = 0.1;
 
     const unsigned OPTIMIZER_STEP_LIMIT = 100;
+    const double LIGAND_AVAILABILITY_RESET_THRESHOLD = 0.97;
 }  // namespace coaler::multialign::constants
