@@ -73,7 +73,7 @@ namespace coaler::multialign {
             PosePair ligandPoses = PosePair{first, second};
             distanceSum += scores.at(ligandPoses, ligands);
         }
-        return 1 - distanceSum / (nofLigands-1);
+        return 1 - distanceSum / (nofLigands - 1);
     }
 
 }  // namespace coaler::multialign

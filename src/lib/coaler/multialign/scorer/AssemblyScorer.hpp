@@ -37,7 +37,7 @@ namespace coaler::multialign {
                                                      PairwiseAlignments& scores, const LigandVector& ligands);
 
         static double calculateMeanLigandDistance(LigandID ligandId, const LigandAlignmentAssembly& assembly,
-                                           PairwiseAlignments& scores, const LigandVector& ligands);
+                                                  PairwiseAlignments& scores, const LigandVector& ligands);
     };
 
 }  // namespace coaler::multialign

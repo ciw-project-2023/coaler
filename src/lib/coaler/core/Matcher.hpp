@@ -57,7 +57,6 @@ namespace coaler::core {
 
         static RDKit::MCSParameters getCoreMCSParams();
 
-
         /**
          * calculates the pairwise MCS for all molecule pairs of molecules in @param mols
          * @param mols molecules the pariwise MCS are calculated for

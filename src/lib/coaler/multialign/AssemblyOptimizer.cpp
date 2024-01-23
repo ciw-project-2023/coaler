@@ -231,7 +231,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 
         const double meanDistance
             = AssemblyScorer::calculateMeanLigandDistance(worstLigandId, assembly, scores, ligands);
-        //spdlog::info("d: {}", meanDistance);
+        // spdlog::info("d: {}", meanDistance);
         if (ligandIsMissing || (!swappedLigandPose && meanDistance > scoreDeficitThreshold)) {
             spdlog::debug("generating new conformer, missing ligand = {}", ligandIsMissing);
 

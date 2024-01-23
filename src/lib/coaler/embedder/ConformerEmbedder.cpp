@@ -188,11 +188,11 @@ namespace coaler::embedder {
                     addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligandMol, params);
                     auto end = std::chrono::high_resolution_clock::now();
                     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-                    if(duration > 10000) {
+                    if (duration > 10000) {
                         spdlog::debug("relaxed mcs confgen took {} ms", duration);
                         spdlog::debug("mol1: {} \nmol2: {}\n mcs: {}\n",
-                                     RDKit::MolToSmiles(*worstLigand.getMoleculePtr()), RDKit::MolToSmiles(targetMol),
-                                     mcsStringRelaxed);
+                                      RDKit::MolToSmiles(*worstLigand.getMoleculePtr()), RDKit::MolToSmiles(targetMol),
+                                      mcsStringRelaxed);
                         spdlog::debug("success: {}", addedID > 0 ? "true" : "false");
                     }
                 } catch (const std::runtime_error &e) {
@@ -212,14 +212,11 @@ namespace coaler::embedder {
                     addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligandMol, params);
                     auto end = std::chrono::high_resolution_clock::now();
                     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-                    if(duration > 10000) {
+                    if (duration > 10000) {
                         spdlog::debug("strict mcs confgen took {} ms", duration);
                         spdlog::debug("mol1: {} \nmol2: {}\n mcs: {}\n",
-                                     RDKit::MolToSmiles(*worstLigand.getMoleculePtr()),
-                                     RDKit::MolToSmiles(targetMol),
-                                     mcsStringStrict
-                        );
-
+                                      RDKit::MolToSmiles(*worstLigand.getMoleculePtr()), RDKit::MolToSmiles(targetMol),
+                                      mcsStringStrict);
                     }
                 } catch (const std::runtime_error &e) {
                     spdlog::debug(e.what());
