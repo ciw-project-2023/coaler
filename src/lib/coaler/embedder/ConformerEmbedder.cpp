@@ -173,8 +173,8 @@ namespace coaler::embedder {
             RDKit::DGeomHelpers::EmbedParameters params = get_embed_params_for_optimizer_generation();
             int addedID = -1;
 
-            double relaxedMcsSizeFactor = ligandMatchRelaxed.size() / ligandMol->getNumAtoms();
-            double strictMcsSizeFactor = ligandMatchStrict.size() / ligandMol->getNumAtoms();
+            const double relaxedMcsSizeFactor = (double)ligandMatchRelaxed.size() / ligandMol->getNumAtoms();
+            const double strictMcsSizeFactor = (double)ligandMatchStrict.size() / ligandMol->getNumAtoms();
 
             // try relaxed mcs first
             if (!ligandMatchRelaxed.empty() && !targetMatchRelaxed.empty()
@@ -187,9 +187,14 @@ namespace coaler::embedder {
                     auto start = std::chrono::high_resolution_clock::now();
                     addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligandMol, params);
                     auto end = std::chrono::high_resolution_clock::now();
-
-                    spdlog::debug("relaxed mcs confgen took {} ms",
-                                  std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+                    if(duration > 10000) {
+                        spdlog::info("relaxed mcs confgen took {} ms", duration);
+                        spdlog::info("mol1: {} \nmol2: {}\n mcs: {}\n",
+                                     RDKit::MolToSmiles(*worstLigand.getMoleculePtr()), RDKit::MolToSmiles(targetMol),
+                                     mcsStringRelaxed);
+                        spdlog::info("success: {}", addedID > 0 ? "true" : "false");
+                    }
                 } catch (const std::runtime_error &e) {
                     spdlog::debug(e.what());
                 }
@@ -206,9 +211,16 @@ namespace coaler::embedder {
                     auto start = std::chrono::high_resolution_clock::now();
                     addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligandMol, params);
                     auto end = std::chrono::high_resolution_clock::now();
+                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+                    if(duration > 10000) {
+                        spdlog::info("strict mcs confgen took {} ms", duration);
+                        spdlog::info("mol1: {} \nmol2: {}\n mcs: {}\n",
+                                     RDKit::MolToSmiles(*worstLigand.getMoleculePtr()),
+                                     RDKit::MolToSmiles(targetMol),
+                                     mcsStringStrict
+                        );
 
-                    spdlog::debug("strict mcs confgen took {} ms",
-                                  std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+                    }
                 } catch (const std::runtime_error &e) {
                     spdlog::debug(e.what());
                 }

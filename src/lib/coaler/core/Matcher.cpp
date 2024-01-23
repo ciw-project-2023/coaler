@@ -29,7 +29,7 @@ namespace coaler::core {
 
     std::optional<CoreResult> Matcher::calculateCoreMcs(RDKit::MOL_SPTR_VECT &mols) {
         // Generates all parameters needed for RDKit::findMCS()
-        auto mcsParams = Matcher::getRelaxedMCSParams();
+        auto mcsParams = Matcher::getCoreMCSParams();
 
         RDKit::MOL_SPTR_VECT molsWithoutHs = {};
         for (auto &mol : mols) {
@@ -243,10 +243,19 @@ namespace coaler::core {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
+    RDKit::MCSParameters Matcher::getCoreMCSParams() {
+        RDKit::MCSParameters mcsParams = getRelaxedMCSParams();
+        mcsParams.AtomCompareParameters.MatchChiralTag = false;
+        mcsParams.BondCompareParameters.MatchStereo = false;
+        return mcsParams;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     RDKit::MCSParameters Matcher::getRelaxedMCSParams() {
         RDKit::MCSParameters mcsParams;
         RDKit::MCSAtomCompareParameters atomCompParams;
-        atomCompParams.MatchChiralTag = false;
+        atomCompParams.MatchChiralTag = true;
         atomCompParams.MatchFormalCharge = false;
         atomCompParams.MatchIsotope = false;
         atomCompParams.MatchValences = true;
