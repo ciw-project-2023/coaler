@@ -7,6 +7,7 @@
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
+#include <GraphMol/Atom.h>
 #include <spdlog/spdlog.h>
 
 #include <utility>
@@ -173,13 +174,15 @@ namespace coaler::embedder {
             RDKit::DGeomHelpers::EmbedParameters params = get_embed_params_for_optimizer_generation();
             int addedID = -1;
 
-            const double relaxedMcsSizeFactor = (double)ligandMatchRelaxed.size() / ligandMol->getNumAtoms();
-            const double strictMcsSizeFactor = (double)ligandMatchStrict.size() / ligandMol->getNumAtoms();
+            double relaxedMcsSizeFactor = (double)ligandMatchRelaxed.size() / ligandMol->getNumAtoms();
+            if(!(relaxedMcsSizeFactor > 0.2 || enforceGeneration)){
+                spdlog::debug("skipped due to small mcs, {} / {} = {}", ligandMatchRelaxed.size(), ligandMol->getNumAtoms(),relaxedMcsSizeFactor );
+                continue;
+            }
 
             // try relaxed mcs first
-            if (!ligandMatchRelaxed.empty() && !targetMatchRelaxed.empty()
-                && (relaxedMcsSizeFactor > 0.2 || enforceGeneration)) {
-                spdlog::debug("trying relaxed substructure approach.");
+            if (!ligandMatchRelaxed.empty() && !targetMatchRelaxed.empty()) {
+                //spdlog::debug("trying relaxed substructure approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchRelaxed, targetMatchRelaxed);
                 params.coordMap = &ligandMcsCoords;
@@ -188,12 +191,12 @@ namespace coaler::embedder {
                     addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligandMol, params);
                     auto end = std::chrono::high_resolution_clock::now();
                     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-                    if (duration > 10000) {
+                    if (duration > 5000) {
                         spdlog::debug("relaxed mcs confgen took {} ms", duration);
-                        spdlog::debug("mol1: {} \nmol2: {}\n mcs: {}\n",
+                        spdlog::debug("mol1: {} \nmol2: {}\n mcs: {}",
                                       RDKit::MolToSmiles(*worstLigand.getMoleculePtr()), RDKit::MolToSmiles(targetMol),
                                       mcsStringRelaxed);
-                        spdlog::debug("success: {}", addedID > 0 ? "true" : "false");
+                        spdlog::debug("success: {}", addedID > 0 ? "true\n" : "false\n");
                     }
                 } catch (const std::runtime_error &e) {
                     spdlog::debug(e.what());
@@ -201,9 +204,8 @@ namespace coaler::embedder {
             }
 
             // if relaxed mcs params didnt yield valid embedding, reattempt with strict mcs.
-            if (addedID < 0 && !ligandMatchStrict.empty() && !targetMatchStrict.empty()
-                && (strictMcsSizeFactor > 0.2 || enforceGeneration)) {
-                spdlog::debug("flexible approach failed. Trying strict approach.");
+            if (addedID < 0 && !ligandMatchStrict.empty() && !targetMatchStrict.empty()) {
+                //spdlog::debug("flexible approach failed. Trying strict approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchStrict, targetMatchStrict);
                 params.coordMap = &ligandMcsCoords;
@@ -228,7 +230,7 @@ namespace coaler::embedder {
                 spdlog::debug("target conformer {}/{}: no viable pose generated.", targetID, targets.size());
                 continue;
             }
-            spdlog::debug("target conformer {}/{}: generated valid pose.", targetID, targets.size());
+            //spdlog::debug("target conformer {}/{}: generated valid pose.", targetID, targets.size());
             const auto addedIDUnsigned = static_cast<unsigned>(addedID);
             newIds.push_back(addedIDUnsigned);
         }

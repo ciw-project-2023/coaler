@@ -161,13 +161,13 @@ namespace coaler::multialign {
 #pragma omp parallel for shared(bestAssembly, bestAssemblyLock, skippedAssembliesCount, skippedAssembliesCountLock, \
                                     assembliesList) default(none)
         for (unsigned assemblyID = 0; assemblyID < assembliesList.size(); assemblyID++) {
-            spdlog::debug("assembly {} has mapped Conformers for {}/{} molecules.", assemblyID,
+            spdlog::info("assembly {} has mapped Conformers for {}/{} molecules.", assemblyID,
                           assembliesList.at(assemblyID).first.getAssemblyMapping().size(), m_ligands.size());
 
             OptimizerState optimizedAssembly = m_assemblyOptimizer.optimizeAssembly(
                 assembliesList.at(assemblyID).first, m_pairwiseAlignments, m_ligands, m_poseRegisters);
 
-            spdlog::info("optimized assembly {}, score: {}", assemblyID, optimizedAssembly.score);
+            //spdlog::info("optimized assembly {}, score: {}", assemblyID, optimizedAssembly.score);
 
             if (optimizedAssembly.score == -1) {
                 omp_set_lock(&skippedAssembliesCountLock);

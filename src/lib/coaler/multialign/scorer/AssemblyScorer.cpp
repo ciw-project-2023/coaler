@@ -61,7 +61,7 @@ namespace coaler::multialign {
     double AssemblyScorer::calculateMeanLigandDistance(LigandID ligandId, const LigandAlignmentAssembly& assembly,
                                                        PairwiseAlignments& scores, const LigandVector& ligands) {
         unsigned nofLigands = ligands.size() - 1;
-        double distanceSum = 0;
+        double overlapSum = 0;
         for (LigandID otherLigandId = 0; otherLigandId < ligands.size(); otherLigandId++) {
             if (otherLigandId == ligandId) {
                 continue;
@@ -71,9 +71,9 @@ namespace coaler::multialign {
             UniquePoseID first(ligandId, firstLigandPoseId);
             UniquePoseID second(otherLigandId, secondLigandPoseId);
             PosePair ligandPoses = PosePair{first, second};
-            distanceSum += scores.at(ligandPoses, ligands);
+            overlapSum += scores.at(ligandPoses, ligands);
         }
-        return 1 - distanceSum / (nofLigands - 1);
+        return 1 - (overlapSum / nofLigands);
     }
 
 }  // namespace coaler::multialign
