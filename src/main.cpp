@@ -166,9 +166,9 @@ int main(int argc, char* argv[]) {
     auto relaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, false, coreSmarts);
     spdlog::info("finished calculating pairwise MCS.");
 
-    const multialign::AssemblyOptimizer optimizer(strictMcsMap, relaxedMcsMap, opts.coarse_optimization_threshold,
-                                                  opts.fine_optimization_threshold, opts.optimizer_step_limit,
-                                                  opts.num_threads);
+    const multialign::AssemblyOptimizer optimizer(strictMcsMap, relaxedMcsMap, embedder,
+                                                  opts.coarse_optimization_threshold, opts.fine_optimization_threshold,
+                                                  opts.optimizer_step_limit, opts.num_threads);
 
     spdlog::info("finished embedding");
 

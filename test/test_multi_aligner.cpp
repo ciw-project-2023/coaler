@@ -21,11 +21,13 @@ TEST_CASE("basic_test", "[multialigner_tester]") {
 
     RDKit::MOL_SPTR_VECT mols = {mol1, mol2};
     core::Matcher matcher(1);
-    auto coreResult = matcher.calculateCoreMcs(mols);
+    auto coreResult = matcher.calculateCoreMcs(mols).value();
+
+    coaler::embedder::ConformerEmbedder embedder(coreResult, 1, true);
 
     core::PairwiseMCSMap mcsMap;
-    multialign::AssemblyOptimizer optimizer(mcsMap, mcsMap, 1, 0.5, 100, 1);
-    multialign::MultiAligner aligner(mols, optimizer, coreResult.value(), 2);
+    multialign::AssemblyOptimizer optimizer(mcsMap, mcsMap, embedder, 1, 0.5, 100, 1);
+    multialign::MultiAligner aligner(mols, optimizer, coreResult, 2);
     multialign::MultiAlignerResult result = aligner.alignMolecules();
 
     CHECK(result.pose_ids_by_ligand_id.size() == 2);  // ´

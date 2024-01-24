@@ -4,6 +4,7 @@
 #include "OptimizerState.hpp"
 #include "PoseRegisterCollection.hpp"
 #include "coaler/core/Forward.hpp"
+#include "coaler/embedder/Forward.hpp"
 #include "models/Forward.hpp"
 
 namespace coaler::multialign {
@@ -27,7 +28,8 @@ namespace coaler::multialign {
          */
         // NOLINTBEGIN(readability-inconsistent-declaration-parameter-name)
         AssemblyOptimizer(core::PairwiseMCSMap& strictMCSMap, core::PairwiseMCSMap& relaxedMCSMap,
-                          double coarseScoreThreshold, double fineScoreTreshold, int stepLimit, int threads);
+                          embedder::ConformerEmbedder& embedder, double coarseScoreThreshold, double fineScoreTreshold,
+                          int stepLimit, int threads);
         // NOLINTEND(readability-inconsistent-declaration-parameter-name)
 
         OptimizerState optimizeAssembly(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
@@ -54,7 +56,7 @@ namespace coaler::multialign {
          * @param core core of all input molecules
          */
         void fixWorstLigands(LigandAlignmentAssembly assembly, PairwiseAlignments scores, LigandVector ligands,
-                             PoseRegisterCollection registers, const core::CoreResult& core);
+                             PoseRegisterCollection registers);
 
         int m_threads;
         int m_stepLimit;
@@ -64,5 +66,7 @@ namespace coaler::multialign {
 
         core::PairwiseMCSMap& m_strictMCSMap;
         core::PairwiseMCSMap& m_relaxedMCSMap;
+
+        embedder::ConformerEmbedder& m_embedder;
     };
 }  // namespace coaler::multialign

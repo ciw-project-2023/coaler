@@ -11,7 +11,9 @@
 
 const unsigned SEED = 42;
 const float FORCE_TOL = 0.0135;
-const float SCORE_THRESHOLD = 0.5;
+const float RELATIVE_SCORE_THRESHOLD = 0.2;
+const float ABSOLUTE_SCORE_THRESHOLD = 0.3;
+const unsigned BRUTEFORCE_CONFS = 100;
 
 namespace {
     RDKit::DGeomHelpers::EmbedParameters get_embed_params_for_optimizer_generation() {
@@ -84,10 +86,11 @@ LigandID get_next_missing_ligand(const LigandAlignmentAssembly &assembly, const 
 }
 
 AssemblyOptimizer::AssemblyOptimizer(coaler::core::PairwiseMCSMap &strictMCSMap,
-                                     coaler::core::PairwiseMCSMap &relaxedMCSMap, double coarseScoreThreshold,
-                                     double fineScoreThreshold, int stepLimit, int threads)
+                                     coaler::core::PairwiseMCSMap &relaxedMCSMap, embedder::ConformerEmbedder &embedder,
+                                     double coarseScoreThreshold, double fineScoreThreshold, int stepLimit, int threads)
     : m_strictMCSMap(strictMCSMap),
       m_relaxedMCSMap(relaxedMCSMap),
+      m_embedder(embedder),
       m_coarseScoreThreshold(coarseScoreThreshold),
       m_fineScoreThreshold(fineScoreThreshold),
       m_threads(threads),
@@ -340,11 +343,9 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 /*----------------------------------------------------------------------------------------------------------------*/
 
 void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
-                                        LigandVector ligands, PoseRegisterCollection registers,
-                                        const coaler::core::CoreResult &core) {
+                                        LigandVector ligands, PoseRegisterCollection registers) {
     spdlog::info("starting bruteforcing worst alignments in assembly.");
     double assemblyScore = AssemblyScorer::calculateAssemblyScore(assembly, scores, ligands);
-    coaler::embedder::ConformerEmbedder embedder(core, m_threads);
     // calculating the alignment scores for all ligands separately and find average
     std::unordered_map<LigandID, double> ligandScores;
     for (Ligand &ligand : ligands) {
@@ -380,7 +381,8 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
     for (Ligand &ligand : ligands) {
         LigandID ligandID = ligand.getID();
         const double currScore = ligandScores.at(ligandID);
-        if (currScore + SCORE_THRESHOLD * currScore < ligandScoreMean) {
+        if (currScore + RELATIVE_SCORE_THRESHOLD * currScore < ligandScoreMean
+            || currScore < ABSOLUTE_SCORE_THRESHOLD) {
             spdlog::info(
                 "bruteforce: found ligand {} with below average alignment score. Starting bruteforce conformer "
                 "generation.",
@@ -388,7 +390,8 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
             LigandAlignmentAssembly assemblyCopy = assembly;
 
             // generate new conformers for ligand with fixed core coords
-            const std::vector<multialign::PoseID> newPoseIDs = embedder.generateNewPosesForAssemblyLigand(ligand);
+            const std::vector<multialign::PoseID> newPoseIDs
+                = m_embedder.generateNewPosesForAssemblyLigand(ligand, BRUTEFORCE_CONFS);
             if (newPoseIDs.empty()) {
                 spdlog::debug("bruteforce: no confs generated. skipping ligand {}",
                               RDKit::MolToSmiles(ligand.getMolecule()));
@@ -433,7 +436,7 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
 
 OptimizerState AssemblyOptimizer::fineTuneState(OptimizerState &state, const core::CoreResult &core) {
     OptimizerState optState
-        = optimizeAssembly(state.assembly, state.scores, state.ligands, state.registers, m_fineScoreThreshold);
-    fixWorstLigands(optState.assembly, optState.scores, optState.ligands, optState.registers, core);
+        = this->optimizeAssembly(state.assembly, state.scores, state.ligands, state.registers, m_fineScoreThreshold);
+    this->fixWorstLigands(optState.assembly, optState.scores, optState.ligands, optState.registers);
     return optState;
 }

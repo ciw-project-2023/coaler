@@ -7,7 +7,7 @@
 #include <GraphMol/ROMol.h>
 
 #include "coaler/core/Forward.hpp"
-#include "coaler/multialign/Forward.hpp"
+#include "coaler/multialign/models/Forward.hpp"
 
 namespace coaler::embedder {
     using CoreAtomMapping = std::map<int, RDGeom::Point3D>;
@@ -54,10 +54,10 @@ namespace coaler::embedder {
          *
          * Embed new conformers into the worst ligand of an assembly using the core structure
          * @param worstLigand ligand new conformers are embedded into
-         * @param core core structure of all molecules
          * @return IDs of conformers added to @param worstLigand
          */
-        std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(const multialign::Ligand& worstLigand);
+        std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(const multialign::Ligand& worstLigand,
+                                                                          const unsigned numConfs);
 
         static CoreAtomMapping getLigandMcsAtomCoordsFromTargetMatch(const RDGeom::POINT3D_VECT& targetCoords,
                                                                      const RDKit::MatchVectType& ligandMcsMatch,

@@ -24,6 +24,8 @@ namespace coaler::io {
          * @param mol A molecule whose conformers are to be written to an .sdf file
          */
         static void writeConformersToSDF(const std::string& folderPath, const std::vector<RDKit::ROMOL_SPTR>& mols);
+
+        static void writeConformersToSDF(const std::string& folderPath, const RDKit::ROMOL_SPTR& mol);
     };
 
 }  // namespace coaler::io
