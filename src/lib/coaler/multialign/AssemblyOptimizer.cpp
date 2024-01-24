@@ -190,11 +190,11 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
         auto now = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::minutes>(now - start).count();
 
-        if(duration > 3 && assembly.getMissingLigandsCount() == 0) {
+        if (duration > 3 && assembly.getMissingLigandsCount() == 0) {
             spdlog::info("optimizer run limit of 3 minuntes reached (no missing ligands).");
             break;
         }
-        if(duration > 6 ) {
+        if (duration > 6) {
             spdlog::info("optimizer run hard limit of 6 minuntes reached (missing ligands ignored).");
             break;
         }
@@ -238,7 +238,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                     spdlog::debug("swapped for existing pose.");
                     assembly = assemblyCopy;
                     assemblyScore = newAssemblyScore;
-                    if(newAssemblyScore * constants::LIGAND_AVAILABILITY_RESET_THRESHOLD > assemblyScore) {
+                    if (newAssemblyScore * constants::LIGAND_AVAILABILITY_RESET_THRESHOLD > assemblyScore) {
                         ligandAvailable.setAllAvailable();
                         spdlog::debug("set available after swap");
                     }
@@ -251,11 +251,9 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 
         const double meanDistance
             = AssemblyScorer::calculateMeanLigandDistance(worstLigandId, assembly, scores, ligands);
-        //spdlog::info("d: {}", meanDistance);
         if (ligandIsMissing || (!swappedLigandPose && meanDistance > scoreDeficitThreshold)) {
             spdlog::debug("generating new conformer, missing ligand = {}", ligandIsMissing);
             genAttempts++;
-
 
             LigandVector const alignmentTargets = generate_alignment_targets(ligands, *worstLigand);
             assert(alignmentTargets.size() == ligands.size() - 1);
@@ -280,11 +278,9 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             if (ligandIsMissing || bestNewAssemblyScore > assemblyScore) {
                 // from here on we keep the new pose and adapt all containers accordingly
                 genAttemptsSuccessful++;
-                spdlog::debug("old: {}, new: {} * {} = {}", assemblyScore, bestNewAssemblyScore, constants::LIGAND_AVAILABILITY_RESET_THRESHOLD,
-                             bestNewAssemblyScore * constants::LIGAND_AVAILABILITY_RESET_THRESHOLD);
                 if (ligandIsMissing
                     || bestNewAssemblyScore * constants::LIGAND_AVAILABILITY_RESET_THRESHOLD > assemblyScore) {
-                    if(!ligandIsMissing) {
+                    if (!ligandIsMissing) {
                         spdlog::debug("All ligands set available. Improve: {}", bestNewAssemblyScore - assemblyScore);
                     }
                     ligandAvailable.setAllAvailable();
@@ -331,9 +327,12 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
         ligandAvailable.at(worstLigandId) = false;
     }
 
-    spdlog::info("optimized assembly with score {}\n"
-        "optimization took {} steps: {} swaps | {}/{} successful generation attempts",
-                 assemblyScore, stepCount, swapCount, genAttemptsSuccessful, genAttempts);
+    spdlog::info(
+        "optimized assembly with score {}.\n"
+        "\toptimization took {} steps:\n"
+        "\t  swaps: {}\n"
+        "\t  conformer generation attempts:{} ({} yielded new pose in assembly)",
+        assemblyScore, stepCount, swapCount, genAttempts, genAttemptsSuccessful);
 
     return {assemblyScore, assembly, scores, ligands, registers};
 }

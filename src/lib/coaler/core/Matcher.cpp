@@ -245,7 +245,6 @@ namespace coaler::core {
 
     RDKit::MCSParameters Matcher::getCoreMCSParams() {
         RDKit::MCSParameters mcsParams = getRelaxedMCSParams();
-        mcsParams.AtomCompareParameters.MatchChiralTag = false;
         mcsParams.BondCompareParameters.MatchStereo = false;
         return mcsParams;
     }

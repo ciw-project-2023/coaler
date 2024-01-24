@@ -6,7 +6,6 @@
 #include "coaler/core/Matcher.hpp"
 #include "test_helper.h"
 
-
 /*
 TEST_CASE("test_strict_mcs", "[multialign]") {
     auto mol1 = MolFromSmiles("Cc1nnc2n1-c1sc3c(c1[C@H](c1ccccc1Cl)NC2)C[C@H](C(=O)N1CCOCC1)C3");

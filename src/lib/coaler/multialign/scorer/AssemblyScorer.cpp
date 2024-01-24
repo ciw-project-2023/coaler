@@ -5,7 +5,7 @@
 namespace coaler::multialign {
     double AssemblyScorer::calculateAssemblyScore(const LigandAlignmentAssembly& assembly, PairwiseAlignments& scores,
                                                   const LigandVector& ligands) {
-        if(assembly.getMissingLigandsCount() > 0) {
+        if (assembly.getMissingLigandsCount() > 0) {
             return 0;
         }
         double assemblyScore = 0.0;

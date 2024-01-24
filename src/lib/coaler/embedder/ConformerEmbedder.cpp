@@ -1,5 +1,6 @@
 #include "ConformerEmbedder.hpp"
 
+#include <GraphMol/Atom.h>
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/FMCS/FMCS.h>
 #include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
@@ -7,7 +8,6 @@
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
-#include <GraphMol/Atom.h>
 #include <spdlog/spdlog.h>
 
 #include <utility>
@@ -175,48 +175,50 @@ namespace coaler::embedder {
             int addedID = -1;
 
             double relaxedMcsSizeFactor = (double)ligandMatchRelaxed.size() / ligandMol->getNumAtoms();
-            if(!(relaxedMcsSizeFactor > 0.2 || enforceGeneration)){
-                spdlog::debug("skipped due to small mcs, {} / {} = {}", ligandMatchRelaxed.size(), ligandMol->getNumAtoms(),relaxedMcsSizeFactor );
+            if (!(relaxedMcsSizeFactor > 0.2 || enforceGeneration)) {
+                spdlog::debug("skipped due to small mcs, {} / {} = {}", ligandMatchRelaxed.size(),
+                              ligandMol->getNumAtoms(), relaxedMcsSizeFactor);
                 continue;
             }
 
-            for(int atomid = 0; atomid < ligandMol->getNumAtoms(); atomid++) {
+            for (int atomid = 0; atomid < ligandMol->getNumAtoms(); atomid++) {
                 auto atom = ligandMol->getAtomWithIdx(atomid);
-                //spdlog::info("id: {}, chiral: {}", atomid, std::to_string(atom->getChiralTag()));
+                // spdlog::info("id: {}, chiral: {}", atomid, std::to_string(atom->getChiralTag()));
             }
 
+            // check whether mapped chiral atoms match. Otherwise the embedder will take very long and then fail.
             bool invalidChiral = false;
             for (const auto &[targetMcsAtomID, targetAtomID] : targetMatchRelaxed) {
                 auto targetChiralTag = targetMol.getAtomWithIdx(targetAtomID)->getChiralTag();
-                if(targetChiralTag != RDKit::Atom::CHI_UNSPECIFIED) {
-                    //spdlog::info("found {}", std::to_string(targetChiralTag));
+                if (targetChiralTag != RDKit::Atom::CHI_UNSPECIFIED) {
                     int matchingLigandAtomID = -1;
                     for (const auto &[ligandMcsAtomID, ligandAtomID] : ligandMatchRelaxed) {
-                        if(ligandMcsAtomID == targetMcsAtomID){
+                        if (ligandMcsAtomID == targetMcsAtomID) {
                             matchingLigandAtomID = ligandAtomID;
-                            //spdlog::info("matching ligand atom: {}", matchingLigandAtomID);
                             break;
                         }
                     }
                     assert(matchingLigandAtomID != -1);
                     auto ligandChiralTag = ligandMol->getAtomWithIdx(matchingLigandAtomID)->getChiralTag();
-                    //spdlog::info("opposite atom {} has {}", matchingLigandAtomID, std::to_string(ligandChiralTag));
-                    //ligandChiralTag != RDKit::Atom::CHI_UNSPECIFIED &&
-                    if(ligandChiralTag != targetChiralTag){
-                        spdlog::debug("chirality mismatch: \n"
-                            "{}\n{}", RDKit::MolToSmiles(*worstLigand.getMoleculePtr()), RDKit::MolToSmiles(targetMol));
+                    // todo sometimes chiral vs no chiral is not caught here, not sure why.
+                    // embedding often fails in this case
+                    // CHI_UNSPECIFIED (=0) sollte eigentlich bei anderen CHI tags != auswerten, idk was da falsch läuft
+                    if (ligandChiralTag != targetChiralTag) {
+                        spdlog::debug(
+                            "chirality mismatch: \n"
+                            "{}\n{}",
+                            RDKit::MolToSmiles(*worstLigand.getMoleculePtr()), RDKit::MolToSmiles(targetMol));
                         invalidChiral = true;
                         break;
                     }
                 }
             }
-            if(invalidChiral) {
+            if (invalidChiral) {
                 continue;
             }
 
             // try relaxed mcs first
             if (!ligandMatchRelaxed.empty() && !targetMatchRelaxed.empty()) {
-                //spdlog::debug("trying relaxed substructure approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchRelaxed, targetMatchRelaxed);
                 params.coordMap = &ligandMcsCoords;
@@ -239,7 +241,7 @@ namespace coaler::embedder {
 
             // if relaxed mcs params didnt yield valid embedding, reattempt with strict mcs.
             if (addedID < 0 && !ligandMatchStrict.empty() && !targetMatchStrict.empty()) {
-                //spdlog::debug("flexible approach failed. Trying strict approach.");
+                spdlog::debug("flexible approach failed. Trying strict approach.");
                 ligandMcsCoords = getLigandMcsAtomCoordsFromTargetMatch(targetConformer.getPositions(),
                                                                         ligandMatchStrict, targetMatchStrict);
                 params.coordMap = &ligandMcsCoords;
@@ -248,7 +250,7 @@ namespace coaler::embedder {
                     addedID = RDKit::DGeomHelpers::EmbedMolecule(*ligandMol, params);
                     auto end = std::chrono::high_resolution_clock::now();
                     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-                    if (duration > 10000) {
+                    if (duration > 5000) {
                         spdlog::debug("strict mcs confgen took {} ms", duration);
                         spdlog::debug("mol1: {} \nmol2: {}\n mcs: {}\n",
                                       RDKit::MolToSmiles(*worstLigand.getMoleculePtr()), RDKit::MolToSmiles(targetMol),
@@ -264,7 +266,6 @@ namespace coaler::embedder {
                 spdlog::debug("target conformer {}/{}: no viable pose generated.", targetID, targets.size());
                 continue;
             }
-            //spdlog::debug("target conformer {}/{}: generated valid pose.", targetID, targets.size());
             const auto addedIDUnsigned = static_cast<unsigned>(addedID);
             newIds.push_back(addedIDUnsigned);
         }
