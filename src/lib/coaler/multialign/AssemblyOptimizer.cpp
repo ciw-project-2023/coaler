@@ -177,14 +177,28 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 
     LigandAvailabilityMapping ligandAvailable(ligands);
     unsigned stepCount = 0;
+    unsigned swapCount = 0;
     unsigned genAttempts = 0;
     unsigned genAttemptsSuccessful = 0;
 
     double assemblyScore = AssemblyScorer::calculateAssemblyScore(assembly, scores, ligands);
 
     // assembly optimization step
+    auto start = std::chrono::high_resolution_clock::now();
     while (stepCount < m_stepLimit
            && std::any_of(ligandAvailable.begin(), ligandAvailable.end(), LigandIsAvailable())) {
+        auto now = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::minutes>(now - start).count();
+
+        if(duration > 3 && assembly.getMissingLigandsCount() == 0) {
+            spdlog::info("optimizer run limit of 3 minuntes reached (no missing ligands).");
+            break;
+        }
+        if(duration > 6 ) {
+            spdlog::info("optimizer run hard limit of 6 minuntes reached (missing ligands ignored).");
+            break;
+        }
+
         assert(std::all_of(ligands.begin(), ligands.end(),
                            [](const Ligand &l) { return l.getNumPoses() == l.getMoleculePtr()->getNumConformers(); }));
 
@@ -226,9 +240,10 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                     assemblyScore = newAssemblyScore;
                     if(newAssemblyScore * constants::LIGAND_AVAILABILITY_RESET_THRESHOLD > assemblyScore) {
                         ligandAvailable.setAllAvailable();
-                        spdlog::info("set available after swap");
+                        spdlog::debug("set available after swap");
                     }
                     swappedLigandPose = true;
+                    swapCount++;
                     break;
                 }
             }
@@ -265,14 +280,16 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
             if (ligandIsMissing || bestNewAssemblyScore > assemblyScore) {
                 // from here on we keep the new pose and adapt all containers accordingly
                 genAttemptsSuccessful++;
-                spdlog::info("old: {}, new: {} * {} = {}", assemblyScore, bestNewAssemblyScore, constants::LIGAND_AVAILABILITY_RESET_THRESHOLD,
+                spdlog::debug("old: {}, new: {} * {} = {}", assemblyScore, bestNewAssemblyScore, constants::LIGAND_AVAILABILITY_RESET_THRESHOLD,
                              bestNewAssemblyScore * constants::LIGAND_AVAILABILITY_RESET_THRESHOLD);
                 if (ligandIsMissing
                     || bestNewAssemblyScore * constants::LIGAND_AVAILABILITY_RESET_THRESHOLD > assemblyScore) {
-                    spdlog::info("All ligands set available. Improve: {}", bestNewAssemblyScore - assemblyScore);
+                    if(!ligandIsMissing) {
+                        spdlog::debug("All ligands set available. Improve: {}", bestNewAssemblyScore - assemblyScore);
+                    }
                     ligandAvailable.setAllAvailable();
                 } else {
-                    spdlog::info("did not reset due to minor improve.");
+                    spdlog::debug("did not reset due to minor improve.");
                     ligandAvailable.at(worstLigandId) = false;
                 }
 
@@ -315,8 +332,8 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
     }
 
     spdlog::info("optimized assembly with score {}\n"
-                "optimization took {} steps. made {} generation attempts, {} successful",
-                 assemblyScore, stepCount, genAttempts, genAttemptsSuccessful);
+        "optimization took {} steps: {} swaps | {}/{} successful generation attempts",
+                 assemblyScore, stepCount, swapCount, genAttemptsSuccessful, genAttempts);
 
     return {assemblyScore, assembly, scores, ligands, registers};
 }

@@ -339,7 +339,6 @@ namespace coaler::core {
                 mcsParams.InitialSeed = seed;
 
                 const RDKit::MCSResult mcsResult = RDKit::findMCS(molPair, &mcsParams);
-                spdlog::info("mcs size: {}", mcsResult.QueryMol->getNumAtoms());
                 if (mcsResult.QueryMol == nullptr) {
                     omp_set_lock(&mapLock);
                     mcsMap.emplace(ligandPair, std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>());

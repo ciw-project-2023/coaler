@@ -180,6 +180,40 @@ namespace coaler::embedder {
                 continue;
             }
 
+            for(int atomid = 0; atomid < ligandMol->getNumAtoms(); atomid++) {
+                auto atom = ligandMol->getAtomWithIdx(atomid);
+                //spdlog::info("id: {}, chiral: {}", atomid, std::to_string(atom->getChiralTag()));
+            }
+
+            bool invalidChiral = false;
+            for (const auto &[targetMcsAtomID, targetAtomID] : targetMatchRelaxed) {
+                auto targetChiralTag = targetMol.getAtomWithIdx(targetAtomID)->getChiralTag();
+                if(targetChiralTag != RDKit::Atom::CHI_UNSPECIFIED) {
+                    //spdlog::info("found {}", std::to_string(targetChiralTag));
+                    int matchingLigandAtomID = -1;
+                    for (const auto &[ligandMcsAtomID, ligandAtomID] : ligandMatchRelaxed) {
+                        if(ligandMcsAtomID == targetMcsAtomID){
+                            matchingLigandAtomID = ligandAtomID;
+                            //spdlog::info("matching ligand atom: {}", matchingLigandAtomID);
+                            break;
+                        }
+                    }
+                    assert(matchingLigandAtomID != -1);
+                    auto ligandChiralTag = ligandMol->getAtomWithIdx(matchingLigandAtomID)->getChiralTag();
+                    //spdlog::info("opposite atom {} has {}", matchingLigandAtomID, std::to_string(ligandChiralTag));
+                    //ligandChiralTag != RDKit::Atom::CHI_UNSPECIFIED &&
+                    if(ligandChiralTag != targetChiralTag){
+                        spdlog::debug("chirality mismatch: \n"
+                            "{}\n{}", RDKit::MolToSmiles(*worstLigand.getMoleculePtr()), RDKit::MolToSmiles(targetMol));
+                        invalidChiral = true;
+                        break;
+                    }
+                }
+            }
+            if(invalidChiral) {
+                continue;
+            }
+
             // try relaxed mcs first
             if (!ligandMatchRelaxed.empty() && !targetMatchRelaxed.empty()) {
                 //spdlog::debug("trying relaxed substructure approach.");
