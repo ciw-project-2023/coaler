@@ -331,7 +331,7 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
         "optimized assembly with score {}.\n"
         "\toptimization took {} steps:\n"
         "\t  swaps: {}\n"
-        "\t  conformer generation attempts:{} ({} yielded new pose in assembly)",
+        "\t  conformer generation attempts:{} ({} yielded new pose in assembly)\n",
         assemblyScore, stepCount, swapCount, genAttempts, genAttemptsSuccessful);
 
     return {assemblyScore, assembly, scores, ligands, registers};
@@ -407,7 +407,7 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
             // add new pose to assembly if new bruteforce score is higher than old score
             if (bestNewAssemblyScore > assemblyScore) {
                 assemblyScore = bestNewAssemblyScore;
-                spdlog::debug("bruteforce: ligand {} now has conformer {}.", ligandID, bestNewPoseID);
+                spdlog::info("bruteforce: ligand {} now has conformer {}.", ligandID, bestNewPoseID);
                 // remove all (except best) new poses from ligand
                 for (auto const confId : newPoseIDs) {
                     if (confId == bestNewPoseID) {
@@ -420,7 +420,7 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
                 ligand.addPose(bestNewPoseID);
 
             } else {
-                spdlog::debug("bruteforce: no better conformer found for ligand {}.",
+                spdlog::info("bruteforce: no better conformer found for ligand {}.",
                               RDKit::MolToSmiles(ligand.getMolecule()));
                 for (const auto confId : newPoseIDs) {
                     ligand.removePose(confId);
