@@ -181,11 +181,6 @@ namespace coaler::embedder {
                 continue;
             }
 
-            for (int atomid = 0; atomid < ligandMol->getNumAtoms(); atomid++) {
-                auto atom = ligandMol->getAtomWithIdx(atomid);
-                // spdlog::info("id: {}, chiral: {}", atomid, std::to_string(atom->getChiralTag()));
-            }
-
             // check whether mapped chiral atoms match. Otherwise the embedder will take very long and then fail.
             bool invalidChiral = false;
             for (const auto &[targetMcsAtomID, targetAtomID] : targetMatchRelaxed) {
