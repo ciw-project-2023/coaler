@@ -177,12 +177,28 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 
     LigandAvailabilityMapping ligandAvailable(ligands);
     unsigned stepCount = 0;
+    unsigned swapCount = 0;
+    unsigned genAttempts = 0;
+    unsigned genAttemptsSuccessful = 0;
 
     double assemblyScore = AssemblyScorer::calculateAssemblyScore(assembly, scores, ligands);
 
     // assembly optimization step
+    auto start = std::chrono::high_resolution_clock::now();
     while (stepCount < m_stepLimit
            && std::any_of(ligandAvailable.begin(), ligandAvailable.end(), LigandIsAvailable())) {
+        auto now = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::minutes>(now - start).count();
+
+        if (duration > 3 && assembly.getMissingLigandsCount() == 0) {
+            spdlog::info("optimizer run limit of 3 minuntes reached (no missing ligands).");
+            break;
+        }
+        if (duration > 6) {
+            spdlog::info("optimizer run hard limit of 6 minuntes reached (missing ligands ignored).");
+            break;
+        }
+
         assert(std::all_of(ligands.begin(), ligands.end(),
                            [](const Ligand &l) { return l.getNumPoses() == l.getMoleculePtr()->getNumConformers(); }));
 
@@ -222,17 +238,22 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                     spdlog::debug("swapped for existing pose.");
                     assembly = assemblyCopy;
                     assemblyScore = newAssemblyScore;
-                    ligandAvailable.setAllAvailable();
+                    if (newAssemblyScore * constants::LIGAND_AVAILABILITY_RESET_THRESHOLD > assemblyScore) {
+                        ligandAvailable.setAllAvailable();
+                        spdlog::debug("set available after swap");
+                    }
                     swappedLigandPose = true;
+                    swapCount++;
                     break;
                 }
             }
         }
 
-        // if no improving pose can be found among existing poses, generate new ones
-        // TODO add some absolute shape overlap threshold
-        if (ligandIsMissing || (!swappedLigandPose && maxScoreDeficit > scoreDeficitThreshold)) {
+        const double meanDistance
+            = AssemblyScorer::calculateMeanLigandDistance(worstLigandId, assembly, scores, ligands);
+        if (ligandIsMissing || (!swappedLigandPose && meanDistance > scoreDeficitThreshold)) {
             spdlog::debug("generating new conformer, missing ligand = {}", ligandIsMissing);
+            genAttempts++;
 
             LigandVector const alignmentTargets = generate_alignment_targets(ligands, *worstLigand);
             assert(alignmentTargets.size() == ligands.size() - 1);
@@ -256,6 +277,17 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
 
             if (ligandIsMissing || bestNewAssemblyScore > assemblyScore) {
                 // from here on we keep the new pose and adapt all containers accordingly
+                genAttemptsSuccessful++;
+                if (ligandIsMissing
+                    || bestNewAssemblyScore * constants::LIGAND_AVAILABILITY_RESET_THRESHOLD > assemblyScore) {
+                    if (!ligandIsMissing) {
+                        spdlog::debug("All ligands set available. Improve: {}", bestNewAssemblyScore - assemblyScore);
+                    }
+                    ligandAvailable.setAllAvailable();
+                } else {
+                    spdlog::debug("did not reset due to minor improve.");
+                    ligandAvailable.at(worstLigandId) = false;
+                }
 
                 assemblyScore = bestNewAssemblyScore;
                 spdlog::debug("ligand {} now has conformer {}.", worstLigandId, bestNewPoseID);
@@ -272,7 +304,6 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
                 update_pose_registers(worstLigandId, bestNewPoseID, registers, scores, ligands);
                 assembly.swapPoseForLigand(worstLigandId, bestNewPoseID);
                 worstLigand->addPose(bestNewPoseID);
-                ligandAvailable.setAllAvailable();
 
                 if (ligandIsMissing) {
                     assembly.decrementMissingLigandsCount();
@@ -296,7 +327,12 @@ OptimizerState AssemblyOptimizer::optimizeAssembly(LigandAlignmentAssembly assem
         ligandAvailable.at(worstLigandId) = false;
     }
 
-    spdlog::debug("optimization took {} steps.", stepCount);
+    spdlog::info(
+        "optimized assembly with score {}.\n"
+        "\toptimization took {} steps:\n"
+        "\t  swaps: {}\n"
+        "\t  conformer generation attempts:{} ({} yielded new pose in assembly)\n",
+        assemblyScore, stepCount, swapCount, genAttempts, genAttemptsSuccessful);
 
     return {assemblyScore, assembly, scores, ligands, registers};
 }
@@ -371,7 +407,7 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
             // add new pose to assembly if new bruteforce score is higher than old score
             if (bestNewAssemblyScore > assemblyScore) {
                 assemblyScore = bestNewAssemblyScore;
-                spdlog::debug("bruteforce: ligand {} now has conformer {}.", ligandID, bestNewPoseID);
+                spdlog::info("bruteforce: ligand {} now has conformer {}.", ligandID, bestNewPoseID);
                 // remove all (except best) new poses from ligand
                 for (auto const confId : newPoseIDs) {
                     if (confId == bestNewPoseID) {
@@ -384,8 +420,8 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
                 ligand.addPose(bestNewPoseID);
 
             } else {
-                spdlog::debug("bruteforce: no better conformer found for ligand {}.",
-                              RDKit::MolToSmiles(ligand.getMolecule()));
+                spdlog::info("bruteforce: no better conformer found for ligand {}.",
+                             RDKit::MolToSmiles(ligand.getMolecule()));
                 for (const auto confId : newPoseIDs) {
                     ligand.removePose(confId);
                 }

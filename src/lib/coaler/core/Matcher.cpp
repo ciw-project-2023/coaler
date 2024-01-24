@@ -29,7 +29,7 @@ namespace coaler::core {
 
     std::optional<CoreResult> Matcher::calculateCoreMcs(RDKit::MOL_SPTR_VECT &mols) {
         // Generates all parameters needed for RDKit::findMCS()
-        auto mcsParams = Matcher::getRelaxedMCSParams();
+        auto mcsParams = Matcher::getCoreMCSParams();
 
         RDKit::MOL_SPTR_VECT molsWithoutHs = {};
         for (auto &mol : mols) {
@@ -243,6 +243,14 @@ namespace coaler::core {
 
     /*----------------------------------------------------------------------------------------------------------------*/
 
+    RDKit::MCSParameters Matcher::getCoreMCSParams() {
+        RDKit::MCSParameters mcsParams = getRelaxedMCSParams();
+        mcsParams.BondCompareParameters.MatchStereo = false;
+        return mcsParams;
+    }
+
+    /*----------------------------------------------------------------------------------------------------------------*/
+
     RDKit::MCSParameters Matcher::getRelaxedMCSParams() {
         RDKit::MCSParameters mcsParams;
         RDKit::MCSAtomCompareParameters atomCompParams;
@@ -255,7 +263,7 @@ namespace coaler::core {
         mcsParams.AtomCompareParameters = atomCompParams;
 
         RDKit::MCSBondCompareParameters bondCompParams;
-        bondCompParams.MatchStereo = false;
+        bondCompParams.MatchStereo = true;
         bondCompParams.RingMatchesRingOnly = false;
         bondCompParams.CompleteRingsOnly = true;
         bondCompParams.MatchFusedRings = true;
@@ -330,7 +338,6 @@ namespace coaler::core {
                 mcsParams.InitialSeed = seed;
 
                 const RDKit::MCSResult mcsResult = RDKit::findMCS(molPair, &mcsParams);
-
                 if (mcsResult.QueryMol == nullptr) {
                     omp_set_lock(&mapLock);
                     mcsMap.emplace(ligandPair, std::tuple<RDKit::MatchVectType, RDKit::MatchVectType, std::string>());
