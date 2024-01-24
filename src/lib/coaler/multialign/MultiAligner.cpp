@@ -166,9 +166,6 @@ namespace coaler::multialign {
 
             OptimizerState optimizedAssembly = m_assemblyOptimizer.optimizeAssembly(
                 assembliesList.at(assemblyID).first, m_pairwiseAlignments, m_ligands, m_poseRegisters);
-
-            // spdlog::info("optimized assembly {}, score: {}", assemblyID, optimizedAssembly.score);
-
             if (optimizedAssembly.score == -1) {
                 omp_set_lock(&skippedAssembliesCountLock);
                 skippedAssembliesCount++;
