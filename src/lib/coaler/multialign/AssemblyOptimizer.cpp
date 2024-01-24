@@ -421,7 +421,7 @@ void AssemblyOptimizer::fixWorstLigands(LigandAlignmentAssembly assembly, Pairwi
 
             } else {
                 spdlog::info("bruteforce: no better conformer found for ligand {}.",
-                              RDKit::MolToSmiles(ligand.getMolecule()));
+                             RDKit::MolToSmiles(ligand.getMolecule()));
                 for (const auto confId : newPoseIDs) {
                     ligand.removePose(confId);
                 }
