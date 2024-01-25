@@ -159,16 +159,9 @@ int main(int argc, char* argv[]) {
         embedder.embedConformers(mols.at(i), opts.num_conformers);
     }
 
-    auto ligands = multialign::LigandVector(mols);
-
-    spdlog::info("start calculating pairwise MCS.");
-    auto strictMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, true, coreSmarts);
-    auto relaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, false, coreSmarts);
-    spdlog::info("finished calculating pairwise MCS.");
-
-    const multialign::AssemblyOptimizer optimizer(strictMcsMap, relaxedMcsMap, opts.coarse_optimization_threshold,
-                                                  opts.fine_optimization_threshold, opts.optimizer_step_limit,
-                                                  opts.num_threads);
+    const multialign::AssemblyOptimizer optimizer(core.strict_mcs_map, core.relaxed_mcs_map,
+                                                  opts.coarse_optimization_threshold, opts.fine_optimization_threshold,
+                                                  opts.optimizer_step_limit, opts.num_threads);
 
     spdlog::info("finished embedding");
 

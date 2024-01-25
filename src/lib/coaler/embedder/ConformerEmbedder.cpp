@@ -48,19 +48,46 @@ namespace coaler::embedder {
         : m_core(std::move(result)), m_threads(threads), m_divideConformersByMatches(divideConformersByMatches) {}
 
     void ConformerEmbedder::embedConformers(const RDKit::ROMOL_SPTR &mol, unsigned numConfs) {
+        spdlog::debug("embedding on: {}", RDKit::MolToSmiles(*mol));
+        auto params = this->getEmbeddingParameters();
+
+        if (RDKit::MolToSmiles(*mol) == RDKit::MolToSmiles(*m_core.ref)) {
+            RDKit::DGeomHelpers::EmbedMultipleConfs(*mol, numConfs, params);
+
+            return;
+        }
+
+        RDKit::MOL_SPTR_VECT pair = {mol, m_core.ref};
+
+        auto mcsParams = core::Matcher::getRelaxedMCSParams();
+        mcsParams.InitialSeed = RDKit::MolToSmarts(*m_core.core);
+
+        auto mcs = RDKit::findMCS(pair, &mcsParams);
+        if (mcs.QueryMol == nullptr) {
+            spdlog::error("failed to find MCS for {} and {}", RDKit::MolToSmiles(*mol),
+                          RDKit::MolToSmiles(*m_core.ref));
+            return;
+        }
+
         // firstMatch molecule and core
         RDKit::SubstructMatchParameters substructMatchParams;
         substructMatchParams.uniquify = false;
-        substructMatchParams.useChirality = false;
-        substructMatchParams.useQueryQueryMatches = false;
+        substructMatchParams.useChirality = true;
+        substructMatchParams.useQueryQueryMatches = true;
+        substructMatchParams.useEnhancedStereo = true;
         substructMatchParams.maxMatches = 1000;
         substructMatchParams.numThreads = m_threads;
 
-        auto matches = RDKit::SubstructMatch(*mol, *m_core.core, substructMatchParams);
+        assert(mcs.QueryMol.get()->getNumAtoms() >= m_core.core.get()->getNumAtoms());
 
-        assert(!matches.empty());
+        auto matches = RDKit::SubstructMatch(*mol, *mcs.QueryMol, substructMatchParams);
+        spdlog::debug("number of mol matches: {}", matches.size());
 
-        spdlog::debug("number of Core Matches: {}", matches.size());
+        auto refMatch = RDKit::SubstructMatch(*m_core.ref, *mcs.QueryMol, substructMatchParams).at(0);
+        std::unordered_map<int, int> refMatchMap;
+        for (const auto &[queryId, molId] : refMatch) {
+            refMatchMap[queryId] = molId;
+        }
 
         unsigned matchCounter = 0;
         if (m_divideConformersByMatches && (numConfs / (float)matches.size()) < 5) {
@@ -70,7 +97,6 @@ namespace coaler::embedder {
         }
 
         for (auto const &match : matches) {
-            auto params = this->getEmbeddingParameters();
 
             std::vector<int> confs;
             if (m_divideConformersByMatches) {
@@ -86,21 +112,18 @@ namespace coaler::embedder {
             std::vector<std::pair<int, double>> result;
             RDKit::UFF::UFFOptimizeMoleculeConfs(*mol, result, m_threads);
 
-            // This is somewhat unintuitive:
-            // We use a reference molecule (m_core.ref) to have a "real" conformer, as we cannot generate
-            // chemically sensible conformers from m_core.core, as it contains smarts queries. So we get the
-            // match of the query to the reference in m_core.coreToRef {'id_in_core': 'id_in_ref'}. Now we have to make
-            // a list for the alignment of [(id_in_mol, id_in_ref)] because the alignment wants the atom mapping in the
-            // opposite order than we get from the substruct matching (i.e. we get (queryId, molId) from substruct
-            // and have to provide (molId, queryId) to the alignment.
-            RDKit::MatchVectType matchReverse;
+            RDKit::MatchVectType atomMap;
             for (const auto &[queryId, molId] : match) {
-                matchReverse.emplace_back(std::make_pair(molId, m_core.core_to_ref.at(queryId)));
+                    atomMap.emplace_back(molId, refMatchMap.at(queryId));
             }
 
             for (auto const confId : confs) {
-                auto score = RDKit::MolAlign::alignMol(*mol, *m_core.ref, confId, 0, &matchReverse);
-                spdlog::debug("aligned conformer {} with score {}", confId, score);
+                try {
+                    auto score = RDKit::MolAlign::alignMol(*mol, *m_core.ref, confId, 0, &atomMap);
+                    spdlog::debug("aligned conformer {} with score {}", confId, score);
+                } catch (RDKit::MolAlign::MolAlignException &e) {
+                    spdlog::debug("failed to align conformer {} with {}, {}: {}", confId, RDKit::MolToSmiles(*mol), RDKit::MolToSmiles(*m_core.ref), e.what());
+                }
             }
         }
 

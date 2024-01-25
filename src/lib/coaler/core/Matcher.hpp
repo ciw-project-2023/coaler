@@ -23,6 +23,9 @@ namespace coaler::core {
         RDKit::ROMOL_SPTR core{nullptr};
         RDKit::ROMOL_SPTR ref{nullptr};
         std::unordered_map<int, int> core_to_ref{};
+
+        PairwiseMCSMap strict_mcs_map{};
+        PairwiseMCSMap relaxed_mcs_map{};
     };
     // NOLINTEND(cppcoreguidelines-pro-type-member-init)
 
@@ -67,6 +70,7 @@ namespace coaler::core {
                                               const std::string& seed = "");
 
       private:
+        std::pair<multialign::LigandID, RDKit::ROMol> findReferenceMolecule(RDKit::MOL_SPTR_VECT &mols, PairwiseMCSMap &relaxedMcsMap);
         /**
          * recursive implementation of a murcko pruning of the mcs structure. The function does not delete atoms or
          * bonds from mol but saves them in delAtoms and delBonds to be deleted after function call.

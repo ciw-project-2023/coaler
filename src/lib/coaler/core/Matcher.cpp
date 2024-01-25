@@ -43,12 +43,17 @@ namespace coaler::core {
 
         spdlog::info("mcs: {}", mcs.SmartsString);
 
+        spdlog::info("start calculating pairwise MCS.");
+        auto ligands = multialign::LigandVector(mols);
+        auto strictMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, true, mcs.SmartsString);
+        auto relaxedMcsMap = coaler::core::Matcher::calcPairwiseMCS(ligands, false, mcs.SmartsString);
+        spdlog::info("finished calculating pairwise MCS.");
+
         // creating a reference molecule of the core to embed conformer with atom coords
-        auto ref = this->buildMolConformerForQuery(*mols.at(0), *mcs.QueryMol);
+        auto [refId, reference] = this->findReferenceMolecule(mols, relaxedMcsMap);
+        auto referenceWithConf = this->buildMolConformerForQuery(reference, *mcs.QueryMol);
 
-        spdlog::info("Reference: {}", RDKit::MolToSmiles(*ref));
-
-        auto matches = RDKit::SubstructMatch(*ref, *mcs.QueryMol, this->getMatchParams());
+        auto matches = RDKit::SubstructMatch(*referenceWithConf, *mcs.QueryMol, this->getMatchParams());
         assert(!matches.empty());
 
         auto match = matches.at(0);
@@ -57,7 +62,7 @@ namespace coaler::core {
             coreToRef[queryId] = molId;
         }
 
-        return CoreResult{mcs.QueryMol, ref, coreToRef};
+        return CoreResult{mcs.QueryMol, referenceWithConf, coreToRef, strictMcsMap, relaxedMcsMap};
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
@@ -143,8 +148,7 @@ namespace coaler::core {
         spdlog::info("murco: {}", RDKit::MolToSmarts(*murckoPtr));
 
         // Embedding of core and calculation of atomCoords
-        RDKit::RWMol first = *mols.at(0);
-        auto ref = this->buildMolConformerForQuery(first, *murckoPtr);
+        auto ref = this->buildMolConformerForQuery(*mols.at(0), *murckoPtr);
 
         auto matches = RDKit::SubstructMatch(*ref, *murckoPtr, this->getMatchParams());
         auto match = matches.at(0);
@@ -167,7 +171,7 @@ namespace coaler::core {
         auto params = RDKit::DGeomHelpers::srETKDGv3;
         params.numThreads = m_threads;
         params.randomSeed = 42;
-        params.useRandomCoords = true;
+        params.useRandomCoords = false;
         RDKit::DGeomHelpers::EmbedMolecule(first, params);
 
         std::vector<std::pair<int, double>> result;
@@ -299,6 +303,29 @@ namespace coaler::core {
         mcsParams.setMCSAtomTyperFromEnum(RDKit::AtomCompareElements);
         mcsParams.setMCSBondTyperFromEnum(RDKit::BondCompareOrderExact);
         return mcsParams;
+    }
+
+    std::pair<multialign::LigandID, RDKit::ROMol> Matcher::findReferenceMolecule(RDKit::MOL_SPTR_VECT &mols, PairwiseMCSMap &relaxedMcsMap) {
+        std::map<multialign::LigandID, int> result;
+        for (auto [key, value] : relaxedMcsMap) {
+            auto [firstMatch, secondMatch, _] = value;
+
+            result[key.getFirst()] += (int)firstMatch.size();
+            result[key.getSecond()] += (int)secondMatch.size();
+        }
+
+        multialign::LigandID candidate;
+        int max = 0;
+        for (auto [key, value] : result) {
+            if (value > max) {
+                candidate = key;
+                max = value;
+            }
+        }
+
+        spdlog::info("reference molecule: {}", RDKit::MolToSmiles(*mols.at(candidate)));
+
+        return {candidate, *mols.at(candidate)};
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
