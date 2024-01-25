@@ -270,34 +270,45 @@ namespace coaler::embedder {
     /*----------------------------------------------------------------------------------------------------------------*/
 
     std::vector<multialign::PoseID> ConformerEmbedder::generateNewPosesForAssemblyLigand(
-        const multialign::Ligand &worstLigand) {
-        std::vector<unsigned> newIds;
-        std::vector<int> newIntIds;
-        auto *ligandMol = (RDKit::ROMol *)worstLigand.getMoleculePtr();
-        RDKit::DGeomHelpers::EmbedParameters params = get_embed_params_for_optimizer_generation();
+        const multialign::Ligand &worstLigand, const unsigned numConfs) {
+        RDKit::SubstructMatchParameters substructMatchParams;
+        substructMatchParams.uniquify = false;
+        substructMatchParams.useChirality = false;
+        substructMatchParams.useQueryQueryMatches = false;
+        substructMatchParams.maxMatches = 1000;
+        substructMatchParams.numThreads = m_threads;
 
-        RDKit::MatchVectType ligandMatch;
-        RDKit::MatchVectType targetMatch;
+        const unsigned numConfsBefore = worstLigand.getMoleculePtr()->getNumConformers();
+        auto matches = RDKit::SubstructMatch(*worstLigand.getMoleculePtr(), *m_core.core, substructMatchParams);
 
-        // get atom coords for core structure
-        const CoreAtomMapping coreCoords = getLigandMcsAtomCoordsFromTargetMatch(
-            m_core.ref->getConformer(0).getPositions(), ligandMatch, targetMatch);
-        params.coordMap = &coreCoords;
-        params.numThreads = m_threads;
+        assert(!matches.empty());
 
-        // embed BRUTEFORCE_CONFS new conformers into ligand
-        try {
-            newIntIds = RDKit::DGeomHelpers::EmbedMultipleConfs(*ligandMol, BRUTEFORCE_CONFS, params);
-        } catch (const std::runtime_error &e) {
-            spdlog::debug(e.what());
+        spdlog::debug("number of Core Matches: {}", matches.size());
+
+        std::vector<multialign::PoseID> confs;
+        for (auto const &match : matches) {
+            auto params = this->getEmbeddingParameters();
+            std::vector<int> newConfs = RDKit::DGeomHelpers::EmbedMultipleConfs(
+                *(RDKit::ROMol *)worstLigand.getMoleculePtr(), numConfs, params);
+            confs.insert(confs.end(), newConfs.begin(), newConfs.end());
+
+            std::vector<std::pair<int, double>> result;
+            RDKit::UFF::UFFOptimizeMoleculeConfs(*(RDKit::ROMol *)worstLigand.getMoleculePtr(), result, m_threads);
+
+            RDKit::MatchVectType matchReverse;
+            for (const auto &[queryId, molId] : match) {
+                matchReverse.emplace_back(std::make_pair(molId, m_core.core_to_ref.at(queryId)));
+            }
+
+            for (auto const confId : confs) {
+                auto score = RDKit::MolAlign::alignMol(*(RDKit::ROMol *)worstLigand.getMoleculePtr(), *m_core.ref,
+                                                       confId, 0, &matchReverse);
+                spdlog::debug("aligned conformer {} with score {}", confId, score);
+            }
         }
 
-        // type casting
-        for (auto newIntId : newIntIds) {
-            unsigned newUnsignedId = static_cast<unsigned>(newIntId);
-            newIds.push_back(newUnsignedId);
-        }
-        return newIds;
+        assert(worstLigand.getMoleculePtr()->getNumConformers() == numConfsBefore + matches.size() * numConfs);
+        return confs;
     }
 
     /*----------------------------------------------------------------------------------------------------------------*/
