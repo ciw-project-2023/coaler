@@ -10,13 +10,10 @@
  * @brief This file contains the Ligand class which is used to represent a ligand molecule and its conformers.
  */
 namespace coaler::multialign {
+    /**
+     * The Ligand class provides functionality for the representation of a ligand molecule and its conformers.
+     */
     class Ligand {
-        /**
-         * @brief Ligand class to represent a ligand molecule and its conformers.
-         *
-         * The ligand class is used to represent a ligand molecule and its conformers.
-         * It is used to store the molecule and its conformers in a single object.
-         */
       public:
         Ligand(const RDKit::ROMol& mol, const UniquePoseSet& poses, LigandID id);
 
