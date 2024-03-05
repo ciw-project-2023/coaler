@@ -67,7 +67,7 @@ jobs:
         run: conan graph info .
 
       - name: Build
-        run: conan build .
+        run: conan build . --build=missing
 
       - name: Run Tests
         run: ./build/Release/test/Test

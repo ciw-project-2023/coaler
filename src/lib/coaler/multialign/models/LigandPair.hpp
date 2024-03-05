@@ -5,8 +5,9 @@
 #include "boost/functional/hash.hpp"
 
 namespace coaler::multialign {
-    /**
-     * A pair of ligands.
+    /*!
+     * @file LigandPair.hpp
+     * @brief This file contains the LigandPair class which is used to represent a pair of ligands.
      */
     class LigandPair {
       public:
@@ -21,7 +22,9 @@ namespace coaler::multialign {
         LigandID m_firstLigand;
         LigandID m_secondLigand;
     };
-
+    /**
+     * @brief Hash function for LigandPair
+     */
     struct LigandPairHash {
         std::size_t operator()(const LigandPair& pair) const {
             std::size_t seed = 0;
