@@ -24,22 +24,27 @@ namespace coaler::embedder {
         ConformerEmbedder(core::CoreResult result, int threads, bool divideConformersByMatches = true);
 
         /**
-         * Embeds conformers into a molecule
-         * @param mol molecule to embed conformers into
-         * @param numConfs number of conformers to embed
+         * Embed an even amount of conformers at every core match.
+         * @param mol The molecule to embed.
+         * @param numConfs number of conformers to embed into @param mol
+         *
+         * @note If the core has a too high symmetry, it is possible, that no embedding can be
+         * performed within the given min/max constraints.
+         *
+         * @return True upon success.
          */
         void embedConformers(const RDKit::ROMOL_SPTR& mol, unsigned numConfs);
 
         // std::vector<RDKit::MatchVectType> filterMatches(const std::vector<RDKit::MatchVectType>& matches);
 
         /**
-         * Embeds conformers into a molecule
-         *
-         * @param mol molecule to embed conformers into
-         * @param numConfs number of conformers to embed
-         * @param matches matches to use for embedding
-         *
-         * @return vector of new poses
+         * Embed new conformers into the worst ligand of an assembly using the pairwise MCS with each target
+         * @param worstLigand ligand new conformers are embedded into
+         * @param targets all target ligands of the assembly
+         * @param conformerIDs maps the conformerIDs to the ligands
+         * @param pairwiseStrictMCSMap MCSMap of ligand pairs with strict params
+         * @param pairwiseRelaxedMCSMap MCSMap of ligand pairs with relaxed params
+         * @return IDs of conformers added to @param worstLigand
          */
         static std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(
             const multialign::Ligand& worstLigand, const multialign::LigandVector& targets,
@@ -48,12 +53,11 @@ namespace coaler::embedder {
             bool enforceGeneration = false);
 
         /**
-         * @overload generateNewPosesForAssemblyLigand
+         * @overload
          *
-         * @param worstLigand
-         * @param numConfs
-         *
-         * @return vector of new poses
+         * Embed new conformers into the worst ligand of an assembly using the core structure
+         * @param worstLigand ligand new conformers are embedded into
+         * @return IDs of conformers added to @param worstLigand
          */
         std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(const multialign::Ligand& worstLigand,
                                                                           const unsigned numConfs);
