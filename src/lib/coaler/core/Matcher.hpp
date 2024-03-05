@@ -11,6 +11,10 @@
 #include "GraphMol/Substruct/SubstructMatch.h"
 #include "coaler/core/Forward.hpp"
 #include "coaler/multialign/models/Forward.hpp"
+/**
+ * @file Matcher.hpp
+ * @brief This file contains the Matcher class which is used to calculate the MCS and Murcko scaffold of molecules
+ */
 
 namespace coaler::core {
 
@@ -27,6 +31,9 @@ namespace coaler::core {
     // NOLINTEND(cppcoreguidelines-pro-type-member-init)
 
     class Matcher {
+        /**
+         * @brief Matcher class to calculate the MCS and Murcko scaffold of molecules
+         */
       public:
         explicit Matcher(int threads);
         /**

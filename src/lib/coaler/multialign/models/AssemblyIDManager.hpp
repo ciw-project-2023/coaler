@@ -5,7 +5,7 @@
 namespace coaler::multialign {
 
     /**
-     * @brief This class is responsible for managing Assembly IDs.
+     * The AssemblyIDManager class provides functionality for the management of assembly IDs.
      */
     class AssemblyIDManager {
       public:

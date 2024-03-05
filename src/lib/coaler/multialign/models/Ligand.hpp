@@ -5,19 +5,24 @@
 #include "Alias.hpp"
 #include "UniquePoseID.hpp"
 #include "UniquePoseSet.hpp"
-
+/*!
+ * @file Ligand.hpp
+ * @brief This file contains the Ligand class which is used to represent a ligand molecule and its conformers.
+ */
 namespace coaler::multialign {
-
-    /**
-     * Represents a molecule.
-     */
     class Ligand {
+        /**
+         * @brief Ligand class to represent a ligand molecule and its conformers.
+         *
+         * The ligand class is used to represent a ligand molecule and its conformers.
+         * It is used to store the molecule and its conformers in a single object.
+         */
       public:
         Ligand(const RDKit::ROMol& mol, const UniquePoseSet& poses, LigandID id);
 
         /**
          * get idenitifers of all poses embedded in ligand.
-         * @return
+         * @return The ids of the ligands molecule conformers.
          */
         [[nodiscard]] UniquePoseSet getPoses() const noexcept;
 
@@ -28,19 +33,19 @@ namespace coaler::multialign {
         void addPose(const PoseID& poseId) noexcept;
 
         /**
-         *
-         * @return
+         * Get the id of the ligand.
+         * @return The id of the ligand.
          */
         [[nodiscard]] LigandID getID() const noexcept;
 
         /**
-         *
-         * @return
+         * Get the number of heavy atoms in the ligand.
+         * @return The number of heavy atoms in the ligand.
          */
         [[nodiscard]] unsigned getNumHeavyAtoms() const noexcept;
 
         /**
-         *
+         * Get the number of conformers embedded in the ligand.
          * @return The number of conformers embedded in the ligand.
          */
         [[nodiscard]] unsigned getNumPoses() const noexcept;

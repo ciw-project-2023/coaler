@@ -5,6 +5,9 @@
 #include "coaler/multialign/models/PairwiseAlignments.hpp"
 
 namespace coaler::multialign {
+    /**
+     * @brief Class to score an assembly.
+     */
     class AssemblyScorer {
       public:
         /**
@@ -36,6 +39,14 @@ namespace coaler::multialign {
                                                      const PoseRegisterCollection& registers,
                                                      PairwiseAlignments& scores, const LigandVector& ligands);
 
+        /**
+         * @brief Calculate the mean distance of a ligand to all other ligands in the assembly.
+         * @param ligandId
+         * @param assembly
+         * @param scores
+         * @param ligands
+         * @return The mean distance of a ligand to all other ligands in the assembly.
+         */
         static double calculateMeanLigandDistance(LigandID ligandId, const LigandAlignmentAssembly& assembly,
                                                   PairwiseAlignments& scores, const LigandVector& ligands);
     };

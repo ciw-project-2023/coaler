@@ -8,7 +8,7 @@
 
 namespace coaler::io {
     /**
-     * @brief This class is responsible for handling the output.
+     * @brief Writes the aligned molecules in an output file.
      */
     class OutputWriter {
       public:
@@ -20,8 +20,8 @@ namespace coaler::io {
 
         /**
          * Writes all conformers of a molecule to a sdf file.
-         * @param folder_path A path to the folder store the files in
-         * @param mol A molecule whose conformers are to be written to an .sdf file
+         * @param folderPath A path to the folder store the files in
+         * @param mols A vector of molecules whose conformers are to be written to an .sdf file
          */
         static void writeConformersToSDF(const std::string& folderPath, const std::vector<RDKit::ROMOL_SPTR>& mols);
 

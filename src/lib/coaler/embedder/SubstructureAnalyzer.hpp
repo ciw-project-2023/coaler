@@ -5,7 +5,7 @@
 namespace coaler::embedder {
 
     /**
-     * Helper class to identify potential core matches for conformer embedding
+     * The SubstructureAnalyzer class provides functionality for the analysis of substructures in molecules.
      */
     class SubstructureAnalyzer {
       public:

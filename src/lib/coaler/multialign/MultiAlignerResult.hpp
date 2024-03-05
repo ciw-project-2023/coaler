@@ -6,8 +6,17 @@
 
 namespace coaler {
     namespace multialign {
-
+        /**
+         * The result of a MultiAligner run.
+         */
         struct MultiAlignerResult {
+            /**
+             * @brief Construct a new MultiAlignerResult object
+             *
+             * @param score The alignment score
+             * @param mapping The mapping of ligand IDs to pose IDs
+             * @param ligands The input ligands
+             */
             // NOLINTBEGIN(cppcoreguidelines-pro-type-member-init, modernize-pass-by-value, readability-named-parameter)
             MultiAlignerResult(double score, const std::unordered_map<LigandID, PoseID>& mapping,
                                const LigandVector& ligands)

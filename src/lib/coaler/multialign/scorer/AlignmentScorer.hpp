@@ -6,7 +6,7 @@
 namespace coaler::multialign {
 
     /**
-     * @brief This class is responsible the scoring of the alignment of two molecules.
+     * @brief AlignmentScorer class to calculate the tanimoto shape similarity between two molecules
      */
     class AlignmentScorer {
       public:
