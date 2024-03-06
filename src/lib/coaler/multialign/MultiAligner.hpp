@@ -5,11 +5,27 @@
 #include "MultiAlignerResult.hpp"
 #include "coaler/core/Forward.hpp"
 #include "coaler/multialign/models/Forward.hpp"
-
+/*!
+ * @file
+ * @brief Contains the MultiAligner class
+ */
 namespace coaler::multialign {
 
+    /**
+     * @brief The MultiAligner class is responsible for aligning multiple ligands
+     * to each other.
+     */
     class MultiAligner {
       public:
+        /**
+         * @brief Construct a new MultiAligner object
+         *
+         * @param molecules The molecules to align
+         * @param optimizer The assembly optimizer to use
+         * @param core The core result
+         * @param maxStartingAssemblies The maximum number of starting assemblies to generate
+         * @param nofThreads The number of threads to use
+         */
         explicit MultiAligner(RDKit::MOL_SPTR_VECT molecules, AssemblyOptimizer optimizer, core::CoreResult core,
                               unsigned maxStartingAssemblies = constants::DEFAULT_NOF_STARTING_ASSEMBLIES,
                               unsigned nofThreads = constants::DEFAULT_NOF_THREADS);
@@ -17,6 +33,11 @@ namespace coaler::multialign {
         MultiAlignerResult alignMolecules();
 
       private:
+        /**
+         * @brief Generate all possible starting assemblies
+         *
+         * @return The generated starting assemblies
+         */
         static PairwiseAlignments calculateAlignmentScores(const LigandVector& ligands);
 
         AssemblyOptimizer m_assemblyOptimizer;

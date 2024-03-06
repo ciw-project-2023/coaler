@@ -32,6 +32,17 @@ namespace coaler::multialign {
                           int stepLimit, int threads);
         // NOLINTEND(readability-inconsistent-declaration-parameter-name)
 
+        /**
+         * @brief Optimize an assembly using both existing conformers and newly generated ones.
+         *
+         * @param assembly The assembly to optimize
+         * @param scores The pairwise overlap scores
+         * @param ligands The input ligands
+         * @param registers The registers for all ligand pairs
+         * @param scoreDeficitThreshold Score deficits above this value will trigger the
+         * generation of a new pose
+         * @return The optimized state
+         */
         OptimizerState optimizeAssembly(LigandAlignmentAssembly assembly, PairwiseAlignments scores,
                                         LigandVector ligands, PoseRegisterCollection registers,
                                         double scoreDeficitThreshold = 0);

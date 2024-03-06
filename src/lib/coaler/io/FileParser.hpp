@@ -7,14 +7,28 @@
 
 namespace coaler::io {
     class FileParser {
+        /*!
+         * @brief Parses a file and returns a vector of molecules
+         *
+         * @param filePath Path to the file
+         * @return RDKit::MOL_SPTR_VECT Vector of molecules
+         */
       public:
+        /*!
+         * @brief Parses a file and returns a vector of molecules
+         *
+         * @param filePath Path to the file
+         * @return RDKit::MOL_SPTR_VECT Vector of molecules
+         */
         static RDKit::MOL_SPTR_VECT parse(const std::string& filePath);
 
       private:
-        /***
-         * checks the input molecules for duplicates and deletes them
-         * @param mols molecules parsed in parse()
-         * @return RDKit::MOL_SPTR_VECT without duplicates
+        /*!
+         * @brief Checks if the input molecules are valid
+         *
+         * @param mols Vector of molecules
+         * @param filePath Path to the file
+         * @return RDKit::MOL_SPTR_VECT Vector of molecules
          */
         static RDKit::MOL_SPTR_VECT checkInputMolecules(const RDKit::MOL_SPTR_VECT& mols, const std::string& filePath);
     };

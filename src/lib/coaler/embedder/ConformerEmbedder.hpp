@@ -8,7 +8,10 @@
 
 #include "coaler/core/Forward.hpp"
 #include "coaler/multialign/models/Forward.hpp"
-
+/**
+ * @file ConformerEmbedder.hpp
+ * @brief This file contains the ConformerEmbedder class which is used to generate conformers for a given molecule
+ */
 namespace coaler::embedder {
     using CoreAtomMapping = std::map<int, RDGeom::Point3D>;
 
@@ -59,6 +62,14 @@ namespace coaler::embedder {
         std::vector<multialign::PoseID> generateNewPosesForAssemblyLigand(const multialign::Ligand& worstLigand,
                                                                           const unsigned numConfs);
 
+        /**
+         * Get the coordinates of the ligand MCS atoms from the target match
+         *
+         * @param targetCoords
+         * @param ligandMcsMatch
+         * @param targetMcsMatch
+         * @return CoreAtomMapping
+         */
         static CoreAtomMapping getLigandMcsAtomCoordsFromTargetMatch(const RDGeom::POINT3D_VECT& targetCoords,
                                                                      const RDKit::MatchVectType& ligandMcsMatch,
                                                                      const RDKit::MatchVectType& targetMcsMatch);
