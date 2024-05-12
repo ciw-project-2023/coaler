@@ -1,0 +1,52 @@
+# Prerequisites
+*.d
+
+cmake-build-debug/*
+CMakeFiles/*
+.cmake/*
+
+.idea/*
+.venv/
+TestRDkit
+
+cmake_install.cmake
+CMakeCache.txt
+Testing/*
+CMakeUserPresets.json
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+#default outfile
+out.sdf
+build/
+
+venv/
+confs/
