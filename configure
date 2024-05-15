@@ -1,0 +1,16 @@
+#!/bin/sh
+
+BASEDIR=$(dirname "$0")
+python3 -m venv "$BASEDIR"/venv
+
+python3 -m pip install --upgrade pip
+
+export PATH=$BASEDIR/venv/bin:$PATH
+
+"$BASEDIR"/venv/bin/pip install conan cmake
+
+conan --version
+
+conan profile detect
+conan remote add --force coaler http://server.conan.corealigner.de
+conan remote login coaler ciw -p VZKhzh2v5nCnijAS3A8R
